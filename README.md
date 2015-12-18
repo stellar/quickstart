@@ -1,6 +1,6 @@
 # docker-stellar-core-horizon
 
-Docker container which starts a single-node [Stellar](https://www.stellar.org) network with horizon-importer and horizon services:
+Docker container which starts a single-node [Stellar](https://www.stellar.org) network with following services:
 
 * [stellar-core](https://github.com/stellar/stellar-core)
 * [horizon-importer](https://github.com/stellar/horizon-importer)
