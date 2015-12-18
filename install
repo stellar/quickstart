@@ -1,0 +1,18 @@
+# stellar-core
+wget -O stellar-core.deb https://s3.amazonaws.com/stellar.org/releases/stellar-core/stellar-core-${STELLAR_CORE_VERSION}_amd64.deb
+dpkg -i stellar-core.deb
+rm stellar-core.deb
+
+# horizon-importer
+echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+git clone https://github.com/stellar/horizon-importer.git
+cd horizon-importer
+bundle install
+cd ..
+
+# horizon
+wget -O horizon.tar.gz https://github.com/stellar/horizon/releases/download/v0.2.0/horizon-v0.2.0-linux-amd64.tar.gz
+tar -zxvf horizon.tar.gz
+rm horizon.tar.gz
+
+echo "\nDone installing stellar-core and horizon[-importer]...\n"

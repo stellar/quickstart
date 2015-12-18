@@ -1,0 +1,11 @@
+# dependencies
+apt-get update
+apt-get install -y bundler curl git libpq-dev libsqlite3-dev libsasl2-dev postgresql-client postgresql postgresql-contrib vim zlib1g-dev
+
+# creating databases postgres
+/etc/init.d/postgresql start
+su postgres -c "createdb stellar"
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+sudo -u postgres psql -c "CREATE EXTENSION hstore;"
+
+echo "\nDone installing dependencies...\n"

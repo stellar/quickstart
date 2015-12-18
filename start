@@ -1,0 +1,26 @@
+# starting postgres
+/etc/init.d/postgresql start
+
+# stellar-core
+stellar-core --newdb --forcescp
+stellar-core &
+
+# horizon-importer
+export STELLAR_CORE_DATABASE_URL="postgres://postgres:postgres@localhost/stellar?sslmode=disable"
+export DATABASE_URL="postgres://postgres:postgres@localhost/horizon_development?sslmode=disable"
+export STELLARD_URL="http://localhost:8080"
+export IMPORT_HISTORY=true
+
+su postgres -c "createdb horizon_development"
+
+cd horizon-importer
+./bin/rake db:create
+./bin/rake db:migrate
+./bin/rails s -p 8001 -e production &
+cd ..
+
+# horizon
+cd horizon-v0.2.0-linux-amd64
+./horizon --port 8000 --stellar-core-url=$STELLARD_URL &
+
+while true; do sleep 1000; done
