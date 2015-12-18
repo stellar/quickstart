@@ -1,16 +1,18 @@
 # docker-stellar-core-horizon
 
-Docker container which includes:
+Docker container which starts a single-node [Stellar](https://www.stellar.org) network with horizon-importer and horizon services:
 
 * [stellar-core](https://github.com/stellar/stellar-core)
 * [horizon-importer](https://github.com/stellar/horizon-importer)
 * [horizon](https://github.com/stellar/horizon)
 
-After starting the container the single-node Stellar network will be created with horizon-importer and horizon services. To start using test lumens use this key pair:
+To start using test lumens use this key pair:
 ```
 GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H
 SDHOAMBNLGCE2MV5ZKIVZAQD3VCLGP53P3OBSBI6UN5L5XZI5TKHFQL4
 ```
+
+It does not have a persistent storage (yet?).
 
 ## Usage
 
