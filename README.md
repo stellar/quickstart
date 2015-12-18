@@ -14,6 +14,10 @@ SDHOAMBNLGCE2MV5ZKIVZAQD3VCLGP53P3OBSBI6UN5L5XZI5TKHFQL4
 
 It does not have a persistent storage (yet?).
 
+### Motivation
+
+This container can be used for integration tests or for testing stellar-core + horizon stack locally (no internet connection needed).
+
 ## Usage
 
 ```
