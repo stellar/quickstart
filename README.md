@@ -21,7 +21,7 @@ This container can be used for integration tests or for testing stellar-core + h
 ## Usage
 
 ```
-docker run -p 8000 -d stellar/stellar-core-horizon:latest
+docker run -p 8000 -d --name=stellar-core-horizon stellar/stellar-core-horizon:latest
 ```
 
 You can then run `docker ps` to find a port on which horizon is listening.
@@ -29,5 +29,5 @@ You can then run `docker ps` to find a port on which horizon is listening.
 ## Logs
 
 ```
-docker logs -f [process name]
+docker logs -f stellar-core-horizon
 ```
