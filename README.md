@@ -31,3 +31,9 @@ You can then run `docker ps` to find a port on which horizon is listening.
 ```
 docker logs -f stellar-core-horizon
 ```
+
+## Local build
+
+```
+docker build -t stellar/stellar-core-horizon .
+```

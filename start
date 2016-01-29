@@ -20,7 +20,7 @@ cd horizon-importer
 cd ..
 
 # horizon
-cd horizon-v0.2.0-linux-amd64
+cd horizon-v0.3.0-linux-amd64
 ./horizon --port 8000 --stellar-core-url=$STELLARD_URL &
 
 while true; do sleep 1000; done

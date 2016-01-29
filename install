@@ -11,7 +11,7 @@ bundle install
 cd ..
 
 # horizon
-wget -O horizon.tar.gz https://github.com/stellar/horizon/releases/download/v0.2.0/horizon-v0.2.0-linux-amd64.tar.gz
+wget -O horizon.tar.gz https://github.com/stellar/horizon/releases/download/v0.3.0/horizon-v0.3.0-linux-amd64.tar.gz
 tar -zxvf horizon.tar.gz
 rm horizon.tar.gz
 
