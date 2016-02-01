@@ -5,6 +5,7 @@ apt-get install -y bundler curl git libpq-dev libsqlite3-dev libsasl2-dev postgr
 # creating databases postgres
 /etc/init.d/postgresql start
 su postgres -c "createdb stellar"
+su postgres -c "createdb horizon_development"
 sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
 sudo -u postgres psql -c "CREATE EXTENSION hstore;"
 

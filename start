@@ -1,6 +1,17 @@
 # starting postgres
 /etc/init.d/postgresql start
 
+# wait for postgres to start
+# https://github.com/docker/docker/issues/7445#issuecomment-150318533
+
+su -c "
+	export PGPASSWORD=postgres
+    while ! psql --host=localhost --username=postgres > /dev/null 2>&1; do
+        echo 'Waiting for postgres to start...'
+        sleep 1;
+    done;
+echo 'postgres started!';"
+
 # stellar-core
 stellar-core --newdb --forcescp
 stellar-core &
@@ -10,8 +21,6 @@ export STELLAR_CORE_DATABASE_URL="postgres://postgres:postgres@localhost/stellar
 export DATABASE_URL="postgres://postgres:postgres@localhost/horizon_development?sslmode=disable"
 export STELLARD_URL="http://localhost:8080"
 export IMPORT_HISTORY=true
-
-su postgres -c "createdb horizon_development"
 
 cd horizon-importer
 ./bin/rake db:create
