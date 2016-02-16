@@ -30,6 +30,6 @@ cd ..
 
 # horizon
 cd horizon-v0.3.0-linux-amd64
-./horizon --port 8000 --stellar-core-url=$STELLARD_URL &
+./horizon --port 8000 --per-hour-rate-limit 72000 --stellar-core-url=$STELLARD_URL &
 
 while true; do sleep 1000; done
