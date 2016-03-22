@@ -7,6 +7,7 @@ rm stellar-core.deb
 echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 git clone https://github.com/stellar/horizon-importer.git
 cd horizon-importer
+git checkout 944628e
 bundle install
 cd ..
 
