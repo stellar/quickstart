@@ -2,7 +2,7 @@ FROM stellar/base:latest
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 0.3.3-253-414076fc
+ENV STELLAR_CORE_VERSION 0.4.1-291-657d67b8
 
 EXPOSE 5432
 EXPOSE 8000

@@ -3,7 +3,6 @@
 Docker container which starts a single-node [Stellar](https://www.stellar.org) network with following services:
 
 * [stellar-core](https://github.com/stellar/stellar-core)
-* [horizon-importer](https://github.com/stellar/horizon-importer)
 * [horizon](https://github.com/stellar/horizon)
 
 To start using test lumens use this key pair:

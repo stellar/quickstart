@@ -16,20 +16,15 @@ echo 'postgres started!';"
 stellar-core --newdb --forcescp
 stellar-core &
 
-# horizon-importer
+export STELLAR_CORE_URL="http://localhost:8080"
 export STELLAR_CORE_DATABASE_URL="postgres://postgres:postgres@localhost/stellar?sslmode=disable"
 export DATABASE_URL="postgres://postgres:postgres@localhost/horizon_development?sslmode=disable"
-export STELLARD_URL="http://localhost:8080"
-export IMPORT_HISTORY=true
-
-cd horizon-importer
-./bin/rake db:create
-./bin/rake db:migrate
-./bin/rails s -p 8001 -e production &
-cd ..
+export INGEST=true
 
 # horizon
-cd horizon-v0.3.0-linux-amd64
-./horizon --port 8000 --per-hour-rate-limit 72000 --stellar-core-url=$STELLARD_URL &
+cd horizon-v0.5.0-linux-amd64
+./horizon db init
+./horizon db migrate up
+./horizon --port 8000 --per-hour-rate-limit 72000 &
 
 while true; do sleep 1000; done

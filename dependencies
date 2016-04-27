@@ -1,6 +1,6 @@
 # dependencies
 apt-get update
-apt-get install -y bundler curl git libpq-dev libsqlite3-dev libsasl2-dev postgresql-client postgresql postgresql-contrib vim zlib1g-dev
+apt-get install -y curl git libpq-dev libsqlite3-dev libsasl2-dev postgresql-client postgresql postgresql-contrib sudo vim zlib1g-dev
 
 # creating databases postgres
 /etc/init.d/postgresql start
