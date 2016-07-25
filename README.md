@@ -1,6 +1,6 @@
 # Stellar Quickstart Docker Image
 
-This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker. This project produces two separate docker images: `stellar/quickstart-pubnet` and `stellar/quickstart-testnet`, each of which is configured to join the public network or the test network.
+This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker. This project produces two separate docker images: `stellar/quickstart:pubnet` and `stellar/quickstart:testnet`, each of which is configured to join the public network or the test network.
 
 These images provide a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
