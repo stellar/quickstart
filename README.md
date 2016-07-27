@@ -1,10 +1,10 @@
 # Stellar Quickstart Docker Image
 
-This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker. This project produces two separate docker images: `stellar/quickstart:pubnet` and `stellar/quickstart:testnet`, each of which is configured to join the public network or the test network.
+This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker. This project produces two separate docker images: `stellar/quickstart:pubnet` and `stellar/quickstart:testnet`, configured to join either the public network or the test network.
 
 These images provide a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
-The images produces by this project run the following software:
+The images produced by this project run the following software:
 
 - Postgresql 9.5 is used for storing both stellar-core and horizon data
 - [stellar-core](https://github.com/stellar/stellar-core)
@@ -15,19 +15,19 @@ The images produces by this project run the following software:
 
 To use this project successfully, you should first decide a few things:
 
-First, decide whether you want your container to be part of the public, production stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet.  This decision will inform what docker image to use: `stellar/quickstart:pubnet` or `stellar/quickstart:testnet`, respectively.
+First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet.  This decision will inform what docker image to use: `stellar/quickstart:pubnet` or `stellar/quickstart:testnet`, respectively.
 
-Next, you must decide whether you will use a docker volume or not.  When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the stellar network in the case of a crash or server restart.  We recommend persistent mode for anything besides a development or test environment.
+Next, you must decide whether you will use a docker volume or not.  When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart.  We recommend persistent mode for anything besides a development or test environment.
 
-Finally, you must decide what ports to expose.  This software that runs within these images listen on 4 ports, each of which you may or may not want tox` expose to the network your host system is connected to.  A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port.  See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
+Finally, you must decide what ports to expose.  The software in these images listen on 4 ports, each of which you may or may not want to expose to the network your host system is connected to.  A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port.  See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
 
 After deciding on the questions above, you can setup your container.  Please refer to the appropriate section below based upon what mode you will run the container in.
 
 ### Ephemeral mode
 
-Ephermeral mode is provided to support development and testing environments.  Every time you start a container in ephemeral mode, the database starts in a blank slate and a default configuration file will be used for the appropriate network.
+Ephermeral mode is provided to support development and testing environments.  Every time you start a container in ephemeral mode, the database starts empty and a default configuration file will be used for the appropriate network.
 
-Starting an ephemeral node is simple, just craft a `docker run` command to launch the appropriate image but *do not mount a volume*.  To craft your docker command, you need the image name and the flags to expose the ports your want available (See the sections named "Ports" below to learn about exposing ports).  Thus, launching a testnet node while exposing horizon would be:
+Starting an ephemeral node is simple, just craft a `docker run` command to launch the appropriate image but *do not mount a volume*.  To craft your docker command, you need the image name and the flags to expose the ports your want available (See the section named "Ports" below to learn about exposing ports).  Thus, launching a testnet node while exposing horizon would be:
 
 ```shell
 $ docker run --rm -it -p "8000:8000" --name stellar stellar/quickstart:testnet
