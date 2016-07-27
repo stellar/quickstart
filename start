@@ -98,7 +98,7 @@ function init_db() {
 
 	kill $PID
 	# wait for postgres to die
-	while kill -0 "$PID"; do
+	while kill -0 "$PID" &> /dev/null; do
     sleep 0.5
   done
 	echo "postgres: down"
