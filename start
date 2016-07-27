@@ -1,8 +1,139 @@
 #! /usr/bin/env bash
+set -e
 
-# This is the launcher script for the stellar/quickstart docker image. It:
-# 1.
+export STELLAR_MODE=""
+export PGBIN="/usr/lib/postgresql/9.4/bin"
+export PGHOME="/opt/stellar/postgresql"
+export PGETC="$PGHOME/etc"
+export PGDATA="$PGHOME/data"
+export PGUSER="stellar"
+export PGPASSFILE=$PGHOME/.pgpass
+export SUPHOME="/opt/stellar/supervisor"
+export SUPETC="$SUPHOME/etc"
+export PGPORT=5432
+
+function main() {
+	echo ""
+	echo "Starting Stellar Quickstart"
+	echo ""
+
+	# Are we ephemeral or persistent?
+	if [ -f "/opt/stellar/.docker-ephemeral" ]; then
+		STELLAR_MODE="ephemeral"
+	else
+		STELLAR_MODE="persistent"
+	fi
+
+	echo "mode: $STELLAR_MODE"
+
+	# write configuration files
+	establish_default_postgres_conf
+	establish_default_supervisor_conf
+	init_db
+
+	# TODO: remove line below when its all working
+	# exec /bin/bash
+	# launch services
+	exec_supervisor
+}
 
 
-echo "hello world"
-while true; do sleep 1000; done
+function establish_default_postgres_conf() {
+	if [ -d $PGETC ]; then
+		echo "postgres: config directory exists, skipping copy"
+		return 0
+	fi
+
+	cp -R /opt/stellar-default/postgresql $PGHOME
+}
+
+function establish_default_supervisor_conf() {
+	if [ -d $SUPETC ]; then
+		echo "supervisor: config directory exists, skipping copy"
+		return 0
+	fi
+
+	cp -R /opt/stellar-default/supervisor $SUPHOME
+}
+
+function init_db() {
+	if [ -d $PGDATA ]; then
+		echo "postgres: data directory exists, skipping db initialization"
+		return 0
+	fi
+
+	# TODO: only roll a random password when in ephemeral mode.  Prompt for the
+	# password when in persistent mode.
+	local PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
+
+	echo "postgres user: $PGUSER"
+	echo "postgres password: $PGPASS"
+
+	echo "*:*:*:$PGUSER:$PGPASS" > $PGPASSFILE
+	chmod 0600 $PGPASSFILE
+
+	mkdir -p $PGDATA
+	chown postgres:postgres $PGDATA
+	chmod 0700 $PGDATA
+
+	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
+
+	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGETC/postgresql.conf &> /dev/null &
+	PID=$!
+
+	while ! sudo -upostgres psql -c 'select 1' &> /dev/null ; do
+	  echo "Waiting for postgres to be available..."
+	  sleep 1
+	done
+
+	echo "postgres: up"
+
+	run_silent "create-horizon-db" sudo -upostgres createdb horizon
+	run_silent "create-core-db" sudo -upostgres createdb core
+	run_silent "create-stellar-user" sudo -upostgres psql <<-SQL
+		CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
+		GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
+		GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
+	SQL
+
+	kill $PID
+	# wait for postgres to die
+	while kill -0 "$PID"; do
+    sleep 0.5
+  done
+	echo "postgres: down"
+}
+
+function exec_supervisor() {
+	echo "starting suervisor"
+	exec supervisord -n -c $SUPETC/supervisord.conf
+}
+
+# run_silent is a utility function that runs a command with an abbreviated
+# output provided it succeeds.
+function run_silent() {
+	local LABEL=$1
+	shift
+	local COMMAND=$1
+	shift
+	local ARGS=$@
+	local OUTFILE="/tmp/run_silent.out"
+
+	echo -n "$LABEL: "
+	set +e
+
+	$COMMAND $ARGS &> $OUTFILE
+
+	if [ $? -eq 0 ]; then
+    echo "ok"
+	else
+	  echo "failed!"
+		echo ""
+		cat $OUTFILE
+		exit 1
+	fi
+
+	set -e
+}
+
+main

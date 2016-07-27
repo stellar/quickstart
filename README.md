@@ -54,6 +54,10 @@ Upon launching a persistent mode container for the first time, the launch script
 
 To customize the configurations that both stellar-core and horizon use, you must use persistent mode.  The default configurations will be copied into the data directory upon launching a persistent mode container for the first time.  
 
+## Regarding user accounts
+
+
+
 
 ## Ports
 
