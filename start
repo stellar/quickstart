@@ -219,6 +219,10 @@ function start_postgres() {
 		return 0
 	fi
 
+	# workaround!!!! from: https://github.com/nimiq/docker-postgresql93/issues/2
+	mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
+	# end workaround
+
 	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
 	CURRENT_POSTGRES_PID=$!
 
