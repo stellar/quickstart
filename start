@@ -21,7 +21,7 @@ function main() {
 	echo "Starting Stellar Quickstart"
 	echo ""
 
-	process_args
+	process_args $*
 
 	echo "mode: $STELLAR_MODE"
 	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
@@ -44,6 +44,7 @@ function process_args() {
 	while [[ -n "$1" ]]; do
   	ARG="$1"
 	  shift
+
 
 	  case "${ARG}" in
 	  --testnet)
@@ -251,4 +252,4 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-main
+main $@

@@ -37,4 +37,4 @@ ADD testnet /opt/stellar-default/testnet
 ADD start /
 RUN ["chmod", "+x", "start"]
 
-CMD ["/init", "--", "/bin/bash", "/start" ]
+ENTRYPOINT ["/init", "--", "/start" ]
