@@ -24,7 +24,7 @@ function main() {
 	process_args
 
 	echo "mode: $STELLAR_MODE"
-	echo "network: $NETWORK"
+	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
 
 	copy_defaults
 	init_db
@@ -58,9 +58,22 @@ function process_args() {
 	  esac
 	done
 
-	if [ -z "$var" ]; then
+	# TODO: ask for what network to use
+	if [ -z "$NETWORK" ]; then
 		NETWORK="testnet"
 	fi
+
+	case "$NETWORK" in
+	testnet)
+    NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+    ;;
+	pubnet)
+    NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+    ;;
+	*)
+		echo "Unknown network: '$NETWORK'" >&2
+		exit 1
+	esac
 
 	# Are we ephemeral or persistent?
 	if [ -f "/opt/stellar/.docker-ephemeral" ]; then
@@ -158,7 +171,8 @@ function init_horizon() {
 	pushd $HZHOME
 
 	run_silent "chown-horizon" chown stellar:stellar .
-	run_silent "finalize-horizon-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/horizon.env
+	# TODO: replace __NETWORK__ in the config
+	run_silent "finalize-horizon-config" sed -ri  -e "s/__PGPASS__/$PGPASS/g" etc/horizon.env
 
 	start_postgres
 	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
