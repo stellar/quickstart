@@ -1,0 +1,7 @@
+#! /bin/bash
+
+# This file is a simple wrapper around horizon that establishes the proper
+# environment variables before executing the actual binary.
+
+source /opt/stellar/horizon/etc/horizon.env
+exec /usr/local/bin/horizon $@

@@ -1,9 +1,4 @@
-__PHONY__: build-all
+__PHONY__: build
 
-build-base:
-	docker build -t stellar/quickstart:base -f Dockerfile .
-build-pubnet: build-base
-	docker build -t stellar/quickstart:pubnet -f pubnet/Dockerfile ./pubnet
-build-testnet: build-base
-	docker build -t stellar/quickstart:testnet -f testnet/Dockerfile ./testnet
-build-all: build-testnet build-pubnet
+build:
+	docker build -t stellar/quickstart -f Dockerfile .

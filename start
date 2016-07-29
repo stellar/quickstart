@@ -2,20 +2,65 @@
 set -e
 
 export STELLAR_MODE=""
+export STELLAR_HOME="/opt/stellar"
+export PGHOME="$STELLAR_HOME/postgresql"
+export SUPHOME="$STELLAR_HOME/supervisor"
+export COREHOME="$STELLAR_HOME/core"
+export HZHOME="$STELLAR_HOME/horizon"
+
 export PGBIN="/usr/lib/postgresql/9.4/bin"
-export PGHOME="/opt/stellar/postgresql"
-export PGETC="$PGHOME/etc"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
-export PGPASSFILE=$PGHOME/.pgpass
-export SUPHOME="/opt/stellar/supervisor"
-export SUPETC="$SUPHOME/etc"
 export PGPORT=5432
+
+QUICKSTART_INITIALIZED=false
+CURRENT_POSTGRES_PID=""
 
 function main() {
 	echo ""
 	echo "Starting Stellar Quickstart"
 	echo ""
+
+	process_args
+
+	echo "mode: $STELLAR_MODE"
+	echo "network: $NETWORK"
+
+	copy_defaults
+	init_db
+	init_stellar_core
+	init_horizon
+
+	stop_postgres  # this gets started in init_db
+
+	# TODO: remove line below when its all working
+	# exec /bin/bash
+
+	# launch services
+	exec_supervisor
+}
+
+function process_args() {
+	while [[ -n "$1" ]]; do
+  	ARG="$1"
+	  shift
+
+	  case "${ARG}" in
+	  --testnet)
+	    NETWORK="testnet"
+	    ;;
+	  --pubnet)
+	    NETWORK="pubnet"
+	    ;;
+	  *)
+	    echo "Unknown container arg $ARG" >&2
+	    exit 1
+	  esac
+	done
+
+	if [ -z "$var" ]; then
+		NETWORK="testnet"
+	fi
 
 	# Are we ephemeral or persistent?
 	if [ -f "/opt/stellar/.docker-ephemeral" ]; then
@@ -24,53 +69,50 @@ function main() {
 		STELLAR_MODE="persistent"
 	fi
 
-	echo "mode: $STELLAR_MODE"
-
-	# write configuration files
-	establish_default_postgres_conf
-	establish_default_supervisor_conf
-	init_db
-
-	# TODO: remove line below when its all working
-	# exec /bin/bash
-	# launch services
-	exec_supervisor
 }
 
+function copy_defaults() {
+	local CP="rsync -a"
 
-function establish_default_postgres_conf() {
-	if [ -d $PGETC ]; then
+	if [ -d $PGHOME/etc ]; then
 		echo "postgres: config directory exists, skipping copy"
-		return 0
+	else
+		$CP /opt/stellar-default/common/postgresql/ $PGHOME
 	fi
 
-	cp -R /opt/stellar-default/postgresql $PGHOME
-}
-
-function establish_default_supervisor_conf() {
-	if [ -d $SUPETC ]; then
+	if [ -d $SUPHOME/etc ]; then
 		echo "supervisor: config directory exists, skipping copy"
-		return 0
+	else
+		$CP /opt/stellar-default/common/supervisor/ $SUPHOME
 	fi
 
-	cp -R /opt/stellar-default/supervisor $SUPHOME
+	if [ -d $COREHOME/etc ]; then
+		echo "stellar-core: config directory exists, skipping copy"
+	else
+		$CP /opt/stellar-default/common/core/ $COREHOME
+		$CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+	fi
+
+	if [ -d $HZHOME/etc ]; then
+		echo "horizon: config directory exists, skipping copy"
+	else
+		$CP /opt/stellar-default/common/horizon/ $HZHOME
+	fi
 }
 
 function init_db() {
-	if [ -d $PGDATA ]; then
-		echo "postgres: data directory exists, skipping db initialization"
+	if [ -f $PGHOME/.quickstart-initialized ]; then
+		echo "postgres: already initialized"
 		return 0
 	fi
+	pushd $PGHOME
 
 	# TODO: only roll a random password when in ephemeral mode.  Prompt for the
 	# password when in persistent mode.
-	local PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
+	PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
 
 	echo "postgres user: $PGUSER"
 	echo "postgres password: $PGPASS"
-
-	echo "*:*:*:$PGUSER:$PGPASS" > $PGPASSFILE
-	chmod 0600 $PGPASSFILE
 
 	mkdir -p $PGDATA
 	chown postgres:postgres $PGDATA
@@ -78,35 +120,56 @@ function init_db() {
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
-	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGETC/postgresql.conf &> /dev/null &
-	PID=$!
-
-	while ! sudo -upostgres psql -c 'select 1' &> /dev/null ; do
-	  echo "Waiting for postgres to be available..."
-	  sleep 1
-	done
-
-	echo "postgres: up"
-
-	run_silent "create-horizon-db" sudo -upostgres createdb horizon
-	run_silent "create-core-db" sudo -upostgres createdb core
-	run_silent "create-stellar-user" sudo -upostgres psql <<-SQL
+	start_postgres
+	run_silent "create-horizon-db" sudo -u postgres createdb horizon
+	run_silent "create-core-db" sudo -u postgres createdb core
+	run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
 		CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
 		GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
 		GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
 	SQL
 
-	kill $PID
-	# wait for postgres to die
-	while kill -0 "$PID" &> /dev/null; do
-    sleep 0.5
-  done
-	echo "postgres: down"
+	touch .quickstart-initialized
+	popd
+}
+
+function init_stellar_core() {
+	if [ -f $COREHOME/.quickstart-initialized ]; then
+		echo "core: already initialized"
+		return 0
+	fi
+	pushd $COREHOME
+
+	run_silent "chown-core" chown stellar:stellar .
+	run_silent "finalize-core-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
+
+	start_postgres
+	run_silent "init-core-db" sudo -u stellar stellar-core --newdb --conf etc/stellar-core.cfg
+
+	touch .quickstart-initialized
+	popd
+}
+
+function init_horizon() {
+	if [ -f $HZHOME/.quickstart-initialized ]; then
+		echo "horizon: already initialized"
+		return 0
+	fi
+	pushd $HZHOME
+
+	run_silent "chown-horizon" chown stellar:stellar .
+	run_silent "finalize-horizon-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/horizon.env
+
+	start_postgres
+	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
+
+	touch .quickstart-initialized
+	popd
 }
 
 function exec_supervisor() {
 	echo "starting suervisor"
-	exec supervisord -n -c $SUPETC/supervisord.conf
+	exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
@@ -134,6 +197,44 @@ function run_silent() {
 	fi
 
 	set -e
+}
+
+function start_postgres() {
+	if [ ! -z "$CURRENT_POSTGRES_PID" ]; then
+		return 0
+	fi
+
+	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
+	CURRENT_POSTGRES_PID=$!
+
+	while ! sudo -upostgres psql -c 'select 1' &> /dev/null ; do
+	  echo "Waiting for postgres to be available..."
+	  sleep 1
+	done
+
+	echo "postgres: up"
+}
+
+function stop_postgres() {
+	if [ -z "$CURRENT_POSTGRES_PID" ]; then
+		echo "postgres is not running, cannot shut it down"
+		exit 1
+	fi
+
+	kill $CURRENT_POSTGRES_PID
+	# wait for postgres to die
+	while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
+		sleep 0.5
+	done
+	echo "postgres: down"
+}
+
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
 }
 
 main
