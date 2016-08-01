@@ -25,6 +25,10 @@ Finally, you must decide what ports to expose.  The software in these images lis
 
 After deciding on the questions above, you can setup your container.  Please refer to the appropriate section below based upon what mode you will run the container in.
 
+### Background vs. Interactive containers
+
+Docker containers can be run interactively (using the `-it` flags) or in a detached, background state (using the `-d` flag).  Many of the example commands below use the `-it` flags to aid in debugging but in many cases you will simply want to run a node in the background.  It's recommended that you use the use [the tutorials at docker](https://docs.docker.com/engine/tutorials/usingdocker/) to familiarize yourself with using docker.
+
 ### Ephemeral mode
 
 Ephermeral mode is provided to support development and testing environments.  Every time you start a container in ephemeral mode, the database starts empty and a default configuration file will be used for the appropriate network.
@@ -50,7 +54,12 @@ docker run --rm -it -p "8000:8000" -v "/home/scott/stellar:/opt/stellar" --name 
 
 The `-v` option in the example above tells docker to mount the host directory `/home/scott/stellar` into the container at the `/opt/stellar` path.  You may customize the host directory to any location you like, simply make sure to use the same value every time you launch the container.  Also note: an absolute directory path is required.  The second portion of the volume mount (`/opt/stellar`) should never be changed.  This special directory is checked by the container to see if it is mounted from the host system which is used to see if we should launch in ephemeral or persistent mode.
 
-Upon launching a persistent mode container for the first time, the launch script will notice that the mounted volume is empty.  This will trigger an interactive initialization process to populate the initial configuration for the container.  
+Upon launching a persistent mode container for the first time, the launch script will notice that the mounted volume is empty.  This will trigger an interactive initialization process to populate the initial configuration for the container.  This interactive initialization adds some complications to the setup process because in most cases you won't want to run the container interactively during normal operation, but rather in the background.  We recommend the following steps to setup a persistent mode node:
+
+1.  Run an interactive session of the container at first, ensuring that all services start and run correctly.
+2.  Shut down the interactive container (using Ctrl-C).
+3.  Start a new container using the same host directory in the background.
+
 
 ### Customizing configurations
 
@@ -118,27 +127,72 @@ The command above assumes that you launched your container with the name `stella
 Services within the quickstart container are managed using [supervisord](http://supervisord.org/index.html) and we recommend you use supervisor's shell to interact with running services.  To launch the supervisor shell, open an interactive shell to the container and then run `supervisorctl`.  You should then see a command prompt that looks like:
 
 ```shell
+horizon                          RUNNING    pid 143, uptime 0:01:12
+postgresql                       RUNNING    pid 126, uptime 0:01:13
+stellar-core                     RUNNING    pid 125, uptime 0:01:13
 supervisor>
 ```
 
-From this prompt you can execute any of the supervisord commands:  TODO
+From this prompt you can execute any of the supervisord commands:  
+
+```shell
+# restart horizon
+supervisor> restart horizon  
+
+
+# stop stellar-core
+supervisor> stop stellar-core  
+```
+
+You can learn more about what commands are available by using the `help` command.
 
 ### Viewing logs
 
-TODO
+Logs can be found within the container at the path `/var/log/supervisor/`.  A file is kept for both the stdout and stderr of the processes managed by supervisord.  Additionally, you can use the `tail` command provided by supervisorctl.
 
 ### Accessing databases
 
-TODO
+The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network.  In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database either horizon or stellar-core provide.  This allows you to craft your own custom sql queries against the stellar network data.
+
+This image manages two postgres databases:  `core` for stellar-core's data and `horizon` for horizon's data.  The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in:  Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
 
 
 ## Example launch commands
 
-Below is a list of various ways you might want to launch the quickstart container annotated to illustrate what options are enabled.
+Below is a list of various ways you might want to launch the quickstart container annotated to illustrate what options are enabled.  It's also recommended that you should learn and get familiar with the docker command.
 
-TODO
+*Launch an ephemeral pubnet node in the background:*
+```
+$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --pubnet
+```
 
+*Launch an ephemeral testnet node in the foreground, exposing all ports:*
+```
+$ docker run --rm -it \
+    -p "8000:8000" \
+    -p "11626:11626" \
+    -p "11625:11625" \
+    --name stellar \
+    stellar/quickstart --testnet
+```
+
+*Setup a new persistent node using the host directory `/str`:*
+```
+$ docker run -it --rm \
+    -v "/str:/opt/stellar" \
+    --name stellar \
+    stellar/quickstart --pubnet
+```
+
+*Start a background persistent container for an already initialized host directory:*
+```
+$ docker run -d \
+    -v "/str:/opt/stellar" \
+    -p "8000:8000" \
+    --name stellar \
+    stellar/quickstart --pubnet
+```
 
 ## Troubleshooting
 
-TODO
+Let us know what you're having trouble with!  Open an issue or join us on our public slack channel.
