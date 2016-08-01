@@ -25,7 +25,13 @@ RUN /install
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
-RUN ["adduser", "--disabled-password", "--gecos", "\"\"", "stellar"]
+
+RUN [ "adduser", \
+  "--disabled-password", \
+  "--gecos", "\"\"", \
+  "--uid", "10011001", \
+  "stellar"]
+
 RUN ["ln", "-s", "/opt/stellar", "/stellar"]
 RUN ["ln", "-s", "/opt/stellar/core/etc/stellar-core.cfg", "/stellar-core.cfg"]
 RUN ["ln", "-s", "/opt/stellar/horizon/etc/horizon.env", "/horizon.env"]

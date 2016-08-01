@@ -17,7 +17,7 @@ The image uses the following software:
 
 To use this project successfully, you should first decide a few things:
 
-First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet.
+First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet.  You'll provide either `--pubnet` or `--testnet` as a command line flag when starting the container to determine which network (and base configuration file) to use.
 
 Next, you must decide whether you will use a docker volume or not.  When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart.  We recommend persistent mode for anything besides a development or test environment.
 
@@ -45,20 +45,43 @@ In comparison to ephemeral mode, persistent mode is more complicated to operate,
 Starting a persistent mode container is the same as the ephemeral mode with one exception:
 
 ```shell
-docker run --rm -it -p "8000:8000" -v "~/stellar:/opt/stellar" --name stellar stellar/quickstart --testnet
+docker run --rm -it -p "8000:8000" -v "/home/scott/stellar:/opt/stellar" --name stellar stellar/quickstart --testnet
 ```
 
-The `-v` option in the example above tells docker to mount the host directory `~/stellar` into the container at the `/opt/stellar` path.  You may customize the host directory to any location you like, simply make sure to use the same value every time you launch the container.  The second portion of the volume mount (`/opt/stellar`) should never be changed.  This special directory is checked by the container to see if it is mounted from the host system which is used to see if we should launch in ephemeral or persistent mode.
+The `-v` option in the example above tells docker to mount the host directory `/home/scott/stellar` into the container at the `/opt/stellar` path.  You may customize the host directory to any location you like, simply make sure to use the same value every time you launch the container.  Also note: an absolute directory path is required.  The second portion of the volume mount (`/opt/stellar`) should never be changed.  This special directory is checked by the container to see if it is mounted from the host system which is used to see if we should launch in ephemeral or persistent mode.
 
 Upon launching a persistent mode container for the first time, the launch script will notice that the mounted volume is empty.  This will trigger an interactive initialization process to populate the initial configuration for the container.  
 
 ### Customizing configurations
 
-To customize the configurations that both stellar-core and horizon use, you must use persistent mode.  The default configurations will be copied into the data directory upon launching a persistent mode container for the first time.  
+To customize the configurations that both stellar-core and horizon use, you must use persistent mode.  The default configurations will be copied into the data directory upon launching a persistent mode container for the first time.  Use the diagram below to learn about the various configuration files that can be customized.
+
+```
+  /opt/stellar
+  |-- core                  
+  |   `-- etc
+  |       `-- stellar-core.cfg  # Stellar core config
+  |-- horizon
+  |   `-- etc
+  |       `-- horizon.env       # A shell script that exports horizon's config
+  |-- postgresql
+  |   `-- etc
+  |       |-- postgresql.conf   # Postgresql root configuration file
+  |       |-- pg_hba.conf       # Postgresql client configuration file
+  |       `-- pg_ident.conf     # Postgresql user mapping file
+  `-- supervisor
+      `-- etc
+  |       `-- supervisord.conf  # Supervisord root configuration
+```
+
+It is recommended that you stop the container before editing any of these files, then restart the container after completing your customization.
+
+*NOTE:* Be wary of editing these files.  It is possible to break or more of the services started within this container with an bad edit.  Its recommended that you learn about managing the operations of each of the services before customizing them, as you are taking responsibility for maintaining those services going forward.
+
 
 ## Regarding user accounts
 
-TODO
+Managing UIDs between a docker container and a host volume can be complicated.  At present, this image simply tries to create a UID that does not conflict with the host system by using a preset UID:  10011001.  Currently there is no way to customize this value.  All data produced in the host volume be owned by 10011001.  If this UID value is inappropriate for your infrastructure we recommend you fork this project and do a find/replace operation to change UIDs.  We may improve this story in the future if enough users request it.
 
 ## Ports
 
