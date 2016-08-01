@@ -33,9 +33,6 @@ function main() {
 
 	stop_postgres  # this gets started in init_db
 
-	# TODO: remove line below when its all working
-	# exec /bin/bash
-
 	# launch services
 	exec_supervisor
 }
