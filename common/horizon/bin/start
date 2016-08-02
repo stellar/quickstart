@@ -1,0 +1,8 @@
+#! /bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# TODO: wait for postgres
+# TODO: wait for stellar-core
+
+exec $DIR/horizon
