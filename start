@@ -256,8 +256,7 @@ function start_postgres() {
 
 function stop_postgres() {
 	if [ -z "$CURRENT_POSTGRES_PID" ]; then
-		echo "postgres is not running, cannot shut it down"
-		exit 1
+		return 0
 	fi
 
 	kill $CURRENT_POSTGRES_PID
