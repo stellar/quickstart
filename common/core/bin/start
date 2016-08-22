@@ -2,4 +2,4 @@
 
 # TODO: wait for postgres
 
-/usr/local/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg"
+exec /usr/local/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg"
