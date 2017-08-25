@@ -96,8 +96,8 @@ Managing UIDs between a docker container and a host volume can be complicated.  
 |-------|--------------|----------------------|
 | 5432  | postgresql   | database access port |
 | 8000  | horizon      | main http port       |
-| 11625 | stellar-core | main http port       |
-| 11626 | stellar-core | peer node port       |
+| 11625 | stellar-core | peer node port       |
+| 11626 | stellar-core | main http port       |
 
 
 ### Security Considerations
