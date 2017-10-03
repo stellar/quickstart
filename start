@@ -90,6 +90,11 @@ function set_pg_password() {
 		return 0
 	fi
 
+	if [ -n "$PGPASS" ]; then
+		echo "postgres password: $PGPASS"
+		return 0
+	fi
+
 	# ask for a password when persistent
 	read -s -p "Enter New Postgresql Password: " PGPASS
 	echo ""
@@ -109,6 +114,21 @@ function set_pg_password() {
 
 function copy_defaults() {
 	local CP="rsync -a"
+
+	if [ -d /root/.pgpass ]; then
+		echo "postgres: /root/.pgpass exists, skipping copy"
+	else
+		$CP /opt/stellar-default/common/postgresql/.pgpass /root
+		chmod 0600 /root/.pgpass
+	fi
+	
+	if [ -d /root/.pgpass ]; then
+		echo "postgres: /root/.pgpass exists, skipping copy"
+	else
+		$CP /opt/stellar-default/common/postgresql/.pgpass /home/stellar
+		chmod 0600 /home/stellar/.pgpass
+		chown stellar:stellar /home/stellar/.pgpass
+	fi
 
 	if [ -d $PGHOME/etc ]; then
 		echo "postgres: config directory exists, skipping copy"
@@ -150,6 +170,9 @@ function init_db() {
 	echo "postgres user: $PGUSER"
 
 	set_pg_password
+
+	run_silent "finalize-pgpass-root" sed -ri "s/__PGPASS__/$PGPASS/g" /root/.pgpass
+	run_silent "finalize-pgpass-stellar" sed -ri "s/__PGPASS__/$PGPASS/g" /home/stellar/.pgpass
 
 
 	mkdir -p $PGDATA
