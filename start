@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 set -e
 
-export STELLAR_MODE=""
 export STELLAR_HOME="/opt/stellar"
 export PGHOME="$STELLAR_HOME/postgresql"
 export SUPHOME="$STELLAR_HOME/supervisor"
@@ -74,12 +73,13 @@ function process_args() {
 	esac
 
 	# Are we ephemeral or persistent?
-	if [ -f "/opt/stellar/.docker-ephemeral" ]; then
-		STELLAR_MODE="ephemeral"
-	else
-		STELLAR_MODE="persistent"
+	if [ -z "$STELLAR_MODE" ]; then
+		if [ -f "/opt/stellar/.docker-ephemeral" ]; then
+			STELLAR_MODE="ephemeral"
+		else
+			STELLAR_MODE="persistent"
+		fi
 	fi
-
 }
 
 function set_pg_password() {
@@ -110,6 +110,7 @@ function set_pg_password() {
 		echo "Password mistmach" >&2
 		exit 1
 	fi
+
 }
 
 function copy_defaults() {
