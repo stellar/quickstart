@@ -2,7 +2,16 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# TODO: wait for postgres
-# TODO: wait for stellar-core
+while ! psql -U stellar -c 'select 1' horizon &> /dev/null ; do
+  echo "Waiting for postgres to be available..."
+  sleep 1
+done
 
+while ! stellar-core --conf /opt/stellar/core/etc/stellar-core.cfg -c info &> /dev/null ; do
+  echo "Waiting for stellar-core to be available..."
+  sleep 1
+done
+
+echo "starting horizon..."
+set -e
 exec $DIR/horizon
