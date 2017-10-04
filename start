@@ -29,6 +29,7 @@ function main() {
 	init_db
 	init_stellar_core
 	init_horizon
+	copy_pgpass
 
 	stop_postgres  # this gets started in init_db
 
@@ -62,10 +63,10 @@ function process_args() {
 
 	case "$NETWORK" in
 	testnet)
-    NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+    export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
     ;;
 	pubnet)
-    NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+    export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
     ;;
 	*)
 		echo "Unknown network: '$NETWORK'" >&2
@@ -116,21 +117,6 @@ function set_pg_password() {
 function copy_defaults() {
 	local CP="rsync -a"
 
-	if [ -d /root/.pgpass ]; then
-		echo "postgres: /root/.pgpass exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/postgresql/.pgpass /root
-		chmod 0600 /root/.pgpass
-	fi
-	
-	if [ -d /root/.pgpass ]; then
-		echo "postgres: /root/.pgpass exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/postgresql/.pgpass /home/stellar
-		chmod 0600 /home/stellar/.pgpass
-		chown stellar:stellar /home/stellar/.pgpass
-	fi
-
 	if [ -d $PGHOME/etc ]; then
 		echo "postgres: config directory exists, skipping copy"
 	else
@@ -157,6 +143,17 @@ function copy_defaults() {
 	fi
 }
 
+function copy_pgpass() {
+	local CP="rsync -a"
+
+	$CP /opt/stellar/postgresql/.pgpass /root/
+	chmod 0600 /root/.pgpass
+
+	$CP /opt/stellar/postgresql/.pgpass /home/stellar
+	chmod 0600 /home/stellar/.pgpass
+	chown stellar:stellar /home/stellar/.pgpass
+}
+
 function init_db() {
 	if [ -f $PGHOME/.quickstart-initialized ]; then
 		echo "postgres: already initialized"
@@ -172,9 +169,7 @@ function init_db() {
 
 	set_pg_password
 
-	run_silent "finalize-pgpass-root" sed -ri "s/__PGPASS__/$PGPASS/g" /root/.pgpass
-	run_silent "finalize-pgpass-stellar" sed -ri "s/__PGPASS__/$PGPASS/g" /home/stellar/.pgpass
-
+	run_silent "finalize-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
 
 	mkdir -p $PGDATA
 	chown postgres:postgres $PGDATA
@@ -220,8 +215,11 @@ function init_horizon() {
 	pushd $HZHOME
 
 	run_silent "chown-horizon" chown stellar:stellar .
-	# TODO: replace __NETWORK__ in the config
-	run_silent "finalize-horizon-config" sed -ri  -e "s/__PGPASS__/$PGPASS/g" etc/horizon.env
+	
+	sed -ri \
+		-e "s/__PGPASS__/$PGPASS/g" \
+		-e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
+		etc/horizon.env
 
 	start_postgres
 	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
