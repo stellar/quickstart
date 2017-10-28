@@ -26,11 +26,9 @@ RUN /install
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
 
-RUN [ "adduser", \
-  "--disabled-password", \
-  "--gecos", "\"\"", \
-  "--uid", "10011001", \
-  "stellar"]
+RUN useradd --uid 10011001 --home-dir /home/stellar --no-log-init stellar \
+    && mkdir -p /home/stellar \
+    && chown -R stellar:stellar /home/stellar
 
 RUN ["ln", "-s", "/opt/stellar", "/stellar"]
 RUN ["ln", "-s", "/opt/stellar/core/etc/stellar-core.cfg", "/stellar-core.cfg"]
