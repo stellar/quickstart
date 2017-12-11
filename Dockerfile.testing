@@ -2,8 +2,8 @@ FROM stellar/base:latest
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 0.6.4-436-631687e6
-ENV HORIZON_VERSION 0.11.1
+ENV STELLAR_CORE_VERSION 9.0.0-471-f1289400
+ENV HORIZON_VERSION 0.12.0-testing
 
 EXPOSE 5432
 EXPOSE 8000
@@ -14,9 +14,9 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-ADD install /
-RUN ["chmod", "+x", "install"]
-RUN /install
+ADD install-monorepo /
+RUN ["chmod", "+x", "install-monorepo"]
+RUN /install-monorepo
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
