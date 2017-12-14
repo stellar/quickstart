@@ -84,6 +84,13 @@ function process_args() {
 }
 
 function set_pg_password() {
+
+	if [ -n "$POSTGRES_PASSWORD" ]; then
+		PGPASS=$POSTGRES_PASSWORD
+		echo "using POSTGRES_PASSWORD"
+		return 0
+	fi
+
 	# use a random password when ephemeral (or some other unknown mode)
 	if [ "$STELLAR_MODE" != "persistent" ]; then
 		PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
