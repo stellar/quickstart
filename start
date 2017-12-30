@@ -236,7 +236,7 @@ function init_horizon() {
 }
 
 function exec_supervisor() {
-	echo "starting suervisor"
+	echo "starting supervisor"
 	exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
