@@ -2,7 +2,7 @@ FROM stellar/base:latest
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 9.0.1-475-7ad53a57
+ENV STELLAR_CORE_VERSION 9.1.0-494-a278e959
 ENV HORIZON_VERSION 0.12.0-testing
 
 EXPOSE 5432
