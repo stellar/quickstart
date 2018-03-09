@@ -50,6 +50,9 @@ function process_args() {
 	  --pubnet)
 	    NETWORK="pubnet"
 	    ;;
+	  --standalone)
+		NETWORK="standalone"
+		;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
 	    exit 1
@@ -67,6 +70,9 @@ function process_args() {
     ;;
 	pubnet)
     export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+    ;;
+	standalone)
+    NETWORK_PASSPHRASE="Standalone Network ; February 2017"
     ;;
 	*)
 		echo "Unknown network: '$NETWORK'" >&2
@@ -208,7 +214,12 @@ function init_stellar_core() {
 	run_silent "finalize-core-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
 
 	start_postgres
+
 	run_silent "init-core-db" sudo -u stellar stellar-core --newdb --conf etc/stellar-core.cfg
+
+	if [ "$NETWORK" == "standalone" ]; then
+		run_silent "init-core-scp" sudo -u stellar stellar-core --forcescp --conf etc/stellar-core.cfg
+	fi
 
 	touch .quickstart-initialized
 	popd

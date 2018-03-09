@@ -31,6 +31,7 @@ RUN ["ln", "-s", "/opt/stellar/horizon/etc/horizon.env", "/horizon.env"]
 ADD common /opt/stellar-default/common
 ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
+ADD standalone /opt/stellar-default/standalone
 
 
 ADD start /
