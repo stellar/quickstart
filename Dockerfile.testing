@@ -15,9 +15,9 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-ADD install-monorepo /
-RUN ["chmod", "+x", "install-monorepo"]
-RUN /install-monorepo
+ADD install /
+RUN ["chmod", "+x", "install"]
+RUN /install
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
