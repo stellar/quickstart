@@ -51,8 +51,8 @@ function process_args() {
 	    NETWORK="pubnet"
 	    ;;
 	  --standalone)
-		NETWORK="standalone"
-		;;
+	    NETWORK="standalone"
+	    ;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
 	    exit 1
