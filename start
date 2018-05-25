@@ -233,7 +233,7 @@ function init_horizon() {
 	pushd $HZHOME
 
 	run_silent "chown-horizon" chown stellar:stellar .
-	
+
 	sed -ri \
 		-e "s/__PGPASS__/$PGPASS/g" \
 		-e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
