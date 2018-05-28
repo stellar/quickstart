@@ -1,0 +1,9 @@
+sudo: required
+services:
+- docker
+language: bash
+before_script: docker build -t stellar-travis .
+script:
+  - docker run --rm -it -p "8000:8000" --name stellar stellar-travis --testnet
+  - sleep 120
+  - exit 0
