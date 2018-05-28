@@ -299,7 +299,7 @@ function stop_postgres() {
 		return 0
 	fi
 
-	kill $CURRENT_POSTGRES_PID
+	killall postgres
 	# wait for postgres to die
 	while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
 		sleep 0.5
