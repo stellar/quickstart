@@ -7,7 +7,7 @@ export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 
-export PGBIN="/usr/lib/postgresql/9.4/bin"
+export PGBIN="/usr/lib/postgresql/9.6/bin"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
@@ -299,7 +299,7 @@ function stop_postgres() {
 		return 0
 	fi
 
-	kill $CURRENT_POSTGRES_PID
+	killall postgres
 	# wait for postgres to die
 	while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
 		sleep 0.5

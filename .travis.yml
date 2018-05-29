@@ -1,0 +1,14 @@
+sudo: required
+services:
+- docker
+env:
+  - NETWORK=testnet
+  - NETWORK=pubnet
+language: go
+before_script: docker build -t stellar-travis .
+script:
+  - |
+    docker run --rm -d -p "8000:8000" --name stellar stellar-travis --$NETWORK
+    sleep 10 # sleep until supervisor is up
+    echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+    go run travis.go
