@@ -206,6 +206,13 @@ function init_db() {
 function init_stellar_core() {
 	if [ -f $COREHOME/.quickstart-initialized ]; then
 		echo "core: already initialized"
+
+		if [ "$NETWORK" == "standalone" ]; then
+			start_postgres
+
+			run_silent "init-core-scp" sudo -u stellar stellar-core --forcescp --conf $COREHOME/etc/stellar-core.cfg
+		fi
+
 		return 0
 	fi
 	pushd $COREHOME
