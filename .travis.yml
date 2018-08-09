@@ -4,11 +4,20 @@ services:
 env:
   - NETWORK=testnet
   - NETWORK=pubnet
+  - TAG_TESTING=1 NETWORK=testnet
+  - TAG_TESTING=1 NETWORK=pubnet
 language: go
-before_script: docker build -t stellar-travis .
 script:
   - |
+    # Check if env `TAG_TESTING` has length equal to zero
+    if [[ -z "${TAG_TESTING}" ]]; then
+      docker build -t stellar-travis .
+    else
+      docker build -f Dockerfile.testing -t stellar-travis .
+    fi
+
     docker run --rm -d -p "8000:8000" --name stellar stellar-travis --$NETWORK
+
     sleep 10 # sleep until supervisor is up
     echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
     go run travis.go
