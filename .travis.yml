@@ -9,10 +9,11 @@ env:
 language: go
 script:
   - |
+    # Check if env `TAG_TESTING` has length equal to zero
     if [[ -z "${TAG_TESTING}" ]]; then
-      docker build -f Dockerfile.testing -t stellar-travis .
-    else
       docker build -t stellar-travis .
+    else
+      docker build -f Dockerfile.testing -t stellar-travis .
     fi
 
     docker run --rm -d -p "8000:8000" --name stellar stellar-travis --$NETWORK
