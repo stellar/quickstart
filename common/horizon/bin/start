@@ -13,5 +13,6 @@ while ! stellar-core --conf /opt/stellar/core/etc/stellar-core.cfg -c info &> /d
 done
 
 echo "starting horizon..."
+export DISABLE_ASSET_STATS=true
 set -e
 exec $DIR/horizon
