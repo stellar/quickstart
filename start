@@ -53,6 +53,10 @@ function process_args() {
 	  --standalone)
 	    NETWORK="standalone"
 	    ;;
+    --protocol-version)
+      export PROTOCOL_VERSION="$1"
+      shift
+      ;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
 	    exit 1
@@ -253,8 +257,21 @@ function init_horizon() {
 	popd
 }
 
+function upgrade_standalone() {
+	# Upgrade standalone network to the latest protocol version
+	if [ "$NETWORK" = "standalone" ]; then
+		# Wait for server
+		while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+		if [ -z "$PROTOCOL_VERSION" ]; then
+			export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
+		fi
+		curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
+	fi
+}
+
 function exec_supervisor() {
 	echo "starting supervisor"
+	upgrade_standalone &
 	exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
