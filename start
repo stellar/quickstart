@@ -57,6 +57,10 @@ function process_args() {
       export PROTOCOL_VERSION="$1"
       shift
       ;;
+    --enable-asset-stats)
+      export ENABLE_ASSET_STATS="$1"
+      shift
+      ;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
 	    exit 1
