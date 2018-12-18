@@ -17,7 +17,7 @@ CURRENT_POSTGRES_PID=""
 
 function main() {
 	echo ""
-	echo "Starting Stellar Quickstart"
+	echo "Starting Kin Quickstart"
 	echo ""
 
 	process_args $*
@@ -70,13 +70,13 @@ function process_args() {
 
 	case "$NETWORK" in
 	testnet)
-    export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+    export NETWORK_PASSPHRASE="Kin Testnet ; December 2018"
     ;;
 	pubnet)
-    export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+    export NETWORK_PASSPHRASE="Public Global Kin Ecosystem Network ; June 2018"
     ;;
 	standalone)
-    NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    NETWORK_PASSPHRASE="Standalone Kin Network ; February 2017"
     ;;
 	*)
 		echo "Unknown network: '$NETWORK'" >&2

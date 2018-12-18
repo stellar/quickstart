@@ -14,9 +14,12 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-ADD install /
-RUN ["chmod", "+x", "install"]
-RUN /install
+#ADD install /
+#RUN ["chmod", "+x", "install"]
+#RUN /install
+# copy the binaries from the local path
+COPY ./stellar-core  /usr/local/bin/stellar-core
+COPY ./horizon  /usr/local/bin/horizon
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
