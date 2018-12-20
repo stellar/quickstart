@@ -262,14 +262,19 @@ function init_horizon() {
 }
 
 function upgrade_standalone() {
-	# Upgrade standalone network to the latest protocol version
+	# Upgrade standalone network's protocol version
 	if [ "$NETWORK" = "standalone" ]; then
 		# Wait for server
 		while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
 		if [ -z "$PROTOCOL_VERSION" ]; then
+			# default to latest version supported by core
 			export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
 		fi
-		curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
+		if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
+			if [ $PROTOCOL_VERSION -gt 0 ]; then
+				curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
+			fi
+		fi
 	fi
 }
 
