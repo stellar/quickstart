@@ -9,7 +9,7 @@ The image uses the following software:
 - Postgresql 9.6 is used for storing both stellar-core and horizon data
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/horizon)
-- Supervisord is used from managing the processes of the services above.
+- Supervisord is used from managing the processes of the services above
 
 ## Usage
 
