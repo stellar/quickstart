@@ -83,7 +83,7 @@ To customize the configurations that both stellar-core and horizon use, you must
 
 It is recommended that you stop the container before editing any of these files, then restart the container after completing your customization.
 
-*NOTE:* Be wary of editing these files.  It is possible to break the services started within this container with an bad edit.  It's recommended that you learn about managing the operations of each of the services before customizing them, as you are taking responsibility for maintaining those services going forward.
+*NOTE:* Be wary of editing these files.  It is possible to break the services started within this container with a bad edit.  It's recommended that you learn about managing the operations of each of the services before customizing them, as you are taking responsibility for maintaining those services going forward.
 
 
 ## Regarding user accounts
