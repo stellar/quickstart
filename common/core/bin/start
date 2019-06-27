@@ -7,4 +7,4 @@ done
 
 echo "starting core..."
 set -e
-exec /usr/local/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg"
+exec /usr/local/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg" run

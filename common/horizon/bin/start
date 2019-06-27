@@ -7,7 +7,7 @@ while ! psql -U stellar -c 'select 1' horizon &> /dev/null ; do
   sleep 1
 done
 
-while ! stellar-core --conf /opt/stellar/core/etc/stellar-core.cfg -c info &> /dev/null ; do
+while ! stellar-core --conf /opt/stellar/core/etc/stellar-core.cfg http-command info &> /dev/null ; do
   echo "Waiting for stellar-core to be available..."
   sleep 1
 done

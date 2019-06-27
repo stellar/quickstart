@@ -218,7 +218,7 @@ function init_stellar_core() {
 		if [ "$NETWORK" == "standalone" ]; then
 			start_postgres
 
-			run_silent "init-core-scp" sudo -u stellar stellar-core --forcescp --conf $COREHOME/etc/stellar-core.cfg
+			run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
 		fi
 
 		return 0
@@ -230,10 +230,10 @@ function init_stellar_core() {
 
 	start_postgres
 
-	run_silent "init-core-db" sudo -u stellar stellar-core --newdb --conf etc/stellar-core.cfg
+	run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
 	if [ "$NETWORK" == "standalone" ]; then
-		run_silent "init-core-scp" sudo -u stellar stellar-core --forcescp --conf etc/stellar-core.cfg
+		run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 	fi
 
 	touch .quickstart-initialized
