@@ -212,6 +212,8 @@ function init_db() {
 }
 
 function init_stellar_core() {
+	pushd $COREHOME
+	run_silent "chown-core" chown -R stellar:stellar .
 	if [ -f $COREHOME/.quickstart-initialized ]; then
 		echo "core: already initialized"
 
@@ -223,9 +225,7 @@ function init_stellar_core() {
 
 		return 0
 	fi
-	pushd $COREHOME
 
-	run_silent "chown-core" chown stellar:stellar .
 	run_silent "finalize-core-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
 
 	start_postgres
