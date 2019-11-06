@@ -1,0 +1,5 @@
+$ stellar-core http-command 'peers'
+
+
+ *My favorite app::pythoni  https://itunes.apple.com/app/id493505744?mt=8
+Other's Tutorals:http://iii9i.com
