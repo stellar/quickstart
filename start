@@ -153,9 +153,10 @@ function copy_defaults() {
 	if [ -d $COREHOME/etc ]; then
 		echo "stellar-core: config directory exists, skipping copy"
 	else
-		$CP /opt/stellar-default/common/core/ $COREHOME
-		$CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+		$CP /opt/stellar-default/$NETWORK/core/etc $COREHOME
 	fi
+		
+    $CP /opt/stellar-default/common/core/bin $COREHOME
 
 	if [ -d $HZHOME/etc ]; then
 		echo "horizon: config directory exists, skipping copy"
