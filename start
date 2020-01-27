@@ -75,9 +75,11 @@ function process_args() {
 	case "$NETWORK" in
 	testnet)
     export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+    export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-testnet/core_testnet_001"
     ;;
 	pubnet)
     export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+    export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
 	standalone)
     NETWORK_PASSPHRASE="Standalone Network ; February 2017"
@@ -248,10 +250,11 @@ function init_horizon() {
 	pushd $HZHOME
 
 	run_silent "chown-horizon" chown stellar:stellar .
-	
+
 	sed -ri \
 		-e "s/__PGPASS__/$PGPASS/g" \
 		-e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
+		-e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
 		etc/horizon.env
 
 	start_postgres
