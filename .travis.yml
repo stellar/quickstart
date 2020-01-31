@@ -3,9 +3,9 @@ services:
 - docker
 env:
   - NETWORK=testnet
-  - NETWORK=pubnet
+  - NETWORK=pubnet 
   - TAG_TESTING=1 NETWORK=testnet
-  - TAG_TESTING=1 NETWORK=pubnet
+  # - TAG_TESTING=1 NETWORK=pubnet Disabled temporarily since Travis fail when running new ingestion system on pubnet
 language: go
 script:
   - |
