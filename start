@@ -57,10 +57,6 @@ function process_args() {
       export PROTOCOL_VERSION="$1"
       shift
       ;;
-    --history-archive-urls)
-      export HISTORY_ARCHIVE_URLS="$1"
-      shift
-      ;;
     --enable-asset-stats)
       export ENABLE_ASSET_STATS="$1"
       shift
