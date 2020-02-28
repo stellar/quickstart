@@ -43,16 +43,16 @@ function process_args() {
 	  shift
 
 
-      case "${ARG}" in
-      --testnet)
-        NETWORK="testnet"
-        ;;
-      --pubnet)
-        NETWORK="pubnet"
-    ;;
-      --standalone)
-        NETWORK="standalone"
-        ;;
+	  case "${ARG}" in
+	  --testnet)
+	    NETWORK="testnet"
+	    ;;
+	  --pubnet)
+	    NETWORK="pubnet"
+	    ;;
+	  --standalone)
+	    NETWORK="standalone"
+	    ;;
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
