@@ -5,7 +5,7 @@ env:
   - NETWORK=testnet
   - NETWORK=pubnet 
   - TAG_TESTING=1 NETWORK=testnet
-  # - TAG_TESTING=1 NETWORK=pubnet Disabled temporarily since Travis fail when running new ingestion system on pubnet
+  - TAG_TESTING=1 NETWORK=pubnet
 language: go
 script:
   - |
