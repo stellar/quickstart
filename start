@@ -82,7 +82,9 @@ function process_args() {
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
 	standalone)
-    NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    # h1570ry - we'll start a webserver connected to history directory later on
+    export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ;;
 	*)
 		echo "Unknown network: '$NETWORK'" >&2
@@ -236,6 +238,12 @@ function init_stellar_core() {
 
 	if [ "$NETWORK" == "standalone" ]; then
 		run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
+
+		run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
+		# Start local history server
+		pushd /tmp/stellar-core/history/vs
+		python3 -m http.server 1570 > /dev/null 2>&1 &
+		popd
 	fi
 
 	touch .quickstart-initialized
