@@ -2,7 +2,7 @@
 
 This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker.
 
-This image provide a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
+This image provides a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
 The image uses the following software:
 
