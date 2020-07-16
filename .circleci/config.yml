@@ -1,0 +1,28 @@
+version: 2.1
+
+jobs:
+  publish_docker_image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and Push Docker image
+          command: |
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker build -t stellar/quickstart:latest .
+            docker push stellar/quickstart:latest
+            docker build -f Dockerfile.testing -t stellar/quickstart:testing .
+            docker push stellar/quickstart:testing
+
+workflows:
+  version: 2
+
+  publish:
+    jobs:
+      - publish_docker_image:
+          filters:
+              branches:
+                only:
+                  - master
