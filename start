@@ -257,6 +257,13 @@ function init_horizon() {
 	fi
 	pushd $HZHOME
 
+	# copy new horizon binary if available in custom_bin directory provided by the user
+	if [ -d /custom_bin ]; then
+		echo "horizon: copying custom horizon binary"
+		cp /custom_bin/horizon /usr/local/bin/horizon
+		chmod +x /usr/local/bin/horizon
+	fi
+
 	run_silent "chown-horizon" chown stellar:stellar .
 
 	sed -ri \
@@ -267,6 +274,10 @@ function init_horizon() {
 
 	start_postgres
 	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
+	if [ "$NETWORK" == "standalone" ]; then
+		# init-genesis-state command has not been released yet so ignore error and remove `|| true` later.
+		run_silent "init-genesis-state" sudo -u stellar ./bin/horizon expingest init-genesis-state || true
+	fi
 
 	touch .quickstart-initialized
 	popd
