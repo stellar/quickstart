@@ -257,13 +257,6 @@ function init_horizon() {
 	fi
 	pushd $HZHOME
 
-	# copy new horizon binary if available in custom_bin directory provided by the user
-	if [ -d /custom_bin ]; then
-		echo "horizon: copying custom horizon binary"
-		cp /custom_bin/horizon /usr/local/bin/horizon
-		chmod +x /usr/local/bin/horizon
-	fi
-
 	run_silent "chown-horizon" chown stellar:stellar .
 
 	sed -ri \
