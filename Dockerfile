@@ -1,9 +1,9 @@
-FROM stellar/base:latest
+FROM ubuntu:16.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 14.0.0-1310-9dd23416
-ENV HORIZON_VERSION 1.8.2
+ENV STELLAR_CORE_VERSION 14.0.0-37
+ENV HORIZON_VERSION 1.8.2-85
 
 EXPOSE 5432
 EXPOSE 8000
@@ -22,10 +22,6 @@ RUN /install
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
 
-RUN useradd --uid 10011001 --home-dir /home/stellar --no-log-init stellar \
-    && mkdir -p /home/stellar \
-    && chown -R stellar:stellar /home/stellar
-
 RUN ["ln", "-s", "/opt/stellar", "/stellar"]
 RUN ["ln", "-s", "/opt/stellar/core/etc/stellar-core.cfg", "/stellar-core.cfg"]
 RUN ["ln", "-s", "/opt/stellar/horizon/etc/horizon.env", "/horizon.env"]
@@ -38,4 +34,4 @@ ADD standalone /opt/stellar-default/standalone
 ADD start /
 RUN ["chmod", "+x", "start"]
 
-ENTRYPOINT ["/init", "--", "/start" ]
+ENTRYPOINT ["/start"]

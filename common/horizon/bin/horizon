@@ -4,4 +4,4 @@
 # environment variables before executing the actual binary.
 
 source /opt/stellar/horizon/etc/horizon.env
-exec /usr/local/bin/horizon $@
+exec /usr/bin/stellar-horizon $@

@@ -7,7 +7,7 @@ export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 
-export PGBIN="/usr/lib/postgresql/9.6/bin"
+export PGBIN="/usr/lib/postgresql/9.5/bin"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
@@ -174,9 +174,9 @@ function copy_pgpass() {
 	$CP /opt/stellar/postgresql/.pgpass /root/
 	chmod 0600 /root/.pgpass
 
-	$CP /opt/stellar/postgresql/.pgpass /home/stellar
-	chmod 0600 /home/stellar/.pgpass
-	chown stellar:stellar /home/stellar/.pgpass
+	$CP /opt/stellar/postgresql/.pgpass /var/lib/stellar
+	chmod 0600 /var/lib/stellar/.pgpass
+	chown stellar:stellar /var/lib/stellar/.pgpass
 }
 
 function init_db() {
