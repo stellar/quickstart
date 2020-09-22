@@ -1,16 +1,11 @@
 #! /usr/bin/env bash
 set -e
 
-# stellar-core
-wget -O stellar-core.deb https://s3.amazonaws.com/stellar.org/releases/stellar-core/stellar-core-${STELLAR_CORE_VERSION}_amd64.deb
-dpkg -i stellar-core.deb
-rm stellar-core.deb
-
-# horizon
-wget -O horizon.tar.gz https://github.com/stellar/go/releases/download/horizon-v${HORIZON_VERSION}/horizon-v${HORIZON_VERSION}-linux-amd64.tar.gz
-tar -zxvf horizon.tar.gz
-mv /horizon-v${HORIZON_VERSION}-linux-amd64/horizon /usr/local/bin
-chmod +x /usr/local/bin/horizon
-rm -rf horizon.tar.gz /horizon-v${HORIZON_VERSION}-linux-amd64
-
+export DEBIAN_FRONTEND=noninteractive
+wget -qO - https://apt.stellar.org/SDF.asc | apt-key add -
+echo "deb https://apt.stellar.org xenial stable" >/etc/apt/sources.list.d/SDF.list
+apt-get update
+apt-get install -y stellar-core=${STELLAR_CORE_VERSION}
+apt-get install -y stellar-horizon=${HORIZON_VERSION}
+apt-get clean
 echo "\nDone installing stellar-core and horizon...\n"
