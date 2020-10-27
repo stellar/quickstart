@@ -12,6 +12,9 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+ENABLE_HORIZON_CAPTIVE_CORE=false
+ENABLE_CORE_MANUAL_CLOSE=false
+
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
@@ -21,6 +24,10 @@ function main() {
 	echo ""
 
 	process_args $*
+	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+	  echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+		exit 1
+	fi
 
 	echo "mode: $STELLAR_MODE"
 	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
@@ -60,6 +67,12 @@ function process_args() {
     --enable-asset-stats)
       export ENABLE_ASSET_STATS="$1"
       shift
+      ;;
+    --enable-horizon-captive-core)
+      ENABLE_HORIZON_CAPTIVE_CORE=true
+      ;;
+    --enable-core-manual-close)
+      ENABLE_CORE_MANUAL_CLOSE=true
       ;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
@@ -230,7 +243,13 @@ function init_stellar_core() {
 		return 0
 	fi
 
-	run_silent "finalize-core-config" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
+	run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
+	local RUN_STANDALONE=false
+	if [ "$NETWORK" = "standalone" ] && [ "$HORIZON_ENABLE_CAPTIVE_CORE" = "false" ]; then
+	  RUN_STANDALONE=true
+	fi
+	run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+	run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
 	start_postgres
 
@@ -263,6 +282,7 @@ function init_horizon() {
 		-e "s/__PGPASS__/$PGPASS/g" \
 		-e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
 		-e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
+		-e "s=__ENABLE_CAPTIVE_CORE__=$ENABLE_HORIZON_CAPTIVE_CORE=g" \
 		etc/horizon.env
 
 	start_postgres
