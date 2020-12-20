@@ -1,7 +1,7 @@
 version: "3"
 services:
   node1:
-    image: stellot/stellar-quickstart
+    image: stasbar/stellar-quickstart
     env_file: stellar-core.env
     command: "--privnet"
     ports:
@@ -10,7 +10,7 @@ services:
       - SELF=node1
 
   node2:
-    image: stellot/stellar-quickstart
+    image: stasbar/stellar-quickstart
     env_file: stellar-core.env
     command: "--privnet"
     ports:
@@ -19,7 +19,7 @@ services:
       - SELF=node2
 
   node3:
-    image: stellot/stellar-quickstart
+    image: stasbar/stellar-quickstart
     env_file: stellar-core.env
     command: "--privnet"
     ports:
