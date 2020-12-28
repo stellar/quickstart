@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-MAINTAINER Bartek Nowotarski <bartek@stellar.org>
+MAINTAINER Stanislaw Baranski <stan@stan.bar>
 
 ENV STELLAR_CORE_VERSION 17.3.0-647.0b4c12a.focal
 ENV HORIZON_VERSION 2.7.0-133
@@ -29,6 +29,7 @@ ADD common /opt/stellar-default/common
 ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD standalone /opt/stellar-default/standalone
+ADD confd /etc/confd
 
 
 ADD start /

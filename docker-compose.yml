@@ -1,0 +1,28 @@
+version: "3"
+services:
+  node1:
+    image: stellot/stellar-quickstart
+    env_file: stellar-core.env
+    command: "--privnet"
+    ports:
+      - 9001:8000
+    environment:
+      - SELF=node1
+
+  node2:
+    image: stellot/stellar-quickstart
+    env_file: stellar-core.env
+    command: "--privnet"
+    ports:
+      - 9002:8000
+    environment:
+      - SELF=node2
+
+  node3:
+    image: stellot/stellar-quickstart
+    env_file: stellar-core.env
+    command: "--privnet"
+    ports:
+      - 9003:8000
+    environment:
+      - SELF=node3

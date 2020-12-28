@@ -69,6 +69,9 @@ function process_args() {
 	  --standalone)
 	    NETWORK="standalone"
 	    ;;
+	  --privnet)
+	    NETWORK="privnet"
+	    ;;
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
@@ -107,6 +110,11 @@ function process_args() {
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
 	standalone)
+    export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    # h1570ry - we'll start a webserver connected to history directory later on
+    export HISTORY_ARCHIVE_URLS="http://localhost:1570"
+    ;;
+	privnet)
     export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
@@ -183,7 +191,15 @@ function copy_defaults() {
 		echo "stellar-core: config directory exists, skipping copy"
 	else
 		$CP /opt/stellar-default/common/core/ $COREHOME
-		$CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+		if [ "$NETWORK" != "privnet" ]; then
+      $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+    else
+      # Generate config from environment variables using confd
+      mkdir -p $COREHOME/etc/
+
+      confd -onetime -backend=env
+    fi
+
 	fi
 
 	if [ -d $HZHOME/etc ]; then
@@ -268,7 +284,7 @@ function init_stellar_core() {
 
 	run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
-	if [ "$NETWORK" == "standalone" ]; then
+	if [ "$NETWORK" == "standalone" ] || [ "$NETWORK" == "privnet" ]; then
 		run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
 		run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
@@ -317,7 +333,7 @@ EOF
 
 function upgrade_standalone() {
 	# Upgrade standalone network's protocol version
-	if [ "$NETWORK" = "standalone" ]; then
+	if [ "$NETWORK" = "standalone" ] || [ "$NETWORK" = "privnet" ]; then
 		# Wait for server
 		while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
 		if [ -z "$PROTOCOL_VERSION" ]; then
@@ -326,7 +342,15 @@ function upgrade_standalone() {
 		fi
 		if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
 			if [ $PROTOCOL_VERSION -gt 0 ]; then
-				curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
+        export UPGRADETIME=`date --date "5 seconds" -u +"%Y-%m-%dT%H:%M:%SZ"`
+        echo "upgrading protocol to version ${PROTOCOL_VERSION} at ${UPGRADETIME}"
+				export CURL="http://localhost:11626/upgrades?mode=set&upgradetime=${UPGRADETIME}&protocolversion=$PROTOCOL_VERSION"
+        
+        if [ "$NETWORK" = "privnet" ]; then
+          CURL="${CURL}&basefee=1&basereserve=1&maxtxsize=1234"
+        fi
+        echo "curl at ${CURL}"
+        curl "$CURL"
 			fi
 		fi
 	fi

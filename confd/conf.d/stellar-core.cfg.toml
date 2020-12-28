@@ -1,0 +1,4 @@
+[template]
+src = "stellar-core.cfg.tmpl"
+dest = "/opt/stellar/core/etc/stellar-core.cfg"
+mode = "0644"

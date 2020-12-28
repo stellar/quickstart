@@ -1,0 +1,120 @@
+{{if (getenv "DATABASE")}}
+DATABASE="{{getenv "DATABASE"}}"
+{{else}}
+DATABASE="postgresql://dbname=core host=localhost user=stellar password=__PGPASS__"
+{{end}}
+
+{{if (getenv (printf "%s_PEER_PORT" (getenv "SELF")))}}
+PEER_PORT={{getenv (printf "%s_PEER_PORT" (getenv "SELF"))}}
+{{end}}
+
+RUN_STANDALONE=false
+
+{{if (getenv "LOG_FILE_PATH")}}
+LOG_FILE_PATH="{{getenv "LOG_FILE_PATH"}}"
+{{end}}
+
+{{if (getenv "BUCKET_DIR_PATH")}}
+BUCKET_DIR_PATH={{getenv "BUCKET_DIR_PATH"}}
+{{end}}
+
+{{if (getenv (printf "%s_HTTP_PORT" (getenv "SELF")))}}
+HTTP_PORT={{getenv (printf "%s_HTTP_PORT" (getenv "SELF"))}}
+{{end}}
+
+PUBLIC_HTTP_PORT=true
+
+{{if (getenv "CATCHUP_COMPLETE")}}
+CATCHUP_COMPLETE={{getenv "CATCHUP_COMPLETE"}}
+{{end}}
+
+{{if (getenv "CATCHUP_RECENT")}}
+CATCHUP_RECENT={{getenv "CATCHUP_RECENT"}}
+{{end}}
+
+{{if (getenv (printf "%s_NODE_SEED" (getenv "SELF"))) }} 
+NODE_SEED="{{getenv (printf "%s_NODE_SEED" (getenv "SELF"))}}"
+{{end}}
+{{if (getenv "NODE_IS_VALIDATOR")}}
+NODE_IS_VALIDATOR={{getenv "NODE_IS_VALIDATOR"}}
+{{end}}
+
+{{if (getenv "TARGET_PEER_CONNECTIONS")}}
+TARGET_PEER_CONNECTIONS={{getenv "TARGET_PEER_CONNECTIONS"}}
+{{else}}
+TARGET_PEER_CONNECTIONS=20
+{{end}}
+
+{{if (getenv "MAX_ADDITIONAL_PEER_CONNECTIONS")}}
+MAX_ADDITIONAL_PEER_CONNECTIONS={{getenv "MAX_ADDITIONAL_PEER_CONNECTIONS"}}
+{{else}}
+MAX_ADDITIONAL_PEER_CONNECTIONS=20
+{{end}}
+
+{{if (getenv "MAX_CONCURRENT_SUBPROCESSES")}}
+MAX_CONCURRENT_SUBPROCESSES={{getenv "MAX_CONCURRENT_SUBPROCESSES"}}
+{{else}}
+MAX_CONCURRENT_SUBPROCESSES=64
+{{end}}
+
+{{if (getenv "PREFERRED_PEERS")}}
+PREFERRED_PEERS={{getenv "PREFERRED_PEERS"}}
+{{end}}
+
+{{if (getenv "KNOWN_PEERS")}}
+KNOWN_PEERS={{getenv "KNOWN_PEERS"}}
+{{end}}
+
+{{if (getenv "MANUAL_CLOSE")}}
+MANUAL_CLOSE={{getenv "MANUAL_CLOSE"}}
+{{end}}
+
+{{if (getenv "ARTIFICIALLY_GENERATE_LOAD_FOR_TESTING")}}
+ARTIFICIALLY_GENERATE_LOAD_FOR_TESTING={{getenv "ARTIFICIALLY_GENERATE_LOAD_FOR_TESTING"}}
+{{end}}
+
+{{if (getenv "ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING")}}
+ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING={{getenv "ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING"}}
+{{end}}
+
+{{if (getenv "COMMANDS")}}
+COMMANDS={{getenv "COMMANDS"}}
+{{end}}
+
+{{if (getenv "FAILURE_SAFETY")}}
+FAILURE_SAFETY={{getenv "FAILURE_SAFETY"}}
+{{end}}
+{{if (getenv "UNSAFE_QUORUM")}}
+UNSAFE_QUORUM={{getenv "UNSAFE_QUORUM"}}
+{{end}}
+
+{{if (getenv "NETWORK_PASSPHRASE")}}
+NETWORK_PASSPHRASE="{{getenv "NETWORK_PASSPHRASE"}}"
+{{else}}
+NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+{{end}}
+
+{{if (getenv "AUTOMATIC_MAINTENANCE_PERIOD")}}
+AUTOMATIC_MAINTENANCE_PERIOD={{getenv "AUTOMATIC_MAINTENANCE_PERIOD"}}
+{{end}}
+
+{{if (getenv "AUTOMATIC_MAINTENANCE_COUNT")}}
+AUTOMATIC_MAINTENANCE_COUNT={{getenv "AUTOMATIC_MAINTENANCE_COUNT"}}
+{{end}}
+
+[QUORUM_SET]
+{{if (getenv "THRESHOLD_PERCENT")}}
+THRESHOLD_PERCENT={{getenv "THRESHOLD_PERCENT"}}
+{{end}}
+VALIDATORS={{getenv "VALIDATORS"}}
+
+[HISTORY.vs]
+get="cp /tmp/stellar-core/history/vs/{0} {1}"
+put="cp {0} /tmp/stellar-core/history/vs/{1}"
+mkdir="mkdir -p /tmp/stellar-core/history/vs/{0}"
+
+{{range jsonArray (getenv "HISTORY_PEERS")}}
+[HISTORY.{{.}}]
+get="{{printf (getenv "HISTORY_GET") .}}"
+{{end}}
+

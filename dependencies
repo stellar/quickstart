@@ -9,6 +9,10 @@ apt-get install -y curl wget git apt-transport-https \
                    postgresql-client postgresql postgresql-contrib \
                    sudo vim zlib1g-dev supervisor psmisc \
                    jq netcat # Parsing stellar-core JSON for standalone network and checking core HTTP server
+
 apt-get clean
+
+wget -nv -O /usr/local/bin/confd https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64
+chmod +x /usr/local/bin/confd
 
 echo "\nDone installing dependencies...\n"
