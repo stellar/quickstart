@@ -347,7 +347,7 @@ function upgrade_standalone() {
 				export CURL="http://localhost:11626/upgrades?mode=set&upgradetime=${UPGRADETIME}&protocolversion=$PROTOCOL_VERSION"
         
         if [ "$NETWORK" = "privnet" ]; then
-          CURL="${CURL}&basefee=1&basereserve=1&maxtxsize=1234"
+          CURL="${CURL}&basefee=1&basereserve=1&maxtxsize=10000"
         fi
         echo "curl at ${CURL}"
         curl "$CURL"
