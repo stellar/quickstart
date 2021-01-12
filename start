@@ -39,12 +39,17 @@ function main() {
 	fi
 
 	echo "mode: $STELLAR_MODE"
+	echo "horizon enabled: $HORIZON_ENABLED"
 	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
 
 	copy_defaults
 	init_db
 	init_stellar_core
-	init_horizon
+
+  if [ "$HORIZON_ENABLED" = true ]; then 
+    init_horizon
+  fi
+
 	copy_pgpass
 
 	stop_postgres  # this gets started in init_db
@@ -359,7 +364,13 @@ function upgrade_standalone() {
 function exec_supervisor() {
 	echo "starting supervisor"
 	upgrade_standalone &
-	exec supervisord -n -c $SUPHOME/etc/supervisord.conf
+
+  if [ "$HORIZON_ENABLED" = true ]; then 
+    exec supervisord -n -c $SUPHOME/etc/supervisord.conf
+  else
+    exec supervisord -n -c $SUPHOME/etc/supervisord_nohorizon.conf
+  fi
+
 }
 
 # run_silent is a utility function that runs a command with an abbreviated

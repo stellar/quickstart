@@ -4,17 +4,14 @@ services:
     image: stasbar/stellot-quickstart
     env_file: stellar-core.env
     command: "--privnet"
-    ports:
-      - 9001:8000
     environment:
       - SELF=node1
+      - HORIZON_ENABLED=true
 
   node2:
     image: stasbar/stellot-quickstart
     env_file: stellar-core.env
     command: "--privnet"
-    ports:
-      - 9002:8000
     environment:
       - SELF=node2
 
@@ -22,7 +19,5 @@ services:
     image: stasbar/stellot-quickstart
     env_file: stellar-core.env
     command: "--privnet"
-    ports:
-      - 9003:8000
     environment:
       - SELF=node3
