@@ -347,7 +347,7 @@ function upgrade_standalone() {
 		fi
 		if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
 			if [ $PROTOCOL_VERSION -gt 0 ]; then
-        export UPGRADETIME=`date --date "5 seconds" -u +"%Y-%m-%dT%H:%M:%SZ"`
+        export UPGRADETIME=`date --date "15 seconds" -u +"%Y-%m-%dT%H:%M:%SZ"`
         echo "upgrading protocol to version ${PROTOCOL_VERSION} at ${UPGRADETIME}"
 				export CURL="http://localhost:11626/upgrades?mode=set&upgradetime=${UPGRADETIME}&protocolversion=$PROTOCOL_VERSION"
         

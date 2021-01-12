@@ -1,9 +1,10 @@
 FROM ubuntu:20.04
 
-MAINTAINER Stanislaw Baranski <stan@stan.bar>
+MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
 ENV STELLAR_CORE_VERSION 17.3.0-647.0b4c12a.focal
 ENV HORIZON_VERSION 2.7.0-133
+ENV CONFD_VERSION 0.16.0
 
 EXPOSE 5432
 EXPOSE 8000
