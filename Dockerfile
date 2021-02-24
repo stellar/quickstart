@@ -1,8 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 15.3.0-469.6b99ef8.xenial
+ENV STELLAR_CORE_VERSION 15.3.0-469.6b99ef8.focal
 ENV HORIZON_VERSION 1.14.0-44
 
 EXPOSE 5432
