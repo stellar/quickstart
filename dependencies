@@ -2,6 +2,7 @@
 set -e
 
 # dependencies
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y curl wget git apt-transport-https \
                    libpq-dev libsqlite3-dev libsasl2-dev \
