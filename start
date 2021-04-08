@@ -295,8 +295,7 @@ EOF
 	start_postgres
 	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
 	if [ "$NETWORK" == "standalone" ]; then
-		# init-genesis-state command has not been released yet so ignore error and remove `|| true` later.
-		run_silent "init-genesis-state" sudo -u stellar ./bin/horizon expingest init-genesis-state || true
+		run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
 	fi
 
 	touch .quickstart-initialized
