@@ -27,15 +27,15 @@ After deciding on the questions above, you can setup your container.  Please ref
 
 Provide either `--pubnet`, `--testnet` or `--standalone` as a command line flag when starting the container to determine which network (and base configuration file) to use.
 
-#### --pubnet
+#### `--pubnet`
 
 In public network mode, the node will join the public, production Stellar network.
 
-#### --testnet
+#### `--testnet`
 
 In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
 
-#### --standalone
+#### `--standalone`
 
 In standalone network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
 
