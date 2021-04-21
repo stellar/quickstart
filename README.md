@@ -39,7 +39,12 @@ In test network mode, the node will join the network that developers use while d
 
 In standalone network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
 
-In standalone network mode, the root account of the network is fixed to:
+The network passphrase of the network defaults to:
+```
+Standalone Network ; February 2017
+```
+
+The root account of the network is fixed to:
 ```
 GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI
 SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
