@@ -44,6 +44,8 @@ The network passphrase of the network defaults to:
 Standalone Network ; February 2017
 ```
 
+Set the network passphrase in the SDK or tool you're using. If an incorrect network passphrase is used in clients signing transactions, the transactions will fail with a bad authentication error.
+
 The root account of the network is fixed to:
 ```
 Public Key: GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI
