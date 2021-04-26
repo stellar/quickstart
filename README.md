@@ -52,6 +52,8 @@ Public Key: GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI
 Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
 ```
 
+The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
+
 *Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
 ### Background vs. Interactive containers
