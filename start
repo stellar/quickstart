@@ -33,6 +33,10 @@ function main() {
 	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
 	  exit 1
 	fi
+	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
+	  exit 1
+	fi
 
 	echo "mode: $STELLAR_MODE"
 	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
@@ -255,9 +259,9 @@ function init_stellar_core() {
 	local RUN_STANDALONE=false
 	if [ "$NETWORK" = "standalone" ] && [ "$HORIZON_ENABLE_CAPTIVE_CORE" = "false" ]; then
 	  RUN_STANDALONE=true
+	  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
 	fi
 	run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
-	run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
 	run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
 	start_postgres
