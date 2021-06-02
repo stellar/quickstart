@@ -31,4 +31,4 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
 
     - name: Wait for Horizon to have started ingesting
-      run: while ! [ "$(curl -s --fail localhost:8000 | jq '.history_latest_ledger')" -gt 0 ]; do echo waiting; sleep 1; done
+      run: while ! [ "$(curl -s --fail localhost:8000 | tee >(cat 1>&2) | jq '.history_latest_ledger')" -gt 0 ]; do echo; date; echo 'Waiting...'; sleep 10; done
