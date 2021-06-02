@@ -14,6 +14,7 @@ export PGPORT=5432
 
 ENABLE_HORIZON_CAPTIVE_CORE=false
 ENABLE_CORE_MANUAL_CLOSE=false
+ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=false
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -26,6 +27,14 @@ function main() {
 	process_args $*
 	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
 	  echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+	  exit 1
+	fi
+	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
+	  exit 1
+	fi
+	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
 	  exit 1
 	fi
 
@@ -73,6 +82,9 @@ function process_args() {
       ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
+      ;;
+    --enable-core-artificially-accelerate-time-for-testing)
+      ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
       ;;
 	  *)
 	    echo "Unknown container arg $ARG" >&2
@@ -249,6 +261,7 @@ function init_stellar_core() {
 	  RUN_STANDALONE=true
 	fi
 	run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+	run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
 	run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
 	start_postgres
