@@ -300,8 +300,9 @@ function init_horizon() {
 	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
 	  cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
-export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
-export STELLAR_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
+export STELLAR_CORE_BINARY_PATH="/usr/bin/stellar-core"
+export CAPTIVE_CORE_CONFIG_PATH="/opt/stellar/core/etc/stellar-captive-core.cfg"
+export CAPTIVE_CORE_STORAGE_PATH="/var/lib/stellar"
 EOF
 	fi
 
