@@ -1,3 +1,7 @@
+setup:
+  addons:
+    - plan: heroku-posgresql
+      as: DATABASE
 build:
   docker:
     web: Dockerfile
