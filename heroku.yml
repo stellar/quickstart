@@ -1,6 +1,6 @@
 setup:
   addons:
-    - plan: heroku-posgresql
+    - plan: heroku-postgresql
       as: DATABASE
 build:
   docker:
