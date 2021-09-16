@@ -1,5 +1,14 @@
 {
   "name": "Alec test",
   "description": "Alec is testing",
-  "stack": "container"
+  "stack": "container",
+  "addons": [
+    {
+      "plan": "heroku-postgresql",
+      "as": "DATABASE",
+      "options": {
+        "version": "13"
+      }
+    }
+  ]
 }
