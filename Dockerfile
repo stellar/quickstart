@@ -31,6 +31,8 @@ ADD testnet /opt/stellar-default/testnet
 ADD standalone /opt/stellar-default/standalone
 
 
+RUN adduser postgres
+
 ADD start /
 RUN ["chmod", "+x", "start"]
 
