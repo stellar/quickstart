@@ -1,7 +1,7 @@
 # Stellar Quickstart Docker Image
 
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/acharb/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
 
 
