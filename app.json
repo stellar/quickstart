@@ -1,6 +1,7 @@
 {
   "name": "Alec test",
   "description": "Alec is testing",
+  "repository": "https://github.com/acharb/docker-stellar-core-horizon/tree/acharb-quickdeploy",
   "stack": "container",
   "addons": [
     {
