@@ -222,7 +222,8 @@ function init_db() {
 	run_silent "finalize-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
 
 	mkdir -p $PGDATA
-	chown postgres:postgres $PGDATA
+	# TODO - need?
+	# chown postgres:postgres $PGDATA
 	chmod 0700 $PGDATA
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
