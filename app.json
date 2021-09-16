@@ -2,14 +2,14 @@
   "name": "Alec test",
   "description": "Alec is testing",
   "repository": "https://github.com/acharb/docker-stellar-core-horizon/tree/acharb-quickdeploy",
-  "stack": "container",
-  "addons": [
-    {
-      "plan": "heroku-postgresql",
-      "as": "DATABASE",
-      "options": {
-        "version": "13"
-      }
-    }
-  ]
+  "stack": "container"
+  // "addons": [
+  //   {
+  //     "plan": "heroku-postgresql",
+  //     "as": "DATABASE",
+  //     "options": {
+  //       "version": "13"
+  //     }
+  //   }
+  // ]
 }
