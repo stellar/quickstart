@@ -12,7 +12,9 @@
       }
     }
   ],
-  "PGUSER": {
-    "value": "postgres"
+  "env": {
+    "PGUSER": {
+      "value": "postgres"
+    }
   }
 }
