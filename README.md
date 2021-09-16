@@ -1,6 +1,11 @@
 # Stellar Quickstart Docker Image
 
 
+
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/{REPO-OWNER}/{REPO-NAME}/tree/{BRANCH-NAME})
+
+
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/acharb/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
 

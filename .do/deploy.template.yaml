@@ -1,0 +1,7 @@
+spec:
+ name: sample-quickstart
+ services:
+ - name: web
+   git:
+     branch: main
+     repo_clone_url: https://github.com/acharb/docker-stellar-core-horizon/tree/acharb-quickdeploy.git
