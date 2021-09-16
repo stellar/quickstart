@@ -11,5 +11,8 @@
         "version": "13"
       }
     }
-  ]
+  ],
+  "PGUSER": {
+    "value": "postgres"
+  }
 }
