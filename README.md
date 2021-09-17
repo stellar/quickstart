@@ -25,7 +25,7 @@ After deciding on the questions above, you can setup your container.  Please ref
 
 ### Quick Deploy
 
-In order to get started quickly, you can deploy the docker image to a server on Digital Ocean by clicking the button below:
+In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
