@@ -11,9 +11,10 @@ The image uses the following software:
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - Supervisord is used from managing the processes of the services above
 
+In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
+
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
-In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button above. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
 
 ## Usage
 
