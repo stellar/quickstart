@@ -50,7 +50,7 @@ function main() {
 	# stop_postgres  # this gets started in init_db
 
 	# # launch services
-	# exec_supervisor
+	exec_supervisor
 }
 
 function process_args() {
@@ -369,6 +369,10 @@ function start_postgres() {
 	if [ ! -z "$CURRENT_POSTGRES_PID" ]; then
 		return 0
 	fi
+
+	echo $PGHOME
+	echo $PGBIN
+	echo $PGDATA
 
 	# sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf
 	# CURRENT_POSTGRES_PID=$!
