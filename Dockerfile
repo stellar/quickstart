@@ -33,4 +33,4 @@ ADD standalone /opt/stellar-default/standalone
 ADD start /
 RUN ["chmod", "+x", "start"]
 
-CMD ["/start"]
+CMD ["/start", "--standalone"]
