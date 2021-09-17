@@ -43,6 +43,8 @@ function main() {
 
 	copy_defaults
 	init_db
+
+	exit 0
 	# init_stellar_core
 	# init_horizon
 	# copy_pgpass
@@ -50,7 +52,7 @@ function main() {
 	# stop_postgres  # this gets started in init_db
 
 	# # launch services
-	exec_supervisor
+	# exec_supervisor
 }
 
 function process_args() {
