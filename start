@@ -370,7 +370,7 @@ function start_postgres() {
 		return 0
 	fi
 
-	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
+	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf
 	CURRENT_POSTGRES_PID=$!
 
 	# alec TODO - uncomment
