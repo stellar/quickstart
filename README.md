@@ -15,6 +15,7 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
+*disclaimer*: this creates a new private network that DigitalOcean makes public. Do not put sensitive information on the network that you would not someone else to know.
 
 ## Usage
 
