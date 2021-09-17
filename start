@@ -44,15 +44,14 @@ function main() {
 	copy_defaults
 	init_db
 
-	exit 0
-	# init_stellar_core
-	# init_horizon
-	# copy_pgpass
+	init_stellar_core
+	init_horizon
+	copy_pgpass
 
-	# stop_postgres  # this gets started in init_db
+	stop_postgres  # this gets started in init_db
 
-	# # launch services
-	# exec_supervisor
+	# launch services
+	exec_supervisor
 }
 
 function process_args() {
@@ -226,6 +225,12 @@ function init_db() {
 	mkdir -p $PGDATA
 	chown postgres:postgres $PGDATA
 	chmod 0700 $PGDATA
+
+
+	# TODO - not sure why this is needed for DO
+	mkdir -p ~/../var/run/postgresql
+  chown postgres:postgres ~/../var/run/postgresql
+
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
