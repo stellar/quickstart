@@ -11,6 +11,10 @@ The image uses the following software:
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - Supervisord is used from managing the processes of the services above
 
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
+
+In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button above. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
+
 ## Usage
 
 To use this project successfully, you should first decide a few things:
@@ -22,12 +26,6 @@ Next, you must decide whether you will use a docker volume or not.  When not usi
 Finally, you must decide what ports to expose.  The software in these images listen on 4 ports, each of which you may or may not want to expose to the network your host system is connected to.  A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port.  See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
 
 After deciding on the questions above, you can setup your container.  Please refer to the appropriate section below based upon what mode you will run the container in.
-
-### Quick Deploy
-
-In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
-
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
 
 ### Network Options
 
