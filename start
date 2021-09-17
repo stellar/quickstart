@@ -235,16 +235,16 @@ function init_db() {
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
 	start_postgres
-	# run_silent "create-horizon-db" sudo -u postgres createdb horizon
-	# run_silent "create-core-db" sudo -u postgres createdb core
-	# run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
-	# 	CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
-	# 	GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
-	# 	GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
-	# SQL
+	run_silent "create-horizon-db" sudo -u postgres createdb horizon
+	run_silent "create-core-db" sudo -u postgres createdb core
+	run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
+		CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
+		GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
+		GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
+	SQL
 
-	# touch .quickstart-initialized
-	# popd
+	touch .quickstart-initialized
+	popd
 }
 
 function init_stellar_core() {
