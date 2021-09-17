@@ -6,4 +6,4 @@ spec:
       branch: acharb-quickdeploy
       repo_clone_url: https://github.com/stellar/docker-stellar-core-horizon.git
     name: docker-stellar-core-horizon
-    run_command: docker run docker-stellar-core-horizon
+    run_command: docker run --rm docker-stellar-core-horizon --standalone
