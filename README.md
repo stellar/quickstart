@@ -1,11 +1,5 @@
 # Stellar Quickstart Docker Image
 
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
-
-
-
-
 This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker.
 
 This image provides a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
@@ -28,6 +22,12 @@ Next, you must decide whether you will use a docker volume or not.  When not usi
 Finally, you must decide what ports to expose.  The software in these images listen on 4 ports, each of which you may or may not want to expose to the network your host system is connected to.  A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port.  See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
 
 After deciding on the questions above, you can setup your container.  Please refer to the appropriate section below based upon what mode you will run the container in.
+
+### Quick Deploy
+
+In order to get started quickly, you can deploy the docker image to a server on Digital Ocean by clicking the button below:
+
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/master)
 
 ### Network Options
 
