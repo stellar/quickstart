@@ -11,12 +11,6 @@ The image uses the following software:
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - Supervisord is used from managing the processes of the services above
 
-In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
-
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
-
-*disclaimer*: this creates a new private network that DigitalOcean makes public. Do not put sensitive information on the network that you would not someone else to know.
-
 ## Usage
 
 To use this project successfully, you should first decide a few things:
@@ -61,6 +55,12 @@ Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
 The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
 
 *Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
+
+In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
+
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
+
+*disclaimer*: this creates a new private network that DigitalOcean makes public. Do not put sensitive information on the network that you would not someone else to know.
 
 ### Background vs. Interactive containers
 
