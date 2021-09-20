@@ -123,8 +123,8 @@ function process_args() {
 		exit 1
 	esac
 
-	if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = true ]; then
-		NETWORK_PASSPHRASE+=$RANDOM
+	if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+		NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
 	fi
 
 	# Are we ephemeral or persistent?
