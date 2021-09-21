@@ -11,7 +11,6 @@ export PGBIN="/usr/lib/postgresql/12/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
-# export PGHOST="/tmp"
 
 ENABLE_HORIZON_CAPTIVE_CORE=false
 ENABLE_CORE_MANUAL_CLOSE=false
@@ -238,7 +237,7 @@ function init_db() {
 	chmod 0700 $PGDATA
 
 	# In some environments this directory is missing.
-	mkdir -p /var/run/postgresql
+	# mkdir -p /var/run/postgresql
 	# chown postgres:postgres /var/run/postgresql
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
