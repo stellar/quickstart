@@ -387,6 +387,7 @@ function start_postgres() {
 	while ! sudo -u postgres psql -c 'select 1'; do
 	  echo "Waiting for postgres to be available..."
 	  sleep 1
+	  cat /var/log/supervisor/postgresql-std*
 	done
 
 	echo "postgres: up"
