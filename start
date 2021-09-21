@@ -237,8 +237,8 @@ function init_db() {
 	chmod 0700 $PGDATA
 
 	# In some environments this directory is missing.
-	mkdir -p /var/run/postgresql
-	chown postgres:postgres /var/run/postgresql
+	# mkdir -p /var/run/postgresql
+	# chown postgres:postgres /var/run/postgresql
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
