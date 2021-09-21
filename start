@@ -11,7 +11,7 @@ export PGBIN="/usr/lib/postgresql/12/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
-export PGHOST="/tmp"
+# export PGHOST="/tmp"
 
 ENABLE_HORIZON_CAPTIVE_CORE=false
 ENABLE_CORE_MANUAL_CLOSE=false
