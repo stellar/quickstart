@@ -11,6 +11,7 @@ export PGBIN="/usr/lib/postgresql/12/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
+export PGHOST="/tmp"
 
 ENABLE_HORIZON_CAPTIVE_CORE=false
 ENABLE_CORE_MANUAL_CLOSE=false
@@ -388,7 +389,7 @@ function start_postgres() {
 	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
 	CURRENT_POSTGRES_PID=$!
 
-	while ! sudo -u postgres psql -c 'select 1' &> /dev/null ; do
+	while ! sudo -u postgres psql -c 'select 1'; do
 	  echo "Waiting for postgres to be available..."
 	  sleep 1
 	done
