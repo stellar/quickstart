@@ -236,9 +236,10 @@ function init_db() {
 	chown postgres:postgres $PGDATA
 	chmod 0700 $PGDATA
 
-	# In some environments this directory is missing.
+	# Needed for DigitalOcean deployment.
 	mkdir -p /var/run/postgresql
 	chown postgres:postgres /var/run/postgresql
+	# end
 
 	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
