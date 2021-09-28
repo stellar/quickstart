@@ -26,16 +26,16 @@ function main() {
 
 	process_args $*
 	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-	  echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
-	  exit 1
+		echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+		exit 1
 	fi
 	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
-	  exit 1
+		echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
+		exit 1
 	fi
 	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
-	  exit 1
+		echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
+		exit 1
 	fi
 
 	echo "mode: $STELLAR_MODE"
@@ -55,41 +55,41 @@ function main() {
 
 function process_args() {
 	while [[ -n "$1" ]]; do
-  	ARG="$1"
-	  shift
+		ARG="$1"
+		shift
 
 
-	  case "${ARG}" in
-	  --testnet)
-	    NETWORK="testnet"
-	    ;;
-	  --pubnet)
-	    NETWORK="pubnet"
-	    ;;
-	  --standalone)
-	    NETWORK="standalone"
-	    ;;
-    --protocol-version)
-      export PROTOCOL_VERSION="$1"
-      shift
-      ;;
-    --enable-asset-stats)
-      export ENABLE_ASSET_STATS="$1"
-      shift
-      ;;
-    --enable-horizon-captive-core)
-      ENABLE_HORIZON_CAPTIVE_CORE=true
-      ;;
-    --enable-core-manual-close)
-      ENABLE_CORE_MANUAL_CLOSE=true
-      ;;
-    --enable-core-artificially-accelerate-time-for-testing)
-      ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
-      ;;
-	  *)
-	    echo "Unknown container arg $ARG" >&2
-	    exit 1
-	  esac
+		case "${ARG}" in
+		--testnet)
+			NETWORK="testnet"
+			;;
+		--pubnet)
+			NETWORK="pubnet"
+			;;
+		--standalone)
+			NETWORK="standalone"
+			;;
+		--protocol-version)
+			export PROTOCOL_VERSION="$1"
+			shift
+			;;
+		--enable-asset-stats)
+			export ENABLE_ASSET_STATS="$1"
+			shift
+			;;
+		--enable-horizon-captive-core)
+			ENABLE_HORIZON_CAPTIVE_CORE=true
+			;;
+		--enable-core-manual-close)
+			ENABLE_CORE_MANUAL_CLOSE=true
+			;;
+		--enable-core-artificially-accelerate-time-for-testing)
+			ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
+			;;
+		*)
+			echo "Unknown container arg $ARG" >&2
+			exit 1
+		esac
 	done
 
 	# TODO: ask for what network to use
@@ -99,18 +99,18 @@ function process_args() {
 
 	case "$NETWORK" in
 	testnet)
-    export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
-    export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-testnet/core_testnet_001"
-    ;;
+		export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+		export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-testnet/core_testnet_001"
+		;;
 	pubnet)
-    export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
-    export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
-    ;;
+		export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
+		export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
+		;;
 	standalone)
-    export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
-    # h1570ry - we'll start a webserver connected to history directory later on
-    export HISTORY_ARCHIVE_URLS="http://localhost:1570"
-    ;;
+		export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+		# h1570ry - we'll start a webserver connected to history directory later on
+		export HISTORY_ARCHIVE_URLS="http://localhost:1570"
+		;;
 	*)
 		echo "Unknown network: '$NETWORK'" >&2
 		exit 1
@@ -258,7 +258,7 @@ function init_stellar_core() {
 	run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
 	local RUN_STANDALONE=false
 	if [ "$NETWORK" = "standalone" ] && [ "$HORIZON_ENABLE_CAPTIVE_CORE" = "false" ]; then
-	  RUN_STANDALONE=true
+		RUN_STANDALONE=true
 	fi
 	run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
 	run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
@@ -298,7 +298,7 @@ function init_horizon() {
 		etc/horizon.env
 
 	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-	  cat << EOF >> etc/horizon.env
+		cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
 export STELLAR_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
@@ -354,9 +354,9 @@ function run_silent() {
 	$COMMAND $ARGS &> $OUTFILE
 
 	if [ $? -eq 0 ]; then
-    echo "ok"
+		echo "ok"
 	else
-	  echo "failed!"
+		echo "failed!"
 		echo ""
 		cat $OUTFILE
 		exit 1
@@ -374,8 +374,8 @@ function start_postgres() {
 	CURRENT_POSTGRES_PID=$!
 
 	while ! sudo -u postgres psql -c 'select 1' &> /dev/null ; do
-	  echo "Waiting for postgres to be available..."
-	  sleep 1
+		echo "Waiting for postgres to be available..."
+		sleep 1
 	done
 
 	echo "postgres: up"
@@ -395,11 +395,11 @@ function stop_postgres() {
 }
 
 pushd () {
-    command pushd "$@" > /dev/null
+		command pushd "$@" > /dev/null
 }
 
 popd () {
-    command popd "$@" > /dev/null
+		command popd "$@" > /dev/null
 }
 
 main $@
