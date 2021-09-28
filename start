@@ -234,7 +234,7 @@ function init_db() {
     CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
     GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
     GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
-  SQL
+SQL
 
   touch .quickstart-initialized
   popd
