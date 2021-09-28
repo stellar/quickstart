@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        network: [testnet, pubnet]
+        network: [testnet, pubnet, standalone]
         dockerfile: [Dockerfile, Dockerfile.testing]
     runs-on: ubuntu-latest
     steps:
