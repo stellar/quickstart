@@ -236,7 +236,9 @@ function init_db() {
 	chown postgres:postgres $PGDATA
 	chmod 0700 $PGDATA
 
-	# Needed for DigitalOcean deployment.
+	# Create /var/run/postgresql because we are starting postgres manually,
+	# it is our responsibility to make sure the directory exists for where the
+	# process files and unix socket will live.
 	mkdir -p /var/run/postgresql
 	chown postgres:postgres /var/run/postgresql
 	# end
