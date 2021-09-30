@@ -33,6 +33,10 @@ function main() {
     echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
     exit 1
   fi
+  if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    echo "--randomize-network-passphrase is only supported in the standalone network" >&2
+    exit 1
+  fi
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
     echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
     exit 1
@@ -86,6 +90,9 @@ function process_args() {
     --enable-core-artificially-accelerate-time-for-testing)
       ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
       ;;
+    --randomize-network-passphrase)
+      RANDOMIZE_NETWORK_PASSPHRASE=true
+      ;;
     *)
       echo "Unknown container arg $ARG" >&2
       exit 1
@@ -115,6 +122,10 @@ function process_args() {
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
   esac
+
+  if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
+  fi
 
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
@@ -224,6 +235,12 @@ function init_db() {
   mkdir -p $PGDATA
   chown postgres:postgres $PGDATA
   chmod 0700 $PGDATA
+
+  # Create /var/run/postgresql because we are starting postgres manually,
+  # it is our responsibility to make sure the directory exists for where the
+  # process files and unix socket will live.
+  mkdir -p /var/run/postgresql
+  chown postgres:postgres /var/run/postgresql
 
   run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
