@@ -241,7 +241,6 @@ function init_db() {
   # process files and unix socket will live.
   mkdir -p /var/run/postgresql
   chown postgres:postgres /var/run/postgresql
-  # end
 
   run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
