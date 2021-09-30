@@ -1,0 +1,9 @@
+spec:
+  name: docker-stellar-core-horizon
+  services:
+  - dockerfile_path: Dockerfile
+    git:
+      branch: acharb-pc-fork-quickdeploy
+      repo_clone_url: https://github.com/acharb/docker-stellar-core-horizon.git
+    name: docker-stellar-core-horizon
+    run_command: /start --standalone --randomize-network-passphrase
