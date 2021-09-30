@@ -58,7 +58,7 @@ The root account is derived from the network passphrase and if the network passp
 
 In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* (with a random network passphrase) that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
 
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/acharb-quickdeploy)
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/master)
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
