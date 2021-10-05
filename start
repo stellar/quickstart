@@ -20,55 +20,59 @@ QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
 function main() {
-	echo ""
-	echo "Starting Stellar Quickstart"
-	echo ""
+  echo ""
+  echo "Starting Stellar Quickstart"
+  echo ""
 
-	process_args $*
-	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-	  echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
-	  exit 1
-	fi
-	if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
-	  exit 1
-	fi
-	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-	  echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
-	  exit 1
-	fi
+  process_args $*
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+    echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    echo "--randomize-network-passphrase is only supported in the standalone network" >&2
+    exit 1
+  fi
+  if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
+    exit 1
+  fi
 
-	echo "mode: $STELLAR_MODE"
-	echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
+  echo "mode: $STELLAR_MODE"
+  echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
 
-	copy_defaults
-	init_db
-	init_stellar_core
-	init_horizon
-	copy_pgpass
+  copy_defaults
+  init_db
+  init_stellar_core
+  init_horizon
+  copy_pgpass
 
-	stop_postgres  # this gets started in init_db
+  stop_postgres  # this gets started in init_db
 
-	# launch services
-	exec_supervisor
+  # launch services
+  exec_supervisor
 }
 
 function process_args() {
-	while [[ -n "$1" ]]; do
-  	ARG="$1"
-	  shift
+  while [[ -n "$1" ]]; do
+    ARG="$1"
+    shift
 
 
-	  case "${ARG}" in
-	  --testnet)
-	    NETWORK="testnet"
-	    ;;
-	  --pubnet)
-	    NETWORK="pubnet"
-	    ;;
-	  --standalone)
-	    NETWORK="standalone"
-	    ;;
+    case "${ARG}" in
+    --testnet)
+      NETWORK="testnet"
+      ;;
+    --pubnet)
+      NETWORK="pubnet"
+      ;;
+    --standalone)
+      NETWORK="standalone"
+      ;;
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
@@ -86,312 +90,325 @@ function process_args() {
     --enable-core-artificially-accelerate-time-for-testing)
       ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
       ;;
-	  *)
-	    echo "Unknown container arg $ARG" >&2
-	    exit 1
-	  esac
-	done
+    --randomize-network-passphrase)
+      RANDOMIZE_NETWORK_PASSPHRASE=true
+      ;;
+    *)
+      echo "Unknown container arg $ARG" >&2
+      exit 1
+    esac
+  done
 
-	# TODO: ask for what network to use
-	if [ -z "$NETWORK" ]; then
-		NETWORK="testnet"
-	fi
+  # TODO: ask for what network to use
+  if [ -z "$NETWORK" ]; then
+    NETWORK="testnet"
+  fi
 
-	case "$NETWORK" in
-	testnet)
+  case "$NETWORK" in
+  testnet)
     export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-testnet/core_testnet_001"
     ;;
-	pubnet)
+  pubnet)
     export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
-	standalone)
+  standalone)
     export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ;;
-	*)
-		echo "Unknown network: '$NETWORK'" >&2
-		exit 1
-	esac
+  *)
+    echo "Unknown network: '$NETWORK'" >&2
+    exit 1
+  esac
 
-	# Are we ephemeral or persistent?
-	if [ -z "$STELLAR_MODE" ]; then
-		if [ -f "/opt/stellar/.docker-ephemeral" ]; then
-			STELLAR_MODE="ephemeral"
-		else
-			STELLAR_MODE="persistent"
-		fi
-	fi
+  if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
+  fi
+
+  # Are we ephemeral or persistent?
+  if [ -z "$STELLAR_MODE" ]; then
+    if [ -f "/opt/stellar/.docker-ephemeral" ]; then
+      STELLAR_MODE="ephemeral"
+    else
+      STELLAR_MODE="persistent"
+    fi
+  fi
 }
 
 function set_pg_password() {
 
-	if [ -n "$POSTGRES_PASSWORD" ]; then
-		PGPASS=$POSTGRES_PASSWORD
-		echo "using POSTGRES_PASSWORD"
-		return 0
-	fi
+  if [ -n "$POSTGRES_PASSWORD" ]; then
+    PGPASS=$POSTGRES_PASSWORD
+    echo "using POSTGRES_PASSWORD"
+    return 0
+  fi
 
-	# use a random password when ephemeral (or some other unknown mode)
-	if [ "$STELLAR_MODE" != "persistent" ]; then
-		PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
-		echo "postgres password: $PGPASS"
-		return 0
-	fi
+  # use a random password when ephemeral (or some other unknown mode)
+  if [ "$STELLAR_MODE" != "persistent" ]; then
+    PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
+    echo "postgres password: $PGPASS"
+    return 0
+  fi
 
-	if [ -n "$PGPASS" ]; then
-		echo "postgres password: $PGPASS"
-		return 0
-	fi
+  if [ -n "$PGPASS" ]; then
+    echo "postgres password: $PGPASS"
+    return 0
+  fi
 
-	# ask for a password when persistent
-	read -s -p "Enter New Postgresql Password: " PGPASS
-	echo ""
-	read -s -p "Confirm: " PGPASS_CONFIRMATION
-	echo ""
+  # ask for a password when persistent
+  read -s -p "Enter New Postgresql Password: " PGPASS
+  echo ""
+  read -s -p "Confirm: " PGPASS_CONFIRMATION
+  echo ""
 
-	if [ -z "$PGPASS" ]; then
-		echo "Password empty" >&2
-		exit 1
-	fi
+  if [ -z "$PGPASS" ]; then
+    echo "Password empty" >&2
+    exit 1
+  fi
 
-	if [ "$PGPASS" != "$PGPASS_CONFIRMATION" ]; then
-		echo "Password mistmach" >&2
-		exit 1
-	fi
+  if [ "$PGPASS" != "$PGPASS_CONFIRMATION" ]; then
+    echo "Password mistmach" >&2
+    exit 1
+  fi
 
 }
 
 function copy_defaults() {
-	local CP="rsync -a"
+  local CP="rsync -a"
 
-	if [ -d $PGHOME/etc ]; then
-		echo "postgres: config directory exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/postgresql/ $PGHOME
-	fi
+  if [ -d $PGHOME/etc ]; then
+    echo "postgres: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/postgresql/ $PGHOME
+  fi
 
-	if [ -d $SUPHOME/etc ]; then
-		echo "supervisor: config directory exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/supervisor/ $SUPHOME
-	fi
+  if [ -d $SUPHOME/etc ]; then
+    echo "supervisor: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/supervisor/ $SUPHOME
+  fi
 
-	if [ -d $COREHOME/etc ]; then
-		echo "stellar-core: config directory exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/core/ $COREHOME
-		$CP /opt/stellar-default/$NETWORK/core/ $COREHOME
-	fi
+  if [ -d $COREHOME/etc ]; then
+    echo "stellar-core: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/core/ $COREHOME
+    $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+  fi
 
-	if [ -d $HZHOME/etc ]; then
-		echo "horizon: config directory exists, skipping copy"
-	else
-		$CP /opt/stellar-default/common/horizon/ $HZHOME
-	fi
+  if [ -d $HZHOME/etc ]; then
+    echo "horizon: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/horizon/ $HZHOME
+  fi
 }
 
 function copy_pgpass() {
-	local CP="rsync -a"
+  local CP="rsync -a"
 
-	$CP /opt/stellar/postgresql/.pgpass /root/
-	chmod 0600 /root/.pgpass
+  $CP /opt/stellar/postgresql/.pgpass /root/
+  chmod 0600 /root/.pgpass
 
-	$CP /opt/stellar/postgresql/.pgpass /var/lib/stellar
-	chmod 0600 /var/lib/stellar/.pgpass
-	chown stellar:stellar /var/lib/stellar/.pgpass
+  $CP /opt/stellar/postgresql/.pgpass /var/lib/stellar
+  chmod 0600 /var/lib/stellar/.pgpass
+  chown stellar:stellar /var/lib/stellar/.pgpass
 }
 
 function init_db() {
-	if [ -f $PGHOME/.quickstart-initialized ]; then
-		echo "postgres: already initialized"
-		return 0
-	fi
-	pushd $PGHOME
+  if [ -f $PGHOME/.quickstart-initialized ]; then
+    echo "postgres: already initialized"
+    return 0
+  fi
+  pushd $PGHOME
 
-	# workaround!!!! from: https://github.com/nimiq/docker-postgresql93/issues/2
-	mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
-	# end workaround
+  # workaround!!!! from: https://github.com/nimiq/docker-postgresql93/issues/2
+  mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
+  # end workaround
 
-	echo "postgres user: $PGUSER"
+  echo "postgres user: $PGUSER"
 
-	set_pg_password
+  set_pg_password
 
-	run_silent "finalize-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
+  run_silent "finalize-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
 
-	mkdir -p $PGDATA
-	chown postgres:postgres $PGDATA
-	chmod 0700 $PGDATA
+  mkdir -p $PGDATA
+  chown postgres:postgres $PGDATA
+  chmod 0700 $PGDATA
 
-	run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
+  # Create /var/run/postgresql because we are starting postgres manually,
+  # it is our responsibility to make sure the directory exists for where the
+  # process files and unix socket will live.
+  mkdir -p /var/run/postgresql
+  chown postgres:postgres /var/run/postgresql
 
-	start_postgres
-	run_silent "create-horizon-db" sudo -u postgres createdb horizon
-	run_silent "create-core-db" sudo -u postgres createdb core
-	run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
-		CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
-		GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
-		GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
-	SQL
+  run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
-	touch .quickstart-initialized
-	popd
+  start_postgres
+  run_silent "create-horizon-db" sudo -u postgres createdb horizon
+  run_silent "create-core-db" sudo -u postgres createdb core
+  run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
+    CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
+    GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
+    GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
+SQL
+
+  touch .quickstart-initialized
+  popd
 }
 
 function init_stellar_core() {
-	pushd $COREHOME
-	run_silent "chown-core" chown -R stellar:stellar .
-	if [ -f $COREHOME/.quickstart-initialized ]; then
-		echo "core: already initialized"
+  pushd $COREHOME
+  run_silent "chown-core" chown -R stellar:stellar .
+  if [ -f $COREHOME/.quickstart-initialized ]; then
+    echo "core: already initialized"
 
-		if [ "$NETWORK" == "standalone" ]; then
-			start_postgres
+    if [ "$NETWORK" == "standalone" ]; then
+      start_postgres
 
-			run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
-		fi
+      run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
+    fi
 
-		return 0
-	fi
+    return 0
+  fi
 
-	run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
-	local RUN_STANDALONE=false
-	if [ "$NETWORK" = "standalone" ] && [ "$HORIZON_ENABLE_CAPTIVE_CORE" = "false" ]; then
-	  RUN_STANDALONE=true
-	fi
-	run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
-	run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
-	run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
+  local RUN_STANDALONE=false
+  if [ "$NETWORK" = "standalone" ] && [ "$HORIZON_ENABLE_CAPTIVE_CORE" = "false" ]; then
+    RUN_STANDALONE=true
+  fi
+  run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
-	start_postgres
+  start_postgres
 
-	run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
+  run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
-	if [ "$NETWORK" == "standalone" ]; then
-		run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
+  if [ "$NETWORK" == "standalone" ]; then
+    run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
-		run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
-		# Start local history server
-		pushd /tmp/stellar-core/history/vs
-		python3 -m http.server 1570 > /dev/null 2>&1 &
-		popd
-	fi
+    run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
+    # Start local history server
+    pushd /tmp/stellar-core/history/vs
+    python3 -m http.server 1570 > /dev/null 2>&1 &
+    popd
+  fi
 
-	touch .quickstart-initialized
-	popd
+  touch .quickstart-initialized
+  popd
 }
 
 function init_horizon() {
-	if [ -f $HZHOME/.quickstart-initialized ]; then
-		echo "horizon: already initialized"
-		return 0
-	fi
-	pushd $HZHOME
+  if [ -f $HZHOME/.quickstart-initialized ]; then
+    echo "horizon: already initialized"
+    return 0
+  fi
+  pushd $HZHOME
 
-	run_silent "chown-horizon" chown stellar:stellar .
+  run_silent "chown-horizon" chown stellar:stellar .
 
-	sed -ri \
-		-e "s/__PGPASS__/$PGPASS/g" \
-		-e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
-		-e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
-		etc/horizon.env
+  sed -ri \
+    -e "s/__PGPASS__/$PGPASS/g" \
+    -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
+    -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
+    etc/horizon.env
 
-	if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-	  cat << EOF >> etc/horizon.env
+  if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
 export STELLAR_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
 EOF
-	fi
+  fi
 
-	start_postgres
-	run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
-	if [ "$NETWORK" == "standalone" ]; then
-		run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
-	fi
+  start_postgres
+  run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
+  if [ "$NETWORK" == "standalone" ]; then
+    run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
+  fi
 
-	touch .quickstart-initialized
-	popd
+  touch .quickstart-initialized
+  popd
 }
 
 function upgrade_standalone() {
-	# Upgrade standalone network's protocol version
-	if [ "$NETWORK" = "standalone" ]; then
-		# Wait for server
-		while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
-		if [ -z "$PROTOCOL_VERSION" ]; then
-			# default to latest version supported by core
-			export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
-		fi
-		if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
-			if [ $PROTOCOL_VERSION -gt 0 ]; then
-				curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
-			fi
-		fi
-	fi
+  # Upgrade standalone network's protocol version
+  if [ "$NETWORK" = "standalone" ]; then
+    # Wait for server
+    while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+    if [ -z "$PROTOCOL_VERSION" ]; then
+      # default to latest version supported by core
+      export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
+    fi
+    if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
+      if [ $PROTOCOL_VERSION -gt 0 ]; then
+        curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION"
+      fi
+    fi
+  fi
 }
 
 function exec_supervisor() {
-	echo "starting supervisor"
-	upgrade_standalone &
-	exec supervisord -n -c $SUPHOME/etc/supervisord.conf
+  echo "starting supervisor"
+  upgrade_standalone &
+  exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
 # output provided it succeeds.
 function run_silent() {
-	local LABEL=$1
-	shift
-	local COMMAND=$1
-	shift
-	local ARGS=$@
-	local OUTFILE="/tmp/run_silent.out"
+  local LABEL=$1
+  shift
+  local COMMAND=$1
+  shift
+  local ARGS=$@
+  local OUTFILE="/tmp/run_silent.out"
 
-	echo -n "$LABEL: "
-	set +e
+  echo -n "$LABEL: "
+  set +e
 
-	$COMMAND $ARGS &> $OUTFILE
+  $COMMAND $ARGS &> $OUTFILE
 
-	if [ $? -eq 0 ]; then
+  if [ $? -eq 0 ]; then
     echo "ok"
-	else
-	  echo "failed!"
-		echo ""
-		cat $OUTFILE
-		exit 1
-	fi
+  else
+    echo "failed!"
+    echo ""
+    cat $OUTFILE
+    exit 1
+  fi
 
-	set -e
+  set -e
 }
 
 function start_postgres() {
-	if [ ! -z "$CURRENT_POSTGRES_PID" ]; then
-		return 0
-	fi
+  if [ ! -z "$CURRENT_POSTGRES_PID" ]; then
+    return 0
+  fi
 
-	sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
-	CURRENT_POSTGRES_PID=$!
+  sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
+  CURRENT_POSTGRES_PID=$!
 
-	while ! sudo -u postgres psql -c 'select 1' &> /dev/null ; do
-	  echo "Waiting for postgres to be available..."
-	  sleep 1
-	done
+  while ! sudo -u postgres psql -c 'select 1' &> /dev/null ; do
+    echo "Waiting for postgres to be available..."
+    sleep 1
+  done
 
-	echo "postgres: up"
+  echo "postgres: up"
 }
 
 function stop_postgres() {
-	if [ -z "$CURRENT_POSTGRES_PID" ]; then
-		return 0
-	fi
+  if [ -z "$CURRENT_POSTGRES_PID" ]; then
+    return 0
+  fi
 
-	killall postgres
-	# wait for postgres to die
-	while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
-		sleep 0.5
-	done
-	echo "postgres: down"
+  killall postgres
+  # wait for postgres to die
+  while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
+    sleep 0.5
+  done
+  echo "postgres: down"
 }
 
 pushd () {
