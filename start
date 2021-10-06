@@ -281,6 +281,11 @@ function init_stellar_core() {
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
+  if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    sed -ri "s/Standalone Network ; February 2017/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
+    sed -ri "s/Standalone Network ; February 2017/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
+  fi
+
   start_postgres
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
