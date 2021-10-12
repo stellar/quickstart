@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 18.0.1-740.5bec96c.focal
+ENV STELLAR_CORE_VERSION 18.0.3-746.f3baea6.focal
 ENV HORIZON_VERSION 2.9.0~rc1-159
 
 EXPOSE 5432
