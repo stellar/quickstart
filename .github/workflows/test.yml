@@ -12,6 +12,7 @@ jobs:
       matrix:
         network: [testnet, pubnet, standalone]
         dockerfile: [Dockerfile, Dockerfile.testing]
+        enable_captive_core: [--enable-horizon-captive-core, ""]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,7 +21,7 @@ jobs:
       run: docker build -f ${{ matrix.dockerfile }} -t stellar-quickstart .
 
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }} ${{ matrix.enable_captive_core }}
 
     - name: Set up Go
       uses: actions/setup-go@v2
