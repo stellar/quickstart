@@ -23,7 +23,7 @@ jobs:
       run: docker build -f ${{ matrix.dockerfile }} -t stellar-quickstart .
 
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }} ${{ options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }} ${{ matrix.options }}
 
     - name: Set up Go
       uses: actions/setup-go@v2
