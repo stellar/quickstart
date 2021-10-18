@@ -277,6 +277,11 @@ function init_stellar_core() {
   if [ "$NETWORK" = "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ]; then
     RUN_STANDALONE=true
   fi
+
+  if [ "$NETWORK" = "standalone" ]; then
+    sed -ri "s/__STANDALONE_NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg etc/stellar-captive-core.cfg
+  fi
+
   run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
