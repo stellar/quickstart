@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        network: [testnet, pubnet, standalone]
+        network: [standalone]
         dockerfile: [Dockerfile, Dockerfile.testing]
         options: ["", --enable-horizon-captive-core]
         exclude:
