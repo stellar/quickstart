@@ -2,7 +2,8 @@ FROM ubuntu:20.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 15.2.0-646.9334fcb.focal~cap21and40
+# Core Version is built from https://github.com/stellar/stellar-core-experimental-cap21and40/pull/1 @ 8ddc0dc
+ENV STELLAR_CORE_VERSION 18.1.1-776.8ddc0dc7.focal~do~not~use~in~prd
 # Horizon Version is built from https://github.com/stellar/go/pull/4013 @ e178366
 ENV HORIZON_VERSION 0.0.0~cap21and40-167
 
