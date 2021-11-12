@@ -24,17 +24,17 @@ jobs:
 
     - name: Build Stellar-Core Image
       if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
-      run: docker build git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 -e CONFIGURE_FLAGS='--disable-tests' -f docker/Dockerfile.testing -t stellar/stellar-core:testing
+	    run: docker build -t stellar/stellar-core:testing -f docker/Dockerfile.testing git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg CONFIGURE_FLAGS='--disable-tests'
 
     - name: Build Stellar-Horizon Image
       if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
-      run: docker build git://github.com/stellar/go#cap21and40 -f services/horizon/docker/Dockerfile.dev -t stellar/stellar-horizon:dev
+      run: docker build -t stellar/stellar-horizon:dev -f services/horizon/docker/Dockerfile.dev git://github.com/stellar/go#cap21and40
 
     - name: Build Quickstart Image
-      run: docker build -f ${{ matrix.dockerfile }} -t stellar-quickstart .
+      run: docker build -t stellar/quickstart -f ${{ matrix.dockerfile }} .
 
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ matrix.network }} ${{ matrix.options }}
 
     - name: Set up Go
       uses: actions/setup-go@v2

@@ -12,13 +12,11 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-# Requires building the testing image of stellar-core. E.g.:
-# docker build git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 -e CONFIGURE_FLAGS='--disable-tests' -f docker/Dockerfile.testing -t stellar/stellar-core:testing
+# Requires building the testing image of stellar-core. See Makefile.
 RUN apt-get -y install libunwind8 postgresql curl sqlite iproute2 libc++abi1-10 libc++1-10
 COPY --from=stellar/stellar-core:testing /usr/local/bin/stellar-core /usr/bin/stellar-core
 
-# Requires building the dev image of stellar-horizon. E.g.:
-# docker build git://github.com/stellar/go#cap21and40 -f services/horizon/docker/Dockerfile.dev -t stellar/stellar-horizon:dev
+# Requires building the dev image of stellar-horizon. See Makefile.
 COPY --from=stellar/stellar-horizon:dev /horizon /usr/bin/stellar-horizon
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
