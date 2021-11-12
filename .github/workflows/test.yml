@@ -24,7 +24,7 @@ jobs:
 
     - name: Build Stellar-Core Image
       if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
-	    run: docker build -t stellar/stellar-core:testing -f docker/Dockerfile.testing git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg CONFIGURE_FLAGS='--disable-tests'
+      run: docker build -t stellar/stellar-core:testing -f docker/Dockerfile.testing git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg CONFIGURE_FLAGS='--disable-tests'
 
     - name: Build Stellar-Horizon Image
       if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
