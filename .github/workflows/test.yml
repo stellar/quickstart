@@ -22,6 +22,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Build Stellar-Core Image
+      if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
+      run: docker build git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 -e CONFIGURE_FLAGS='--disable-tests' -f docker/Dockerfile.testing -t stellar/stellar-core:testing
+
+    - name: Build Stellar-Horizon Image
+      if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
+      run: docker build git://github.com/stellar/go#cap21and40 -f services/horizon/docker/Dockerfile.dev -t stellar/stellar-horizon:dev
+
     - name: Build Quickstart Image
       run: docker build -f ${{ matrix.dockerfile }} -t stellar-quickstart .
 
