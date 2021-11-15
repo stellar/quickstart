@@ -22,6 +22,19 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Docker Cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/docker-cache
+        key: ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-docker-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-docker-${{ github.ref }}-
+          ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-docker-
+
+    - name: Docker Images - Load from Cache
+      continue-on-error: true
+      run: docker load -i /tmp/docker-cache/images.tar
+
     - name: Build Stellar-Core Image
       if: ${{ matrix.dockerfile == 'Dockerfile.dev' }}
       run: DOCKER_BUILDKIT=0 docker build -t stellar/stellar-core:testing -f docker/Dockerfile.testing git://github.com/stellar/stellar-core-experimental-cap21and40#master --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
@@ -49,3 +62,7 @@ jobs:
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
+
+    - name: Docker Images - Save to Cache
+      continue-on-error: true
+      run: docker save $(docker images -q) -o /tmp/docker-cache/images.tar
