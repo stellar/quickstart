@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         network: [standalone]
-        dockerfile: [Dockerfile, Dockerfile.testing]
+        dockerfile: [Dockerfile, Dockerfile.testing, Dockerfile.dev]
         options: ["", --enable-horizon-captive-core]
         exclude:
           - network: testnet
@@ -23,11 +23,11 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build Stellar-Core Image
-      if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
+      if: ${{ matrix.dockerfile == 'Dockerfile.dev' }}
       run: docker build -t stellar/stellar-core:testing -f docker/Dockerfile.testing git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg CONFIGURE_FLAGS='--disable-tests'
 
     - name: Build Stellar-Horizon Image
-      if: ${{ matrix.dockerfile == 'Dockerfile.testing' }}
+      if: ${{ matrix.dockerfile == 'Dockerfile.dev' }}
       run: docker build -t stellar/stellar-horizon:dev -f services/horizon/docker/Dockerfile.dev git://github.com/stellar/go#cap21and40
 
     - name: Build Quickstart Image
