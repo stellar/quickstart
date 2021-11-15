@@ -12,20 +12,18 @@ jobs:
       matrix:
         dockerfile: [Dockerfile, Dockerfile.testing]
     runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
     steps:
     - uses: actions/checkout@v2
 
     - name: Build Quickstart Image
-      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=local,dest=/tmp/stellar-quickstart .
-
-    - name: Save Docker Image
-      continue-on-error: true
-      run: docker save $(docker images --format '{{.Repository}}:{{.Tag}}') -o /tmp/docker-images.tar
+      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=docker,dest=/tmp/stellar-quickstart .
 
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        path: /tmp/docker-images.tar
+        path: /tmp/stellar-quickstart
 
   test:
     needs: build
@@ -46,10 +44,10 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        path: /tmp/docker-images.tar
+        path: /tmp/stellar-quickstart
 
     - name: Load image
-      run: docker load -i /tmp/docker-images.tar
+      run: docker load -i /tmp/stellar-quickstart
 
     - name: Run Quickstart Image
       run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:${{ matrix.dockerfile }} --${{ matrix.network }} ${{ matrix.options }}
