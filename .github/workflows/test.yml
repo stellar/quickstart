@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build Quickstart Image
-      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=docker,dest=/tmp/stellar-quickstart .
+      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=local,dest=/tmp/stellar-quickstart .
 
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
