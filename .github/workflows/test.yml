@@ -21,7 +21,7 @@ jobs:
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: stellar-quickstart-${{ github.sha }}-${{ matrix.dockerfile }}
+        name: stellar-quickstart-${{ matrix.dockerfile }}
         path: /tmp/stellar-quickstart
 
   test:
@@ -43,7 +43,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: stellar-quickstart-${{ github.sha }}-${{ matrix.dockerfile }}
+        name: stellar-quickstart-${{ matrix.dockerfile }}
         path: /tmp/stellar-quickstart
 
     - name: Load image
