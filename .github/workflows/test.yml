@@ -25,7 +25,7 @@ jobs:
     - name: Docker Cache
       uses: actions/cache@v2
       with:
-        path: /tmp/docker-cache
+        path: /tmp/docker-images.tar
         key: ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-docker-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
           ${{ github.workflow }}-${{ github.job }}-${{ runner.os }}-docker-${{ github.ref }}-
@@ -33,7 +33,7 @@ jobs:
 
     - name: Docker Images - Load from Cache
       continue-on-error: true
-      run: docker load -i /tmp/docker-cache/images.tar
+      run: docker load -i /tmp/docker-images.tar
 
     - name: Build Stellar-Core Image
       if: ${{ matrix.dockerfile == 'Dockerfile.dev' }}
@@ -65,4 +65,4 @@ jobs:
 
     - name: Docker Images - Save to Cache
       continue-on-error: true
-      run: docker save $(docker images -q) -o /tmp/docker-cache/images.tar
+      run: docker save $(docker images -q) -o /tmp/docker-images.tar
