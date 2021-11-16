@@ -16,9 +16,11 @@ runs:
       path: /tmp/
 
   - name: Load Quickstart Image
+    shell: bash
     run: docker load -i /tmp/image
 
   - name: Run Quickstart Image
+    shell: bash
     run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ inputs.network }} ${{ inputs.options }}
 
   - name: Set up Go
@@ -27,9 +29,11 @@ runs:
       go-version: ^1
 
   - name: Sleep until supervisor is up
+    shell: bash
     run: sleep 10
 
   - name: Run test
+    shell: bash
     run: |
       echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
       echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
