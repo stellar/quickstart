@@ -50,7 +50,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: stellar-quickstart-${{ matrix.dockerfile }}
-        path: /tmp/stellar-quickstart
+        path: /tmp/
 
     - name: Load Quickstart Image
       run: docker load -i /tmp/stellar-quickstart
