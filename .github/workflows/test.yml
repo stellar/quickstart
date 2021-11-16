@@ -8,12 +8,12 @@ on:
 jobs:
 
   build-Dockerfile:
-    uses: ./github/workflows/build.yml@ghabuildonce
+    uses: ./.github/workflows/build.yml@ghabuildonce
     with:
       dockerfile: Dockerfile
 
   build-Dockerfile.testing:
-    uses: ./github/workflows/build.yml@ghabuildonce
+    uses: ./.github/workflows/build.yml@ghabuildonce
     with:
       dockerfile: Dockerfile.testing
 
