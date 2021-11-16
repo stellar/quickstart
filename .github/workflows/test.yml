@@ -8,12 +8,12 @@ on:
 jobs:
 
   build-Dockerfile:
-    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@ghabuildonce
+    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@c29641d
     with:
       dockerfile: Dockerfile
 
   build-Dockerfile.testing:
-    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@ghabuildonce
+    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@c29641d
     with:
       dockerfile: Dockerfile.testing
 
