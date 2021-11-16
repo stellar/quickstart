@@ -5,6 +5,7 @@ inputs:
     required: true
 
 runs:
+  using: "composite"
   steps:
 
   - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f

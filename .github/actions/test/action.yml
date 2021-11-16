@@ -8,6 +8,7 @@ inputs:
   options:
 
 runs:
+  using: "composite"
   steps:
   - name: Download Quickstart Image
     uses: actions/download-artifact@v2
