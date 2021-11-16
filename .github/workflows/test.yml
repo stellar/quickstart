@@ -24,7 +24,6 @@ jobs:
     needs: build-Dockerfile
     runs-on: ubuntu-latest
     steps:
-    steps:
     - uses: ./.github/actions/test
       with:
         dockerfile: Dockerfile.testing
