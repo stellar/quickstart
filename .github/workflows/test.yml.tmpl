@@ -1,0 +1,82 @@
+name: Test
+
+"on":
+  push:
+    branches: master
+  pull_request:
+
+-: &build
+  runs-on: ubuntu-latest
+  steps:
+  - uses: actions/checkout@v2
+
+  - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+
+  - name: Build Quickstart Image
+    run: docker buildx build -f ${{ env.dockerfile }} -t stellar/quickstart -o type=docker,dest=/tmp/image .
+
+  - name: Upload Quickstart Image
+    uses: actions/upload-artifact@v2
+    with:
+      name: image-${{ env.dockerfile }}
+      path: /tmp/image
+
+-: &test
+  needs: build
+  strategy:
+    matrix:
+      network: [testnet, pubnet, standalone]
+      options: ["", --enable-horizon-captive-core]
+      exclude:
+        - network: testnet
+          options: --enable-horizon-captive-core
+        - network: pubnet
+          options: --enable-horizon-captive-core
+  runs-on: ubuntu-latest
+  steps:
+  - uses: actions/checkout@v2
+
+  - name: Download Quickstart Image
+    uses: actions/download-artifact@v2
+    with:
+      name: image-${{ env.dockerfile }}
+      path: /tmp/
+
+  - name: Load Quickstart Image
+    run: docker load -i /tmp/image
+
+  - name: Run Quickstart Image
+    run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ matrix.network }} ${{ matrix.options }}
+
+  - name: Set up Go
+    uses: actions/setup-go@v2
+    with:
+      go-version: ^1
+
+  - name: Sleep until supervisor is up
+    run: sleep 10
+
+  - name: Run test
+    run: |
+      echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+      echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+      go run test.go
+      curl http://localhost:8000
+
+jobs:
+  build-Dockerfile:
+    env:
+      dockerfile: Dockerfile
+    <<: *build
+  build-Dockerfile.testing:
+    env:
+      dockerfile: Dockerfile.testing
+    <<: *build
+  test-Dockerfile:
+    env:
+      dockerfile: Dockerfile
+    <<: *test
+  test-Dockerfile.testing:
+    env:
+      dockerfile: Dockerfile.testing
+    <<: *test
