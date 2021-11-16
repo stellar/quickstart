@@ -1,3 +1,5 @@
+# This workflow is generated from a workflow template.
+# DO NOT EDIT or your changes may be overwritten.
 ---
 name: Test
 'on':
