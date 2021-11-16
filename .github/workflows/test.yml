@@ -7,18 +7,31 @@ on:
 
 jobs:
 
-  build-Dockerfile:
-    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@c29641d
-    with:
-      dockerfile: Dockerfile
+  build:
+    strategy:
+      matrix:
+        dockerfile: [Dockerfile, Dockerfile.testing]
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+    - uses: actions/checkout@v2
 
-  build-Dockerfile.testing:
-    uses: stellar/docker-stellar-core-horizon/.github/workflows/build.yml@c29641d
-    with:
-      dockerfile: Dockerfile.testing
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+      with:
+        install: true
+
+    - name: Build Quickstart Image
+      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart -o type=docker,dest=/tmp/stellar-quickstart .
+
+    - name: Upload Quickstart Image
+      uses: actions/upload-artifact@v2
+      with:
+        name: stellar-quickstart-${{ matrix.dockerfile }}
+        path: /tmp/stellar-quickstart
 
   test:
-    needs: [build-Dockerfile, build-Dockerfile.testing]
+    needs: build
     strategy:
       matrix:
         network: [testnet, pubnet, standalone]
@@ -36,11 +49,11 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-${{ matrix.dockerfile }}
+        name: stellar-quickstart-${{ matrix.dockerfile }}
         path: /tmp/
 
     - name: Load Quickstart Image
-      run: docker load -i /tmp/image
+      run: docker load -i /tmp/stellar-quickstart
 
     - name: Run Quickstart Image
       run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ matrix.network }} ${{ matrix.options }}
