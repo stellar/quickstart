@@ -50,7 +50,7 @@ jobs:
         path: /tmp/docker-images
 
     - name: Load image
-      run: docker load -i /tmp/stellar-quickstart
+      run: docker load -i /tmp/docker-images/stellar-quickstart
 
     - name: Run Quickstart Image
       run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:${{ matrix.dockerfile }} --${{ matrix.network }} ${{ matrix.options }}
