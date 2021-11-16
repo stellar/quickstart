@@ -21,17 +21,14 @@ jobs:
       with:
         install: true
 
-    - name: Create directory for docker images
-      run: mkdir -p /tmp/docker-images
-
     - name: Build Quickstart Image
-      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart -o type=docker,dest=/tmp/docker-images/stellar-quickstart .
+      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart -o type=docker,dest=/tmp/stellar-quickstart .
 
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: docker-images-${{ matrix.dockerfile }}
-        path: /tmp/docker-images
+        name: stellar-quickstart-${{ matrix.dockerfile }}
+        path: /tmp/stellar-quickstart
 
   test:
     needs: build
@@ -49,14 +46,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Download artifact
+    - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: docker-images-${{ matrix.dockerfile }}
-        path: /tmp/docker-images
+        name: stellar-quickstart-${{ matrix.dockerfile }}
+        path: /tmp/stellar-quickstart
 
-    - name: Load image
-      run: docker load -i /tmp/docker-images/stellar-quickstart
+    - name: Load Quickstart Image
+      run: docker load -i /tmp/stellar-quickstart
 
     - name: Run Quickstart Image
       run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ matrix.network }} ${{ matrix.options }}
