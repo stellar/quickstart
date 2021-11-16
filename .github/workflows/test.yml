@@ -21,7 +21,7 @@ jobs:
       run: mkdir -p /tmp/docker-images
 
     - name: Build Quickstart Image
-      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=tar,dest=/tmp/docker-images/stellar-quickstart .
+      run: docker build -f ${{ matrix.dockerfile }} -t stellar/quickstart:${{ matrix.dockerfile }} -o type=tar,dest=/tmp/docker-images/stellar-quickstart-${{ matrix.dockerfile }} .
 
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
@@ -47,10 +47,10 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        path: /tmp/docker-images
+        path: /tmp/docker-images/stellar-quickstart-${{ matrix.dockerfile }}
 
     - name: Load image
-      run: docker load -i /tmp/docker-images/stellar-quickstart
+      run: docker load -i /tmp/docker-images/stellar-quickstart-${{ matrix.dockerfile }}
 
     - name: Run Quickstart Image
       run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:${{ matrix.dockerfile }} --${{ matrix.network }} ${{ matrix.options }}
@@ -68,3 +68,4 @@ jobs:
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
+        curl http://localhost:8000
