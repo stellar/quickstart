@@ -9,6 +9,7 @@ jobs:
   build-Dockerfile:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: ./.github/actions/build
       with:
         dockerfile: Dockerfile
@@ -16,6 +17,7 @@ jobs:
   build-Dockerfile-testing:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: ./.github/actions/build
       with:
         dockerfile: Dockerfile.testing
@@ -24,6 +26,7 @@ jobs:
     needs: build-Dockerfile
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: ./.github/actions/test
       with:
         dockerfile: Dockerfile.testing
@@ -43,6 +46,7 @@ jobs:
             options: --enable-horizon-captive-core
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - uses: ./.github/actions/test
       with:
         dockerfile: Dockerfile.testing
