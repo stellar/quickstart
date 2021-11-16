@@ -1,0 +1,39 @@
+name: Test
+
+inputs:
+  dockerfile:
+    required: true
+  network:
+    required: true
+  options:
+
+runs:
+  steps:
+  - uses: actions/checkout@v2
+
+  - name: Download Quickstart Image
+    uses: actions/download-artifact@v2
+    with:
+      name: image-${{ inputs.dockerfile }}
+      path: /tmp/
+
+  - name: Load Quickstart Image
+    run: docker load -i /tmp/image
+
+  - name: Run Quickstart Image
+    run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ inputs.network }} ${{ inputs.options }}
+
+  - name: Set up Go
+    uses: actions/setup-go@v2
+    with:
+      go-version: ^1
+
+  - name: Sleep until supervisor is up
+    run: sleep 10
+
+  - name: Run test
+    run: |
+      echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+      echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+      go run test.go
+      curl http://localhost:8000
