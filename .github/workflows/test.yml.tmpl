@@ -22,7 +22,6 @@ name: Test
       path: /tmp/image
 
 -: &test
-  needs: build
   strategy:
     matrix:
       network: [testnet, pubnet, standalone]
@@ -68,15 +67,17 @@ jobs:
     env:
       dockerfile: Dockerfile
     <<: *build
-  build-Dockerfile.testing:
+  build-Dockerfile-testing:
     env:
       dockerfile: Dockerfile.testing
     <<: *build
   test-Dockerfile:
+    needs: build-Dockerfile
     env:
       dockerfile: Dockerfile
     <<: *test
-  test-Dockerfile.testing:
+  test-Dockerfile-testing:
+    needs: build-Dockerfile-testing
     env:
       dockerfile: Dockerfile.testing
     <<: *test

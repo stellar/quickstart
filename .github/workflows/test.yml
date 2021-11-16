@@ -20,7 +20,7 @@ jobs:
       with:
         name: image-${{ env.dockerfile }}
         path: "/tmp/image"
-  build-Dockerfile.testing:
+  build-Dockerfile-testing:
     env:
       dockerfile: Dockerfile.testing
     runs-on: ubuntu-latest
@@ -36,9 +36,9 @@ jobs:
         name: image-${{ env.dockerfile }}
         path: "/tmp/image"
   test-Dockerfile:
+    needs: build-Dockerfile
     env:
       dockerfile: Dockerfile
-    needs: build
     strategy:
       matrix:
         network:
@@ -78,10 +78,10 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
         curl http://localhost:8000
-  test-Dockerfile.testing:
+  test-Dockerfile-testing:
+    needs: build-Dockerfile-testing
     env:
       dockerfile: Dockerfile.testing
-    needs: build
     strategy:
       matrix:
         network:
