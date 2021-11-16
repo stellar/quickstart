@@ -17,7 +17,7 @@ jobs:
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: image-Dockerfile
+        name: stellar/quickstart
         path: /tmp/image
 
   build-Dockerfile-testing:
@@ -30,7 +30,7 @@ jobs:
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: image-Dockerfile-testing
+        name: stellar/quickstart:testing
         path: /tmp/image
 
   test-Dockerfile:
@@ -50,7 +50,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-Dockerfile
+        name: stellar/quickstart
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -86,7 +86,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-Dockerfile-testing
+        name: stellar/quickstart:testing
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
