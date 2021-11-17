@@ -80,7 +80,7 @@ jobs:
       run: docker load -i /tmp/stellar-horizon/image
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile.testing -t stellar/quickstart -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile.dev -t stellar/quickstart -o type=docker,dest=/tmp/image .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
