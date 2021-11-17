@@ -1,6 +1,10 @@
-FROM ubuntu:20.04
+ARG STELLAR_CORE_IMAGE_REF
+ARG HORIZON_IMAGE_REF
 
-MAINTAINER Bartek Nowotarski <bartek@stellar.org>
+FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
+FROM $HORIZON_IMAGE_REF AS horizon
+
+FROM ubuntu:20.04
 
 EXPOSE 5432
 EXPOSE 8000
@@ -12,12 +16,10 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-# Requires building the testing image of stellar-core. See Makefile.
 RUN apt-get -y install libunwind8 postgresql curl sqlite iproute2 libc++abi1-10 libc++1-10
-COPY --from=stellar-core:testing /usr/local/bin/stellar-core /usr/bin/stellar-core
+COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
 
-# Requires building the dev image of stellar-horizon. See Makefile.
-COPY --from=stellar-horizon:dev /horizon /usr/bin/stellar-horizon
+COPY --from=horizon /horizon /usr/bin/stellar-horizon
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
