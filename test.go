@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const timeout = 1 * time.Hour
+const timeout = 2 * time.Hour
 
 type Root struct {
 	HorizonSequence int32 `json:"history_latest_ledger"`
