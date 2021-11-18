@@ -87,7 +87,7 @@ jobs:
     - name: Build Quickstart Image
       run: docker build -f Dockerfile.dev -t stellar/quickstart:dev . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon
     - name: Save Quickstart Image
-      run: docker save stellar-quickstart:dev -o /tmp/image
+      run: docker save stellar/quickstart:dev -o /tmp/image
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
@@ -116,7 +116,7 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -152,7 +152,7 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart:testing --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:testing --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -188,7 +188,7 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar-quickstart:dev --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:dev --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -201,4 +201,3 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
         curl http://localhost:8000
-
