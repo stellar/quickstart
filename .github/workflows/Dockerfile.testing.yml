@@ -67,7 +67,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-${{ github.sha }}-testing
+      IMAGE_ID: ghcr.io/leighmcculloch/quickstart:pr-${{ github.event.number }}-${{ github.sha }}-testing
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
