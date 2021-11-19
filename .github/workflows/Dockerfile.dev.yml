@@ -107,3 +107,34 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
         curl http://localhost:8000
+
+  push:
+    # Only push the image to the ghcr.io registry if this is a branch on the
+    # stellar/quickstart repo, i.e. not a fork, and this is in a pull request.
+    # Master image builds are published to Docker Hub, not to ghcr.io.
+    if: ${{ github.repository == 'leighmcculloch/stellar--quickstart' && github.event_name == 'pull_request' }}
+    needs: [build, test]
+    permissions:
+      packages: write
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-${{ github.sha }}-dev
+    steps:
+    - name: Download Quickstart Image
+      uses: actions/download-artifact@v2
+      with:
+        name: image-Dockerfile-dev
+        path: /tmp/
+    - name: Load Quickstart Image
+      run: docker load -i /tmp/image
+    - name: Tag Quickstart Image
+      run: docker tag stellar/quickstart:dev $IMAGE_ID
+    - name: Log in to ghcr.io
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push Quickstart Image
+      run: docker push $IMAGE_ID
