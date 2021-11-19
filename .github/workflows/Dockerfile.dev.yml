@@ -5,10 +5,9 @@ on:
     branches: master
   pull_request:
   schedule:
-    # UTC: At 07:15 on every day-of-week from Monday through Friday.
-    # UTC-8: At 23:15 on every day-of-week from Sunday through Thursday.
-    # https://crontab.guru/#15_2_*_*_1-5
-    - cron: '15 7 * * 1-5'
+    # UTC: At 10:15 on every day-of-week from Monday through Friday.
+    # UTC-8: At 02:15 on every day-of-week from Monday through Friday.
+    - cron: '15 10 * * 1-5'
 
 jobs:
 
