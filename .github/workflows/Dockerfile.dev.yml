@@ -26,7 +26,7 @@ jobs:
           docker-${{ github.workflow }}-${{ github.ref }}-
           docker-${{ github.workflow }}-
     - name: Build Stellar-Core Image
-      run: docker buildx build --pull -f docker/Dockerfile.testing -t stellar-core --cache-from type=local,src=/tmp/docker-cache --cache-to type=local,dest=/tmp/docker-cache-new -o type=docker,dest=/tmp/image git://github.com/stellar/stellar-core#master --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
+      run: docker buildx build --pull -f docker/Dockerfile.testing -t stellar-core --cache-from type=local,src=/tmp/docker-cache --cache-to type=local,dest=/tmp/docker-cache-new,mode=max -o type=docker,dest=/tmp/image git://github.com/stellar/stellar-core#master --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v2
       with:
