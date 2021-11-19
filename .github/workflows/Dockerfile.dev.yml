@@ -63,7 +63,7 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build -f Dockerfile.dev -t stellar/quickstart:dev . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon
+      run: docker build -f Dockerfile.dev -t stellar/quickstart:dev --label org.opencontainers.image.revision="${{ github.sha }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon
     - name: Save Quickstart Image
       run: docker save stellar/quickstart:dev -o /tmp/image
     - name: Upload Quickstart Image
@@ -119,7 +119,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-${{ github.sha }}-dev
+      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-dev
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2

@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile -t stellar/quickstart -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ github.sha }}" -o type=docker,dest=/tmp/image .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
@@ -67,7 +67,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-${{ github.sha }}
+      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
