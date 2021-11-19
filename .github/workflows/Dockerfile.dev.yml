@@ -22,7 +22,9 @@ jobs:
         path: /tmp/docker-cache
         key: docker-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-buildx-
+          docker-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+          docker-${{ github.workflow }}-${{ github.ref }}-
+          docker-${{ github.workflow }}-
     - name: Build Stellar-Core Image
       run: docker buildx build --pull -f docker/Dockerfile.testing -t stellar-core --cache-from type=local,src=/tmp/docker-cache --cache-to type=local,dest=/tmp/docker-cache-new -o type=docker,dest=/tmp/image git://github.com/stellar/stellar-core#master --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
     - name: Upload Stellar-Core Image
