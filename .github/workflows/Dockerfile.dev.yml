@@ -4,6 +4,11 @@ on:
   push:
     branches: master
   pull_request:
+  schedule:
+    # UTC: At 02:15 on every day-of-week from Tuesday through Saturday.
+    # UTC-8: At 18:15 on every day-of-week from Monday through Friday.
+    # https://crontab.guru/#15_1_*_*_2-6
+    - cron: '15 1 * * 2-6'
 
 jobs:
 
