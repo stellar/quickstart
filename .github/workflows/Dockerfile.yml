@@ -86,4 +86,13 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push Quickstart Image
       run: docker push $IMAGE_ID
+    - uses: actions/github-script@v4
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Docker image: ${{ env.IMAGE_ID }}'
+          })
 
