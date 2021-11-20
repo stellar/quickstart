@@ -102,6 +102,7 @@ jobs:
           github.rest.checks.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
+            head_sha: context.sha,
             name: 'Dockerfile / ${{ env.IMAGE_ID }}',
             details_url: 'https://${{ env.IMAGE_ID }}',
             status: 'completed',
