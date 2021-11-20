@@ -139,7 +139,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push Quickstart Image
       run: docker push $IMAGE_ID
-    - uses: actions/github-script@v4
+    - uses: actions/github-script@v5
       with:
         script: |
           github.rest.issues.createComment({
