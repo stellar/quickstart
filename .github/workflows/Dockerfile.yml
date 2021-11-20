@@ -64,11 +64,12 @@ jobs:
     needs: [build, test]
     permissions:
       packages: write
+      checks: write
       issues: write
       contents: read
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}
+      IMAGE_ID: ghcr.io/leighmcculloch/quickstart:pr-${{ github.event.number }}
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
@@ -90,10 +91,18 @@ jobs:
     - uses: actions/github-script@v5
       with:
         script: |
+          github.rest.checks.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: 'Dockerfile / ${{ env.IMAGE_ID }}',
+            details_url: 'https://${{ env.IMAGE_ID }}',
+            status: 'completed',
+            conclusion: 'success',
+          })
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: 'Docker image: ${{ env.IMAGE_ID }}'
+            body: 'Docker image: ${{ env.IMAGE_ID }}',
           })
 

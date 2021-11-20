@@ -120,7 +120,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/stellar--quickstart/quickstart:pr-${{ github.event.number }}-dev
+      IMAGE_ID: ghcr.io/leighmcculloch/quickstart:pr-${{ github.event.number }}-dev
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
@@ -139,12 +139,3 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push Quickstart Image
       run: docker push $IMAGE_ID
-    - uses: actions/github-script@v5
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: 'Docker image: ${{ env.IMAGE_ID }}'
-          })
