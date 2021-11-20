@@ -64,6 +64,7 @@ jobs:
     needs: [build, test]
     permissions:
       packages: write
+      issues: write
       contents: read
     runs-on: ubuntu-latest
     env:
