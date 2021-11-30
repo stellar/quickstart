@@ -99,13 +99,11 @@ jobs:
     - uses: actions/github-script@v5
       with:
         script: |
-          github.rest.checks.create({
+          github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            head_sha: context.sha,
-            name: 'Dockerfile / ${{ env.IMAGE_ID }}',
-            details_url: 'https://${{ env.IMAGE_ID }}',
-            status: 'completed',
-            conclusion: 'success',
-          })
-
+            sha: context.sha,
+            state: 'success',
+            target_url: 'https://${{ env.IMAGE_ID }}',
+            description: 'Dockerfile / ${{ env.IMAGE_ID }}',
+          });
