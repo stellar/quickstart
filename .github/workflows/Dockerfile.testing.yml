@@ -69,7 +69,7 @@ jobs:
     # stellar/quickstart repo, i.e. not a fork, and this is in a pull request.
     # Master image builds are published to Docker Hub, not to ghcr.io.
     if: ${{ github.repository == 'leighmcculloch/stellar--quickstart' && github.event_name == 'pull_request' }}
-    needs: [build, test]
+    needs: [build]
     permissions:
       packages: write
       issues: write
