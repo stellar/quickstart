@@ -68,14 +68,14 @@ jobs:
     # Only push the image to the ghcr.io registry if this is a branch on the
     # stellar/quickstart repo, i.e. not a fork, and this is in a pull request.
     # Master image builds are published to Docker Hub, not to ghcr.io.
-    if: ${{ github.repository == 'leighmcculloch/stellar--quickstart' && github.event_name == 'pull_request' }}
+    if: ${{ github.repository == 'stellar/quickstart' && github.event_name == 'pull_request' }}
     needs: [build]
     permissions:
       packages: write
       statuses: write
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/leighmcculloch/quickstart:pr-${{ github.event.number }}
+      IMAGE_ID: ghcr.io/stellar/quickstart:pr-${{ github.event.number }}
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
