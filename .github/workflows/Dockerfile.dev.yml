@@ -124,7 +124,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/${{ github.repository }}:pr-${{ github.event.number }}-dev
+      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name }}:pr-${{ github.event.number }}-dev
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
