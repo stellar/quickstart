@@ -84,7 +84,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        network: [testnet, standalone]
+        network: [testnet, pubnet, standalone]
         options: ["", --enable-horizon-captive-core]
         exclude:
           - network: testnet

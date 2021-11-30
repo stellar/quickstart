@@ -19,8 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
       run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ github.sha }}" -o type=docker,dest=/tmp/image .
@@ -34,8 +32,8 @@ jobs:
     needs: build
     strategy:
       matrix:
-        network: [standalone]
-        options: [""]
+        network: [testnet, pubnet, standalone]
+        options: ["", --enable-horizon-captive-core]
         exclude:
           - network: testnet
             options: --enable-horizon-captive-core
