@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
       run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ github.sha }}" -o type=docker,dest=/tmp/image .
@@ -100,10 +102,11 @@ jobs:
           console.log(context.owner);
           console.log(context.repo);
           console.log(context.sha);
+          console.log('${{ github.event.pull_request.head.sha }}');
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: context.sha,
+            ref: '${{ github.event.pull_request.head.sha }}',
             state: 'success',
             target_url: 'https://${{ env.IMAGE_ID }}',
             description: 'Dockerfile / ${{ env.IMAGE_ID }}',
