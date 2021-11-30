@@ -105,5 +105,6 @@ jobs:
             sha: '${{ github.event.pull_request.head.sha }}',
             state: 'success',
             target_url: 'https://${{ env.IMAGE_ID }}',
-            description: 'Dockerfile / ${{ env.IMAGE_ID }}',
+            context: context.workflow,
+            description: '${{ env.IMAGE_ID }}',
           });
