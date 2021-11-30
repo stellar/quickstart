@@ -95,4 +95,15 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push Quickstart Image
       run: docker push $IMAGE_ID
-
+    - uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ github.event.pull_request.head.sha }}',
+            state: 'success',
+            target_url: 'https://${{ env.IMAGE_ID }}',
+            context: context.workflow,
+            description: '${{ env.IMAGE_ID }}',
+          });
