@@ -72,8 +72,7 @@ jobs:
     needs: [build]
     permissions:
       packages: write
-      issues: write
-      contents: read
+      statuses: write
     runs-on: ubuntu-latest
     env:
       IMAGE_ID: ghcr.io/leighmcculloch/quickstart:pr-${{ github.event.number }}-testing
