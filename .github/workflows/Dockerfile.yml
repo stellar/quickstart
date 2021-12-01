@@ -71,8 +71,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}:${COMMIT_SHA::7}
+      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}
     steps:
+    - name: Build Image ID
+      id: params
+      run:
+        echo '::set-output name=IMAGE_ID::$IMAGE_ID:${COMMIT_SHA::7}'
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
@@ -81,7 +85,7 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Tag Quickstart Image
-      run: docker tag stellar/quickstart $IMAGE_ID
+      run: docker tag stellar/quickstart ${{ steps.params.outputs.IMAGE_ID }}
     - name: Log in to ghcr.io
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -89,7 +93,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push Quickstart Image
-      run: docker push $IMAGE_ID
+      run: docker push ${{ steps.params.outputs.IMAGE_ID }}
     - uses: actions/github-script@v5
       with:
         script: |
@@ -98,7 +102,7 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ env.COMMIT_SHA }}',
             state: 'success',
-            target_url: 'https://${{ env.IMAGE_ID }}',
+            target_url: 'https://${{ ${{ steps.params.outputs.IMAGE_ID }} }}',
             context: context.workflow,
-            description: '${{ env.IMAGE_ID }}',
+            description: '${{ steps.params.outputs.IMAGE_ID }}',
           });
