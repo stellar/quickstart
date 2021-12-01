@@ -2,8 +2,6 @@ name: Dockerfile.dev
 
 on:
   push:
-    branches: master
-  pull_request:
   schedule:
     # UTC: At 10:15 on every day-of-week from Monday through Friday.
     # UTC-8: At 02:15 on every day-of-week from Monday through Friday.
@@ -117,14 +115,14 @@ jobs:
         curl http://localhost:8000
 
   push:
-    if: ${{ github.event_name == 'pull_request' }}
     needs: [build]
     permissions:
       packages: write
       statuses: write
     runs-on: ubuntu-latest
     env:
-      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name }}:pr-${{ github.event.number }}-dev
+      STATUS_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}:${{ github.event.pull_request.head.sha || github.sha }}-dev
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
@@ -149,7 +147,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ github.event.pull_request.head.sha }}',
+            sha: '${{ env.STATUS_SHA }}',
             state: 'success',
             target_url: 'https://${{ env.IMAGE_ID }}',
             context: context.workflow,
