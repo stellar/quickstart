@@ -2,6 +2,7 @@ name: Dockerfile
 
 on:
   push:
+  pull_request:
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -69,8 +70,8 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     env:
-      STATUS_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}:${{ github.event.pull_request.head.sha || github.sha }}
+      COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      IMAGE_ID: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}:${COMMIT_SHA::7}
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
@@ -95,7 +96,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ env.STATUS_SHA }}',
+            sha: '${{ env.COMMIT_SHA }}',
             state: 'success',
             target_url: 'https://${{ env.IMAGE_ID }}',
             context: context.workflow,
