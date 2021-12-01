@@ -98,7 +98,7 @@ jobs:
     - name: Set Env Vars
       run: |
         echo "COMMIT_SHORT_SHA=${COMMIT_SHA::7}" >> $GITHUB_ENV
-        echo "IMAGE_SHA256=$(docker inspect --format='{{index .RepoDigests 0}}' stellar/quickstart)" >> $GITHUB_ENV
+        echo "IMAGE_SHA256=$(docker inspect --format='{{.ID}}' stellar/quickstart)" >> $GITHUB_ENV
     # - name: Push Quickstart Image (commit)
     #   run: |
     #     IMAGE_ID=$IMAGE_REPO:$COMMIT_SHORT_SHA
