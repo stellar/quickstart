@@ -102,7 +102,7 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ env.COMMIT_SHA }}',
             state: 'success',
-            target_url: 'https://${{ ${{ steps.params.outputs.IMAGE_ID }} }}',
+            target_url: 'https://${{ steps.params.outputs.IMAGE_ID }}',
             context: context.workflow,
             description: '${{ steps.params.outputs.IMAGE_ID }}',
           });
