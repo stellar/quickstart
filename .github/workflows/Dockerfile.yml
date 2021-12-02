@@ -90,8 +90,8 @@ jobs:
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         registry: ${{ env.IMAGE_HOST }}
-        username: ${{ env.IMAGE_HOST == 'ghcr.io' && github.actor || env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_USERNAME }}
-        password: ${{ env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN || env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN }}
+        username: ${{ (env.IMAGE_HOST == 'ghcr.io' && github.actor) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_USERNAME) }}
+        password: ${{ (env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN) }}
     - name: Set Env Vars
       run: |
         echo "IMAGE_ID=$IMAGE_REPO:${COMMIT_SHA::7}" >> $GITHUB_ENV
