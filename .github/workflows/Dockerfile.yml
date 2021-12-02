@@ -14,7 +14,7 @@ concurrency:
 
 env:
   # Push docker images to docker.io for the stellar repo, while forks push to ghcr.io.
-  IMAGE_HOST: ${{ (github.event.pull_request.head.repo.full_name || github.repository) == github.repository && 'docker.io' || 'ghcr.io' }}
+  IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
 
 jobs:
 
