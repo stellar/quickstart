@@ -28,6 +28,7 @@ jobs:
         path: /tmp/image
 
   test:
+    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
     needs: build
     strategy:
       matrix:
