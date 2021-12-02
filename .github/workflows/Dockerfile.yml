@@ -106,7 +106,7 @@ jobs:
     #     docker push $IMAGE_ID
     - name: Push Quickstart Image
       run: |
-        IMAGE_ID=$IMAGE_REPO:$IMAGE_SHA256
+        IMAGE_ID=$IMAGE_REPO@$IMAGE_SHA256
         docker tag stellar/quickstart $IMAGE_ID
         docker push $IMAGE_ID
     - uses: actions/github-script@v5
@@ -118,5 +118,5 @@ jobs:
             sha: '${{ env.COMMIT_SHA }}',
             state: 'success',
             context: context.workflow,
-            description: '${{ env.IMAGE_REPO }}:${{ env.IMAGE_SHA256 }}',
+            description: '${{ env.IMAGE_REPO }}@${{ env.IMAGE_SHA256 }}',
           });
