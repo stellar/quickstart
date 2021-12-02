@@ -2,6 +2,7 @@ name: Dockerfile
 
 on:
   push:
+  - master
   pull_request:
 
 # Prevent more than one build of this workflow for a branch to be running at the
@@ -23,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
       run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ github.sha }}" -o type=docker,dest=/tmp/image .
@@ -34,7 +35,6 @@ jobs:
         path: /tmp/image
 
   test:
-    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/master' }}
     needs: build
     strategy:
       matrix:
@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
+        ref: ${{ github.event.pull_request.head.sha || github.sha  }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
@@ -73,7 +73,8 @@ jobs:
         curl http://localhost:8000
 
   push:
-    if: ${{ github.event_name == 'push' }}
+    # Push an image if this is a push event, or if this is a pull request from a local branch.
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
       packages: write
@@ -114,6 +115,7 @@ jobs:
           });
 
   tag:
+    # Tag if this is a push to master.
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [push, test]
     permissions:
@@ -150,5 +152,6 @@ jobs:
             sha: context.sha,
             state: 'success',
             context: context.workflow,
+            target_url: `https://${{ env.IMAGE_ID }}`,
             description: '${{ env.IMAGE_ID }}',
           });
