@@ -13,9 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
-  IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.event.pull_request.head.repo.full_name || github.repository }}
+  IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.repository }}
 
 jobs:
 
@@ -92,7 +91,7 @@ jobs:
         password: ${{ (env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN) }}
     - name: Build Image ID
       run: |
-        echo "IMAGE_ID=$IMAGE_REPO:${COMMIT_SHA::7}" >> $GITHUB_ENV
+        echo "IMAGE_ID=$IMAGE_REPO:${GITHUB_SHA::7}" >> $GITHUB_ENV
     - name: Push Quickstart Image
       run: |
         docker tag stellar/quickstart $IMAGE_ID
@@ -103,7 +102,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ env.COMMIT_SHA }}',
+            sha: '${{ env.GITHUB_SHA }}',
             state: 'success',
             context: context.workflow,
             target_url: `https://${{ env.IMAGE_ID }}`,
@@ -144,7 +143,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ env.COMMIT_SHA }}',
+            sha: '${{ env.GITHUB_SHA }}',
             state: 'success',
             context: context.workflow,
             description: '${{ env.IMAGE_ID }}',
