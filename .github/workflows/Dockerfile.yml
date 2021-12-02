@@ -102,7 +102,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ context.sha }}',
+            sha: context.sha,
             state: 'success',
             context: context.workflow,
             target_url: `https://${{ env.IMAGE_ID }}`,
@@ -143,7 +143,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ context.sha }}',
+            sha: context.sha,
             state: 'success',
             context: context.workflow,
             description: '${{ env.IMAGE_ID }}',
