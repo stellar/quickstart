@@ -12,10 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
   cancel-in-progress: true
 
-env:
-  # Push docker images to docker.io for the stellar repo, while forks push to ghcr.io.
-  IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
-
 jobs:
 
   build:
@@ -77,7 +73,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      IMAGE_REPO: ${{ env.IMAGE_HOST }}/${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
+      IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.event.pull_request.head.repo.full_name || github.repository }}
     steps:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
