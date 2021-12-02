@@ -2,7 +2,8 @@ name: Dockerfile
 
 on:
   push:
-  - master
+    branches:
+    - master
   pull_request:
 
 # Prevent more than one build of this workflow for a branch to be running at the
