@@ -64,11 +64,10 @@ jobs:
         curl http://localhost:8000
 
   push:
-    # if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-    needs:
-    - build
-    # - test
+    if: ${{ github.event_name == 'push' }}
+    needs: build
     permissions:
+      packages: write
       statuses: write
     runs-on: ubuntu-latest
     env:
@@ -99,14 +98,9 @@ jobs:
       run: |
         echo "COMMIT_SHORT_SHA=${COMMIT_SHA::7}" >> $GITHUB_ENV
         echo "IMAGE_SHA256=$(docker inspect --format='{{.ID}}' stellar/quickstart)" >> $GITHUB_ENV
-    # - name: Push Quickstart Image (commit)
-    #   run: |
-    #     IMAGE_ID=$IMAGE_REPO:$COMMIT_SHORT_SHA
-    #     docker tag stellar/quickstart $IMAGE_ID
-    #     docker push $IMAGE_ID
     - name: Push Quickstart Image
       run: |
-        IMAGE_ID=$IMAGE_REPO@$IMAGE_SHA256
+        IMAGE_ID=$IMAGE_REPO:$COMMIT_SHORT_SHA
         docker tag stellar/quickstart $IMAGE_ID
         docker push $IMAGE_ID
     - uses: actions/github-script@v5
@@ -119,4 +113,52 @@ jobs:
             state: 'success',
             context: context.workflow,
             description: '${{ env.IMAGE_REPO }}@${{ env.IMAGE_SHA256 }}',
+          });
+
+  tag:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    needs: [push, test]
+    permissions:
+      packages: write
+      statuses: write
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_REPO: ghcr.io/${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      # IMAGE_REPO: docker.io/stellar/quickstart
+      IMAGE_TAG: latest
+    steps:
+    - name: Download Quickstart Image
+      uses: actions/download-artifact@v2
+      with:
+        name: image-Dockerfile
+        path: /tmp/
+    - name: Load Quickstart Image
+      run: docker load -i /tmp/image
+    - name: Log in to ghcr.io
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Log in to docker.io
+    #   uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+    #   with:
+    #     registry: docker.io
+    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Push Quickstart Image
+      run: |
+        IMAGE_ID=$IMAGE_REPO:$IMAGE_TAG
+        docker tag stellar/quickstart $IMAGE_ID
+        docker push $IMAGE_ID
+    - uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ env.COMMIT_SHA }}',
+            state: 'success',
+            context: context.workflow,
+            description: '${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}',
           });
