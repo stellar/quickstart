@@ -17,6 +17,7 @@ concurrency:
 env:
   IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
   IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.repository }}
+  IMAGE_TAG: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'latest' }}
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
@@ -74,7 +75,7 @@ jobs:
         curl http://localhost:8000
 
   push:
-    # Push an image if this is a push event, or if this is a pull request from a local branch.
+    # Push an image if this is a pull request from a local branch.
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
@@ -96,17 +97,17 @@ jobs:
         username: ${{ (env.IMAGE_HOST == 'ghcr.io' && github.actor) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_USERNAME) }}
         password: ${{ (env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN) }}
     - name: Build Image ID
-      run: echo "IMAGE_ID=$IMAGE_REPO:pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-    - name: Push Quickstart Image
-      run: |
-        docker tag stellar/quickstart $IMAGE_ID
-        docker push $IMAGE_ID
+      run: echo "IMAGE_ID=$IMAGE_REPO:$IMAGE_TAG" >> $GITHUB_ENV
     - name: Build Image URL (ghcr.io)
       if: ${{ env.IMAGE_HOST == 'ghcr.io' }}
       run: echo "IMAGE_URL=https://$IMAGE_ID" >> $GITHUB_ENV
     - name: Build Image URL (docker.io)
       if: ${{ env.IMAGE_HOST == 'docker.io' }}
-      run: echo "IMAGE_URL=https://hub.docker.com/r/stellar/quickstart/tags?name=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+      run: echo "IMAGE_URL=https://hub.docker.com/r/stellar/quickstart/tags?name=$IMAGE_TAG" >> $GITHUB_ENV
+    - name: Push Quickstart Image
+      run: |
+        docker tag stellar/quickstart $IMAGE_ID
+        docker push $IMAGE_ID
     - uses: actions/github-script@v5
       with:
         script: |
@@ -160,7 +161,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: context.sha,
+            sha: '${{ env.HEAD_SHA }}',
             state: 'success',
             context: context.workflow,
             target_url: '${{ env.IMAGE_URL }}',
