@@ -36,9 +36,6 @@ runs:
         IMAGE_REGISTRY=$(echo $IMAGE_TAGLESS | cut -d'/' -f1)
         IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)
         IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)
-        echo "IMAGE_REGISTRY=$IMAGE_REGISTRY"
-        echo "IMAGE_REPO=$IMAGE_REPO"
-        echo "IMAGE_TAG=$IMAGE_TAG"
         echo "::set-output name=registry::$IMAGE_REGISTRY"
         echo "::set-output name=repo::$IMAGE_REPO"
         echo "::set-output name=tag::$IMAGE_TAG"
