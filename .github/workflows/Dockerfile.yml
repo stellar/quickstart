@@ -17,25 +17,18 @@ concurrency:
 env:
   IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
   IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.repository }}
-  COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  envv:
-    runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo COMMIT_SHA: $COMMIT_SHA
-        echo GITHUB_SHA: $GITHUB_SHA
-
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.COMMIT_SHA }}
+        ref: ${{ env.HEAD_SHA }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ env.COMMIT_SHA }}" -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" -o type=docker,dest=/tmp/image .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
@@ -57,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.COMMIT_SHA  }}
+        ref: ${{ env.HEAD_SHA  }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
@@ -114,7 +107,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ env.COMMIT_SHA }}',
+            sha: '${{ env.HEAD_SHA }}',
             state: 'success',
             context: context.workflow,
             target_url: `https://${{ env.IMAGE_ID }}`,
