@@ -73,7 +73,7 @@ jobs:
         curl http://localhost:8000
 
   push:
-    # Push an image if this is a pull request from a local branch.
+    # Push image to registry after build for pull requests build from a local branch.
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
@@ -94,8 +94,8 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
-  tag:
-    # Tag if this is a push to master.
+  push-after-test:
+    # Push image to registry after test for master.
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [push, test]
     permissions:
