@@ -17,9 +17,6 @@ inputs:
   password:
     required: true
     default: ${{ github.token }}
-outputs:
-  url:
-    value: ${{ steps.set_outputs.outputs.url }}
 runs:
   using: "composite"
   steps:
@@ -39,6 +36,9 @@ runs:
         IMAGE_REGISTRY=$(echo $IMAGE_TAGLESS | cut -d'/' -f1)"
         IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)"
         IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)"
+        echo "IMAGE_REGISTRY=$IMAGE_REGISTRY"
+        echo "IMAGE_REPO=$IMAGE_REPO"
+        echo "IMAGE_TAG=$IMAGE_TAG"
         echo "::set-output name=registry::$IMAGE_REGISTRY"
         echo "::set-output name=repo::$IMAGE_REPO"
         echo "::set-output name=tag::$IMAGE_TAG"
@@ -56,11 +56,6 @@ runs:
       shell: bash
       run: |
         echo "IMAGE_URL=https://hub.docker.com/r/${{ steps.image_parts.outputs.repo }}/tags?name=${{ steps.image_parts.outputs.tag }}" >> $GITHUB_ENV
-    -
-      id: set_outputs
-      shell: bash
-      run: |
-        echo "::set-output name=url::$IMAGE_URL"
     -
       shell: bash
       run: |
