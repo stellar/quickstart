@@ -17,18 +17,25 @@ concurrency:
 env:
   IMAGE_HOST: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}
   IMAGE_REPO: ${{ github.repository == 'stellar/quickstart' && 'docker.io' || 'ghcr.io' }}/${{ github.repository }}
+  COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
+  envv:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo COMMIT_SHA: $COMMIT_SHA
+        echo GITHUB_SHA: $GITHUB_SHA
 
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        ref: ${{ env.COMMIT_SHA }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ github.sha }}" -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile -t stellar/quickstart --label org.opencontainers.image.revision="${{ env.COMMIT_SHA }}" -o type=docker,dest=/tmp/image .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
@@ -50,7 +57,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha  }}
+        ref: ${{ env.COMMIT_SHA  }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
@@ -75,7 +82,7 @@ jobs:
 
   push:
     # Push an image if this is a push event, or if this is a pull request from a local branch.
-    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
       packages: write
@@ -95,12 +102,8 @@ jobs:
         registry: ${{ env.IMAGE_HOST }}
         username: ${{ (env.IMAGE_HOST == 'ghcr.io' && github.actor) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_USERNAME) }}
         password: ${{ (env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN) }}
-    - name: Build Image ID (PR)
-      if: ${{ github.event_name == 'pull_request' }}
+    - name: Build Image ID
       run: echo "IMAGE_ID=$IMAGE_REPO:pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-    - name: Build Image ID (Push)
-      if: ${{ github.event_name == 'push' }}
-      run: echo "IMAGE_ID=$IMAGE_REPO:${GITHUB_SHA::7}" >> $GITHUB_ENV
     - name: Push Quickstart Image
       run: |
         docker tag stellar/quickstart $IMAGE_ID
@@ -111,7 +114,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ github.event.pull_request.head.sha || github.sha }}',
+            sha: '${{ env.COMMIT_SHA }}',
             state: 'success',
             context: context.workflow,
             target_url: `https://${{ env.IMAGE_ID }}`,
