@@ -101,6 +101,12 @@ jobs:
       run: |
         docker tag stellar/quickstart $IMAGE_ID
         docker push $IMAGE_ID
+    - name: Build Image URL (ghcr.io)
+      if: ${{ env.IMAGE_HOST == 'ghcr.io' }}
+      run: echo "IMAGE_URL=https://$IMAGE_ID" >> $GITHUB_ENV
+    - name: Build Image URL (docker.io)
+      if: ${{ env.IMAGE_HOST == 'docker.io' }}
+      run: echo "IMAGE_URL=https://hub.docker.com/r/stellar/quickstart/tags?name=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
     - uses: actions/github-script@v5
       with:
         script: |
@@ -110,7 +116,7 @@ jobs:
             sha: '${{ env.HEAD_SHA }}',
             state: 'success',
             context: context.workflow,
-            target_url: `https://${{ env.IMAGE_ID }}`,
+            target_url: '${{ env.IMAGE_URL }}',
             description: '${{ env.IMAGE_ID }}',
           });
 
@@ -137,12 +143,17 @@ jobs:
         username: ${{ (env.IMAGE_HOST == 'ghcr.io' && github.actor) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_USERNAME) }}
         password: ${{ (env.IMAGE_HOST == 'ghcr.io' && secrets.GITHUB_TOKEN) || (env.IMAGE_HOST == 'docker.io' && secrets.DOCKERHUB_TOKEN) }}
     - name: Build Image ID
-      run: |
-        echo "IMAGE_ID=$IMAGE_REPO:latest" >> $GITHUB_ENV
+      run: echo "IMAGE_ID=$IMAGE_REPO:latest" >> $GITHUB_ENV
     - name: Push Quickstart Image
       run: |
         docker tag stellar/quickstart $IMAGE_ID
         docker push $IMAGE_ID
+    - name: Build Image URL (ghcr.io)
+      if: ${{ env.IMAGE_HOST == 'ghcr.io' }}
+      run: echo "IMAGE_URL=https://$IMAGE_ID" >> $GITHUB_ENV
+    - name: Build Image URL (docker.io)
+      if: ${{ env.IMAGE_HOST == 'docker.io' }}
+      run: echo "IMAGE_URL=https://hub.docker.com/r/stellar/quickstart/tags?name=latest" >> $GITHUB_ENV
     - uses: actions/github-script@v5
       with:
         script: |
@@ -152,6 +163,6 @@ jobs:
             sha: context.sha,
             state: 'success',
             context: context.workflow,
-            target_url: `https://${{ env.IMAGE_ID }}`,
+            target_url: '${{ env.IMAGE_URL }}',
             description: '${{ env.IMAGE_ID }}',
           });
