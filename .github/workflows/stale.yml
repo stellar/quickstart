@@ -1,0 +1,20 @@
+name: 'Stale Issues'
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # approx 9:30am daily
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v4
+        with:
+          debug-only: false
+          days-before-stale: 30
+          days-before-close: 30
+          stale-issue-message: 'This issue is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
+          stale-pr-message: 'This pull request is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
+          stale-issue-label: stale
+          stale-pr-label: stale
+          remove-stale-when-updated: true
