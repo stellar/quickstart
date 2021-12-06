@@ -11,6 +11,9 @@ inputs:
   image:
     required: true
     default: ghcr.io/${{ github.repository }}:latest
+  registry:
+    required: true
+    default: ghcr.io
   username:
     required: true
     default: ${{ github.actor }}
@@ -33,16 +36,14 @@ runs:
       shell: bash
       run: |
         IMAGE_TAGLESS=$(echo ${{ inputs.image }} | cut -d':' -f1)
-        IMAGE_REGISTRY=$(echo $IMAGE_TAGLESS | cut -d'/' -f1)
         IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)
         IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)
-        echo "::set-output name=registry::$IMAGE_REGISTRY"
         echo "::set-output name=repo::$IMAGE_REPO"
         echo "::set-output name=tag::$IMAGE_TAG"
     -
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
-        registry: ${{ steps.image_parts.outputs.registry }}
+        registry: ${{ inputs.registry }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
     -

@@ -142,5 +142,6 @@ jobs:
         artifact_name: image-Dockerfile-dev
         artifact_image_file: image
         image: ${{ env.IMAGE }}
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
