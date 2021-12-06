@@ -1,6 +1,7 @@
 name: 'Stale Issues'
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 18 * * *' # approx 9:30am daily
 
