@@ -2,18 +2,34 @@ name: Dockerfile.dev
 
 on:
   push:
-    branches: master
+    branches:
+    - master
   pull_request:
+  schedule:
+    # UTC: At 10:15 on every day-of-week from Monday through Friday.
+    # UTC-8: At 02:15 on every day-of-week from Monday through Friday.
+    - cron: '15 10 * * 1-5'
+
+# Prevent more than one build of this workflow for a branch to be running at the
+# same time, and if multiple are queued, only run the latest, cancelling any
+# already running build. The exception being any protected branch, such as
+# master, where a build for every commit will run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+env:
+  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-dev', github.event.pull_request.number) || 'dev') }}
 
 jobs:
 
   build-stellar-core:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Core Image
-      run: docker buildx build -f docker/Dockerfile.testing -t stellar-core -o type=docker,dest=/tmp/image git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
+      run: docker buildx build -f docker/Dockerfile.testing -t stellar-core -o type=docker,dest=/tmp/image git://github.com/stellar/stellar-core-experimental-cap21and40#cap21and40 --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS='--disable-tests'
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v2
       with:
@@ -23,7 +39,6 @@ jobs:
   build-stellar-horizon:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
       run: docker buildx build -f services/horizon/docker/Dockerfile.dev -t stellar-horizon -o type=docker,dest=/tmp/image git://github.com/stellar/go#cap21and40
@@ -38,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.HEAD_SHA }}
     - name: Download Stellar-Core Image
       uses: actions/download-artifact@v2
       with:
@@ -59,9 +76,9 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build -f Dockerfile.dev -t stellar/quickstart:dev . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon
+      run: docker build -f Dockerfile.dev -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon
     - name: Save Quickstart Image
-      run: docker save stellar/quickstart:dev -o /tmp/image
+      run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
@@ -82,6 +99,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.HEAD_SHA }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
@@ -90,7 +109,7 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar stellar/quickstart:dev --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -103,3 +122,26 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
         curl http://localhost:8000
+
+  push:
+    # Push image to registry after build for pull requests from a local branch.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    needs: build
+    permissions:
+      packages: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.HEAD_SHA  }}
+    - id: push
+      uses: ./.github/actions/push
+      with:
+        head_sha: ${{ env.HEAD_SHA }}
+        artifact_name: image-Dockerfile-dev
+        artifact_image_file: image
+        image: ${{ env.IMAGE }}
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}

@@ -1,6 +1,8 @@
 # Stellar Quickstart Docker Image
 
-This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker.
+This docker image provides a simple way to run stellar-core and horizon locally for development and testing.
+
+**Looking for instructions for how to run stellar-core or horizon in production? Take a look at the docs [here](https://developers.stellar.org/docs/run-core-node/).**
 
 This image provides a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
