@@ -50,7 +50,7 @@ runs:
       shell: bash
       run: echo "IMAGE_URL=https://${{ inputs.image }}" >> $GITHUB_ENV
     -
-      if: ${{ steps.image_parts.outputs.registry == 'docker.io' }}
+      if: ${{ inputs.registry == 'docker.io' }}
       shell: bash
       run: |
         echo "IMAGE_URL=https://hub.docker.com/r/${{ steps.image_parts.outputs.repo }}/tags?name=${{ steps.image_parts.outputs.tag }}" >> $GITHUB_ENV
