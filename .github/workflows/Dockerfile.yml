@@ -98,7 +98,7 @@ jobs:
   push-after-test:
     # Push image to registry after test for master.
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-    needs: [push, test]
+    needs: [build, test]
     permissions:
       packages: write
       statuses: write
