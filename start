@@ -6,6 +6,8 @@ export PGHOME="$STELLAR_HOME/postgresql"
 export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
+export FBHOME="$STELLAR_HOME/friendbot"
+export NXHOME="$STELLAR_HOME/nginx"
 
 export PGBIN="/usr/lib/postgresql/12/bin/"
 export PGDATA="$PGHOME/data"
@@ -188,6 +190,9 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
+    if [ -d /opt/stellar-default/$NETWORK/supervisor/ ]; then
+      $CP /opt/stellar-default/$NETWORK/supervisor/ $SUPHOME
+    fi
   fi
 
   if [ -d $COREHOME/etc ]; then
@@ -201,6 +206,24 @@ function copy_defaults() {
     echo "horizon: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/horizon/ $HZHOME
+  fi
+
+  if [ -d $FBHOME/etc ]; then
+    echo "friendbot: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/friendbot/ $FBHOME
+    if [ -d /opt/stellar-default/$NETWORK/friendbot/ ]; then
+      $CP /opt/stellar-default/$NETWORK/friendbot/ $FBHOME
+    fi
+  fi
+
+  if [ -d $NXHOME/etc ]; then
+    echo "nginx: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/nginx/ $NXHOME
+    if [ -d /opt/stellar-default/$NETWORK/nginx/ ]; then
+      $CP /opt/stellar-default/$NETWORK/nginx/ $NXHOME
+    fi
   fi
 }
 

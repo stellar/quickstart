@@ -1,3 +1,7 @@
+FROM golang:1.17 as go
+
+RUN go install github.com/stellar/go/services/friendbot@horizon-v2.12.1
+
 FROM ubuntu:20.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
@@ -18,6 +22,8 @@ RUN /dependencies
 ADD install /
 RUN ["chmod", "+x", "install"]
 RUN /install
+
+COPY --from=go /go/bin/friendbot /usr/local/bin/friendbot
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]

@@ -1,0 +1,5 @@
+#! /bin/bash
+
+echo "starting nginx..."
+set -e
+exec /usr/sbin/nginx -c /opt/stellar/nginx/etc/nginx.conf
