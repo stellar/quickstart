@@ -1,13 +1,19 @@
+ARG STELLAR_CORE_VERSION=18.2.0-798.b63c1622e.focal
+ARG HORIZON_VERSION=2.12.1-213
+ARG FRIENDBOT_VERSION=horizon-v2.12.1
+
 FROM golang:1.17 as go
 
-RUN go install github.com/stellar/go/services/friendbot@horizon-v2.12.1
+ARG FRIENDBOT_VERSION
+
+RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
 
 FROM ubuntu:20.04
 
 MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
-ENV STELLAR_CORE_VERSION 18.2.0-798.b63c1622e.focal
-ENV HORIZON_VERSION 2.12.1-213
+ARG STELLAR_CORE_VERSION
+ARG HORIZON_VERSION
 
 EXPOSE 5432
 EXPOSE 8000
@@ -22,7 +28,6 @@ RUN /dependencies
 ADD install /
 RUN ["chmod", "+x", "install"]
 RUN /install
-
 COPY --from=go /go/bin/friendbot /usr/local/bin/friendbot
 
 RUN ["mkdir", "-p", "/opt/stellar"]
