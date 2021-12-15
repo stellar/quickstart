@@ -71,6 +71,11 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test.go
         curl http://localhost:8000
+    - name: Run friendbot test
+      if: ${{ matrix.network == 'standalone' }}
+      run: |
+        echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
+        go run test_friendbot.go
 
   push:
     # Push image to registry after build for pull requests from a local branch.
