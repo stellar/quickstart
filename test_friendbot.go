@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const timeout = 2 * time.Minute
+const timeout = 10 * time.Minute
 
 func main() {
 	startTime := time.Now()
