@@ -73,7 +73,11 @@ jobs:
         go run test.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ matrix.network == 'standalone' }}
+      # Horizon with captive-core is currently broken. Don't run the Friendbot
+      # test in captive-core mode since it will always fail while Horizon is not
+      # functioning with captive-core.
+      # See https://github.com/stellar/quickstart/issues/328 for more details.
+      if: ${{ matrix.network == 'standalone' && !contains(matrix.options, '--enable-horizon-captive-core') }}
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         go run test_friendbot.go
