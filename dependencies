@@ -8,7 +8,9 @@ apt-get install -y curl wget git apt-transport-https \
                    libpq-dev libsqlite3-dev libsasl2-dev \
                    postgresql-client postgresql postgresql-contrib \
                    sudo vim zlib1g-dev supervisor psmisc \
-                   rsync jq netcat # Parsing stellar-core JSON for standalone network and checking core HTTP server
+                   nginx rsync jq netcat # Parsing stellar-core JSON for standalone network and checking core HTTP server
 apt-get clean
+
+chown -R www-data:www-data /var/lib/nginx
 
 echo "\nDone installing dependencies...\n"

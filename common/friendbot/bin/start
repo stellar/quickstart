@@ -1,0 +1,12 @@
+#! /bin/bash
+
+set -e
+set -o pipefail
+
+while ! (curl -sf http://localhost:8001/ | jq --exit-status '.current_protocol_version > 0'); do
+  echo "Waiting for horizon to be available..."
+  sleep 1
+done
+
+echo "starting friendbot..."
+exec /usr/local/bin/friendbot --conf /opt/stellar/friendbot/etc/friendbot.cfg
