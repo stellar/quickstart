@@ -78,6 +78,8 @@ jobs:
     - name: Run horizon ingesting test
       if: ${{ matrix.network != 'pubnet' }}
       run: |
+        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
