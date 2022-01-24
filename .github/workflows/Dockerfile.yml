@@ -58,18 +58,29 @@ jobs:
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
     - name: Run Quickstart Image
-      run: docker run --rm -d -p "8000:8000" --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
+      run: docker run --rm -d -p "8000:8000" -p "11626:11626" --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: ^1
     - name: Sleep until supervisor is up
       run: sleep 10
-    - name: Run test
+    - name: Run core test
+      run: |
+        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+        go run test_core.go
+        curl http://localhost:11626/info
+    - name: Run horizon up test
+      run: |
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run test_horizon_up.go
+        curl http://localhost:8000
+    - name: Run horizon ingesting test
+      if: ${{ matrix.network != 'pubnet' }}
       run: |
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run test.go
+        go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
       # Horizon with captive-core is currently broken. Don't run the Friendbot
