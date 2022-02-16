@@ -21,7 +21,7 @@ RUN /dependencies
 RUN apt-get -y install libunwind8 postgresql curl sqlite iproute2 libc++abi1-10 libc++1-10
 COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
 
-COPY --from=horizon /horizon /usr/bin/stellar-horizon
+COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 
