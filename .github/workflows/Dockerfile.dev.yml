@@ -41,7 +41,7 @@ jobs:
     steps:
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
-      run: docker buildx build -f services/horizon/docker/Dockerfile.dev -t stellar-horizon -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#master
+      run: docker buildx build -f services/horizon/docker/Dockerfile.dev --target builder -t stellar-horizon -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#master
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v2
       with:
