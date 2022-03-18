@@ -1,10 +1,10 @@
 __PHONY__: build build-testing build-dev build-dev-deps
 
 build:
-	docker build -t stellar/quickstart -f Dockerfile .
+	docker build --platform linux/amd64 -t stellar/quickstart -f Dockerfile .
 
 build-testing:
-	docker build -t stellar/quickstart:testing -f Dockerfile.testing .
+	docker build --platform linux/amd64 -t stellar/quickstart:testing -f Dockerfile.testing .
 
 build-dev-deps:
 	docker build -t stellar-core:master -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#master --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
