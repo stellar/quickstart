@@ -7,7 +7,7 @@ build-testing:
 	docker build --platform linux/amd64 -t stellar/quickstart:testing -f Dockerfile.testing .
 
 build-dev-deps:
-	docker build -t stellar-core:protocol19 -f docker/Dockerfile.testing https://github.com/sisuresh/stellar-core.git#cap21-40-2 --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
+	docker build -t stellar-core:protocol19 -f docker/Dockerfile.testing https://github.com/sisuresh/stellar-core.git#cap21-40-2 --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production'
 	docker build -t stellar-horizon:protocol19 -f services/horizon/docker/Dockerfile.dev --target=builder https://github.com/stellar/go.git#horizon-protocol-19
 	docker build -t stellar-friendbot:protocol19 -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#horizon-protocol-19
 
