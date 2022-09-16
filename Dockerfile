@@ -1,12 +1,14 @@
 ARG STELLAR_CORE_VERSION=19.3.0-1006.9ce6dc4e9.focal
 ARG HORIZON_VERSION=2.20.0-296
 ARG FRIENDBOT_VERSION=horizon-v2.20.0
+ARG SOROBAN_RPC_VERSION=horizon-v2.20.0
 
 FROM golang:1.19 as go
 
 ARG FRIENDBOT_VERSION
 
 RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
+RUN go install github.com/stellar/go/exp/services/soroban-rpc$SOROBAN_RPC_VERSION
 
 FROM ubuntu:20.04
 
@@ -29,6 +31,7 @@ ADD install /
 RUN ["chmod", "+x", "install"]
 RUN /install
 COPY --from=go /go/bin/friendbot /usr/local/bin/friendbot
+COPY --from=go /go/bin/soroban-rpc /usr/local/bin/soroban-rpc
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]

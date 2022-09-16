@@ -60,8 +60,20 @@ jobs:
         name: image-stellar-friendbot
         path: /tmp/image
 
+  build-stellar-soroban-rpc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Build Stellar-Soraban-Rpc Image
+      run: docker buildx build -f exp/services/soroban-rpc/docker/Dockerfile -t stellar-soroban-rpc -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#master
+    - name: Upload Stellar-Friendbot Image
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-stellar-friendbot
+        path: /tmp/image      
+
   build:
-    needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot]
+    needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot, build-stellar-soroban-rpc]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -82,12 +94,19 @@ jobs:
       with:
         name: image-stellar-friendbot
         path: /tmp/stellar-friendbot
+    - name: Download Stellar-Soraban-Rpc Image
+      uses: actions/download-artifact@v2
+      with:
+        name: image-stellar-soroban-rpc
+        path: /tmp/stellar-soroban-rpc 
     - name: Load Stellar-Core Image
       run: docker load -i /tmp/stellar-core/image
     - name: Load Stellar-Horizon Image
       run: docker load -i /tmp/stellar-horizon/image
     - name: Load Stellar-Friendbot Image
       run: docker load -i /tmp/stellar-friendbot/image
+    - name: Load Stellar-Soraban-Rpc Image
+      run: docker load -i /tmp/stellar-soroban-rpc/image  
     # Docker buildx cannot be used to build the dev quickstart image because
     # buildx does not yet support importing existing images, like the core and
     # horizon images above, into a buildx builder's cache. Buildx would be
@@ -95,7 +114,7 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build -f Dockerfile.dev -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot
+      run: docker build -f Dockerfile.dev -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
@@ -109,12 +128,12 @@ jobs:
     strategy:
       matrix:
         network: [testnet, pubnet, standalone]
-        options: ["", --enable-horizon-captive-core]
+        options: ["", "--enable-horizon-captive-core --enable-soroban-rpc"]
         exclude:
           - network: testnet
-            options: --enable-horizon-captive-core
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"
           - network: pubnet
-            options: --enable-horizon-captive-core
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -153,14 +172,15 @@ jobs:
         go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      # Horizon with captive-core is currently broken. Don't run the Friendbot
-      # test in captive-core mode since it will always fail while Horizon is not
-      # functioning with captive-core.
-      # See https://github.com/stellar/quickstart/issues/328 for more details.
-      if: ${{ matrix.network == 'standalone' && !contains(matrix.options, '--enable-horizon-captive-core') }}
+      if: ${{ matrix.network == 'standalone' }}
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         go run test_friendbot.go
+    - name: Run soroban rpc test
+      if: ${{ matrix.network == 'standalone' && contains(matrix.options, '--enable-soroban-rpc') }}
+      run: |
+        echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
+        go run test_soroban_rpc_up.go    
 
   push:
     # Push image to registry after build for pull requests from a local branch.

@@ -8,6 +8,7 @@ export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
 export NXHOME="$STELLAR_HOME/nginx"
+export SOROBAN_RPC_HOME="$STELLAR_HOME/soroban-rpc"
 
 export PGBIN="/usr/lib/postgresql/12/bin/"
 export PGDATA="$PGHOME/data"
@@ -15,6 +16,7 @@ export PGUSER="stellar"
 export PGPORT=5432
 
 ENABLE_HORIZON_CAPTIVE_CORE=false
+ENABLE_SOROBAN_RPC=false
 ENABLE_CORE_MANUAL_CLOSE=false
 ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=false
 
@@ -29,6 +31,10 @@ function main() {
   process_args $*
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    echo "--enable-soroban-rpc is only supported in the standalone network" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
@@ -86,6 +92,9 @@ function process_args() {
     --enable-horizon-captive-core)
       ENABLE_HORIZON_CAPTIVE_CORE=true
       ;;
+    --enable-soroban-rpc)
+      ENABLE_SOROBAN_RPC=true
+      ;;  
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
       ;;
@@ -206,6 +215,15 @@ function copy_defaults() {
     echo "horizon: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/horizon/ $HZHOME
+  fi
+
+  if [ -d $SOROBAN_RPC_HOME/etc ]; then
+    echo "horizon: config directory exists, skipping copy"
+  elif [  "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
+    if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
+      $CP /opt/stellar-default/$NETWORK/soroban-rpc/ $SOROBAN_RPC_HOME
+    fi
   fi
 
   if [ -d $FBHOME/etc ]; then
