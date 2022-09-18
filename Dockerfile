@@ -6,9 +6,10 @@ ARG SOROBAN_RPC_VERSION=horizon-v2.20.0
 FROM golang:1.19 as go
 
 ARG FRIENDBOT_VERSION
+ARG SOROBAN_RPC_VERSION
 
 RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
-RUN go install github.com/stellar/go/exp/services/soroban-rpc$SOROBAN_RPC_VERSION
+RUN go install github.com/stellar/go/exp/services/soroban-rpc@$SOROBAN_RPC_VERSION
 
 FROM ubuntu:20.04
 

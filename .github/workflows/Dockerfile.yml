@@ -17,6 +17,7 @@ concurrency:
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'latest') }}
+  SOROBAN_RPC_VERSION: latest 
 
 jobs:
   build:
@@ -27,7 +28,7 @@ jobs:
         ref: ${{ env.HEAD_SHA }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" -o type=docker,dest=/tmp/image --build-arg SOROBAN_RPC_VERSION="${{ env.SOROBAN_RPC_VERSION }}" .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
