@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,14 +12,18 @@ import (
 
 const timeout = 3 * time.Minute
 
-type RPCResponse struct {
+type RPCResult struct {
 	Status string `json:"status"`
+}
+
+type RPCResponse struct {
+	Result RPCResult `json:"result"`
 }
 
 func main() {
 	startTime := time.Now()
 
-    getHealthRPCRequest := []byte(`{
+	getHealthRPCRequest := []byte(`{
     	   "jsonrpc": "2.0",
     	   "id": 10235,
     	   "method": "getHealth"
@@ -33,7 +38,7 @@ func main() {
 			os.Exit(-1)
 		}
 
-		resp, err := http.Post("http://localhost:8000/soroban/rpc", "application/json",bytes.NewBuffer(getHealthRPCRequest))
+		resp, err := http.Post("http://localhost:8000/soroban/rpc", "application/json", bytes.NewBuffer(getHealthRPCRequest))
 		if err != nil {
 			logLine(err)
 			continue
@@ -47,7 +52,9 @@ func main() {
 			continue
 		}
 
-		if rpcResponse.Status == "healthy" {
+		logLine(fmt.Sprintf("Soroban RPC health reponse %v", rpcResponse))
+
+		if rpcResponse.Result.Status == "healthy" {
 			logLine("Soroban RPC has started!")
 			os.Exit(0)
 		}
