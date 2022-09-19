@@ -11,6 +11,7 @@ The image uses the following software:
 - Postgresql 12 is used for storing both stellar-core and horizon data
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
+- [soroban-rpc](https://github.com/stellar/go/tree/master/exp/services/soroban-rpc)
 - Supervisord is used from managing the processes of the services above
 
 ## Usage
@@ -63,6 +64,13 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/docker-stellar-core-horizon/tree/master)
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
+
+### Enable Optional Soroban RPC server
+
+You can run an instance of Soroban RPC server in the container also. At present the Soroban RPC server can only be enabled when using standalone network `--standalone`. Add the following command line flags to the `docker run` container invocation to enable Soroban RPC server to be launched:
+`--enable-horizon-captive-core --enable-soroban-rpc`
+
+You will then be able to connect to the Soroban RPC Server on port 8000 of the container, the root url path for Soroban RPC is `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol, and also refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp) 
 
 ### Background vs. Interactive containers
 
