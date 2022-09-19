@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         network: [testnet, pubnet, standalone]
-        options: ["", "--enable-horizon-captive-core --enable-soroban-rpc"]
+        options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
         exclude:
           - network: testnet
             options: "--enable-horizon-captive-core --enable-soroban-rpc"
