@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-while ! (curl -sf http://localhost:8001/ | jq --exit-status '.current_protocol_version > 0'); do
+while ! (curl -sf http://localhost:8001/ | jq --exit-status '.ingest_latest_ledger > 1'); do
   echo "Waiting for horizon to be available..."
   sleep 1
 done
