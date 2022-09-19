@@ -16,7 +16,7 @@ concurrency:
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'latest') }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'latest') }} 
 
 jobs:
   complete:
@@ -46,13 +46,14 @@ jobs:
     needs: build
     strategy:
       matrix:
+        # TODO, add futurenet and --enable-soroban-rpc to matrix of test cases
         network: [testnet, pubnet, standalone]
-        options: ["", --enable-horizon-captive-core]
+        options: ["", "--enable-horizon-captive-core"]
         exclude:
           - network: testnet
-            options: --enable-horizon-captive-core
+            options: "--enable-horizon-captive-core"
           - network: pubnet
-            options: --enable-horizon-captive-core
+            options: "--enable-horizon-captive-core"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -91,14 +92,16 @@ jobs:
         go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      # Horizon with captive-core is currently broken. Don't run the Friendbot
-      # test in captive-core mode since it will always fail while Horizon is not
-      # functioning with captive-core.
-      # See https://github.com/stellar/quickstart/issues/328 for more details.
-      if: ${{ matrix.network == 'standalone' && !contains(matrix.options, '--enable-horizon-captive-core') }}
+      if: ${{ matrix.network == 'standalone' }}
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         go run test_friendbot.go
+    # TODO, test soroban once released    
+    # - name: Run soroban rpc test
+    #  if: ${{ matrix.network == 'standalone' && contains(matrix.options, '--enable-soroban-rpc') }}
+    #  run: |
+    #    echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
+    #    go run test_soroban_rpc_up.go    
 
   push:
     # Push image to registry after build for pull requests from a local branch.
