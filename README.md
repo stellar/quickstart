@@ -11,6 +11,7 @@ The image uses the following software:
 - Postgresql 12 is used for storing both stellar-core and horizon data
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
+- [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
 - [soroban-rpc](https://github.com/stellar/go/tree/master/exp/services/soroban-rpc)
 - Supervisord is used from managing the processes of the services above
 
@@ -65,13 +66,16 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
-### Early Access, enable optional soroban RPC server
+### Soroban RPC Server
 
-You can run an instance of soroban rpc server in the container also. At present the Soroban RPC server is in early phases of development and can only be enabled when using standalone network `--standalone` and should only be used in a learning or development purpose for now, do not enable it for production environments. 
-Add the following command line flags to the `docker run` container invocation to enable Soroban RPC server to be launched:
-`--enable-horizon-captive-core --enable-soroban-rpc`
+**Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
-You will then be able to connect to the Soroban RPC Server on port 8000 of the container, the root url path for Soroban RPC is `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol, and also refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp) 
+This image contains the Soroban RPC server. It is supported only with the `--standalone` option.
+
+To enable the Soroban RPC server provide the following command line flags when starting the container:
+`--enable-soroban-rpc`
+
+The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
 ### Background vs. Interactive containers
 
