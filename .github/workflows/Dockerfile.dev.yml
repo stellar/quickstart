@@ -136,7 +136,9 @@ jobs:
     needs: build
     strategy:
       matrix:
-        network: [testnet, pubnet, standalone, futurenet]
+        # TODO when futurenet is ready 
+        # network: [testnet, pubnet, standalone, futurenet]
+        network: [testnet, pubnet, standalone]
         options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
         exclude:
           - network: testnet
