@@ -1,4 +1,4 @@
-name: Dockerfile.testing
+name: Dockerfile.image-Dockerfile-soroban-dev
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-testing', github.event.pull_request.number) || 'testing') }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-soroban-dev', github.event.pull_request.number) || 'soroban-dev') }}
 
 jobs:
   complete:
@@ -35,24 +35,28 @@ jobs:
         ref: ${{ env.HEAD_SHA }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Quickstart Image
-      run: docker buildx build -f Dockerfile.testing -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" -o type=docker,dest=/tmp/image .
+      run: docker buildx build -f Dockerfile.soroban-dev -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" -o type=docker,dest=/tmp/image .
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: image-Dockerfile-testing
+        name: image-Dockerfile-soroban-dev
         path: /tmp/image
 
   test:
     needs: build
     strategy:
       matrix:
-        network: [testnet, pubnet, standalone]
-        options: ["", "--enable-horizon-captive-core"]
+        network: [testnet, pubnet, standalone, futurenet]
+        options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
         exclude:
           - network: testnet
             options: "--enable-horizon-captive-core"
+          - network: testnet
+            options: "--enable-horizon-captive-core --enable-soroban-rpc" 
           - network: pubnet
             options: "--enable-horizon-captive-core"
+          - network: pubnet
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -61,7 +65,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-Dockerfile-testing
+        name: image-Dockerfile-soroban-dev
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -95,6 +99,11 @@ jobs:
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         go run test_friendbot.go     
+    - name: Run soroban rpc test
+      if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
+      run: |
+        echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
+        go run test_soroban_rpc_up.go    
 
   push:
     # Push image to registry after build for pull requests from a local branch.
@@ -112,7 +121,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-Dockerfile-testing
+        artifact_name: image-Dockerfile-soroban-dev
         artifact_image_file: image
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
@@ -135,7 +144,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-Dockerfile-testing
+        artifact_name: image-Dockerfile-soroban-dev
         artifact_image_file: image
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}

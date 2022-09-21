@@ -29,12 +29,12 @@ function main() {
   echo ""
 
   process_args $*
-  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    echo "--enable-horizon-captive-core usage only supported on standalone/futurenet networks" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    echo "--enable-soroban-rpc is only supported in the standalone network" >&2
+  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
@@ -81,6 +81,9 @@ function process_args() {
     --standalone)
       NETWORK="standalone"
       ;;
+    --futurenet)
+      NETWORK="futurenet"
+      ;;  
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
@@ -129,6 +132,10 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ;;
+  futurenet)
+    export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
+    export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-futurenet/core_futurenet_001"
+    ;;  
   *)
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
