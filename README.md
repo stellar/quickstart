@@ -41,6 +41,8 @@ In test network mode, the node will join the network that developers use while d
 
 #### `--futurenet`
 
+**Note that FutureNet is not yet deployed.**
+
 In futurenet network mode, the node will join a new development network that developers use while developing smart contracts on stellar. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the futurenet network.
 
 #### `--standalone`
@@ -72,14 +74,14 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 ### Soroban Dev
 
-For local development on smart contracts on stellar(aka soroban), it is recommended to run the soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+For local development on smart contracts on stellar(aka soroban), it is recommended to run a `standalone` network and the soroban stack locally via the `stellar/quickstart:soroban-dev` image:
 
 ```
 $ docker run --rm -it \
     -p "8000:8000" \
     --name stellar \
     stellar/quickstart:soroban-dev \
-    --futurenet \
+    --standalone \
     --enable-soroban-rpc
 ```
 

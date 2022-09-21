@@ -14,8 +14,6 @@ RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
 
 FROM ubuntu:20.04
 
-MAINTAINER Bartek Nowotarski <bartek@stellar.org>
-
 ARG STELLAR_CORE_VERSION
 ARG HORIZON_VERSION
 
