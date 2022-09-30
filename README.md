@@ -82,7 +82,8 @@ $ docker run --rm -it \
     --name stellar \
     stellar/quickstart:soroban-dev \
     --standalone \
-    --enable-soroban-rpc
+    --enable-soroban-rpc \
+    --protocol-version 20
 ```
 
 This will run most recent versions of smart contract(soroban) enabled: stellar core, stellar horizon, soroban rpc server. Additionally, if you want to run even more bleeding edge versions of that stack locally, it is possible to checkout [quickstart](https://github.com/stellar/quickstart.git) repo, edit `Dockerfile.soroban-dev` change `STELLAR_CORE_VERSION` and `HORIZON_VERSION` to newer debian package versions and then run `make build-soroban-dev`
