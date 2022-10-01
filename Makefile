@@ -10,7 +10,7 @@ build-testing:
 	docker build --platform linux/amd64 -t stellar/quickstart:testing -f Dockerfile.testing .
 
 build-soroban-dev:
-	docker build --platform linux/amd64 -t stellar/quickstart:soroban-dev -f Dockerfile.soroban-dev .
+	docker build --platform linux/amd64 --no-cache -t stellar/quickstart:soroban-dev -f Dockerfile.soroban-dev .
 
 build-dev-deps:
 	docker build --platform linux/amd64 -t stellar-core:dev -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REPO_BRANCH) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
