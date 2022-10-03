@@ -46,13 +46,25 @@ jobs:
     needs: build
     strategy:
       matrix:
+        # TODO when futurenet is up AND horizon released with p20/soroban support 
+        # network: [testnet, pubnet, standalone, futurenet]
+        # options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
         network: [testnet, pubnet, standalone]
         options: ["", "--enable-horizon-captive-core"]
         exclude:
           - network: testnet
             options: "--enable-horizon-captive-core"
+          - network: testnet
+            options: "--enable-horizon-captive-core --enable-soroban-rpc" 
           - network: pubnet
             options: "--enable-horizon-captive-core"
+          - network: pubnet
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"
+          - network: futurenet
+            options: "--enable-horizon-captive-core"
+
+
+
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
