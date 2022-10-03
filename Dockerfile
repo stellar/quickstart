@@ -45,6 +45,7 @@ ADD common /opt/stellar-default/common
 ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD standalone /opt/stellar-default/standalone
+ADD futurenet /opt/stellar-default/futurenet
 
 
 ADD start /
