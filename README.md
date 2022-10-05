@@ -74,7 +74,7 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 ### Soroban Development
 
-For local development on smart contracts on stellar(aka soroban), it is recommended to run a `standalone` network and the soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
 
 ```
 $ docker run --rm -it \
