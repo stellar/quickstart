@@ -72,7 +72,7 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
-### Soroban Dev
+### Soroban Development
 
 For local development on smart contracts on stellar(aka soroban), it is recommended to run a `standalone` network and the soroban stack locally via the `stellar/quickstart:soroban-dev` image:
 
