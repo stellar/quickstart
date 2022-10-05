@@ -41,9 +41,9 @@ In test network mode, the node will join the network that developers use while d
 
 #### `--futurenet`
 
-**Note that FutureNet is not yet deployed.**
+In futurenet network mode, the node will join the [Soroban] test network that developers use while developing smart contracts on Stellar.
 
-In futurenet network mode, the node will join a new development network that developers use while developing smart contracts on stellar. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the futurenet network.
+[Soroban]: https://soroban.stellar.org
 
 #### `--standalone`
 
