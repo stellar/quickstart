@@ -72,9 +72,9 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
-### Soroban Dev
+### Soroban Development
 
-For local development on smart contracts on stellar(aka soroban), it is recommended to run a `standalone` network and the soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
 
 ```
 $ docker run --rm -it \
@@ -86,7 +86,19 @@ $ docker run --rm -it \
     --protocol-version 20
 ```
 
-This will run most recent versions of smart contract(soroban) enabled: stellar core, stellar horizon, soroban rpc server. Additionally, if you want to run even more bleeding edge versions of that stack locally, it is possible to checkout [quickstart](https://github.com/stellar/quickstart.git) repo, edit `Dockerfile.soroban-dev` change `STELLAR_CORE_VERSION` and `HORIZON_VERSION` to newer debian package versions and then run `make build-soroban-dev`
+This will run development versions stellar-core, horizon, friendbot, and soroban-rpc server that have Soroban enabled.
+
+If you want to run even more bleeding edge versions of that stack locally, you can build the soroban-dev image with custom versions of stellar-core, horizon, etc:
+```
+docker build \
+    --platform linux/amd64 \
+    --no-cache \
+    -t stellar/quickstart:soroban-dev \
+    -f Dockerfile.soroban-dev \
+    --arg STELLAR_CORE_VERSION=... \
+    --arg HORIZON_VERSION=... \
+    git://github.com/stellar/quickstart
+```
 
 **Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
