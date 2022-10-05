@@ -62,7 +62,6 @@ jobs:
             options: "--enable-horizon-captive-core --enable-soroban-rpc"
           - network: futurenet
             options: "--enable-horizon-captive-core"
-
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

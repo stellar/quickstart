@@ -206,13 +206,10 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    echo "copied default stuff"
-    if [ "$ENABLE_SOROBAN_RPC" = "true" ] && [ -f /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf ]; then
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d
-    fi
-    if [ -f /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf ]; then
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d
-    fi
+    if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    fi  
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
 
   if [ -d $COREHOME/etc ]; then
