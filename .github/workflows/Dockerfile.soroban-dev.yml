@@ -47,16 +47,24 @@ jobs:
     strategy:
       matrix:
         network: [testnet, pubnet, standalone, futurenet]
-        options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
+        options: ["", "--enable-horizon-captive-core", "--enable-soroban-rpc", "--enable-horizon-captive-core --enable-soroban-rpc"]
         exclude:
           - network: testnet
             options: "--enable-horizon-captive-core"
+          - network: testnet
+            options: "--enable-soroban-rpc"  
           - network: testnet
             options: "--enable-horizon-captive-core --enable-soroban-rpc" 
           - network: pubnet
             options: "--enable-horizon-captive-core"
           - network: pubnet
+            options: "--enable-soroban-rpc"  
+          - network: pubnet
             options: "--enable-horizon-captive-core --enable-soroban-rpc"
+          - network: futurenet
+            options: "--enable-horizon-captive-core"
+          - network: futurenet
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"  
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
