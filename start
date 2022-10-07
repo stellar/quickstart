@@ -376,6 +376,12 @@ export CAPTIVE_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
 EOF
   fi
 
+  if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
+    cat << EOF >> etc/horizon.env
+export INGEST_DISABLE_STATE_VERIFICATION=True
+EOF
+  fi
+
   start_postgres
   run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
   if [ "$NETWORK" == "standalone" ]; then
