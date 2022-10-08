@@ -145,7 +145,7 @@ jobs:
           - network: testnet
             options: "--enable-horizon-captive-core"
           - network: testnet
-            options: "--enable-horizon-captive-core --enable-soroban-rpc" 
+            options: "--enable-horizon-captive-core --enable-soroban-rpc"
           - network: pubnet
             options: "--enable-horizon-captive-core"
           - network: pubnet
