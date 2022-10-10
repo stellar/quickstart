@@ -82,11 +82,10 @@ $ docker run --rm -it \
     --name stellar \
     stellar/quickstart:soroban-dev \
     --standalone \
-    --enable-soroban-rpc \
-    --protocol-version 20
+    --enable-soroban-rpc
 ```
 
-This will run development versions stellar-core, horizon, friendbot, and soroban-rpc server that have Soroban enabled.
+This will run development versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
 
 If you want to run even more bleeding edge versions of that stack locally, you can build the soroban-dev image with custom versions of stellar-core, horizon, etc:
 ```
