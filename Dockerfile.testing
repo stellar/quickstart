@@ -1,19 +1,18 @@
 ARG STELLAR_CORE_VERSION=19.4.0-1075.39bee1a2b.focal
 ARG HORIZON_VERSION=2.20.0-296
 ARG FRIENDBOT_VERSION=horizon-v2.20.0
-ARG SOROBAN_RPC_VERSION=latest
+# TODO, when horizon released with p20/soroban support
+# ARG SOROBAN_RPC_VERSION=x.y.z - this may be same version as horizon
 
 FROM golang:1.19 as go
 
 ARG FRIENDBOT_VERSION
-ARG SOROBAN_RPC_VERSION
 
 RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
-RUN go install github.com/stellar/go/exp/services/soroban-rpc@$SOROBAN_RPC_VERSION
+# TODO, when horizon released with p20/soroban support
+#RUN go install github.com/stellar/go/exp/services/soroban-rpc@$SOROBAN_RPC_VERSION
 
 FROM ubuntu:20.04
-
-MAINTAINER Bartek Nowotarski <bartek@stellar.org>
 
 ARG STELLAR_CORE_VERSION
 ARG HORIZON_VERSION
@@ -32,7 +31,8 @@ ADD install /
 RUN ["chmod", "+x", "install"]
 RUN /install
 COPY --from=go /go/bin/friendbot /usr/local/bin/friendbot
-COPY --from=go /go/bin/soroban-rpc /usr/local/bin/soroban-rpc
+# TODO, when horizon released with p20/soroban support
+#COPY --from=go /go/bin/soroban-rpc /usr/local/bin/soroban-rpc
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
@@ -44,6 +44,7 @@ ADD common /opt/stellar-default/common
 ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD standalone /opt/stellar-default/standalone
+ADD futurenet /opt/stellar-default/futurenet
 
 
 ADD start /

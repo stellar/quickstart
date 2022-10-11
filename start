@@ -30,11 +30,11 @@ function main() {
 
   process_args $*
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    echo "--enable-horizon-captive-core is only supported in the standalone network" >&2
+    echo "--enable-horizon-captive-core usage only supported on standalone networks" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    echo "--enable-soroban-rpc is only supported in the standalone network" >&2
+  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
@@ -81,6 +81,9 @@ function process_args() {
     --standalone)
       NETWORK="standalone"
       ;;
+    --futurenet)
+      NETWORK="futurenet"
+      ;;  
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
@@ -129,6 +132,10 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ;;
+  futurenet)
+    export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
+    export HISTORY_ARCHIVE_URLS="http://history-futurenet.stellar.org"
+    ;;  
   *)
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
@@ -199,9 +206,10 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    if [ -d /opt/stellar-default/$NETWORK/supervisor/ ]; then
-      $CP /opt/stellar-default/$NETWORK/supervisor/ $SUPHOME
-    fi
+    if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    fi  
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
 
   if [ -d $COREHOME/etc ]; then
@@ -219,7 +227,7 @@ function copy_defaults() {
 
   if [ -d $SOROBAN_RPC_HOME/etc ]; then
     echo "soroban-rpc: config directory exists, skipping copy"
-  elif [  "$ENABLE_SOROBAN_RPC" = "true" ]; then
+  else
     $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
     if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
       $CP /opt/stellar-default/$NETWORK/soroban-rpc/ $SOROBAN_RPC_HOME
@@ -365,6 +373,12 @@ function init_horizon() {
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
 export CAPTIVE_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
+EOF
+  fi
+
+  if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
+    cat << EOF >> etc/horizon.env
+export INGEST_DISABLE_STATE_VERIFICATION=True
 EOF
   fi
 

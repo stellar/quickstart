@@ -39,6 +39,12 @@ In public network mode, the node will join the public, production Stellar networ
 
 In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
 
+#### `--futurenet`
+
+In futurenet network mode, the node will join the [Soroban] test network that developers use while developing smart contracts on Stellar.
+
+[Soroban]: https://soroban.stellar.org
+
 #### `--standalone`
 
 In standalone network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
@@ -66,16 +72,42 @@ In order to get started quickly, you can deploy the docker image to a DigitalOce
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
-### Soroban RPC Server
+### Soroban Development
+
+For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+
+```
+$ docker run --rm -it \
+    -p "8000:8000" \
+    --name stellar \
+    stellar/quickstart:soroban-dev \
+    --standalone \
+    --enable-soroban-rpc
+```
+
+This will run development versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
+
+If you want to run even more bleeding edge versions of that stack locally, you can build the soroban-dev image with custom versions of stellar-core, horizon, etc:
+```
+docker build \
+    --platform linux/amd64 \
+    --no-cache \
+    -t stellar/quickstart:soroban-dev \
+    -f Dockerfile.soroban-dev \
+    --arg STELLAR_CORE_VERSION=... \
+    --arg HORIZON_VERSION=... \
+    git://github.com/stellar/quickstart
+```
 
 **Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
-This image contains the Soroban RPC server. It is supported only with the `--standalone` option.
+The Soroban RPC server is supported only with the `--standalone` and `--futurenet` network options.
 
 To enable the Soroban RPC server provide the following command line flags when starting the container:
 `--enable-soroban-rpc`
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+
 
 ### Background vs. Interactive containers
 
