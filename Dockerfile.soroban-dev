@@ -1,7 +1,7 @@
 ARG STELLAR_CORE_VERSION=19.4.1-1097.4e813f20e.focal~soroban
 ARG HORIZON_VERSION=2.22.0~soroban-304
-ARG FRIENDBOT_VERSION=soroban-xdr-next
-ARG SOROBAN_RPC_VERSION=soroban-xdr-next
+ARG FRIENDBOT_VERSION=soroban-rpc-v0.0.1-alpha
+ARG SOROBAN_RPC_VERSION=soroban-rpc-v0.0.1-alpha
 
 FROM golang:1.19 as go
 
