@@ -1,6 +1,6 @@
 ARG STELLAR_CORE_VERSION=19.4.0-1075.39bee1a2b.focal
-ARG HORIZON_VERSION=2.20.0-296
-ARG FRIENDBOT_VERSION=horizon-v2.20.0
+ARG HORIZON_VERSION=2.22.1-309
+ARG FRIENDBOT_VERSION=horizon-v2.22.1
 # TODO, when soroban-rpc is released
 # ARG SOROBAN_RPC_VERSION=x.y.z - this may be same version as horizon
 
