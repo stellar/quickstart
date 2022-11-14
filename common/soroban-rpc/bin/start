@@ -10,4 +10,4 @@ done
 
 echo "starting soroban-rpc..."
 source /opt/stellar/soroban-rpc/etc/soroban-rpc.env
-exec /usr/local/bin/soroban-rpc
+exec /usr/bin/stellar-soroban-rpc

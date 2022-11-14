@@ -9,5 +9,6 @@ echo "deb https://apt.stellar.org focal unstable" >/etc/apt/sources.list.d/SDF-u
 apt-get update
 apt-get install -y stellar-core=${STELLAR_CORE_VERSION}
 apt-get install -y stellar-horizon=${HORIZON_VERSION}
+apt-get install -y stellar-soroban-rpc=${SOROBAN_RPC_VERSION}
 apt-get clean
 echo "\nDone installing stellar-core and horizon...\n"
