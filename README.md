@@ -12,7 +12,7 @@ The image uses the following software:
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
-- [soroban-rpc](https://github.com/stellar/go/tree/master/exp/services/soroban-rpc)
+- [soroban-rpc](https://github.com/stellar/soroban-tools/tree/main/cmd/soroban-rpc)
 - Supervisord is used from managing the processes of the services above
 
 ## Usage
