@@ -58,6 +58,7 @@ function main() {
   init_stellar_core
   init_horizon
   copy_pgpass
+  init_soroban_rpc
 
   stop_postgres  # this gets started in init_db
 
@@ -387,6 +388,28 @@ EOF
   if [ "$NETWORK" == "standalone" ]; then
     run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
   fi
+
+  touch .quickstart-initialized
+  popd
+}
+
+function init_soroban_rpc() {
+
+  if [ "$ENABLE_SOROBAN_RPC" != "true" ]; then
+    return 0
+  fi   
+
+  if [ -f $SOROBAN_RPC_HOME/.quickstart-initialized ]; then
+    echo "soroban rpc: already initialized"
+    return 0
+  fi
+  pushd $SOROBAN_RPC_HOME
+
+  run_silent "init-soroban-rpc" chown stellar:stellar .
+
+  sed -ri \
+    -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
+    etc/soroban-rpc.env
 
   touch .quickstart-initialized
   popd
