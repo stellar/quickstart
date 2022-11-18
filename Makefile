@@ -1,8 +1,8 @@
 __PHONY__: build build-testing build-dev build-dev-deps
 
-GO_REPO_BRANCH=master	
 CORE_REPO_BRANCH=master
 SOROBAN_TOOLS_REPO_BRANCH=main
+GO_REPO_BRANCH := $(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_TOOLS_REPO_BRANCH))
 
 build:
 	docker build --platform linux/amd64 -t stellar/quickstart -f Dockerfile .
