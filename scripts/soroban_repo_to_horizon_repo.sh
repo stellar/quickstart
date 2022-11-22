@@ -1,5 +1,3 @@
-SOROBAN_REPO_BRANCH=$1
-
 #!/usr/bin/env bash
 
 # soroban_repo_to_horizon_repo.sh - given a soroban branch to horizon branch
@@ -9,6 +7,7 @@ SOROBAN_REPO_BRANCH=$1
 # Examples: soroban_repo_to_horizon_repo.sh main
 
 set -e
+
 if [ "$#" -ne 1 ]; then
     echo "Syntax: soroban_repo_to_horizon_repo.sh <soroban_branch_name>"
     exit 1
