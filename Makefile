@@ -1,7 +1,7 @@
 __PHONY__: build build-testing build-dev build-dev-deps
 
-CORE_REPO_BRANCH=master
-SOROBAN_TOOLS_REPO_BRANCH=main
+CORE_REPO_BRANCH=49562bd9a91f4bbf572f7ded90f54fa9d91f8957 # futurenet is b3a6bc28116e80bff7889c2f3bcd7c30dd1ac4d6
+SOROBAN_TOOLS_REPO_BRANCH=46e72d89f5201ecd67c729dd9f29b59df991d9aa
 GO_REPO_BRANCH := $(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_TOOLS_REPO_BRANCH))
 
 build:
@@ -14,7 +14,7 @@ build-soroban-dev:
 	docker build --no-cache -t stellar/quickstart:soroban-dev -f Dockerfile.soroban-dev .
 
 build-dev-deps-core:
-	docker build -t stellar-core:dev -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REPO_BRANCH) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
+	docker build -t stellar-core:dev -f docker/Dockerfile.testing https://github.com/leighmcculloch/stellar--stellar-core.git#$(CORE_REPO_BRANCH) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production'
 
 build-dev-deps-horizon:
 	docker build -t stellar-horizon:dev -f services/horizon/docker/Dockerfile.dev --target builder https://github.com/stellar/go.git#$(GO_REPO_BRANCH)
