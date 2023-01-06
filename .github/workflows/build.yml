@@ -2,9 +2,9 @@ on:
   workflow_call:
     secrets:
       DOCKERHUB_USERNAME:
-        required: false:
+        required: false
       DOCKERHUB_TOKEN:
-        required: false:
+        required: false
     inputs:
       tag:
         description: 'Tag to use on the image name'
