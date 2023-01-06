@@ -1,19 +1,14 @@
-ARG STELLAR_CORE_VERSION=19.6.0-1138.b3a6bc281.focal
-ARG HORIZON_VERSION=2.23.0-317
-ARG FRIENDBOT_VERSION=horizon-v2.23.0
-ARG SOROBAN_RPC_VERSION=
+ARG STELLAR_CORE_IMAGE_REF
+ARG HORIZON_IMAGE_REF
+ARG FRIENDBOT_IMAGE_REF
+ARG SOROBAN_RPC_IMAGE_REF
 
-FROM golang:1.19 as go
-
-ARG FRIENDBOT_VERSION
-
-RUN go install github.com/stellar/go/services/friendbot@$FRIENDBOT_VERSION
+FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
+FROM $HORIZON_IMAGE_REF AS horizon
+FROM $FRIENDBOT_IMAGE_REF AS friendbot
+FROM $SOROBAN_RPC_IMAGE_REF AS soroban-rpc
 
 FROM ubuntu:20.04
-
-ARG STELLAR_CORE_VERSION
-ARG HORIZON_VERSION
-ARG SOROBAN_RPC_VERSION
 
 EXPOSE 5432
 EXPOSE 8000
@@ -25,10 +20,16 @@ ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-ADD install /
-RUN ["chmod", "+x", "install"]
-RUN /install
-COPY --from=go /go/bin/friendbot /usr/local/bin/friendbot
+RUN apt-get -y install libunwind8 postgresql curl sqlite iproute2 libc++abi1-10 libc++1-10
+COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
+
+COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
+
+COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
+
+COPY --from=soroban-rpc /bin/soroban-rpc /usr/bin/stellar-soroban-rpc
+
+RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
