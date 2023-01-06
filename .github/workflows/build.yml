@@ -40,7 +40,7 @@ jobs:
       run: exit 1
 
   build-stellar-core:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-cores
     steps:
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Core Image
