@@ -23,7 +23,7 @@ build-dev-deps-friendbot:
 	docker build --platform linux/amd64 -t stellar-friendbot:dev -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(GO_REPO_BRANCH)
 
 build-dev-deps-soroban-rpc:
-	docker build --platform linux/amd64 -t stellar-soroban-rpc:dev -f cmd/soroban-rpc/docker/Dockerfile https://github.com/stellar/soroban-tools.git#$(SOROBAN_TOOLS_REPO_BRANCH)
+	docker build --platform linux/amd64 -t stellar-soroban-rpc:dev -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_TOOLS_REPO_BRANCH)
 
 # the build-dev-deps have the four dependencies for the building of the
 # dockers for core, horizon, friendbot and soroban-rpc. Specifying these as dependencies

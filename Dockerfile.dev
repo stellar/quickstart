@@ -27,7 +27,7 @@ COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 
-COPY --from=soroban-rpc /app/soroban-rpc /usr/bin/stellar-soroban-rpc
+COPY --from=soroban-rpc /bin/soroban-rpc /usr/bin/stellar-soroban-rpc
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
