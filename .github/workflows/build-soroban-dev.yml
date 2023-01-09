@@ -34,3 +34,8 @@ jobs:
       core_ref: c0ad35aa19297e112d71fcc5755458495f99a237
       go_ref: soroban-v0.0.4
       soroban_tools_ref: v0.3.3
+      test_matrix: |
+        {
+          "network": ["standalone"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
+        }

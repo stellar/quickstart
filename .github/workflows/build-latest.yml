@@ -34,3 +34,12 @@ jobs:
       core_ref: v19.6.0
       go_ref: horizon-v2.23.0
       soroban_tools_ref: v0.4.0
+      test_matrix: |
+        {
+          "network": ["testnet", "pubnet", "standalone"],
+          "options": ["", "--enable-horizon-captive-core"],
+          "exclude": [
+            { "network": "testnet", "options": "--enable-horizon-captive-core" },
+            { "network": "pubnet", "options": "--enable-horizon-captive-core" },
+          ]
+        }

@@ -22,6 +22,10 @@ on:
         description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
         type: 'string'
         required: true
+      test_matrix:
+        description: 'JSON matrix for the test job'
+        type: 'string'
+        required: true
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -162,23 +166,7 @@ jobs:
   test:
     needs: build
     strategy:
-      matrix:
-        # TODO when futurenet is up AND master branch of horizon has latest P20 xdr merged in 
-        # network: [testnet, pubnet, standalone, futurenet]
-        # options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
-        network: [testnet, pubnet, standalone]
-        options: ["", "--enable-horizon-captive-core"]
-        exclude:
-          - network: testnet
-            options: "--enable-horizon-captive-core"
-          - network: testnet
-            options: "--enable-horizon-captive-core --enable-soroban-rpc"
-          - network: pubnet
-            options: "--enable-horizon-captive-core"
-          - network: pubnet
-            options: "--enable-horizon-captive-core --enable-soroban-rpc"
-          - network: futurenet
-            options: "--enable-horizon-captive-core"
+      matrix: ${{ fromJSON() }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
