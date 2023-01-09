@@ -1,4 +1,4 @@
-name: Build :soroban-dev
+name: Soroban-Dev
 
 on:
   push:
