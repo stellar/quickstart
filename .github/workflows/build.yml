@@ -166,7 +166,7 @@ jobs:
   test:
     needs: build
     strategy:
-      matrix: ${{ fromJSON() }}
+      matrix: ${{ fromJSON(inputs.test_matrix) }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
