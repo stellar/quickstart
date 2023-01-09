@@ -36,6 +36,7 @@ jobs:
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
+          "platform": ["linux/amd64", "linux/arm64"],
           "network": ["standalone"],
           "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
