@@ -30,10 +30,10 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag: latest
+      tag: soroban-dev
       core_ref: c0ad35aa19297e112d71fcc5755458495f99a237
       go_ref: soroban-v0.0.4
-      soroban_tools_ref: v0.3.3
+      soroban_tools_ref: v0.4.0
       test_matrix: |
         {
           "network": ["standalone"],

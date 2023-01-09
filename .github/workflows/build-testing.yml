@@ -30,7 +30,7 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag: latest
+      tag: testing
       core_ref: v19.6.0
       go_ref: horizon-v2.23.0
       soroban_tools_ref: v0.4.0
