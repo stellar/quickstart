@@ -34,6 +34,7 @@ jobs:
       # of software that have been informally released to the futurenet network.
       tag: soroban-dev
       core_ref: c0ad35aa19297e112d71fcc5755458495f99a237
+      core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       go_ref: soroban-v0.0.4
       soroban_tools_ref: v0.4.0
       test_matrix: |
