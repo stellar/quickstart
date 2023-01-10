@@ -18,7 +18,6 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
-        required: true
       go_ref:
         description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
         type: 'string'
