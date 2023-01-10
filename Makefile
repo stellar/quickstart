@@ -8,7 +8,7 @@ build-soroban-dev:
 	docker build --no-cache -t stellar/quickstart:soroban-dev -f Dockerfile.soroban-dev .
 
 build-deps-core:
-	docker build -t stellar-core:dev -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REPO_BRANCH) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CFLAGS='' --build-arg CXXFLAGS='-stdlib=libc++' --build-arg CONFIGURE_FLAGS='--disable-tests'
+	docker build -t stellar-core:dev -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REPO_BRANCH) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS='--disable-tests'
 
 build-deps-horizon:
 	docker build -t stellar-horizon:dev -f services/horizon/docker/Dockerfile.dev --target builder https://github.com/stellar/go.git#$(GO_REPO_BRANCH)
