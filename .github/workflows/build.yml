@@ -60,7 +60,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-core-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-cores
     steps:
     - id: cache
       uses: actions/cache@v3
