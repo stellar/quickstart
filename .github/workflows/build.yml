@@ -168,7 +168,7 @@ jobs:
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: image-Dockerfile-dev
+        name: image
         path: /tmp/image
 
   test:
@@ -183,7 +183,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-Dockerfile-dev
+        name: image
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -239,7 +239,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-Dockerfile-dev
+        artifact_name: image
         artifact_image_file: image
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
@@ -262,7 +262,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-Dockerfile
+        artifact_name: image
         artifact_image_file: image
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
