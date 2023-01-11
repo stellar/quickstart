@@ -87,18 +87,6 @@ $ docker run --rm -it \
 
 This will run development versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
 
-If you want to run even more bleeding edge versions of that stack locally, you can build the soroban-dev image with custom versions of stellar-core, horizon, etc:
-```
-docker build \
-    --platform linux/amd64 \
-    --no-cache \
-    -t stellar/quickstart:soroban-dev \
-    -f Dockerfile.soroban-dev \
-    --arg STELLAR_CORE_VERSION=... \
-    --arg HORIZON_VERSION=... \
-    git://github.com/stellar/quickstart
-```
-
 **Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
 The Soroban RPC server is supported only with the `--standalone` and `--futurenet` network options.
