@@ -10,7 +10,7 @@ build-deps-core:
 	docker build -t stellar-core:$(TAG) -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
 
 build-deps-horizon:
-	docker build -t stellar-horizon:$(TAG) -f services/horizon/docker/Dockerfile.dev --target builder https://github.com/stellar/go.git#$(GO_REF) --build-arg VERSION="$(GO_REF)"
+	docker build -t stellar-horizon:$(TAG) -f Dockerfile.horizon --target builder . --build-arg REF="$(GO_REF)"
 
 build-deps-friendbot:
 	docker build -t stellar-friendbot:$(TAG) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(GO_REF)
