@@ -25,7 +25,7 @@ jobs:
       run: exit 1
 
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/build-images.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
