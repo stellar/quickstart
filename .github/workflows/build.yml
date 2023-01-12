@@ -179,6 +179,8 @@ jobs:
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
+    - name: Pull Base Image
+      run: docker pull --platform linux/${{ inputs.arch }} ubuntu:20.04
     # Docker buildx cannot be used to build the dev quickstart image because
     # buildx does not yet support importing existing images, like the core and
     # horizon images above, into a buildx builder's cache. Buildx would be
@@ -186,7 +188,7 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build --platform linux/${{ inputs.arch }} --pull -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
+      run: docker build --platform linux/${{ inputs.arch }} -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
