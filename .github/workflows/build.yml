@@ -40,7 +40,7 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      platform: linux/amd64
+      arch: amd64
       tag: ${{ inputs.tag }}-amd64
       core_ref: ${{ inputs.core_ref }}
       go_ref: ${{ inputs.go_ref }}
@@ -54,7 +54,7 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      platform: linux/arm64
+      arch: arm64
       tag: ${{ inputs.tag }}-arm64
       core_ref: ${{ inputs.core_ref }}
       go_ref: ${{ inputs.go_ref }}
