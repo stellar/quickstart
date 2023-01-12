@@ -271,6 +271,7 @@ jobs:
         head_sha: ${{ env.HEAD_SHA }}
         artifact_name: image-${{ inputs.arch }}
         artifact_image_file: image
+        arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
@@ -294,6 +295,7 @@ jobs:
         head_sha: ${{ env.HEAD_SHA }}
         artifact_name: image-${{ inputs.arch }}
         artifact_image_file: image
+        arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
