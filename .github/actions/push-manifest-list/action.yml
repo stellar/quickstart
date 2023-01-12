@@ -1,0 +1,66 @@
+name: 'Push Manifest List'
+inputs:
+  head_sha:
+    required: true
+  image:
+    description: 'The image name of the manifest list to create containing the images.'
+    required: true
+  images:
+    description: 'A space separated list of images to include in the manifest list.'
+    required: true
+  registry:
+    required: true
+    default: ghcr.io
+  username:
+    required: true
+    default: ${{ github.actor }}
+  password:
+    required: true
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    -
+      id: image_parts
+      shell: bash
+      run: |
+        IMAGE_TAGLESS=$(echo ${{ inputs.image }} | cut -d':' -f1)
+        IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)
+        IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)
+        echo "::set-output name=repo::$IMAGE_REPO"
+        echo "::set-output name=tag::$IMAGE_TAG"
+    -
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+    -
+      shell: bash
+      run: echo "IMAGE_URL=https://${{ inputs.image }}" >> $GITHUB_ENV
+    -
+      if: ${{ inputs.registry == 'docker.io' }}
+      shell: bash
+      run: |
+        echo "IMAGE_URL=https://hub.docker.com/r/${{ steps.image_parts.outputs.repo }}/tags?name=${{ steps.image_parts.outputs.tag }}" >> $GITHUB_ENV
+    -
+      shell: bash
+      run: |
+        docker manifest create ${{ inputs.image }} ${{ inputs.images }}
+    -
+      shell: bash
+      run: |
+        docker manifest push ${{ inputs.image }}
+    -
+      uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ inputs.head_sha }}',
+            state: 'success',
+            context: `${context.workflow}`,
+            target_url: '${{ env.IMAGE_URL }}',
+            description: '${{ inputs.image }}',
+          });
