@@ -3,7 +3,7 @@ spec:
   services:
   - image:
       registry_type: DOCKER_HUB
-      registry: docker.io
+      registry: hub.docker.com
       repository: stellar/quickstart
       tag: latest
     name: docker-stellar-core-horizon
