@@ -1,4 +1,8 @@
-name: Testing
+name: Latest
+
+# The `:latest` tag should only ever be formally released versions of
+# software. That means each ref should only ever be specified as a version
+# tag for software that's been released which is not a release candidate.
 
 on:
   push:
@@ -25,16 +29,13 @@ jobs:
       run: exit 1
 
   build:
-    uses: ./.github/workflows/build-images.yml
+    uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      # The `:testing` tag should only ever be formally released or release
-      # candidate versions of software. That means each ref should only ever be
-      # specified as a version tag for software that's either the latest release
-      # candidate or latest release.
-      tag: testing
+      arch: amd64
+      tag: latest
       core_ref: v19.6.0
       go_ref: horizon-v2.23.0
       soroban_tools_ref: v0.4.0
