@@ -31,10 +31,6 @@ on:
         type: 'string'
         required: true
 
-env:
-  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
-
 jobs:
 
   image-amd64:
@@ -43,9 +39,9 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      sha: ${{ env.HEAD_SHA }}
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
       platform: linux/amd64
-      image: ${{ env.IMAGE }}-amd64
+      IMAGE: ${{ format('{0}/{1}:{2}-amd64', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
       core_ref: ${{ inputs.core_ref }}
       go_ref: ${{ inputs.go_ref }}
       soroban_tools_ref: ${{ inputs.soroban_tools_ref }}
@@ -57,9 +53,9 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      sha: ${{ env.HEAD_SHA }}
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
       platform: linux/arm64
-      image: ${{ env.IMAGE }}-arm64
+      IMAGE: ${{ format('{0}/{1}:{2}-arm64', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
       core_ref: ${{ inputs.core_ref }}
       go_ref: ${{ inputs.go_ref }}
       soroban_tools_ref: ${{ inputs.soroban_tools_ref }}
