@@ -41,7 +41,7 @@ on:
     outputs:
       image:
         description: 'Image pushed as a result of this build'
-        value: ${{ env.IMAGE }}
+        value: ${{ jobs.build.outputs.image }}
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -150,6 +150,8 @@ jobs:
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot, build-stellar-soroban-rpc]
+    outputs:
+      image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -187,6 +189,9 @@ jobs:
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
+    - id: image
+      name: Image Name
+      run: echo "name=$IMAGE" >> $GITHUB_OUTPUT
     - name: Pull Base Image
       run: docker pull --platform linux/${{ inputs.arch }} ubuntu:20.04
     # Docker buildx cannot be used to build the dev quickstart image because
