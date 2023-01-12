@@ -87,18 +87,6 @@ $ docker run --rm -it \
 
 This will run development versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
 
-If you want to run even more bleeding edge versions of that stack locally, you can build the soroban-dev image with custom versions of stellar-core, horizon, etc:
-```
-docker build \
-    --platform linux/amd64 \
-    --no-cache \
-    -t stellar/quickstart:soroban-dev \
-    -f Dockerfile.soroban-dev \
-    --arg STELLAR_CORE_VERSION=... \
-    --arg HORIZON_VERSION=... \
-    git://github.com/stellar/quickstart
-```
-
 **Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
 The Soroban RPC server is supported only with the `--standalone` and `--futurenet` network options.
@@ -108,6 +96,31 @@ To enable the Soroban RPC server provide the following command line flags when s
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
+### Building Custom Images
+
+To build a quickstart image with custom or specific versions of stellar-core,
+horizon, etc, use the `Makefile`. The following parameters can be specified to
+customize the version of each component, and for stellar-core the features it is
+built with.
+
+- `TAG`: The docker tag to assign to the build. Default `dev`.
+- `CORE_REF`: The git reference of stellar-core to build.
+- `CORE_CONFIGURE_FLAGS`: The `CONFIGURE_FLAGS` to configure the stellar-core
+build with. Typically include `--disable-tests`, and to enable the next protocol
+version that is still in development, add
+`--enable-next-protocol-version-unsafe-for-production`.
+- `GO_REF`: The git reference of stellar-horizon and stellar-friendbot to build.
+- `SOROBAN_TOOLS_REF`: The git reference of soroban-rpc to build.
+
+For example, to build the latest soroban-dev variation:
+```
+make build \
+  TAG=soroban-dev \
+  CORE_REF=c0ad35aa19297e112d71fcc5755458495f99a237 \
+  CORE_CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production' \
+  GO_REF=soroban-v0.0.4 \
+  SOROBAN_TOOLS_REF=v0.4.0
+```
 
 ### Background vs. Interactive containers
 

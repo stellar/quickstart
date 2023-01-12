@@ -1,45 +1,58 @@
-name: Dockerfile.dev
-
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-  schedule:
-    # UTC: At 10:15 on every day-of-week from Monday through Friday.
-    # UTC-8: At 02:15 on every day-of-week from Monday through Friday.
-    - cron: '15 10 * * 1-5'
-
-# Prevent more than one build of this workflow for a branch to be running at the
-# same time, and if multiple are queued, only run the latest, cancelling any
-# already running build. The exception being any protected branch, such as
-# master, where a build for every commit will run.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+    inputs:
+      tag:
+        description: 'Tag to use on the image name'
+        type: 'string'
+        required: true
+      core_ref:
+        description: 'Git ref for the stellar/stellar-core repo (stellar-core)'
+        type: 'string'
+        required: true
+      core_configure_flags:
+        description: 'CONFIGURE_FLAGS used when building stellar-core'
+        type: 'string'
+        default: '--disable-tests'
+      go_ref:
+        description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
+        type: 'string'
+        required: true
+      soroban_tools_ref:
+        description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
+        type: 'string'
+        required: true
+      test_matrix:
+        description: 'JSON matrix for the test job'
+        type: 'string'
+        required: true
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-dev', github.event.pull_request.number) || 'dev') }}
-  GO_REPO_BRANCH: master
-  SOROBAN_TOOLS_REPO_BRANCH: main
-  CORE_REPO_BRANCH: master
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
+  GO_REPO_BRANCH: ${{ inputs.go_ref }}
+  SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
+  CORE_REPO_BRANCH: ${{ inputs.core_ref }}
 
 jobs:
-  complete:
-    if: always()
-    needs: [build, test]
-    runs-on: ubuntu-latest
-    steps:
-    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-      run: exit 1
 
   build-stellar-core:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-cores
     steps:
-    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - name: Build Stellar-Core Image
-      run: docker buildx build -f docker/Dockerfile.testing -t stellar-core -o type=docker,dest=/tmp/image https://github.com/stellar/stellar-core.git#${{ env.CORE_REPO_BRANCH }} --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS='--disable-tests'
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-core-${{ env.CORE_REPO_BRANCH }}-${{ inputs.core_configure_flags }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - if: steps.cache.outputs.cache-hit != 'true'
+      name: Build Stellar-Core Image
+      run: docker buildx build -f docker/Dockerfile.testing -t stellar-core -o type=docker,dest=/tmp/image https://github.com/stellar/stellar-core.git#${{ env.CORE_REPO_BRANCH }} --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v2
       with:
@@ -49,9 +62,20 @@ jobs:
   build-stellar-horizon:
     runs-on: ubuntu-latest
     steps:
-    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - name: Build Stellar-Horizon Image
-      run: docker buildx build -f services/horizon/docker/Dockerfile.dev --target builder -t stellar-horizon -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-horizon-${{ env.GO_REPO_BRANCH }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ env.HEAD_SHA }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - if: steps.cache.outputs.cache-hit != 'true'
+      name: Build Stellar-Horizon Image
+      run: docker buildx build -f Dockerfile.horizon --target builder -t stellar-horizon -o type=docker,dest=/tmp/image . --build-arg REF="${{ env.GO_REPO_BRANCH }}"
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v2
       with:
@@ -61,8 +85,15 @@ jobs:
   build-stellar-friendbot:
     runs-on: ubuntu-latest
     steps:
-    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - name: Build Stellar-Friendbot Image
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-friendbot-${{ env.GO_REPO_BRANCH }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - if: steps.cache.outputs.cache-hit != 'true'
+      name: Build Stellar-Friendbot Image
       run: docker buildx build -f services/friendbot/docker/Dockerfile -t stellar-friendbot -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
@@ -73,8 +104,15 @@ jobs:
   build-stellar-soroban-rpc:
     runs-on: ubuntu-latest
     steps:
-    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - name: Build Stellar-Soraban-Rpc Image
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-soroban-rpc-${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - if: steps.cache.outputs.cache-hit != 'true'
+      name: Build Stellar-Soraban-Rpc Image
       run: docker buildx build -f cmd/soroban-rpc/docker/Dockerfile --target build -t stellar-soroban-rpc -o type=docker,dest=/tmp/image https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
@@ -86,7 +124,7 @@ jobs:
     needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot, build-stellar-soroban-rpc]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ env.HEAD_SHA }}
     - name: Download Stellar-Core Image
@@ -124,35 +162,19 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build -f Dockerfile.dev -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc
+      run: docker build -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core --build-arg HORIZON_IMAGE_REF=stellar-horizon --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v2
       with:
-        name: image-Dockerfile-dev
+        name: image
         path: /tmp/image
 
   test:
     needs: build
     strategy:
-      matrix:
-        # TODO when futurenet is up AND master branch of horizon has latest P20 xdr merged in 
-        # network: [testnet, pubnet, standalone, futurenet]
-        # options: ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"]
-        network: [testnet, pubnet, standalone]
-        options: ["", "--enable-horizon-captive-core"]
-        exclude:
-          - network: testnet
-            options: "--enable-horizon-captive-core"
-          - network: testnet
-            options: "--enable-horizon-captive-core --enable-soroban-rpc"
-          - network: pubnet
-            options: "--enable-horizon-captive-core"
-          - network: pubnet
-            options: "--enable-horizon-captive-core --enable-soroban-rpc"
-          - network: futurenet
-            options: "--enable-horizon-captive-core"
+      matrix: ${{ fromJSON(inputs.test_matrix) }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -161,7 +183,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v2
       with:
-        name: image-Dockerfile-dev
+        name: image
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -201,7 +223,7 @@ jobs:
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go    
 
-  push:
+  push-pr:
     # Push image to registry after build for pull requests from a local branch.
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
@@ -217,7 +239,30 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-Dockerfile-dev
+        artifact_name: image
+        artifact_image_file: image
+        image: ${{ env.IMAGE }}
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+
+  push-release:
+    # Push image to registry after test for master.
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    needs: [build, test]
+    permissions:
+      packages: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.HEAD_SHA  }}
+    - id: push
+      uses: ./.github/actions/push
+      with:
+        head_sha: ${{ env.HEAD_SHA }}
+        artifact_name: image
         artifact_image_file: image
         image: ${{ env.IMAGE }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
