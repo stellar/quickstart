@@ -39,7 +39,6 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      sha: ${{ github.event.pull_request.head.sha || github.sha }}
       arch: amd64
       tag: ${{ inputs.tag }}-amd64
       core_ref: ${{ inputs.core_ref }}
@@ -53,7 +52,6 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      sha: ${{ github.event.pull_request.head.sha || github.sha }}
       arch: arm64
       tag: ${{ inputs.tag }}-arm64
       core_ref: ${{ inputs.core_ref }}

@@ -6,10 +6,6 @@ on:
       DOCKERHUB_TOKEN:
         required: false
     inputs:
-      sha:
-        description: 'Git SHA to use for the build'
-        type: 'string'
-        required: true
       arch:
         description: 'Architecture to build the image for (amd64, arm64)'
         type: 'string'
@@ -40,7 +36,7 @@ on:
         required: true
 
 env:
-  HEAD_SHA: ${{ inputs.sha }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number)) }}-${{ inputs.tag }}
   GO_REPO_BRANCH: ${{ inputs.go_ref }}
   SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
@@ -49,7 +45,7 @@ env:
 jobs:
 
   build-stellar-core:
-    runs-on: ubuntu-latest-16-cores
+    runs-on: ubuntu-latest
     steps:
     - id: cache
       uses: actions/cache@v3
