@@ -77,7 +77,7 @@ jobs:
     - id: push
       uses: ./.github/actions/push-manifest-list
       with:
-        head_sha: ${{ env.HEAD_SHA }}
+        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
         image: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-', github.event.pull_request.number)) }}soroban-dev
         images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
