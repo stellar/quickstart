@@ -22,6 +22,10 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
+      core_build_runner_type:
+        description: 'The GitHub Runner instance type to build stellar-core on'
+        type: 'string'
+        default: 'ubuntu-latest'
       go_ref:
         description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
         type: 'string'
@@ -49,7 +53,7 @@ env:
 jobs:
 
   build-stellar-core:
-    runs-on: ubuntu-latest
+    runs-on: ${{ input.core_build_runner_type }}
     steps:
     - id: cache
       uses: actions/cache@v3
