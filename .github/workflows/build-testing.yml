@@ -40,7 +40,6 @@ jobs:
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
-          "platform": ["linux/amd64"],
           "network": ["testnet", "pubnet", "standalone"],
           "options": ["", "--enable-horizon-captive-core"],
           "exclude": [
