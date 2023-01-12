@@ -1,0 +1,62 @@
+on:
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+    inputs:
+      tag:
+        description: 'Tag to use on the image name'
+        type: 'string'
+        required: true
+      core_ref:
+        description: 'Git ref for the stellar/stellar-core repo (stellar-core)'
+        type: 'string'
+        required: true
+      core_configure_flags:
+        description: 'CONFIGURE_FLAGS used when building stellar-core'
+        type: 'string'
+        default: '--disable-tests'
+      go_ref:
+        description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
+        type: 'string'
+        required: true
+      soroban_tools_ref:
+        description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
+        type: 'string'
+        required: true
+      test_matrix:
+        description: 'JSON matrix for the test job'
+        type: 'string'
+        required: true
+
+jobs:
+
+  image-amd64:
+    uses: ./.github/workflows/build-platform.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      arch: amd64
+      tag: ${{ inputs.tag }}-amd64
+      core_ref: ${{ inputs.core_ref }}
+      go_ref: ${{ inputs.go_ref }}
+      soroban_tools_ref: ${{ inputs.soroban_tools_ref }}
+      test_matrix: ${{ inputs.test_matrix }}
+
+  image-arm64:
+    uses: ./.github/workflows/build-platform.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      arch: arm64
+      tag: ${{ inputs.tag }}-arm64
+      core_ref: ${{ inputs.core_ref }}
+      go_ref: ${{ inputs.go_ref }}
+      soroban_tools_ref: ${{ inputs.soroban_tools_ref }}
+      test_matrix: ${{ inputs.test_matrix }}
