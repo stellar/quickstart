@@ -14,7 +14,7 @@ on:
         description: 'Platform to build the image for'
         type: 'string'
         required: true
-      image:
+      tag:
         description: 'Tag to use on the image name'
         type: 'string'
         required: true
@@ -41,7 +41,7 @@ on:
 
 env:
   HEAD_SHA: ${{ inputs.sha }}
-  IMAGE: ${{ inputs.image }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number)) }}-${{ inputs.tag }}
   GO_REPO_BRANCH: ${{ inputs.go_ref }}
   SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
   CORE_REPO_BRANCH: ${{ inputs.core_ref }}
