@@ -27,7 +27,7 @@ jobs:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
       run: exit 1
 
-  image-amd64:
+  amd64:
     uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -45,7 +45,7 @@ jobs:
           "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
 
-  image-arm64:
+  arm64:
     uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
