@@ -25,7 +25,7 @@ env:
 
 jobs:
 
-  create-and-push:
+  push:
     permissions:
       packages: write
       statuses: write
@@ -57,7 +57,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ inputs.head_sha }}',
+            sha: '${{ env.HEAD_SHA }}',
             state: 'success',
             context: `${context.workflow}`,
             target_url: '${{ env.IMAGE_URL }}',
