@@ -65,21 +65,10 @@ jobs:
         }
 
   push-manifest-list:
-    needs: [amd64, arm64]
-    permissions:
-      packages: write
-      statuses: write
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ env.HEAD_SHA  }}
-    - id: push
-      uses: ./.github/actions/push-manifest-list
-      with:
-        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-        image: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-', github.event.pull_request.number)) }}soroban-dev
-        images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
-        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
-        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
-        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+    uses: ./.github/workflows/create-manifest.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      tag: soroban-dev
+      images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
