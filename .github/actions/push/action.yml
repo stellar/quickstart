@@ -8,6 +8,8 @@ inputs:
     required: true
   artifact_image_name:
     required: true
+  arch:
+    required: true
   image:
     required: true
     default: ghcr.io/${{ github.repository }}:latest
@@ -67,7 +69,7 @@ runs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: context.workflow,
+            context: `${context.workflow} (${{ inputs.arch }})`,
             target_url: '${{ env.IMAGE_URL }}',
             description: '${{ inputs.image }}',
           });
