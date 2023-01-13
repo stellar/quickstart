@@ -65,6 +65,7 @@ jobs:
         }
 
   push-manifest-list:
+    needs: [amd64, arm64]
     uses: ./.github/workflows/create-manifest.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
