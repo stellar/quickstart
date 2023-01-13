@@ -22,6 +22,7 @@ on:
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-', github.event.pull_request.number)) }}${{ inputs.tag }}
+  REGISTRY: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
 
 jobs:
 
@@ -40,11 +41,11 @@ jobs:
         echo "::set-output name=tag::$IMAGE_TAG"
     - uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
-        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+        registry: ${{ env.REGISTRY }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
     - run: echo "IMAGE_URL=https://${{ env.IMAGE }}" >> $GITHUB_ENV
-    - if: ${{ inputs.registry == 'docker.io' }}
+    - if: ${{ env.REGISTRY == 'docker.io' }}
       run: |
         echo "IMAGE_URL=https://hub.docker.com/r/${{ steps.image_parts.outputs.repo }}/tags?name=${{ steps.image_parts.outputs.tag }}" >> $GITHUB_ENV
     - run: |
