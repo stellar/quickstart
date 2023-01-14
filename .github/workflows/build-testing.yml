@@ -1,5 +1,10 @@
 name: Testing
 
+# The `:testing` tag should only ever be formally released or release candidate
+# versions of software. That means each ref should only ever be specified as a
+# version tag for software that's either the latest release candidate or latest
+# release.
+
 on:
   push:
     branches:
@@ -18,22 +23,19 @@ jobs:
 
   complete:
     if: always()
-    needs: [build]
+    needs: [amd64]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
       run: exit 1
 
-  build:
+  amd64:
     uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      # The `:testing` tag should only ever be formally released or release
-      # candidate versions of software. That means each ref should only ever be
-      # specified as a version tag for software that's either the latest release
-      # candidate or latest release.
+      arch: amd64
       tag: testing
       core_ref: v19.6.0
       go_ref: horizon-v2.23.0
