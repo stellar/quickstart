@@ -8,6 +8,6 @@ spec:
     name: stellar
     run_command: /start --standalone
     port: 8000
-    healthcheck:
+    health_check:
       initial_delay_seconds: 30
       http_path: /
