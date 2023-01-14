@@ -1,9 +1,9 @@
 spec:
   name: stellar
   services:
-   - dockerfile_path: .do/Dockerfile
-     git:
-       branch: master
-       repo_clone_url: https://github.com/stellar/quickstart.git
+  - dockerfile_path: .do/Dockerfile
+    git:
+      branch: master
+      repo_clone_url: https://github.com/stellar/quickstart.git
     name: stellar
     run_command: /start --standalone
