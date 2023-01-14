@@ -1,10 +1,9 @@
 spec:
-  name: docker-stellar-core-horizon
+  name: stellar
   services:
-  - image:
-      registry_type: DOCKER_HUB
-      registry: hub.docker.com
-      repository: stellar/quickstart
-      tag: latest
-    name: docker-stellar-core-horizon
+   - dockerfile_path: .do/Dockerfile
+     git:
+       branch: master
+       repo_clone_url: https://github.com/stellar/quickstart.git
+    name: stellar
     run_command: /start --standalone
