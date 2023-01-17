@@ -15,8 +15,6 @@ spec:
     envs:
     - key: NETWORK
       value: 'standalone'
-    - key: ENABLE_SOROBAN_RPC
-      value: 'true'
   - name: stellar-futurenet
     git:
       branch: issue398
