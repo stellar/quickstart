@@ -10,6 +10,8 @@ spec:
     health_check:
       initial_delay_seconds: 30
       http_path: /
+    routes:
+    - path: /standalone
     envs:
     - key: NETWORK
       value: 'futurenet'
@@ -24,6 +26,8 @@ spec:
     health_check:
       initial_delay_seconds: 30
       http_path: /
+    routes:
+    - path: /futurenet
     envs:
     - key: NETWORK
       value: 'standalone'
