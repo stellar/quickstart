@@ -15,8 +15,6 @@ spec:
     envs:
     - key: NETWORK
       value: 'standalone'
-    instance_size_slug: basic-xxs
-    instance_count: '1'
   - name: stellar-soroban-standalone
     git:
       branch: issue398
@@ -33,8 +31,6 @@ spec:
       value: 'standalone'
     - key: ENABLE_SOROBAN_RPC
       value: 'true'
-    instance_size_slug: basic-xxs
-    instance_count: '1'
   - name: stellar-soroban-futurenet
     git:
       branch: issue398
@@ -51,5 +47,3 @@ spec:
       value: 'futurenet'
     - key: ENABLE_SOROBAN_RPC
       value: 'true'
-    instance_size_slug: basic-xxs
-    instance_count: '1'
