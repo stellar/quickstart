@@ -5,7 +5,7 @@ spec:
     git:
       branch: issue398
       repo_clone_url: https://github.com/stellar/quickstart.git
-    dockerfile_path: .do/Dockerfile
+    dockerfile_path: .do/Dockerfile.latest
     http_port: 8000
     health_check:
       initial_delay_seconds: 30
@@ -21,7 +21,7 @@ spec:
     git:
       branch: issue398
       repo_clone_url: https://github.com/stellar/quickstart.git
-    dockerfile_path: .do/Dockerfile
+    dockerfile_path: .do/Dockerfile.soroban-dev
     http_port: 8000
     health_check:
       initial_delay_seconds: 30
@@ -33,4 +33,3 @@ spec:
       value: 'standalone'
     - key: ENABLE_SOROBAN_RPC
       value: 'true'
-
