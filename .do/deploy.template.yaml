@@ -11,7 +11,7 @@ spec:
       initial_delay_seconds: 30
       http_path: /
     routes:
-    - path: /standalone
+    - path: /latest/standalone
     envs:
     - key: NETWORK
       value: 'standalone'
@@ -25,7 +25,7 @@ spec:
       initial_delay_seconds: 30
       http_path: /
     routes:
-    - path: /soroban/standalone
+    - path: /soroban-dev/standalone
     envs:
     - key: NETWORK
       value: 'standalone'
@@ -41,7 +41,7 @@ spec:
       initial_delay_seconds: 30
       http_path: /
     routes:
-    - path: /soroban/futurenet
+    - path: /soroban-dev/futurenet
     envs:
     - key: NETWORK
       value: 'futurenet'
