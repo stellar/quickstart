@@ -14,7 +14,7 @@ spec:
     - path: /standalone
     envs:
     - key: NETWORK
-      value: 'futurenet'
+      value: 'standalone'
     - key: ENABLE_SOROBAN_RPC
       value: 'true'
   - name: stellar-futurenet
@@ -30,6 +30,6 @@ spec:
     - path: /futurenet
     envs:
     - key: NETWORK
-      value: 'standalone'
+      value: 'futurenet'
     - key: ENABLE_SOROBAN_RPC
       value: 'true'
