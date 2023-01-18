@@ -1,1 +1,1 @@
-FROM docker.io/stellar/quickstart:latest
+FROM docker.io/stellar/quickstart:pr-401-latest-amd64
