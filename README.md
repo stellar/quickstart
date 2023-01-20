@@ -92,11 +92,11 @@ The Soroban RPC Server will be avaialble on port 8000 of the container, and the 
 
 ### Deploy to Digital Ocean
 
-You can deploy the `latest` variant docker image to a DigitalOcean server by clicking the button below. It will create a container by default in ephemeral mode on the `standalone` network that can be used for development and testing.
+You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `standalone` network.
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
 
-After clicking the button above, the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing the environment variables.
+After clicking the button above, the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing environment variables.
 
 Some example configurations that can be used are:
 - Standalone network matching pubnet:  
