@@ -71,19 +71,19 @@ In order to get started quickly, you can deploy the `latest` variant docker imag
 After clicking the link below the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing the environment variables.
 
 Some example configurations that can be used are:
-- Standalone network matching pubnet:
-  `IMAGE`: `stellar/quickstart:latest`
+- Standalone network matching pubnet:  
+  `IMAGE`: `stellar/quickstart:latest`  
   `NETWORK`: `standalone`
-- Standalone network matching testnet:
-  `IMAGE`: `stellar/quickstart:testing`
+- Standalone network matching testnet:  
+  `IMAGE`: `stellar/quickstart:testing`  
   `NETWORK`: `standalone`
-- Standalone network matching futurenet:
-  `IMAGE`: `stellar/quickstart:soroban-dev`
-  `NETWORK`: `standalone`
+- Standalone network matching futurenet:  
+  `IMAGE`: `stellar/quickstart:soroban-dev`  
+  `NETWORK`: `standalone`  
   `ENABLE_SOROBAN_RPC`: `true`
-- Futurenet node:
-  `IMAGE`: `stellar/quickstart:soroban-dev`
-  `NETWORK`: `futurenet`
+- Futurenet node:  
+  `IMAGE`: `stellar/quickstart:soroban-dev`  
+  `NETWORK`: `futurenet`  
   `ENABLE_SOROBAN_RPC`: `true`
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
