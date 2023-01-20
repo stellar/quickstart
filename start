@@ -433,9 +433,14 @@ function upgrade_standalone() {
 }
 
 function exec_supervisor() {
-  echo "starting supervisor"
+  echo "starting supervisor..."
   upgrade_standalone &
-  exec supervisord -n -c $SUPHOME/etc/supervisord.conf
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+      sorobanRpcStatus &
+  else 
+      horizonStatus &   
+  fi    
+  exec supervisord -n -c $SUPHOME/etc/supervisord.conf > /dev/null 2>&1
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
@@ -500,6 +505,48 @@ pushd () {
 
 popd () {
     command popd "$@" > /dev/null
+}
+
+function sorobanRpcStatus () {
+    horizonStatus
+    echo "waiting for soroban rpc to report ready state..."
+    COUNTER=1
+    while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
+                --header 'Content-Type: application/json' \
+        --data-raw '{
+          "jsonrpc": "2.0",
+          "id": 10235,
+          "method": "getHealth"
+          
+        }' | jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false ); 
+    do
+      if [ $COUNTER -gt 12 ]; then 
+          echo "waiting for soroban rpc to report ready state..."
+          COUNTER=1
+      else 
+          COUNTER=$[$COUNTER +1]    
+      fi 
+      sleep 5
+    done 
+    echo "soroban rpc reported ready status, the service can be used by tools/cli now ..."
+}
+
+function horizonStatus () {
+    COUNTER=1
+    echo "waiting for horizon ingestion to be caught up to network current ledger..."
+    while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
+                jq --exit-status '.history_latest_ledger > 5' 2>/dev/null | \
+                grep -o true || echo false ); 
+    do
+      if [ $COUNTER -gt 12 ]; then 
+          echo "waiting for horizon ingestion to be caught up to network current ledger..."
+          COUNTER=1
+      else 
+          COUNTER=$[$COUNTER +1] 
+      fi 
+      sleep 5
+    done 
+    echo "horizon ingestion is caught up to network current ledger ..."
 }
 
 main $@

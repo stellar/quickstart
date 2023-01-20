@@ -3,11 +3,6 @@
 set -e
 set -o pipefail
 
-while ! (curl -sf http://localhost:8001/ | jq --exit-status '.ingest_latest_ledger > 1'); do
-  echo "Waiting for horizon to be available..."
-  sleep 1
-done
-
 echo "starting soroban-rpc..."
 source /opt/stellar/soroban-rpc/etc/soroban-rpc.env
 exec /usr/bin/stellar-soroban-rpc
