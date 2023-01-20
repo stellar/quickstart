@@ -66,12 +66,6 @@ The root account is derived from the network passphrase and if the network passp
 
 *Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
-In order to get started quickly, you can deploy the docker image to a DigitalOcean server by clicking the button below. It will create a container in *ephemeral mode* on the *standalone network* (with a random network passphrase) that can be connected to. Note: you will need to create a DigitalOcean account if you don't have one.
-
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
-
-*Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
-
 ### Soroban Development
 
 For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
@@ -95,6 +89,32 @@ To enable the Soroban RPC server provide the following command line flags when s
 `--enable-soroban-rpc`
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+
+### Deploy to Digital Ocean
+
+You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `standalone` network.
+
+[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
+
+After clicking the button above, the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing environment variables.
+
+Some example configurations that can be used are:
+- Standalone network matching pubnet:  
+  `IMAGE`: `stellar/quickstart:latest`  
+  `NETWORK`: `standalone`
+- Standalone network matching testnet:  
+  `IMAGE`: `stellar/quickstart:testing`  
+  `NETWORK`: `standalone`
+- Standalone network matching futurenet:  
+  `IMAGE`: `stellar/quickstart:soroban-dev`  
+  `NETWORK`: `standalone`  
+  `ENABLE_SOROBAN_RPC`: `true`
+- Futurenet node:  
+  `IMAGE`: `stellar/quickstart:soroban-dev`  
+  `NETWORK`: `futurenet`  
+  `ENABLE_SOROBAN_RPC`: `true`
+
+*Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
 ### Building Custom Images
 
