@@ -438,9 +438,9 @@ function exec_supervisor() {
   printScreenOutput "starting supervisor..."
   upgrade_standalone &
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-      sorobanRpcStatus &
+      soroban_rpc_status &
   else 
-      horizonStatus &   
+      horizon_status &   
   fi    
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf > >( tee -a $QUICKSTART_LOG | grep -E '(spawned|success|exited)' ) 2>&1
 }
@@ -509,8 +509,8 @@ popd () {
     command popd "$@" > /dev/null
 }
 
-function sorobanRpcStatus () {
-    horizonStatus
+function soroban_rpc_status () {
+    horizon_status
     printColoredScreenOutput "waiting for soroban rpc to report ready state..." "\033[34m" 
     COUNTER=1
     while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
@@ -533,11 +533,11 @@ function sorobanRpcStatus () {
     printColoredScreenOutput "soroban rpc reported ready status, the service can be used by tools/cli now ..." "\033[32m" 
 }
 
-function horizonStatus () {
+function horizon_status () {
     COUNTER=1
     printColoredScreenOutput "waiting for horizon ingestion to be caught up to network current ledger..." "\033[34m" 
     while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
-                jq --exit-status '.history_latest_ledger > 5' 2>/dev/null | \
+                jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5 and (.core_latest_ledger - .history_latest_ledger) < 5' 2>/dev/null | \
                 grep -o true || echo false ); 
     do
       if [ $COUNTER -gt 12 ]; then 
