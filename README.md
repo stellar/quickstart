@@ -66,30 +66,6 @@ The root account is derived from the network passphrase and if the network passp
 
 *Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
-In order to get started quickly, you can deploy the `latest` variant docker image to a DigitalOcean server by clicking the button below. It will create a container by default in ephemeral mode on the `standalone` network that can be used for development and testing.
-
-After clicking the link below the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing the environment variables.
-
-Some example configurations that can be used are:
-- Standalone network matching pubnet:  
-  `IMAGE`: `stellar/quickstart:latest`  
-  `NETWORK`: `standalone`
-- Standalone network matching testnet:  
-  `IMAGE`: `stellar/quickstart:testing`  
-  `NETWORK`: `standalone`
-- Standalone network matching futurenet:  
-  `IMAGE`: `stellar/quickstart:soroban-dev`  
-  `NETWORK`: `standalone`  
-  `ENABLE_SOROBAN_RPC`: `true`
-- Futurenet node:  
-  `IMAGE`: `stellar/quickstart:soroban-dev`  
-  `NETWORK`: `futurenet`  
-  `ENABLE_SOROBAN_RPC`: `true`
-
-[![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
-
-*Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
-
 ### Soroban Development
 
 For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
