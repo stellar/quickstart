@@ -463,8 +463,8 @@ function run_silent() {
   else
     print_screen_output "failed!"
     print_screen_output ""
-    DUMPOUT = $(cat $OUTFILE)
-    print_screen_output $DUMPOUT
+    DUMPOUT=$(cat $OUTFILE)
+    print_screen_output "$DUMPOUT"
     exit 1
   fi
 
