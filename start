@@ -512,7 +512,7 @@ function service_status () {
 }
 
 function soroban_rpc_status () { 
-  print_screen_output "waiting for soroban rpc to report ready state..." "\033[34m" 
+  print_screen_output "waiting for soroban rpc to report ready state..."
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
     --header 'Content-Type: application/json' \
@@ -524,32 +524,32 @@ function soroban_rpc_status () {
     }' | jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false ); 
   do
     if [ $COUNTER -gt 12 ]; then 
-      print_screen_output "waiting for soroban rpc to report ready state..." "\033[34m" 
+      print_screen_output "waiting for soroban rpc to report ready state..."
       COUNTER=1
     else 
       COUNTER=$[$COUNTER +1]    
     fi 
     sleep 5
   done 
-  print_screen_output "soroban rpc reported ready status, the service can be used by tools/cli now ..." "\033[32m" 
+  print_screen_output "soroban rpc reported ready status, the service can be used by tools/cli now ..."
 }
 
 function horizon_status () {
   COUNTER=1
-  print_screen_output "waiting for horizon ingestion to be caught up to network current ledger..." "\033[34m" 
+  print_screen_output "waiting for horizon ingestion to be caught up to network current ledger..."
   while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
     jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5 and (.core_latest_ledger - .history_latest_ledger) < 5' 2>/dev/null | \
     grep -o true || echo false ); 
   do
     if [ $COUNTER -gt 12 ]; then 
-      print_screen_output "waiting for horizon ingestion to be caught up to network current ledger..." "\033[34m" 
+      print_screen_output "waiting for horizon ingestion to be caught up to network current ledger..."
       COUNTER=1
     else 
       COUNTER=$[$COUNTER +1] 
     fi 
     sleep 5
   done 
-  print_screen_output "horizon ingestion is caught up to network current ledger ..." "\033[32m" 
+  print_screen_output "horizon ingestion is caught up to network current ledger ..."
 }
 
 function print_screen_output() {
