@@ -436,11 +436,7 @@ function upgrade_standalone() {
 function exec_supervisor() {
   print_screen_output "starting supervisor..."
   upgrade_standalone &
-  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-      soroban_rpc_status &
-  else 
-      horizon_status &   
-  fi    
+  service_status &
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf > >( tee -a $QUICKSTART_LOG | grep -E '(spawned|success|exited)' ) 2>&1
 }
 
@@ -508,8 +504,14 @@ popd () {
   command popd "$@" > /dev/null
 }
 
-function soroban_rpc_status () {
+function service_status () {
   horizon_status
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    soroban_rpc_status
+  fi   
+}
+
+function soroban_rpc_status () { 
   print_screen_output "waiting for soroban rpc to report ready state..." "\033[34m" 
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
