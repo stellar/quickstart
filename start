@@ -161,19 +161,19 @@ function set_pg_password() {
 
   if [ -n "$POSTGRES_PASSWORD" ]; then
     PGPASS=$POSTGRES_PASSWORD
-    print_output "using POSTGRES_PASSWORD"
+    print_screen_output "using POSTGRES_PASSWORD"
     return 0
   fi
 
   # use a random password when ephemeral (or some other unknown mode)
   if [ "$STELLAR_MODE" != "persistent" ]; then
     PGPASS=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' |  head -c 16)
-    print_output "postgres password: $PGPASS"
+    print_screen_output "postgres password: $PGPASS"
     return 0
   fi
 
   if [ -n "$PGPASS" ]; then
-    print_output "postgres password: $PGPASS"
+    print_screen_output "postgres password: $PGPASS"
     return 0
   fi
 
@@ -199,13 +199,13 @@ function copy_defaults() {
   local CP="rsync -a"
 
   if [ -d $PGHOME/etc ]; then
-    print_output "postgres: config directory exists, skipping copy"
+    print_screen_output "postgres: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/postgresql/ $PGHOME
   fi
 
   if [ -d $SUPHOME/etc ]; then
-    print_output "supervisor: config directory exists, skipping copy"
+    print_screen_output "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
     if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
@@ -215,20 +215,20 @@ function copy_defaults() {
   fi
 
   if [ -d $COREHOME/etc ]; then
-    print_output "stellar-core: config directory exists, skipping copy"
+    print_screen_output "stellar-core: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/core/ $COREHOME
     $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
   fi
 
   if [ -d $HZHOME/etc ]; then
-    print_output "horizon: config directory exists, skipping copy"
+    print_screen_output "horizon: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/horizon/ $HZHOME
   fi
 
   if [ -d $SOROBAN_RPC_HOME/etc ]; then
-    print_output "soroban-rpc: config directory exists, skipping copy"
+    print_screen_output "soroban-rpc: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
     if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
@@ -237,7 +237,7 @@ function copy_defaults() {
   fi
 
   if [ -d $FBHOME/etc ]; then
-    print_output "friendbot: config directory exists, skipping copy"
+    print_screen_output "friendbot: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/friendbot/ $FBHOME
     if [ -d /opt/stellar-default/$NETWORK/friendbot/ ]; then
@@ -246,7 +246,7 @@ function copy_defaults() {
   fi
 
   if [ -d $NXHOME/etc ]; then
-    print_output "nginx: config directory exists, skipping copy"
+    print_screen_output "nginx: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/nginx/ $NXHOME
     if [ -d /opt/stellar-default/$NETWORK/nginx/ ]; then
@@ -268,7 +268,7 @@ function copy_pgpass() {
 
 function init_db() {
   if [ -f $PGHOME/.quickstart-initialized ]; then
-    print_output "postgres: already initialized"
+    print_screen_output "postgres: already initialized"
     return 0
   fi
   pushd $PGHOME
@@ -277,7 +277,7 @@ function init_db() {
   mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
   # end workaround
 
-  print_output "postgres user: $PGUSER"
+  print_screen_output "postgres user: $PGUSER"
 
   set_pg_password
 
@@ -312,7 +312,7 @@ function init_stellar_core() {
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
   if [ -f $COREHOME/.quickstart-initialized ]; then
-    print_output "core: already initialized"
+    print_screen_output "core: already initialized"
 
     if [ "$NETWORK" == "standalone" ]; then
       start_postgres
@@ -357,7 +357,7 @@ function init_stellar_core() {
 
 function init_horizon() {
   if [ -f $HZHOME/.quickstart-initialized ]; then
-    print_output "horizon: already initialized"
+    print_screen_output "horizon: already initialized"
     return 0
   fi
   pushd $HZHOME
@@ -401,7 +401,7 @@ function init_soroban_rpc() {
   fi   
 
   if [ -f $SOROBAN_RPC_HOME/.quickstart-initialized ]; then
-    print_output "soroban rpc: already initialized"
+    print_screen_output "soroban rpc: already initialized"
     return 0
   fi
   pushd $SOROBAN_RPC_HOME
@@ -455,7 +455,7 @@ function run_silent() {
   $COMMAND $ARGS &> $OUTFILE
 
   if [ $? -eq 0 ]; then
-    print_output "$LABEL: ok"
+    print_screen_output "$LABEL: ok"
   else
     print_screen_output "$LABEL: failed!"
     print_screen_output ""
@@ -476,11 +476,11 @@ function start_postgres() {
   CURRENT_POSTGRES_PID=$!
 
   while ! sudo -u postgres psql -c 'select 1' &> /dev/null ; do
-    print_output "Waiting for postgres to be available..."
+    print_screen_output "Waiting for postgres to be available..."
     sleep 1
   done
 
-  print_output "postgres: up"
+  print_screen_output "postgres: up"
 }
 
 function stop_postgres() {
@@ -493,7 +493,7 @@ function stop_postgres() {
   while kill -0 "$CURRENT_POSTGRES_PID" &> /dev/null; do
     sleep 0.5
   done
-  print_output "postgres: down"
+  print_screen_output "postgres: down"
 }
 
 pushd () {
@@ -550,10 +550,6 @@ function horizon_status () {
 
 function print_screen_output() {
   echo "$1" | tee -a $QUICKSTART_LOG
-}
-
-function print_output() {
-  echo "$1" >> "$QUICKSTART_LOG" 
 }
 
 main $@
