@@ -24,7 +24,7 @@ QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
 function main() {
-  echo "" 
+  echo ""
   echo "Starting Stellar Quickstart"
   echo ""
 
