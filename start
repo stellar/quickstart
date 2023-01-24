@@ -538,7 +538,7 @@ function horizon_status () {
   COUNTER=1
   print_screen_output "waiting for horizon ingestion to be caught up to network current ledger..."
   while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
-    jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5 and (.core_latest_ledger - .history_latest_ledger) < 5' 2>/dev/null | \
+    jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5' 2>/dev/null | \
     grep -o true || echo false ); 
   do
     if [ $COUNTER -gt 12 ]; then 
