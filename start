@@ -457,7 +457,7 @@ function run_silent() {
   if [ $? -eq 0 ]; then
     print_output "$LABEL: ok"
   else
-    print_screen_output "failed!"
+    print_screen_output "$LABEL: failed!"
     print_screen_output ""
     DUMPOUT=$(cat $OUTFILE)
     print_screen_output "$DUMPOUT"
