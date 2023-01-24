@@ -59,7 +59,7 @@ jobs:
       arch: arm64
       tag: testing-arm64
       core_ref: v19.7.0rc1
-      go_ref: soroban-v0.0.4
+      go_ref: horizon-v2.23.0
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
