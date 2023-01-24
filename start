@@ -22,8 +22,6 @@ export PGPORT=5432
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
-QUICKSTART_LOG="/var/log/quickstart.log"
-
 
 function main() {
   print_screen_output "" 
@@ -437,7 +435,7 @@ function exec_supervisor() {
   print_screen_output "starting supervisor..."
   upgrade_standalone &
   service_status &
-  exec supervisord -n -c $SUPHOME/etc/supervisord.conf > >( tee -a $QUICKSTART_LOG | grep -E '(spawned|success|exited)' ) 2>&1
+  exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
@@ -549,7 +547,7 @@ function horizon_status () {
 }
 
 function print_screen_output() {
-  echo "$1" | tee -a $QUICKSTART_LOG
+  echo "$1" 
 }
 
 main $@
