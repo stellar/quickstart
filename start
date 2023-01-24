@@ -457,8 +457,7 @@ function run_silent() {
   else
     echo "$LABEL: failed!"
     echo ""
-    DUMPOUT=$(cat $OUTFILE)
-    echo "$DUMPOUT"
+    cat $OUTFILE
     exit 1
   fi
 
