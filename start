@@ -501,10 +501,23 @@ popd() {
 }
 
 function service_status() {
+  stellar_core_status &
   horizon_status
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     soroban_rpc_status
   fi
+}
+
+function stellar_core_status() {
+  local last_status=""
+  while true; do
+    local status="$(curl --silent --location 'http://localhost:11626/info' | jq -r '"\([.info.state] + (.info.status // []) | join("; "))"')"
+    if [ "$status" != "$last_status" ]; then
+      echo "stellar-core: $status"
+    fi
+    last_status="$status"
+    sleep 1
+  done
 }
 
 function soroban_rpc_status() {
