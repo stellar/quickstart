@@ -492,22 +492,22 @@ function stop_postgres() {
   echo "postgres: down"
 }
 
-pushd () {
+pushd() {
   command pushd "$@" > /dev/null
 }
 
-popd () {
+popd() {
   command popd "$@" > /dev/null
 }
 
-function service_status () {
+function service_status() {
   horizon_status
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     soroban_rpc_status
   fi
 }
 
-function soroban_rpc_status () {
+function soroban_rpc_status() {
   echo "soroban rpc: waiting for ready state..."
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
@@ -524,7 +524,7 @@ function soroban_rpc_status () {
   echo "soroban rpc: up and ready"
 }
 
-function horizon_status () {
+function horizon_status() {
   COUNTER=1
   echo "horizon: waiting for ingestion to catch up..."
   while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
