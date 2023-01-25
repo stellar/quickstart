@@ -268,6 +268,8 @@ You can learn more about what commands are available by using the `help` command
 
 Logs can be found within the container at the path `/var/log/supervisor/`.  A file is kept for both the stdout and stderr of the processes managed by supervisord.  Additionally, you can use the `tail` command provided by supervisorctl.
 
+Alternatively, to tail all logs into the containers output for all services append the `--logs` option.
+
 ### Accessing databases
 
 The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network.  In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database either horizon or stellar-core provide.  This allows you to craft your own custom sql queries against the stellar network data.
