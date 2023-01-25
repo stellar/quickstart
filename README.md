@@ -268,7 +268,7 @@ You can learn more about what commands are available by using the `help` command
 
 Logs can be found within the container at the path `/var/log/supervisor/`.  A file is kept for both the stdout and stderr of the processes managed by supervisord.  Additionally, you can use the `tail` command provided by supervisorctl.
 
-Alternatively, to tail all logs into the containers output for all services append the `--logs` option.
+Alternatively, to tail all logs into the container's output for all services, append the `--logs` option.
 
 ### Accessing databases
 
