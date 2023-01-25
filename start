@@ -431,10 +431,12 @@ function upgrade_standalone() {
 }
 
 function exec_supervisor() {
-  echo "starting supervisor..."
+  echo "supervisor: starting"
   upgrade_standalone &
   service_status &
-  exec supervisord -n -c $SUPHOME/etc/supervisord.conf
+  exec supervisord -n -c $SUPHOME/etc/supervisord.conf \
+    > >(sed 's/^/supervisor: /') \
+    2> >(sed 's/^/supervisor: /' >&2)
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
