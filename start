@@ -55,8 +55,8 @@ function main() {
   if [ "$ENABLE_LOGS" = "true" ]; then
     print_service_logs &
     start \
-      >  >(sed "s/^/${cyan}quickstart  | $clear/") \
-      2> >(sed "s/^/${cyan}quickstart  | $clear/" >&2)
+      >  >(sed "s/^/${cyan}quickstart   | $clear/") \
+      2> >(sed "s/^/${cyan}quickstart   | $clear/" >&2)
   else
     start
   fi
