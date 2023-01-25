@@ -70,8 +70,6 @@ function process_args() {
   while [[ -n "$1" ]]; do
     ARG="$1"
     shift
-
-
     case "${ARG}" in
     --testnet)
       NETWORK="testnet"
@@ -433,8 +431,9 @@ function upgrade_standalone() {
 }
 
 function exec_supervisor() {
-  echo "starting supervisor"
+  echo "starting supervisor..."
   upgrade_standalone &
+  service_status &
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf
 }
 
@@ -448,15 +447,14 @@ function run_silent() {
   local ARGS=$@
   local OUTFILE="/tmp/run_silent.out"
 
-  echo -n "$LABEL: "
   set +e
 
   $COMMAND $ARGS &> $OUTFILE
 
   if [ $? -eq 0 ]; then
-    echo "ok"
+    echo "$LABEL: ok"
   else
-    echo "failed!"
+    echo "$LABEL: failed!"
     echo ""
     cat $OUTFILE
     exit 1
@@ -495,11 +493,55 @@ function stop_postgres() {
 }
 
 pushd () {
-    command pushd "$@" > /dev/null
+  command pushd "$@" > /dev/null
 }
 
 popd () {
-    command popd "$@" > /dev/null
+  command popd "$@" > /dev/null
+}
+
+function service_status () {
+  horizon_status
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    soroban_rpc_status
+  fi   
+}
+
+function soroban_rpc_status () { 
+  echo "soroban rpc: waiting for ready state..."
+  COUNTER=1
+  while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "jsonrpc": "2.0",
+        "id": 10235,
+        "method": "getHealth"
+        
+    }' | jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false ); 
+  do
+    if [ $(expr $COUNTER % 12) -eq 0 ]; then 
+      echo "soroban rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
+    fi 
+    COUNTER=$[$COUNTER +1]
+    sleep 5
+  done 
+  echo "soroban rpc: up and ready"
+}
+
+function horizon_status () {
+  COUNTER=1
+  echo "horizon: waiting for ingestion to catch up..."
+  while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
+    jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5' 2>/dev/null | \
+    grep -o true || echo false ); 
+  do
+    if [ $(expr $COUNTER % 12) -eq 0 ]; then 
+      echo "horizon: waiting for ingestion to catch up, $(expr $COUNTER / 12) minutes..."
+    fi 
+    COUNTER=$[$COUNTER +1]
+    sleep 5
+  done 
+  echo "horizon: ingestion caught up"
 }
 
 main $@
