@@ -99,19 +99,19 @@ You can deploy the quickstart image to DigitalOcean by clicking the button below
 After clicking the button above, the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing environment variables.
 
 Some example configurations that can be used are:
-- Standalone network matching pubnet:  
-  `IMAGE`: `stellar/quickstart:latest`  
+- Standalone network matching pubnet:
+  `IMAGE`: `stellar/quickstart:latest`
   `NETWORK`: `standalone`
-- Standalone network matching testnet:  
-  `IMAGE`: `stellar/quickstart:testing`  
+- Standalone network matching testnet:
+  `IMAGE`: `stellar/quickstart:testing`
   `NETWORK`: `standalone`
-- Standalone network matching futurenet:  
-  `IMAGE`: `stellar/quickstart:soroban-dev`  
-  `NETWORK`: `standalone`  
+- Standalone network matching futurenet:
+  `IMAGE`: `stellar/quickstart:soroban-dev`
+  `NETWORK`: `standalone`
   `ENABLE_SOROBAN_RPC`: `true`
-- Futurenet node:  
-  `IMAGE`: `stellar/quickstart:soroban-dev`  
-  `NETWORK`: `futurenet`  
+- Futurenet node:
+  `IMAGE`: `stellar/quickstart:soroban-dev`
+  `NETWORK`: `futurenet`
   `ENABLE_SOROBAN_RPC`: `true`
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
@@ -154,7 +154,7 @@ Starting an ephemeral node is simple, just craft a `docker run` command to launc
 
 ```shell
 $ docker run --rm -it -p "8000:8000" --name stellar stellar/quickstart --testnet
-```  
+```
 
 As part of launching, an ephemeral mode container will generate a random password for securing the postgresql service and will output it to standard out.  You may use this password (provided you have exposed the postgresql port) to access the running postgresql database (See the section "Accessing Databases" below).
 
@@ -184,7 +184,7 @@ To customize the configurations that both stellar-core and horizon use, you must
 
 ```
   /opt/stellar
-  |-- core                  
+  |-- core
   |   `-- etc
   |       `-- stellar-core.cfg  # Stellar core config
   |-- horizon
@@ -251,15 +251,15 @@ stellar-core                     RUNNING    pid 125, uptime 0:01:13
 supervisor>
 ```
 
-From this prompt you can execute any of the supervisord commands:  
+From this prompt you can execute any of the supervisord commands:
 
 ```shell
 # restart horizon
-supervisor> restart horizon  
+supervisor> restart horizon
 
 
 # stop stellar-core
-supervisor> stop stellar-core  
+supervisor> stop stellar-core
 ```
 
 You can learn more about what commands are available by using the `help` command.
