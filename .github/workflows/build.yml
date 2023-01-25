@@ -146,7 +146,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: image-stellar-soroban-rpc-${{ inputs.arch }}
-        path: /tmp/image      
+        path: /tmp/image
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot, build-stellar-soroban-rpc]
@@ -176,7 +176,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: image-stellar-soroban-rpc-${{ inputs.arch }}
-        path: /tmp/stellar-soroban-rpc 
+        path: /tmp/stellar-soroban-rpc
     - name: Load Stellar-Core Image
       run: docker load -i /tmp/stellar-core/image
     - name: Load Stellar-Horizon Image
@@ -184,7 +184,7 @@ jobs:
     - name: Load Stellar-Friendbot Image
       run: docker load -i /tmp/stellar-friendbot/image
     - name: Load Stellar-Soraban-Rpc Image
-      run: docker load -i /tmp/stellar-soroban-rpc/image  
+      run: docker load -i /tmp/stellar-soroban-rpc/image
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -264,7 +264,7 @@ jobs:
       if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
       run: |
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
-        go run test_soroban_rpc_up.go    
+        go run test_soroban_rpc_up.go
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.

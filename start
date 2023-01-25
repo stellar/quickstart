@@ -82,7 +82,7 @@ function process_args() {
       ;;
     --futurenet)
       NETWORK="futurenet"
-      ;;  
+      ;;
     --protocol-version)
       export PROTOCOL_VERSION="$1"
       shift
@@ -96,7 +96,7 @@ function process_args() {
       ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
-      ;;  
+      ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
       ;;
@@ -134,7 +134,7 @@ function process_args() {
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
     export HISTORY_ARCHIVE_URLS="http://history-futurenet.stellar.org"
-    ;;  
+    ;;
   *)
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
@@ -207,7 +207,7 @@ function copy_defaults() {
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
     if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
-    fi  
+    fi
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
 
@@ -375,7 +375,7 @@ export CAPTIVE_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
 EOF
   fi
 
-  if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
+  if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then
     cat << EOF >> etc/horizon.env
 export INGEST_DISABLE_STATE_VERIFICATION=True
 EOF
@@ -395,7 +395,7 @@ function init_soroban_rpc() {
 
   if [ "$ENABLE_SOROBAN_RPC" != "true" ]; then
     return 0
-  fi   
+  fi
 
   if [ -f $SOROBAN_RPC_HOME/.quickstart-initialized ]; then
     echo "soroban rpc: already initialized"
@@ -494,55 +494,64 @@ function stop_postgres() {
   echo "postgres: down"
 }
 
-pushd () {
+pushd() {
   command pushd "$@" > /dev/null
 }
 
-popd () {
+popd() {
   command popd "$@" > /dev/null
 }
 
-function service_status () {
+function service_status() {
+  stellar_core_status &
   horizon_status
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     soroban_rpc_status
-  fi   
+  fi
 }
 
-function soroban_rpc_status () { 
+function stellar_core_status() {
+  local last_status=""
+  while true; do
+    local status="$(curl --silent --location 'http://localhost:11626/info' | jq -r '"\([.info.state] + (.info.status // []) | join("; "))"')"
+    if [ "$status" != "$last_status" ]; then
+      echo "stellar-core: $status"
+    fi
+    last_status="$status"
+    sleep 1
+  done
+}
+
+function soroban_rpc_status() {
   echo "soroban rpc: waiting for ready state..."
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
     --header 'Content-Type: application/json' \
-    --data-raw '{
-        "jsonrpc": "2.0",
-        "id": 10235,
-        "method": "getHealth"
-        
-    }' | jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false ); 
+    --data-raw '{ "jsonrpc": "2.0", "id": 10235, "method": "getHealth" }' | \
+    jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false);
   do
-    if [ $(expr $COUNTER % 12) -eq 0 ]; then 
+    if [ $(expr $COUNTER % 12) -eq 0 ]; then
       echo "soroban rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
-    fi 
+    fi
     COUNTER=$[$COUNTER +1]
     sleep 5
-  done 
+  done
   echo "soroban rpc: up and ready"
 }
 
-function horizon_status () {
+function horizon_status() {
   COUNTER=1
   echo "horizon: waiting for ingestion to catch up..."
   while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
     jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5' 2>/dev/null | \
-    grep -o true || echo false ); 
+    grep -o true || echo false);
   do
-    if [ $(expr $COUNTER % 12) -eq 0 ]; then 
+    if [ $(expr $COUNTER % 12) -eq 0 ]; then
       echo "horizon: waiting for ingestion to catch up, $(expr $COUNTER / 12) minutes..."
-    fi 
+    fi
     COUNTER=$[$COUNTER +1]
     sleep 5
-  done 
+  done
   echo "horizon: ingestion caught up"
 }
 
