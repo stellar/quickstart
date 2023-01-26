@@ -311,7 +311,7 @@ function init_stellar_core() {
   if [ -f $COREHOME/.quickstart-initialized ]; then
     echo "core: already initialized"
 
-    if [ "$NETWORK" == "standalone" ]; then
+    if [ "$NETWORK" = "standalone" ]; then
       start_postgres
 
       run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
@@ -326,9 +326,7 @@ function init_stellar_core() {
     RUN_STANDALONE=true
   fi
 
-  if [ "$NETWORK" = "standalone" ]; then
-    sed -ri "s/__STANDALONE_NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg etc/stellar-captive-core.cfg
-  fi
+  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
   run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
@@ -338,7 +336,7 @@ function init_stellar_core() {
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
-  if [ "$NETWORK" == "standalone" ]; then
+  if [ "$NETWORK" = "standalone" ]; then
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
@@ -359,8 +357,6 @@ function init_horizon() {
   fi
   pushd $HZHOME
 
-  run_silent "chown-horizon" chown stellar:stellar .
-
   sed -ri \
     -e "s/__PGPASS__/$PGPASS/g" \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
@@ -368,12 +364,32 @@ function init_horizon() {
     etc/horizon.env
 
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    
+    HORIZON_CAPTIVE_CORE_CFG=$COREHOME/etc/horizon-captive-core.cfg
+    cp $COREHOME/etc/stellar-captive-core.cfg $HORIZON_CAPTIVE_CORE_CFG 2>/dev/null || true
+    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-horizon-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11725*g" $HORIZON_CAPTIVE_CORE_CFG
+    sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+
+    mkdir ./cc
+    # this config tells captive core to use memory for current state, 
+    # there is an option to use disk instead at some point, CAPTIVE_CORE_USE_DB
+    # this does tend to make core network catchup take longer though, EXPERIMENTAL_BUCKETLIST_DB
+    # may be used in captive core.cfg later to address this once it's not experimental.
     cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
-export CAPTIVE_CORE_CONFIG_PATH=/opt/stellar/core/etc/stellar-captive-core.cfg
+export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
+export CAPTIVE_CORE_STORAGE_PATH=/opt/stellar/horizon/cc
+export CAPTIVE_CORE_USE_DB=false
+export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
+    # keep bucketlistdb core toml param commented out until 'latest' refers to preview version 7+ of soroban enabled horizon
+    # it's not defined in earlier versions
+    run_silent "disable core bucketlistdb for horizon" sed -ri "s/__ENABLE_BUCKETLIST__/#/g" $HORIZON_CAPTIVE_CORE_CFG
   fi
+
+  run_silent "chown-horizon" chown -R stellar:stellar .
 
   if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
     cat << EOF >> etc/horizon.env
@@ -383,7 +399,7 @@ EOF
 
   start_postgres
   run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
-  if [ "$NETWORK" == "standalone" ]; then
+  if [ "$NETWORK" = "standalone" ]; then
     run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
   fi
 
@@ -392,7 +408,6 @@ EOF
 }
 
 function init_soroban_rpc() {
-
   if [ "$ENABLE_SOROBAN_RPC" != "true" ]; then
     return 0
   fi   
@@ -401,14 +416,25 @@ function init_soroban_rpc() {
     echo "soroban rpc: already initialized"
     return 0
   fi
-  pushd $SOROBAN_RPC_HOME
 
-  run_silent "init-soroban-rpc" chown stellar:stellar .
+  SOROBAN_RPC_CAPTIVE_CORE_CFG=$COREHOME/etc/soroban-rpc-captive-core.cfg
+  cp $COREHOME/etc/stellar-captive-core.cfg $SOROBAN_RPC_CAPTIVE_CORE_CFG 2>/dev/null || true
+  run_silent "finalize-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-rpc-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11726*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+
+  pushd $SOROBAN_RPC_HOME
+  mkdir ./cc
+
+  run_silent "init-soroban-rpc" chown -R stellar:stellar .
 
   sed -ri \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
+    -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
     etc/soroban-rpc.env
 
+  run_silent "enable core bucketlistdb for soroban-rpc" sed -ri "s/__ENABLE_BUCKETLIST__//g" $COREHOME/etc/soroban-rpc-captive-core.cfg
+  
   touch .quickstart-initialized
   popd
 }
