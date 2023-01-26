@@ -322,7 +322,7 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
   local RUN_STANDALONE=false
-  if [ "$NETWORK" = "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ]; then
+  if [ "$NETWORK" = "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
     RUN_STANDALONE=true
   fi
 

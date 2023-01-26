@@ -90,6 +90,8 @@ To enable the Soroban RPC server provide the following command line flags when s
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
+The Soroban RPC server uses an instance of captive core for obtaining various network ledger states, rpc server waits for captive core to be in sync with network first. The captive core requires at least one published archive be available from the network to get in sync. When using `--standalone` network, there will be a delay of 5 minutes for the new/empty standalone network to publish the first archive file based on the first 64 ledgers created on the network, as on average a new ledger is generated once every 4 seconds. As a result, you will see in the quickstart console output a message for `soroban rpc: waiting for ready state` and roughly 5 minutes later, you will see a follow-up message printed for `soroban rpc: up and ready`, you can begin using the soroban rpc service at this point.
+
 ### Deploy to Digital Ocean
 
 You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `standalone` network.
