@@ -1,6 +1,12 @@
 #! /usr/bin/env bash
 set -e
 
+clear=$(echo -e "\e[0m")
+green=$(echo -e "\e[32m")
+blue=$(echo -e "\e[34m")
+purple=$(echo -e "\e[35m")
+cyan=$(echo -e "\e[36m")
+
 export STELLAR_HOME="/opt/stellar"
 export PGHOME="$STELLAR_HOME/postgresql"
 export SUPHOME="$STELLAR_HOME/supervisor"
@@ -15,6 +21,7 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+: "${ENABLE_LOGS:=false}"
 : "${ENABLE_HORIZON_CAPTIVE_CORE:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
@@ -24,10 +31,6 @@ QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
 function main() {
-  echo ""
-  echo "Starting Stellar Quickstart"
-  echo ""
-
   process_args $*
   if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] &&[ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     echo "--enable-horizon-captive-core usage only supported on standalone/futurenet networks" >&2
@@ -49,6 +52,18 @@ function main() {
     echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
     exit 1
   fi
+  if [ "$ENABLE_LOGS" = "true" ]; then
+    print_service_logs &
+    start \
+      >  >(sed "s/^/${cyan}quickstart   | $clear/") \
+      2> >(sed "s/^/${cyan}quickstart   | $clear/" >&2)
+  else
+    start
+  fi
+}
+
+function start() {
+  echo "Starting Stellar Quickstart"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
@@ -71,6 +86,9 @@ function process_args() {
     ARG="$1"
     shift
     case "${ARG}" in
+    --logs)
+      ENABLE_LOGS=true
+      ;;
     --testnet)
       NETWORK="testnet"
       ;;
@@ -461,8 +479,22 @@ function exec_supervisor() {
   upgrade_standalone &
   service_status &
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf \
-    > >(sed 's/^/supervisor: /') \
-    2> >(sed 's/^/supervisor: /' >&2)
+    > >(sed -u 's/^/supervisor: /') \
+    2> >(sed -u 's/^/supervisor: /' >&2)
+}
+
+function print_service_logs() {
+  # Wait for supervisord to be up.
+  while ! supervisorctl pid > /dev/null ; do
+    sleep 1;
+  done
+  # Start tailing logs from notable services.
+  supervisorctl tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
+  supervisorctl tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
+  supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    supervisorctl tail -f soroban-rpc  stdout > >(sed "s/^/${blue}soroban-rpc  | $clear/") &
+  fi
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
