@@ -453,8 +453,8 @@ function exec_supervisor() {
   upgrade_standalone &
   service_status &
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf \
-    > >(sed 's/^/supervisor: /') \
-    2> >(sed 's/^/supervisor: /' >&2)
+    > >(sed -u 's/^/supervisor: /') \
+    2> >(sed -u 's/^/supervisor: /' >&2)
 }
 
 function print_service_logs() {
