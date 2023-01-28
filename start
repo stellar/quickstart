@@ -49,7 +49,11 @@ function main() {
     exit 1
   fi
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core" >&2
+    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core usage by horizon, ingestion won't work correctly with both enabled." >&2
+    exit 1
+  fi
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without soroban rpc enabled, it uses captive core which ingestion won't work correctly with both enabled." >&2
     exit 1
   fi
   if [ "$ENABLE_LOGS" = "true" ]; then
@@ -407,6 +411,12 @@ EOF
     run_silent "disable core bucketlistdb for horizon" sed -ri "s/__ENABLE_BUCKETLIST__/#/g" $HORIZON_CAPTIVE_CORE_CFG
   fi
 
+  if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*8*g" etc/horizon.env
+  else 
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*64*g" etc/horizon.env
+  fi
+
   run_silent "chown-horizon" chown -R stellar:stellar .
 
   if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
@@ -437,8 +447,8 @@ function init_soroban_rpc() {
 
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$COREHOME/etc/soroban-rpc-captive-core.cfg
   cp $COREHOME/etc/stellar-captive-core.cfg $SOROBAN_RPC_CAPTIVE_CORE_CFG 2>/dev/null || true
-  run_silent "finalize-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-rpc-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11726*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-soroban-rpc-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11726*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
 
   pushd $SOROBAN_RPC_HOME
@@ -451,7 +461,7 @@ function init_soroban_rpc() {
     -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
     etc/soroban-rpc.env
 
-  run_silent "enable core bucketlistdb for soroban-rpc" sed -ri "s/__ENABLE_BUCKETLIST__//g" $COREHOME/etc/soroban-rpc-captive-core.cfg
+  run_silent "enable-core-bucketlistdb-soroban-rpc" sed -ri "s/__ENABLE_BUCKETLIST__//g" $COREHOME/etc/soroban-rpc-captive-core.cfg
   
   touch .quickstart-initialized
   popd
