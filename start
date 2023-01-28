@@ -48,14 +48,6 @@ function main() {
     echo "--randomize-network-passphrase is only supported in the standalone network" >&2
     exit 1
   fi
-  if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without captive core usage by horizon, ingestion won't work correctly with both enabled." >&2
-    exit 1
-  fi
-  if [ "$ENABLE_SOROBAN_RPC" = "true" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
-    echo "--enable-core-artificially-accelerate-time-for-testing is only supported without soroban rpc enabled, it uses captive core which ingestion won't work correctly with both enabled." >&2
-    exit 1
-  fi
   if [ "$ENABLE_LOGS" = "true" ]; then
     print_service_logs &
     start \
@@ -244,6 +236,9 @@ function copy_defaults() {
     echo "horizon: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/horizon/ $HZHOME
+    if [ -d /opt/stellar-default/$NETWORK/horizon/ ]; then
+      $CP /opt/stellar-default/$NETWORK/horizon/ $HZHOME
+    fi
   fi
 
   if [ -d $SOROBAN_RPC_HOME/etc ]; then
@@ -379,6 +374,7 @@ function init_horizon() {
   fi
   pushd $HZHOME
 
+  mkdir ./cc
   sed -ri \
     -e "s/__PGPASS__/$PGPASS/g" \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
@@ -387,28 +383,19 @@ function init_horizon() {
 
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     
-    HORIZON_CAPTIVE_CORE_CFG=$COREHOME/etc/horizon-captive-core.cfg
-    cp $COREHOME/etc/stellar-captive-core.cfg $HORIZON_CAPTIVE_CORE_CFG 2>/dev/null || true
-    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
-    run_silent "finalize-horizon-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11725*g" $HORIZON_CAPTIVE_CORE_CFG
+    HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
+    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$HZHOME/cc/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
     sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $HORIZON_CAPTIVE_CORE_CFG
 
-    mkdir ./cc
-    # this config tells captive core to use memory for current state, 
-    # there is an option to use disk instead at some point, CAPTIVE_CORE_USE_DB
-    # this does tend to make core network catchup take longer though, EXPERIMENTAL_BUCKETLIST_DB
-    # may be used in captive core.cfg later to address this once it's not experimental.
     cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
-export CAPTIVE_CORE_STORAGE_PATH=/opt/stellar/horizon/cc
+export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/cc
 export CAPTIVE_CORE_USE_DB=false
 export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
-    # keep bucketlistdb core toml param commented out until 'latest' refers to preview version 7+ of soroban enabled horizon
-    # it's not defined in earlier versions
-    run_silent "disable core bucketlistdb for horizon" sed -ri "s/__ENABLE_BUCKETLIST__/#/g" $HORIZON_CAPTIVE_CORE_CFG
   fi
 
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
@@ -445,24 +432,27 @@ function init_soroban_rpc() {
     return 0
   fi
 
-  SOROBAN_RPC_CAPTIVE_CORE_CFG=$COREHOME/etc/soroban-rpc-captive-core.cfg
-  cp $COREHOME/etc/stellar-captive-core.cfg $SOROBAN_RPC_CAPTIVE_CORE_CFG 2>/dev/null || true
-  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$COREHOME/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-soroban-rpc-captivecore-peer-port" sed -ri "s*__PEER_PORT__*11726*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-
   pushd $SOROBAN_RPC_HOME
   mkdir ./cc
 
-  run_silent "init-soroban-rpc" chown -R stellar:stellar .
-
+  SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/cc/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  
   sed -ri \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
     -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
     etc/soroban-rpc.env
-
-  run_silent "enable-core-bucketlistdb-soroban-rpc" sed -ri "s/__ENABLE_BUCKETLIST__//g" $COREHOME/etc/soroban-rpc-captive-core.cfg
   
+  if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*8*g" etc/soroban-rpc.env
+  else 
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*64*g" etc/soroban-rpc.env
+  fi
+
+  run_silent "init-soroban-rpc" chown -R stellar:stellar .
+
   touch .quickstart-initialized
   popd
 }
