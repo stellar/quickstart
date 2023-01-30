@@ -1,4 +1,4 @@
-__PHONY__: build build-dev-deps
+__PHONY__: build build-deps
 
 TAG?=dev
 CORE_REF?=master
