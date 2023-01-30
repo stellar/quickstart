@@ -399,9 +399,9 @@ EOF
   fi
 
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*8*g" etc/horizon.env
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*8*g" etc/horizon.env
   else 
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*64*g" etc/horizon.env
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*64*g" etc/horizon.env
   fi
 
   run_silent "chown-horizon" chown -R stellar:stellar .
@@ -446,9 +446,9 @@ function init_soroban_rpc() {
     etc/soroban-rpc.env
   
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*8*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.env
   else 
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_SIZE__*64*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.env
   fi
 
   run_silent "init-soroban-rpc" chown -R stellar:stellar .
