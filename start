@@ -374,7 +374,7 @@ function init_horizon() {
   fi
   pushd $HZHOME
 
-  mkdir ./cc
+  mkdir ./captive-core
   sed -ri \
     -e "s/__PGPASS__/$PGPASS/g" \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
@@ -384,7 +384,7 @@ function init_horizon() {
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     
     HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
-    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$HZHOME/cc/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
     sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
     run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $HORIZON_CAPTIVE_CORE_CFG
 
@@ -392,7 +392,7 @@ function init_horizon() {
 export ENABLE_CAPTIVE_CORE_INGESTION=true
 export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
-export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/cc
+export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
 export CAPTIVE_CORE_USE_DB=false
 export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
@@ -433,10 +433,10 @@ function init_soroban_rpc() {
   fi
 
   pushd $SOROBAN_RPC_HOME
-  mkdir ./cc
+  mkdir ./captive-core
 
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
-  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/cc/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
