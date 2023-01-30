@@ -141,7 +141,7 @@ jobs:
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
       name: Build Stellar-Soraban-Rpc Image
-      run: docker buildx build --platform linux/${{ inputs.arch }} -f cmd/soroban-rpc/docker/Dockerfile --target build -t stellar-soroban-rpc:${{ inputs.arch }} -o type=docker,dest=/tmp/image https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
+      run: docker buildx build --platform linux/${{ inputs.arch }} -f Dockerfile.soroban-rpc --target builder -t stellar-soroban-rpc:${{ inputs.arch }} -o type=docker,dest=/tmp/image . --build-arg REF="${{ env.SOROBAN_TOOLS_REPO_BRANCH }}"
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
       with:
