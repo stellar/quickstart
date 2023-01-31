@@ -36,7 +36,7 @@ jobs:
     with:
       arch: amd64
       tag: latest
-      core_ref: v19.6.0
+      core_ref: v19.7.0
       go_ref: horizon-v2.23.0
       soroban_tools_ref: v0.4.0
       test_matrix: |
