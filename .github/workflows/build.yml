@@ -267,8 +267,8 @@ jobs:
         go run test_soroban_rpc_up.go
 
   push-pr:
-    # Push image to registry after build for pull requests.
-    if: ${{ github.event_name == 'pull_request' }}
+    # Push image to registry after build for pull requests from a local branch.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
       packages: write
