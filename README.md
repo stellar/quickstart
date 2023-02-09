@@ -138,7 +138,7 @@ For example, to build the latest soroban-dev variation:
 ```
 make build \
   TAG=soroban-dev \
-  CORE_REF=c0ad35aa19297e112d71fcc5755458495f99a237 \
+  CORE_REF=53eb71f122c9db4ec2a3239ee8c822281aac8e34 \
   CORE_CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production' \
   GO_REF=soroban-v0.0.4 \
   SOROBAN_TOOLS_REF=v0.4.0
