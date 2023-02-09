@@ -35,9 +35,9 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: 53eb71f122c9db4ec2a3239ee8c822281aac8e34
+      core_ref: 3a201d2b5ecee34d6dcc0466633783f27b7fa97c
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
-      go_ref: c3f7444f885d9a9314b4cdaf8ecb24c273c0ebef
+      go_ref: soroban-xdr-next
       soroban_tools_ref: auth-next2
       test_matrix: |
         {
@@ -53,10 +53,10 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: 53eb71f122c9db4ec2a3239ee8c822281aac8e34
+      core_ref: 3a201d2b5ecee34d6dcc0466633783f27b7fa97c
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: c3f7444f885d9a9314b4cdaf8ecb24c273c0ebef
+      go_ref: soroban-xdr-next
       soroban_tools_ref: auth-next2
       test_matrix: |
         {
