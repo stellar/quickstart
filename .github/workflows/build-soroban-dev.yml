@@ -37,8 +37,8 @@ jobs:
       tag: soroban-dev-amd64
       core_ref: 53eb71f122c9db4ec2a3239ee8c822281aac8e34
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
-      go_ref: soroban-v0.0.4
-      soroban_tools_ref: v0.4.0
+      go_ref: 8c3f4c0c23e9
+      soroban_tools_ref: auth-next2
       test_matrix: |
         {
           "network": ["standalone"],
@@ -56,8 +56,8 @@ jobs:
       core_ref: 53eb71f122c9db4ec2a3239ee8c822281aac8e34
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: soroban-v0.0.4
-      soroban_tools_ref: v0.4.0
+      go_ref: 8c3f4c0c23e9
+      soroban_tools_ref: auth-next2
       test_matrix: |
         {
           "network": ["standalone"],
