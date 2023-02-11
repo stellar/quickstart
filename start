@@ -16,7 +16,7 @@ export FBHOME="$STELLAR_HOME/friendbot"
 export NXHOME="$STELLAR_HOME/nginx"
 export SOROBAN_RPC_HOME="$STELLAR_HOME/soroban-rpc"
 
-export PGBIN="/usr/lib/postgresql/12/bin/"
+export PGBIN="/usr/lib/postgresql/14/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
