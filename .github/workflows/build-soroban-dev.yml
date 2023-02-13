@@ -38,7 +38,7 @@ jobs:
       core_ref: 3a201d2b5ecee34d6dcc0466633783f27b7fa97c
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       go_ref: soroban-xdr-next
-      soroban_tools_ref: auth-next2-merged
+      soroban_tools_ref: main
       test_matrix: |
         {
           "network": ["standalone"],
@@ -57,7 +57,7 @@ jobs:
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-xdr-next
-      soroban_tools_ref: auth-next2-merged
+      soroban_tools_ref: main
       test_matrix: |
         {
           "network": ["standalone"],
