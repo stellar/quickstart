@@ -35,7 +35,7 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: 3a201d2b5ecee34d6dcc0466633783f27b7fa97c
+      core_ref: 871accefc0c4a703c1321b4f0e48cf6e03b41960
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       go_ref: soroban-v0.0.5
       soroban_tools_ref: v0.5.0
@@ -53,7 +53,7 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: 3a201d2b5ecee34d6dcc0466633783f27b7fa97c
+      core_ref: 871accefc0c4a703c1321b4f0e48cf6e03b41960
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-v0.0.5
