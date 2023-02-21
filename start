@@ -583,7 +583,7 @@ function stellar_core_status() {
 function soroban_rpc_status() {
   echo "soroban rpc: waiting for ready state..."
   COUNTER=1
-  while ! $(curl --silent --location --request POST 'http://localhost:8000/soroban/rpc' \
+  while ! $(curl --silent --location --request POST 'http://localhost:8003/soroban/rpc' \
     --header 'Content-Type: application/json' \
     --data-raw '{ "jsonrpc": "2.0", "id": 10235, "method": "getHealth" }' | \
     jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false);
@@ -600,7 +600,7 @@ function soroban_rpc_status() {
 function horizon_status() {
   COUNTER=1
   echo "horizon: waiting for ingestion to catch up..."
-  while ! $(curl --silent --location --request GET 'http://localhost:8000' | \
+  while ! $(curl --silent --location --request GET 'http://localhost:8001' | \
     jq --exit-status '.core_latest_ledger > 5 and .history_latest_ledger > 5' 2>/dev/null | \
     grep -o true || echo false);
   do
