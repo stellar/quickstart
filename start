@@ -562,9 +562,11 @@ popd() {
 
 function service_status() {
   stellar_core_status &
-  horizon_status &
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    horizon_status &
     soroban_rpc_status
+  else
+    horizon_status
   fi
 }
 
