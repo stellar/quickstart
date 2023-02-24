@@ -38,7 +38,7 @@ jobs:
       core_ref: 871accefc0c4a703c1321b4f0e48cf6e03b41960
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       go_ref: soroban-v0.0.6.1
-      soroban_tools_ref: v0.6.1
+      soroban_tools_ref: v0.6.2
       test_matrix: |
         {
           "network": ["standalone"],
@@ -57,7 +57,7 @@ jobs:
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-v0.0.6.1
-      soroban_tools_ref: v0.6.1
+      soroban_tools_ref: v0.6.2
       test_matrix: |
         {
           "network": ["standalone"],
