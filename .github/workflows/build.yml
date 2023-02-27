@@ -126,7 +126,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-soroban-rpc:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.core_build_runner_type }}
     steps:
     - id: cache
       uses: actions/cache@v3
