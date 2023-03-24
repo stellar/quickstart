@@ -41,6 +41,10 @@ function main() {
     echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
     exit 1
   fi
+  if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
+    echo "--enable-soroban-diagnostic-events usage only supported with --enable-soroban-rpc" >&2
+    exit 1
+  fi
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
     echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
     exit 1
