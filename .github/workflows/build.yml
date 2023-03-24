@@ -259,6 +259,7 @@ jobs:
       if: ${{ matrix.network == 'standalone' }}
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
     - name: Run soroban rpc test
       if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
