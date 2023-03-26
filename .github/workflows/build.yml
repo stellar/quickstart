@@ -75,26 +75,22 @@ jobs:
         name: image-stellar-core-${{ inputs.arch }}
         path: /tmp/image
 
+# don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
+# different commits over time, cache key won't invalidate correctly. 
   build-stellar-horizon:
     runs-on: ubuntu-latest
     steps:
-    - id: cache
-      uses: actions/cache@v3
-      with:
-        path: /tmp/image
-        key: image-stellar-horizon-${{ inputs.arch }}-${{ env.GO_REPO_BRANCH }}
-    - if: steps.cache.outputs.cache-hit != 'true'
+    - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
         ref: ${{ env.HEAD_SHA }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+    - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
-    - if: steps.cache.outputs.cache-hit != 'true'
+    - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - if: steps.cache.outputs.cache-hit != 'true'
-      name: Build Stellar-Horizon Image
+    - name: Build Stellar-Horizon Image
       run: docker buildx build --platform linux/${{ inputs.arch }} -f Dockerfile.horizon --target builder -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image . --build-arg REF="${{ env.GO_REPO_BRANCH }}"
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v2
@@ -102,22 +98,18 @@ jobs:
         name: image-stellar-horizon-${{ inputs.arch }}
         path: /tmp/image
 
+# don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
+# different commits over time, cache key won't invalidate correctly. 
   build-stellar-friendbot:
     runs-on: ubuntu-latest
     steps:
-    - id: cache
-      uses: actions/cache@v3
-      with:
-        path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ env.GO_REPO_BRANCH }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+    - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
-    - if: steps.cache.outputs.cache-hit != 'true'
+    - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - if: steps.cache.outputs.cache-hit != 'true'
-      name: Build Stellar-Friendbot Image
+    - name: Build Stellar-Friendbot Image
       run: docker buildx build --platform linux/${{ inputs.arch }} -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }} -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
