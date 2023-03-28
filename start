@@ -24,6 +24,7 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_HORIZON_CAPTIVE_CORE:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
+: "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING:=false}"
 
@@ -38,6 +39,10 @@ function main() {
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
+    exit 1
+  fi
+  if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
+    echo "--enable-soroban-diagnostic-events usage only supported with --enable-soroban-rpc" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
@@ -110,6 +115,9 @@ function process_args() {
       ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
+      ;;
+    --enable-soroban-diagnostic-events)
+      ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
@@ -439,6 +447,7 @@ function init_soroban_rpc() {
   run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-enable-soroban-diagnostic-events" sed -ri "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
   sed -ri \
     -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
