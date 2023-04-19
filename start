@@ -303,7 +303,7 @@ function init_db() {
 
   set_pg_password
 
-  run_silent "finalize-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
+  run_silent "finalize-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" /opt/stellar/postgresql/.pgpass
 
   mkdir -p $PGDATA
   chown postgres:postgres $PGDATA
@@ -345,17 +345,17 @@ function init_stellar_core() {
     return 0
   fi
 
-  run_silent "finalize-core-config-pgpass" sed -ri "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
   local RUN_STANDALONE=false
   if [ "$NETWORK" = "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
     RUN_STANDALONE=true
   fi
 
-  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
-  run_silent "finalize-core-config-run-standalone" sed -ri "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
-  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
-  run_silent "finalize-core-config-manual-close" sed -ri "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   start_postgres
 
@@ -383,18 +383,16 @@ function init_horizon() {
   pushd $HZHOME
 
   mkdir ./captive-core
-  sed -ri \
-    -e "s/__PGPASS__/$PGPASS/g" \
-    -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
-    -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
-    etc/horizon.env
+  perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/horizon.env
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/horizon.env
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/horizon.env
 
   if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     
     HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
-    run_silent "finalize-horizon-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
-    sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
-    run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
+    perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $HORIZON_CAPTIVE_CORE_CFG
 
     cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
@@ -407,9 +405,9 @@ EOF
   fi
 
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*8*g" etc/horizon.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/horizon.env
   else 
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*64*g" etc/horizon.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/horizon.env
   fi
 
   run_silent "chown-horizon" chown -R stellar:stellar .
@@ -444,20 +442,18 @@ function init_soroban_rpc() {
   mkdir ./captive-core
 
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
-  run_silent "finalize-soroban-rpc-captivecore-db" sed -ri "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  sed -ri "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" sed -ri "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-core-config-enable-soroban-diagnostic-events" sed -ri "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
-  sed -ri \
-    -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" \
-    -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" \
-    etc/soroban-rpc.env
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.env
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.env
   
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.env
   else 
-    run_silent "finalize-horizon-checkpoint-frequency" sed -ri "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.env
   fi
 
   run_silent "init-soroban-rpc" chown -R stellar:stellar .
