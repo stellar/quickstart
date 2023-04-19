@@ -537,6 +537,16 @@ function start_postgres() {
     return 0
   fi
 
+  # Check that postgres can start and load the data successfully. If it can't
+  # successfully do this, then something is in a bad state. For example, a newer
+  # a persistent volume may be mounted with postgres data which is incompatible
+  # with the version of postgres in the container. Log any errors from postgres
+  # to help the operator debug the situation.
+  if ! postgres_logs=$(sudo -u postgres sh -c "echo -n | $PGBIN/postgres --single -E -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf" 2>&1); then
+    echo "$postgres_logs" | sed -u 's/^/postgres: /'
+    exit 1
+  fi
+
   sudo -u postgres $PGBIN/postgres -D $PGDATA -c config_file=$PGHOME/etc/postgresql.conf &> /dev/null &
   CURRENT_POSTGRES_PID=$!
 
