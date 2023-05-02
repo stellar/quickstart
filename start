@@ -447,13 +447,13 @@ function init_soroban_rpc() {
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
-  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.env
-  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.env
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.cfg
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.cfg
   
   if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
-    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.cfg
   else 
-    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.env
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.cfg
   fi
 
   run_silent "init-soroban-rpc" chown -R stellar:stellar .
