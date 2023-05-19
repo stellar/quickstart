@@ -34,6 +34,10 @@ on:
         description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
         type: 'string'
         required: true
+      soroban_rpc_build_runner_type:
+        description: 'The GitHub Runner instance type to build soroban-rpc on'
+        type: 'string'
+        default: 'ubuntu-latest'
       test_matrix:
         description: 'JSON matrix for the test job'
         type: 'string'
@@ -118,7 +122,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-soroban-rpc:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.soroban_rpc_build_runner_type }}
     steps:
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
