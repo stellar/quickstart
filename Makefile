@@ -16,7 +16,7 @@ build-deps-friendbot:
 	docker build -t stellar-friendbot:$(TAG) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(GO_REF)
 
 build-deps-soroban-rpc:
-	docker build -t stellar-soroban-rpc:$(TAG) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_TOOLS_REF)
+	docker build -t stellar-soroban-rpc:$(TAG) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_TOOLS_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
 
 # the build-deps have the four dependencies for the building of the
 # dockers for core, horizon, friendbot and soroban-rpc. Specifying these as dependencies
