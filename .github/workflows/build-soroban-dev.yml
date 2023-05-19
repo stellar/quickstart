@@ -58,6 +58,8 @@ jobs:
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-v0.0.8
       soroban_tools_ref: 8d74eea499598bfc425b760f7832257786b8fa19
+      soroban_rpc_build_runner_type: ubuntu-latest-8-cores
+
       test_matrix: |
         {
           "network": ["standalone"],
