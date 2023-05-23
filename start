@@ -355,7 +355,17 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
-  run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
+  if [ "$NETWORK" = "standalone" ]; then
+    # Standalone always starts with manual close enabled, because this script
+    # will manually close the first 64 ledgers to move the network forward to
+    # the first checkpoint so that the instance starts with a checkpoint to
+    # allow applications like horizon and rpc to join the network and ingest
+    # data immediately. The `upgrade_standalone` function will set the final
+    # manual close state for standalone.
+    run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/true/g" etc/stellar-core.cfg
+  else
+    run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
+  fi
 
   start_postgres
 
@@ -476,6 +486,11 @@ function upgrade_standalone() {
         curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
       fi
     fi
+    for i in {1..65}; do
+      curl "http://localhost:11626/manualclose"
+    done
+    run_silent "finalize-core-config-manual-close" perl -pi -e "s/MANUAL_CLOSE=true/MANUAL_CLOSE=$ENABLE_CORE_MANUAL_CLOSE/g" $COREHOME/etc/stellar-core.cfg
+    run_silent "restart-core" supervisorctl restart stellar-core
   fi
 }
 
