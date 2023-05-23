@@ -26,6 +26,7 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING:=false}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -42,6 +43,10 @@ function main() {
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
     echo "--enable-soroban-diagnostic-events usage only supported with --enable-soroban-rpc" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then
+    echo "--enable-core-artificially-accelerate-time-for-testing is only supported in the standalone network" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
@@ -116,6 +121,9 @@ function process_args() {
       ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
+      ;;
+    --enable-core-artificially-accelerate-time-for-testing)
+      ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING=true
       ;;
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
@@ -346,6 +354,7 @@ function init_stellar_core() {
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
   run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   start_postgres
@@ -383,6 +392,7 @@ function init_horizon() {
     HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
     run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
     perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $HORIZON_CAPTIVE_CORE_CFG
 
     cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
@@ -392,6 +402,12 @@ export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
 export CAPTIVE_CORE_USE_DB=false
 export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
+  fi
+
+  if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/horizon.env
+  else 
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/horizon.env
   fi
 
   run_silent "chown-horizon" chown -R stellar:stellar .
@@ -428,10 +444,17 @@ function init_soroban_rpc() {
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
   run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-artificially-accelerate-time-for-testing" perl -pi -e "s/__ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING__/$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.env
   perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.env
+  
+  if [ "$ENABLE_CORE_ARTIFICIALLY_ACCELERATE_TIME_FOR_TESTING" = "true" ]; then   
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*8*g" etc/soroban-rpc.env
+  else 
+    run_silent "finalize-horizon-checkpoint-frequency" perl -pi -e "s*__CHECKPOINT_FREQUENCY__*64*g" etc/soroban-rpc.env
+  fi
 
   run_silent "init-soroban-rpc" chown -R stellar:stellar .
 

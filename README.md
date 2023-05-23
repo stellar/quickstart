@@ -64,9 +64,6 @@ Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
 
 The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
 
-In standalone network mode a ledger occurs every one second and so transactions
-are finalized faster than on deployed networks.
-
 *Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
 ### Soroban Development
@@ -92,6 +89,8 @@ To enable the Soroban RPC server provide the following command line flags when s
 `--enable-soroban-rpc`
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+
+The Soroban RPC server uses an instance of captive core for obtaining various network ledger states, rpc server waits for captive core to be in sync with network first. The captive core requires at least one published archive be available from the network to get in sync. When using `--standalone` network, there could be a delay waiting for the new standalone network to publish the first archive file based on the default checkpoint size of first 64 ledgers created on the network. To avoid a timely wait here for those 64 ledgers to pass, which would be about 5 minutes, you can apply an additional setting `--enable-core-artificially-accelerate-time-for-testing`, this will configure the standalone network to generate a ledger every second, and it will do checkpoints every 8th ledger, so their will be an archive generated within roughly the first 8 seconds after starting up quickstart. You can check the readiness status of soroban rpc in the console output of quickstart, it will first print `soroban rpc: waiting for ready state` and then a second message for `soroban rpc: up and ready`, at which point you can begin using the soroban rpc service.
 
 ### Deploy to Digital Ocean
 

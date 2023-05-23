@@ -43,10 +43,12 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "standalone"],
-          "options": ["", "--enable-horizon-captive-core"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-core-artificially-accelerate-time-for-testing"],
           "exclude": [
             { "network": "testnet", "options": "--enable-horizon-captive-core" },
+            { "network": "testnet", "options": "--enable-horizon-captive-core --enable-core-artificially-accelerate-time-for-testing" },
             { "network": "pubnet", "options": "--enable-horizon-captive-core" },
+            { "network": "pubnet", "options": "--enable-horizon-captive-core --enable-core-artificially-accelerate-time-for-testing" },
           ]
         }
 
