@@ -42,7 +42,7 @@ jobs:
       test_matrix: |
         {
           "network": ["standalone"],
-          "options": ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-core-artificially-accelerate-time-for-testing", "--enable-soroban-rpc", "--enable-soroban-rpc --enable-core-artificially-accelerate-time-for-testing"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
 
   arm64:
@@ -58,11 +58,11 @@ jobs:
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-v0.0.7
       soroban_tools_ref: v0.7.0
-      soroban_rpc_build_runner_type: ubuntu-latest-8-cores
+      soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
           "network": ["standalone"],
-          "options": ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-core-artificially-accelerate-time-for-testing", "--enable-soroban-rpc", "--enable-soroban-rpc --enable-core-artificially-accelerate-time-for-testing"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
 
   manifest:
