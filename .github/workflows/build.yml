@@ -72,7 +72,13 @@ jobs:
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
       name: Build Stellar-Core Image
-      run: docker buildx build --platform linux/${{ inputs.arch }} -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }} -o type=docker,dest=/tmp/image https://github.com/stellar/stellar-core.git#${{ env.CORE_REPO_BRANCH }} --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
+      run: >
+        docker buildx build --platform linux/${{ inputs.arch }} 
+        -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }} 
+        -o type=docker,dest=/tmp/image 
+        https://github.com/stellar/stellar-core.git#${{ env.CORE_REPO_BRANCH }} 
+        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
+        --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v2
       with:
@@ -95,7 +101,11 @@ jobs:
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
-      run: docker buildx build --platform linux/${{ inputs.arch }} -f Dockerfile.horizon --target builder -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image . --build-arg REF="${{ env.GO_REPO_BRANCH }}"
+      run: >
+        docker buildx build --platform linux/${{ inputs.arch }} 
+        -f Dockerfile.horizon --target builder 
+        -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image 
+        --build-arg REF="${{ env.GO_REPO_BRANCH }}" .
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v2
       with:
@@ -114,7 +124,12 @@ jobs:
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Friendbot Image
-      run: docker buildx build --platform linux/${{ inputs.arch }} -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }} -o type=docker,dest=/tmp/image https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
+      run: >
+        docker buildx build --platform linux/${{ inputs.arch }} 
+        -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }} 
+        -o type=docker,dest=/tmp/image 
+        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
+        https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
       with:
@@ -131,7 +146,13 @@ jobs:
     - name: Uses buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Soroban-Rpc Image
-      run: docker buildx build --platform linux/${{ inputs.arch }} -f cmd/soroban-rpc/docker/Dockerfile --target build -t stellar-soroban-rpc:${{ inputs.arch }} -o type=docker,dest=/tmp/image https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }} --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+      run: >
+        docker buildx build --platform linux/${{ inputs.arch }} 
+        -f cmd/soroban-rpc/docker/Dockerfile --target build 
+        -t stellar-soroban-rpc:${{ inputs.arch }} 
+        -o type=docker,dest=/tmp/image 
+        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
+        https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v2
       with:
