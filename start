@@ -579,7 +579,7 @@ function stellar_core_status() {
 function soroban_rpc_status() {
   echo "soroban rpc: waiting for ready state..."
   COUNTER=1
-  while ! $(curl --silent --location --request POST 'http://localhost:8003/soroban/rpc' \
+  while ! $(curl --silent --location --request POST 'http://localhost:8003' \
     --header 'Content-Type: application/json' \
     --data-raw '{ "jsonrpc": "2.0", "id": 10235, "method": "getHealth" }' | \
     jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false);
