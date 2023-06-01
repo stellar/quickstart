@@ -404,10 +404,6 @@ EOF
 
   start_postgres
   run_silent "init-horizon-db" sudo -u stellar ./bin/horizon db init
-  if [ "$NETWORK" = "standalone" ]; then
-    run_silent "init-genesis-state" sudo -u stellar ./bin/horizon ingest init-genesis-state
-  fi
-
   touch .quickstart-initialized
   popd
 }
