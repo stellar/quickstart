@@ -25,6 +25,7 @@ export PGPORT=5432
 : "${ENABLE_HORIZON_CAPTIVE_CORE:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+: "${ENABLE_SOROBAN_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 
 QUICKSTART_INITIALIZED=false
@@ -42,6 +43,10 @@ function main() {
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
     echo "--enable-soroban-diagnostic-events usage only supported with --enable-soroban-rpc" >&2
+    exit 1
+  fi
+  if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_ADMIN_ENDPOINT" = "true" ]; then
+    echo "--enable-soroban-admin-endpoint usage only supported with --enable-soroban-admin-endpoint" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
@@ -114,6 +119,9 @@ function process_args() {
     --enable-soroban-diagnostic-events)
       ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
+    --enable-soroban-admin-endpoint)
+      ENABLE_SOROBAN_ADMIN_ENDPOINT=true
+      ;;  
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
       ;;
@@ -430,6 +438,12 @@ function init_soroban_rpc() {
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
+  ADMIN_ENDPOINT=localhost:8004
+  if [ "$ENABLE_SOROBAN_ADMIN_ENDPOINT" != "true" ]; then
+    ADMIN_ENDPOINT=
+  fi
+  
+  perl -pi -e "s/__SOROBAN_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/soroban-rpc.cfg
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.cfg
   perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.cfg
 
