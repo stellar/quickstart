@@ -93,10 +93,10 @@ To enable the Soroban RPC server provide the following command line flags when s
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
-To enable soroban rpc administrative endpoint for access to metrics and pprof, include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 8004, which can be exposed with standard docker port rule `-p "8004:8004"`, the published endpoints are:
+To enable soroban rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
 ```
-http://<container_host>:8004/metrics
-http://container_host:8000/debug/pprof/
+http://<container_host>:6061/metrics
+http://<container_host>:6061/debug/pprof/
 ```
 
 
@@ -221,14 +221,14 @@ Managing UIDs between a docker container and a host volume can be complicated.  
 
 ## Ports
 
-| Port  | Service      | Description               |
-|-------|--------------|---------------------------|
-| 5432  | postgresql        | database access port |
-| 8000  | horizon           | main http port       |
-| 8004  | soroban rpc admin | main http port       |
-| 6060  | horizon           | admin port           |
-| 11625 | stellar-core      | peer node port       |
-| 11626 | stellar-core      | main http port       |
+| Port  | Service                         | Description          |
+|-------|---------------------------------|----------------------|
+| 5432  | postgresql                      | database access port |
+| 8000  | horizon, soroban-rpc, friendbot | main http port       |
+| 6060  | horizon                         | admin port           |
+| 6061  | soroban-rpc                     | admin port           |
+| 11625 | stellar-core                    | peer node port       |
+| 11626 | stellar-core                    | main http port       |
 
 
 ### Security Considerations

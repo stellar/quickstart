@@ -15,7 +15,7 @@ EXPOSE 8000
 EXPOSE 6060
 EXPOSE 11625
 EXPOSE 11626
-EXPOSE 8004
+EXPOSE 6061
 
 ADD dependencies /
 RUN ["chmod", "+x", "dependencies"]
