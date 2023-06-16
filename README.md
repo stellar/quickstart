@@ -93,6 +93,13 @@ To enable the Soroban RPC server provide the following command line flags when s
 
 The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
+To enable soroban rpc administrative endpoint for access to metrics and pprof, include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 8004, which can be exposed with standard docker port rule `-p "8004:8004"`, the published endpoints are:
+```
+http://<container_host>:8004/metrics
+http://container_host:8000/debug/pprof/
+```
+
+
 ### Deploy to Digital Ocean
 
 You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `standalone` network.
@@ -214,13 +221,14 @@ Managing UIDs between a docker container and a host volume can be complicated.  
 
 ## Ports
 
-| Port  | Service      | Description          |
-|-------|--------------|----------------------|
-| 5432  | postgresql   | database access port |
-| 8000  | horizon      | main http port       |
-| 6060  | horizon      | admin port           |
-| 11625 | stellar-core | peer node port       |
-| 11626 | stellar-core | main http port       |
+| Port  | Service      | Description               |
+|-------|--------------|---------------------------|
+| 5432  | postgresql        | database access port |
+| 8000  | horizon           | main http port       |
+| 8004  | soroban rpc admin | main http port       |
+| 6060  | horizon           | admin port           |
+| 11625 | stellar-core      | peer node port       |
+| 11626 | stellar-core      | main http port       |
 
 
 ### Security Considerations
