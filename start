@@ -46,7 +46,7 @@ function main() {
     exit 1
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" = "true" ]; then
-    echo "--enable-soroban-admin-endpoint usage only supported with --enable-soroban-rpc" >&2
+    echo "--enable-soroban-rpc-admin-endpoint usage only supported with --enable-soroban-rpc" >&2
     exit 1
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
