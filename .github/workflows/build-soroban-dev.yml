@@ -35,10 +35,10 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: soroban-preview-9-May22
+      core_ref: 875f47e247cefc25c8a4b3982ee65610e6a620e3
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
-      go_ref: soroban-v0.0.8.2
-      soroban_tools_ref: v0.8.0
+      go_ref: soroban-v0.0.9
+      soroban_tools_ref: v0.9.0
       test_matrix: |
         {
           "network": ["standalone"],
@@ -53,11 +53,11 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: soroban-preview-9-May22
+      core_ref: 875f47e247cefc25c8a4b3982ee65610e6a620e3
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: soroban-v0.0.8.2
-      soroban_tools_ref: v0.8.0
+      go_ref: soroban-v0.0.9
+      soroban_tools_ref: v0.9.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
