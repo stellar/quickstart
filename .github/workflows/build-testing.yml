@@ -38,7 +38,7 @@ jobs:
       arch: amd64
       tag: testing-amd64
       core_ref: v19.12.0
-      go_ref: horizon-v2.26.0
+      go_ref: horizon-v2.26.1
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
@@ -59,7 +59,7 @@ jobs:
       arch: arm64
       tag: testing-arm64
       core_ref: v19.12.0
-      go_ref: horizon-v2.26.0
+      go_ref: horizon-v2.26.1
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
