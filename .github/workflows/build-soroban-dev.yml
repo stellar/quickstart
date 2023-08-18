@@ -6,7 +6,7 @@ name: Soroban-Dev
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
 
 # Prevent more than one build of this workflow for a branch to be running at the
@@ -18,14 +18,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   complete:
     if: always()
     needs: [manifest]
     runs-on: ubuntu-latest
     steps:
-    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-      run: exit 1
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
 
   amd64:
     uses: ./.github/workflows/build.yml
@@ -35,10 +34,10 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: soroban-preview-9-May22
+      core_ref: soroban-preview-10-July20
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
-      go_ref: soroban-v0.0.8.2
-      soroban_tools_ref: v0.8.0
+      go_ref: soroban-v0.0.9.1
+      soroban_tools_ref: v0.9.2
       test_matrix: |
         {
           "network": ["standalone"],
@@ -53,11 +52,11 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: soroban-preview-9-May22
+      core_ref: soroban-preview-10-July20
       core_configure_flags: --disable-tests --enable-next-protocol-version-unsafe-for-production
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: soroban-v0.0.8.2
-      soroban_tools_ref: v0.8.0
+      go_ref: soroban-v0.0.9.1
+      soroban_tools_ref: v0.9.2
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
