@@ -368,6 +368,13 @@ function init_stellar_core() {
     pushd /tmp/stellar-core/history/vs
     python3 -m http.server 1570 > /dev/null 2>&1 &
     popd
+
+    # Skip ahead the first 64 ledgers, writing checkpoints, so that the network
+    # starts with a checkpoint available in the archive. Applications like
+    # Horizon, Soroban-RPC require a checkpoint to start ingestion. Without one
+    # they will wait for a checkpoint to be naturally produced which delays
+    # those services reaching a ready state.
+    run_silent "skip-to-first-checkpoint" sudo -u stellar stellar-core --conf etc/stellar-core.cfg offline-close 64
   fi
 
   touch .quickstart-initialized
