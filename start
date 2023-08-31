@@ -363,7 +363,7 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
-
+  run_silent "finalize-core-config-enable-soroban-high-limit-override" perl -pi -e "s/__ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE__/$ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE/g" etc/stellar-core.cfg
   start_postgres
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
