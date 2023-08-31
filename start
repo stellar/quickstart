@@ -27,6 +27,7 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -51,6 +52,10 @@ function main() {
   fi
   if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     echo "--randomize-network-passphrase is only supported in the standalone network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE" = "true" ]; then
+    echo "--enable-soroban-high-limit-override is only supported in the standalone network" >&2
     exit 1
   fi
   if [ "$ENABLE_LOGS" = "true" ]; then
@@ -127,6 +132,9 @@ function process_args() {
       ;;
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
+      ;;
+    --enable-soroban-high-limit-override)
+      ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE=true
       ;;
     *)
       echo "Unknown container arg $ARG" >&2
@@ -433,6 +441,7 @@ function init_soroban_rpc() {
   run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-core-config-enable-soroban-high-limit-override" perl -pi -e "s/__ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE__/$ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   
   local ADMIN_ENDPOINT=0.0.0.0:6061
   if [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" != "true" ]; then
