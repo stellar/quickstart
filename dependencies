@@ -4,12 +4,13 @@ set -e
 # dependencies
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y curl wget git apt-transport-https \
-                   libpq-dev libsqlite3-dev libsasl2-dev \
+apt-get install -y curl apt-transport-https \
                    postgresql-client postgresql postgresql-contrib \
-                   sudo vim zlib1g-dev supervisor psmisc \
-                   nginx rsync jq netcat # Parsing stellar-core JSON for standalone network and checking core HTTP server
+                   sudo supervisor psmisc \
+                   nginx rsync jq netcat \
+                   libunwind8 sqlite libc++abi1-12 libc++1-12
 apt-get clean
+rm -rf /var/lib/apt/lists/*
 
 chown -R www-data:www-data /var/lib/nginx
 
