@@ -11,7 +11,10 @@ run:
 	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --standalone --enable-soroban-rpc
 
 logs:
-	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
+	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*$(LOG)*'
+
+console:
+	docker exec -it stellar /bin/bash
 
 build-latest:
 	$(MAKE) build TAG=latest \

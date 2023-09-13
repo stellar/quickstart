@@ -33,10 +33,6 @@ CURRENT_POSTGRES_PID=""
 
 function main() {
   process_args $*
-  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] &&[ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    echo "--enable-horizon-captive-core usage only supported on standalone/futurenet networks" >&2
-    exit 1
-  fi
   if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
     exit 1
