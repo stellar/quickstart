@@ -100,6 +100,7 @@ function process_args() {
       NETWORK="local"
       ;;
     --standalone) # Deprecated and replaced by '--local'.
+      echo "deprecated: option --standalone has been replaced by --local"
       NETWORK="local"
       ;;
     --futurenet)
