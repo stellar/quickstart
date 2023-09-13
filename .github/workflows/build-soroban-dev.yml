@@ -40,7 +40,7 @@ jobs:
       soroban_tools_ref: v0.9.2
       test_matrix: |
         {
-          "network": ["standalone"],
+          "network": ["local"],
           "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
 
@@ -60,7 +60,7 @@ jobs:
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
-          "network": ["standalone"],
+          "network": ["local"],
           "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
         }
 
