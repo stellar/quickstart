@@ -53,14 +53,7 @@ function main() {
     echo "--randomize-network-passphrase is only supported in the standalone network" >&2
     exit 1
   fi
-  if [ "$ENABLE_LOGS" = "true" ]; then
-    print_service_logs &
-    start \
-      >  >(sed "s/^/${cyan}quickstart   | $clear/") \
-      2> >(sed "s/^/${cyan}quickstart   | $clear/" >&2)
-  else
-    start
-  fi
+  start
 }
 
 function start() {
@@ -79,7 +72,14 @@ function start() {
   stop_postgres  # this gets started in init_db
 
   # launch services
-  exec_supervisor
+  if [ "$ENABLE_LOGS" = "true" ]; then
+    print_service_logs &
+    exec_supervisor \
+      >  >(sed "s/^/${cyan}quickstart   | $clear/") \
+      2> >(sed "s/^/${cyan}quickstart   | $clear/" >&2)
+  else
+    exec_supervisor
+  fi
 }
 
 function process_args() {
