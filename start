@@ -63,7 +63,8 @@ function start() {
   echo "Starting Stellar Quickstart"
 
   echo "mode: $STELLAR_MODE"
-  echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
+  echo "network: $NETWORK"
+  echo "network passphrase: $NETWORK_PASSPHRASE"
 
   copy_defaults
   init_db
@@ -353,7 +354,7 @@ function init_stellar_core() {
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
-  run_silent "finalize-core-config-run-local" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   start_postgres
