@@ -67,7 +67,8 @@ function start() {
   echo "Starting Stellar Quickstart"
 
   echo "mode: $STELLAR_MODE"
-  echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
+  echo "network: $NETWORK"
+  echo "network passphrase: $NETWORK_PASSPHRASE"
 
   copy_defaults
   init_db
