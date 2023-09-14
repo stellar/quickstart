@@ -27,10 +27,10 @@ build-testing:
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		CORE_REF=soroban-preview-11-Sep13 \
-		CORE_CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production' \
-		HORIZON_REF=soroban-v0.10.0 \
-		SOROBAN_RPC_REF=v0.10.0
+		CORE_REF=v20.0.0rc1 \
+		CORE_CONFIGURE_FLAGS='--disable-tests' \
+		HORIZON_REF=soroban-v1.0.0-rc \
+		SOROBAN_RPC_REF=v20.0.0-rc.1
 
 build:
 	$(MAKE) -j 4 build-deps
