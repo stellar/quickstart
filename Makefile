@@ -30,7 +30,7 @@ build-soroban-dev:
 		CORE_REF=v20.0.0rc1 \
 		CORE_CONFIGURE_FLAGS='--disable-tests' \
 		HORIZON_REF=soroban-v1.0.0-rc \
-		SOROBAN_RPC_REF=v20.0.0-rc.1
+		SOROBAN_RPC_REF=v20.0.0-rc1
 
 build:
 	$(MAKE) -j 4 build-deps
