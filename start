@@ -96,7 +96,7 @@ function process_args() {
     --local)
       NETWORK="local"
       ;;
-    --standalone) # Deprecated and replaced by '--local'.
+    --standalone)
       echo "deprecated: option --standalone has been replaced by --local"
       NETWORK="local"
       ;;
@@ -354,7 +354,7 @@ function init_stellar_core() {
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
-  run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-run-local" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   start_postgres
