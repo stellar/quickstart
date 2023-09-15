@@ -34,7 +34,7 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: ecb24df104c2453a00fa5097d2e879d7731b9596
+      core_ref: v20.0.0rc1
       core_configure_flags: --disable-tests
       go_ref: soroban-v1.0.0-rc
       soroban_tools_ref: v20.0.0-rc1
@@ -52,7 +52,7 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: ecb24df104c2453a00fa5097d2e879d7731b9596
+      core_ref: v20.0.0rc1
       core_configure_flags: --disable-tests
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: soroban-v1.0.0-rc
