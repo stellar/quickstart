@@ -171,7 +171,11 @@ As part of launching, an ephemeral mode container will generate a random passwor
 
 ### Persistent mode
 
-In comparison to ephemeral mode, persistent mode is more complicated to operate, but also more powerful.  Persistent mode uses a mounted host volume, a directory on the host machine that is exposed to the running docker container, to store all database data as well as the configuration files used for running services.  This allows you to manage and modify these files from the host system.
+In comparison to ephemeral mode, persistent mode is more complicated to operate, but also more powerful.  Persistent mode uses a mounted host volume, a directory on the host machine that is exposed to the running docker container, to store all database data as well as the configuration files used for running services. This allows you to manage and modify these files from the host system.
+
+Note that there is no guarantee that the organization of the files of the volume will remain consistent between releases of the image, that occur on every commit to the stellar/quickstart repository. At anytime new files may be added, old files removed, or dependencies and references between them changed. For this reason persistent mode is primarily intended for running short lived test instances for development. If consistency is required over any period of time use [image digest references] to pin to a specific build.
+
+[image digest references]: https://docs.docker.com/engine/reference/run/#imagedigest
 
 Starting a persistent mode container is the same as the ephemeral mode with one exception:
 
@@ -186,34 +190,6 @@ Upon launching a persistent mode container for the first time, the launch script
 1.  Run an interactive session of the container at first, ensuring that all services start and run correctly.
 2.  Shut down the interactive container (using Ctrl-C).
 3.  Start a new container using the same host directory in the background.
-
-
-### Customizing configurations
-
-To customize the configurations that both stellar-core and horizon use, you must use persistent mode.  The default configurations will be copied into the data directory upon launching a persistent mode container for the first time.  Use the diagram below to learn about the various configuration files that can be customized.
-
-```
-  /opt/stellar
-  |-- core
-  |   `-- etc
-  |       `-- stellar-core.cfg  # Stellar core config
-  |-- horizon
-  |   `-- etc
-  |       `-- horizon.env       # A shell script that exports horizon's config
-  |-- postgresql
-  |   `-- etc
-  |       |-- postgresql.conf   # Postgresql root configuration file
-  |       |-- pg_hba.conf       # Postgresql client configuration file
-  |       `-- pg_ident.conf     # Postgresql user mapping file
-  `-- supervisor
-      `-- etc
-  |       `-- supervisord.conf  # Supervisord root configuration
-```
-
-It is recommended that you stop the container before editing any of these files, then restart the container after completing your customization.
-
-*NOTE:* Be wary of editing these files.  It is possible to break the services started within this container with a bad edit.  It's recommended that you learn about managing the operations of each of the services before customizing them, as you are taking responsibility for maintaining those services going forward.
-
 
 ## Regarding user accounts
 

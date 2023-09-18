@@ -18,10 +18,8 @@ EXPOSE 11625
 EXPOSE 11626
 
 ADD dependencies /
-RUN ["chmod", "+x", "dependencies"]
 RUN /dependencies
 
-RUN apt-get -y install libunwind8 postgresql curl sqlite libc++abi1-12 libc++1-12
 COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
 
 COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
