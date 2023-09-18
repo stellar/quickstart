@@ -349,6 +349,7 @@ function init_stellar_core() {
 
     if [ "$NETWORK" = "standalone" ]; then
       start_postgres
+
       run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
     fi
 
@@ -367,8 +368,10 @@ function init_stellar_core() {
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   if [ "$NETWORK" = "standalone" ] && [ "${CORE_PROTOCOL_VERSION}" = "20" ]; then
-    echo "\n" >> $COREHOME/etc/stellar-core.cfg
-    echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" >> $COREHOME/etc/stellar-core.cfg
+    echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" > $COREHOME/etc/stellar-core.cfg.tmp
+    cat $COREHOME/etc/stellar-core.cfg >> $COREHOME/etc/stellar-core.cfg.tmp
+    rm -f $COREHOME/etc/stellar-core.cfg
+    mv $COREHOME/etc/stellar-core.cfg.tmp $COREHOME/etc/stellar-core.cfg
   fi
 
   start_postgres
@@ -407,10 +410,12 @@ function init_horizon() {
     run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
     perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
 
-  if [ "$NETWORK" = "standalone" ] && [ "${CORE_PROTOCOL_VERSION}" = "20" ]; then
-    echo "\n" >> ${HORIZON_CAPTIVE_CORE_CFG}
-    echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" >> ${HORIZON_CAPTIVE_CORE_CFG}
-  fi
+    if [ "$NETWORK" = "standalone" ] && [ "${CORE_PROTOCOL_VERSION}" = "20" ]; then
+      echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" > ${HORIZON_CAPTIVE_CORE_CFG}.tmp
+      cat ${HORIZON_CAPTIVE_CORE_CFG} >> ${HORIZON_CAPTIVE_CORE_CFG}.tmp
+      rm -f ${HORIZON_CAPTIVE_CORE_CFG}
+      mv ${HORIZON_CAPTIVE_CORE_CFG}.tmp ${HORIZON_CAPTIVE_CORE_CFG}
+    fi
 
     cat << EOF >> etc/horizon.env
 export ENABLE_CAPTIVE_CORE_INGESTION=true
