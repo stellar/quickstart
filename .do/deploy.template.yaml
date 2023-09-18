@@ -17,7 +17,7 @@ spec:
       value: stellar/quickstart:latest
       scope: BUILD_TIME
     - key: NETWORK
-      value: 'standalone'
+      value: 'local'
       scope: RUN_TIME
     - key: ENABLE_SOROBAN_RPC
       value: 'false'

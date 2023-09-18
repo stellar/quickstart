@@ -33,12 +33,12 @@ CURRENT_POSTGRES_PID=""
 
 function main() {
   process_args $*
-  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] &&[ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    echo "--enable-horizon-captive-core usage only supported on standalone/futurenet networks" >&2
+  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] &&[ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    echo "--enable-horizon-captive-core usage only supported on local/futurenet networks" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "standalone" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    echo "--enable-soroban-rpc usage only supported on standalone/futurenet networks" >&2
+  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    echo "--enable-soroban-rpc usage only supported on local/futurenet networks" >&2
     exit 1
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
@@ -49,8 +49,8 @@ function main() {
     echo "--enable-soroban-rpc-admin-endpoint usage only supported with --enable-soroban-rpc" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "standalone" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
-    echo "--randomize-network-passphrase is only supported in the standalone network" >&2
+  if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
+    echo "--randomize-network-passphrase is only supported in the local network" >&2
     exit 1
   fi
   if [ "$ENABLE_LOGS" = "true" ]; then
@@ -67,7 +67,8 @@ function start() {
   echo "Starting Stellar Quickstart"
 
   echo "mode: $STELLAR_MODE"
-  echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
+  echo "network: $NETWORK"
+  echo "network passphrase: $NETWORK_PASSPHRASE"
 
   copy_defaults
   init_db
@@ -96,8 +97,12 @@ function process_args() {
     --pubnet)
       NETWORK="pubnet"
       ;;
+    --local)
+      NETWORK="local"
+      ;;
     --standalone)
-      NETWORK="standalone"
+      echo "deprecated: option --standalone has been replaced by --local"
+      NETWORK="local"
       ;;
     --futurenet)
       NETWORK="futurenet"
@@ -148,7 +153,7 @@ function process_args() {
     export NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
-  standalone)
+  local)
     export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
@@ -340,7 +345,7 @@ function init_stellar_core() {
   if [ -f $COREHOME/.quickstart-initialized ]; then
     echo "core: already initialized"
 
-    if [ "$NETWORK" = "standalone" ]; then
+    if [ "$NETWORK" = "local" ]; then
       start_postgres
 
       run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
@@ -351,20 +356,20 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
   local RUN_STANDALONE=false
-  if [ "$NETWORK" = "standalone" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
+  if [ "$NETWORK" = "local" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
     RUN_STANDALONE=true
   fi
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
-  run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
+  run_silent "finalize-core-config-run-local" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   start_postgres
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
-  if [ "$NETWORK" = "standalone" ]; then
+  if [ "$NETWORK" = "local" ]; then
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
@@ -408,7 +413,7 @@ EOF
 
   run_silent "chown-horizon" chown -R stellar:stellar .
 
-  if [[ "$NETWORK" = "standalone" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
+  if [[ "$NETWORK" = "local" || (".$PROTOCOL_VERSION" != ".none"  &&  $PROTOCOL_VERSION -gt 19) ]] ; then    
     cat << EOF >> etc/horizon.env
 export INGEST_DISABLE_STATE_VERIFICATION=True
 EOF
@@ -453,9 +458,9 @@ function init_soroban_rpc() {
   popd
 }
 
-function upgrade_standalone() {
-  # Upgrade standalone network's protocol version and base reserve to match pubnet/testnet
-  if [ "$NETWORK" = "standalone" ]; then
+function upgrade_local() {
+  # Upgrade local network's protocol version and base reserve to match pubnet/testnet
+  if [ "$NETWORK" = "local" ]; then
     # Wait for server
     while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
     if [ -z "$PROTOCOL_VERSION" ]; then
@@ -472,7 +477,7 @@ function upgrade_standalone() {
 
 function exec_supervisor() {
   echo "supervisor: starting"
-  upgrade_standalone &
+  upgrade_local &
   service_status &
   exec supervisord -n -c $SUPHOME/etc/supervisord.conf \
     > >(sed -u 's/^/supervisor: /') \
