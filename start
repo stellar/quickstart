@@ -28,6 +28,7 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
+: "${ENABLE_STANDALONE_SOROBAN_HIGH_LIMIT_OVERRIDE:=true}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -54,10 +55,21 @@ function main() {
     echo "--randomize-network-passphrase is only supported in the standalone network" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE" = "true" ]; then
-    echo "--enable-soroban-high-limit-override is only supported in the standalone network" >&2
+
+  # The disable-soroban-high-limit-override is available only for standalone networks.
+  # By default, we want to keep it enabled ( which is the default ) since we want to help developers
+  # having high execution limits.
+  if [ "$NETWORK" != "standalone" ] && [ "$ENABLE_STANDALONE_SOROBAN_HIGH_LIMIT_OVERRIDE" = "false" ]; then
+    echo "--disable-soroban-high-limit-override is only supported in the standalone network" >&2
     exit 1
   fi
+
+  # The value of ENABLE_STANDALONE_SOROBAN_HIGH_LIMIT_OVERRIDE would "propagete" into ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE
+  # only for standalone networks.
+  if [ "$NETWORK" = "standalone" ]; then
+    ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE=${ENABLE_STANDALONE_SOROBAN_HIGH_LIMIT_OVERRIDE}
+  fi
+
   if [ "$ENABLE_LOGS" = "true" ]; then
     print_service_logs &
     start \
@@ -133,8 +145,8 @@ function process_args() {
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
       ;;
-    --enable-soroban-high-limit-override)
-      ENABLE_SOROBAN_HIGH_LIMIT_OVERRIDE=true
+    --disable-soroban-high-limit-override)
+      ENABLE_STANDALONE_SOROBAN_HIGH_LIMIT_OVERRIDE=false
       ;;
     *)
       echo "Unknown container arg $ARG" >&2
