@@ -42,6 +42,8 @@ ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD futurenet /opt/stellar-default/futurenet
 
+ARG CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE
+ENV CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE $CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE
 
 ADD start /
 RUN ["chmod", "+x", "start"]

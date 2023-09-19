@@ -3,6 +3,7 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 TAG?=dev
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
+CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE?=false
 SOROBAN_RPC_REF?=main
 HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF))
 FRIENDBOT_REF?=$(HORIZON_REF)
@@ -12,6 +13,9 @@ run:
 
 logs:
 	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
+
+console:
+	docker exec -it stellar /bin/bash
 
 build-latest:
 	$(MAKE) build TAG=latest \
@@ -29,12 +33,13 @@ build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		CORE_REF=v20.0.0rc1 \
 		CORE_CONFIGURE_FLAGS='--disable-tests' \
+		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
 		HORIZON_REF=soroban-v1.0.0-rc \
-		SOROBAN_RPC_REF=v20.0.0-rc1
+		SOROBAN_RPC_REF=v20.0.0-rc2
 
 build:
 	$(MAKE) -j 4 build-deps
-	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF)
+	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) --build-arg CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=$(CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE)
 
 build-deps: build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
