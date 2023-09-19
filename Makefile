@@ -25,16 +25,17 @@ build-latest:
 
 build-testing:
 	$(MAKE) build TAG=testing \
-		CORE_REF=v19.13.0 \
-		HORIZON_REF=horizon-v2.26.1 \
-		SOROBAN_RPC_REF=v0.4.0
+		CORE_REF=v20.0.0rc1 \
+		CORE_CONFIGURE_FLAGS='--disable-tests' \
+		HORIZON_REF=horizon-v2.27.0-rc1 \
+		SOROBAN_RPC_REF=v20.0.0-rc2
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		CORE_REF=v20.0.0rc1 \
 		CORE_CONFIGURE_FLAGS='--disable-tests' \
 		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
-		HORIZON_REF=soroban-v1.0.0-rc \
+		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc2
 
 build:
