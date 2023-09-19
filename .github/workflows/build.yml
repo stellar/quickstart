@@ -222,7 +222,7 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build --platform linux/${{ inputs.arch }} -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
+      run: docker build --platform linux/${{ inputs.arch }} -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }} --build-arg CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=${{ inputs.core_supports_testing_soroban_high_limit_override }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
