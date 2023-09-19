@@ -35,7 +35,7 @@ build-soroban-dev:
 		CORE_CONFIGURE_FLAGS='--disable-tests' \
 		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
 		HORIZON_REF=soroban-v1.0.0-rc \
-		SOROBAN_RPC_REF=v20.0.0-rc1
+		SOROBAN_RPC_REF=v20.0.0-rc2
 
 build:
 	$(MAKE) -j 4 build-deps
