@@ -37,16 +37,15 @@ jobs:
     with:
       arch: amd64
       tag: testing-amd64
-      core_ref: v19.13.0
-      go_ref: horizon-v2.26.1
-      soroban_tools_ref: v0.4.0
+      core_ref: v20.0.0rc1
+      go_ref: horizon-v2.27.0-rc1
+      soroban_tools_ref: v20.0.0-rc2
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
           "exclude": [
-            { "network": "testnet", "options": "--enable-horizon-captive-core" },
-            { "network": "pubnet", "options": "--enable-horizon-captive-core" },
+            { "network": "pubnet", "options": "--enable-soroban-rpc" },
           ]
         }
 
@@ -58,16 +57,15 @@ jobs:
     with:
       arch: arm64
       tag: testing-arm64
-      core_ref: v19.13.0
-      go_ref: horizon-v2.26.1
-      soroban_tools_ref: v0.4.0
+      core_ref: v20.0.0rc1
+      go_ref: horizon-v2.27.0-rc1
+      soroban_tools_ref: v20.0.0-rc2
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core"],
+          "options": ["", "--enable-horizon-captive-core", "--enable-soroban-rpc"],
           "exclude": [
-            { "network": "testnet", "options": "--enable-horizon-captive-core" },
-            { "network": "pubnet", "options": "--enable-horizon-captive-core" },
+            { "network": "pubnet", "options": "--enable-soroban-rpc" },
           ]
         }
 
