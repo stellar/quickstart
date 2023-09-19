@@ -22,6 +22,10 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
+      core_supports_testing_soroban_high_limit_override:
+        description: 'Indicator whether stellar-core supports the TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE config'
+        type: 'string'
+        default: 'false'
       core_build_runner_type:
         description: 'The GitHub Runner instance type to build stellar-core on'
         type: 'string'

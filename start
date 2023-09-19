@@ -27,11 +27,10 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
-# CORE_PROTOCOL_VERSION is default to 19, and will be updated in find_core_version.
-CORE_PROTOCOL_VERSION=19
 
 function main() {
   process_args $*
@@ -71,7 +70,6 @@ function start() {
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK ($NETWORK_PASSPHRASE)"
 
-  find_core_version
   copy_defaults
   init_db
   init_stellar_core
@@ -83,14 +81,6 @@ function start() {
 
   # launch services
   exec_supervisor
-}
-
-function find_core_version() {
-  PROTOCOL_20_CORE=$(stellar-core version 2> /dev/null | grep "ledger protocol version: 20" | wc -l | tr -d ' ')
-  if [ "$PROTOCOL_20_CORE" = "1" ]; then
-    # we're on protocol 20.
-    CORE_PROTOCOL_VERSION=20
-  fi
 }
 
 function process_args() {
@@ -367,11 +357,10 @@ function init_stellar_core() {
   run_silent "finalize-core-config-run-standalone" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
-  if [ "$NETWORK" = "standalone" ] && [ "${CORE_PROTOCOL_VERSION}" = "20" ]; then
-    echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" > $COREHOME/etc/stellar-core.cfg.tmp
-    cat $COREHOME/etc/stellar-core.cfg >> $COREHOME/etc/stellar-core.cfg.tmp
-    rm -f $COREHOME/etc/stellar-core.cfg
-    mv $COREHOME/etc/stellar-core.cfg.tmp $COREHOME/etc/stellar-core.cfg
+  if [ "$NETWORK" = "standalone" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
+    run_silent "finalize-core-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" etc/stellar-core.cfg
+  else
+    run_silent "finalize-core-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" etc/stellar-core.cfg
   fi
 
   start_postgres
@@ -410,11 +399,10 @@ function init_horizon() {
     run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
     perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
 
-    if [ "$NETWORK" = "standalone" ] && [ "${CORE_PROTOCOL_VERSION}" = "20" ]; then
-      echo "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true\n" > ${HORIZON_CAPTIVE_CORE_CFG}.tmp
-      cat ${HORIZON_CAPTIVE_CORE_CFG} >> ${HORIZON_CAPTIVE_CORE_CFG}.tmp
-      rm -f ${HORIZON_CAPTIVE_CORE_CFG}
-      mv ${HORIZON_CAPTIVE_CORE_CFG}.tmp ${HORIZON_CAPTIVE_CORE_CFG}
+    if [ "$NETWORK" = "standalone" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
+      run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $HORIZON_CAPTIVE_CORE_CFG
+    else
+      run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $HORIZON_CAPTIVE_CORE_CFG
     fi
 
     cat << EOF >> etc/horizon.env
@@ -458,6 +446,12 @@ function init_soroban_rpc() {
   run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+
+  if [ "$NETWORK" = "standalone" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
+    run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  else
+    run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  fi
 
   local ADMIN_ENDPOINT=0.0.0.0:6061
   if [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" != "true" ]; then
