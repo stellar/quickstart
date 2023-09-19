@@ -34,12 +34,12 @@ CURRENT_POSTGRES_PID=""
 
 function main() {
   process_args $*
-  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] &&[ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    echo "--enable-horizon-captive-core usage only supported on local/futurenet networks" >&2
+  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$NETWORK" != "testnet" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
+    echo "--enable-horizon-captive-core usage only supported on local/futurenet/testnet networks" >&2
     exit 1
   fi
-  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    echo "--enable-soroban-rpc usage only supported on local/futurenet networks" >&2
+  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$NETWORK" != "testnet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    echo "--enable-soroban-rpc usage only supported on local/futurenet/testnet networks" >&2
     exit 1
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
