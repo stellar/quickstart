@@ -19,7 +19,7 @@ The image uses the following software:
 
 To use this project successfully, you should first decide a few things:
 
-First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Additionally, we have added a standalone network (called standalone) which allows you to run your own private Stellar network.
+First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Alternatively, choose to run a local network (called local) which allows you to run your own private Stellar network.
 
 Next, you must decide whether you will use a docker volume or not.  When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart.  We recommend persistent mode for anything besides a development or test environment.
 
@@ -29,7 +29,7 @@ After deciding on the questions above, you can setup your container.  Please ref
 
 ### Network Options
 
-Provide either `--pubnet`, `--testnet` or `--standalone` as a command line flag when starting the container to determine which network (and base configuration file) to use.
+Provide either `--pubnet`, `--testnet` or `--local` as a command line flag when starting the container to determine which network (and base configuration file) to use.
 
 #### `--pubnet`
 
@@ -45,9 +45,9 @@ In futurenet network mode, the node will join the [Soroban] test network that de
 
 [Soroban]: https://soroban.stellar.org
 
-#### `--standalone`
+#### `--local`
 
-In standalone network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
+In local network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
 
 The network passphrase of the network defaults to:
 ```
@@ -64,21 +64,21 @@ Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
 
 The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
 
-In standalone network mode a ledger occurs every one second and so transactions
+In local network mode a ledger occurs every one second and so transactions
 are finalized faster than on deployed networks.
 
-*Note*: The standalone network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
+*Note*: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
 ### Soroban Development
 
-For local development of smart contracts on Stellar using [Soroban], run a `standalone` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
 
 ```
 $ docker run --rm -it \
     -p "8000:8000" \
     --name stellar \
     stellar/quickstart:soroban-dev \
-    --standalone \
+    --local \
     --enable-soroban-rpc
 ```
 
@@ -86,7 +86,7 @@ This will run development versions of stellar-core, horizon, friendbot, and soro
 
 **Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
 
-The Soroban RPC server is supported only with the `--standalone` and `--futurenet` network options.
+The Soroban RPC server is supported only with the `--local` and `--futurenet` network options.
 
 To enable the Soroban RPC server provide the following command line flags when starting the container:
 `--enable-soroban-rpc`
@@ -102,22 +102,22 @@ http://<container_host>:6061/debug/pprof/
 
 ### Deploy to Digital Ocean
 
-You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `standalone` network.
+You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `local` network.
 
 [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/stellar/quickstart/tree/master)
 
 After clicking the button above, the deployment can be configured to deploy a different variant of the image, or join a different network such as `testnet` or `futurenet` by changing environment variables.
 
 Some example configurations that can be used are:
-- Standalone network matching pubnet:
+- Local network matching pubnet:
   `IMAGE`: `stellar/quickstart:latest`
-  `NETWORK`: `standalone`
-- Standalone network matching testnet:
+  `NETWORK`: `local`
+- Local network matching testnet:
   `IMAGE`: `stellar/quickstart:testing`
-  `NETWORK`: `standalone`
-- Standalone network matching futurenet:
+  `NETWORK`: `local`
+- Local network matching futurenet:
   `IMAGE`: `stellar/quickstart:soroban-dev`
-  `NETWORK`: `standalone`
+  `NETWORK`: `local`
   `ENABLE_SOROBAN_RPC`: `true`
 - Futurenet node:
   `IMAGE`: `stellar/quickstart:soroban-dev`

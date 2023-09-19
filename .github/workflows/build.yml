@@ -277,7 +277,7 @@ jobs:
         go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ matrix.network == 'standalone' }}
+      if: ${{ matrix.network == 'local' }}
       run: |
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
