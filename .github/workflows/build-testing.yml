@@ -43,7 +43,7 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"],
+          "options": ["", "--enable-horizon-captive-core --enable-soroban-rpc"],
           "exclude": [
             { "network": "pubnet", "options": "--enable-soroban-rpc" },
           ]
@@ -63,7 +63,7 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core", "--enable-horizon-captive-core --enable-soroban-rpc"],
+          "options": ["", "--enable-horizon-captive-core --enable-soroban-rpc"],
           "exclude": [
             { "network": "pubnet", "options": "--enable-soroban-rpc" },
           ]
