@@ -19,7 +19,7 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-		CORE_REF=v19.13.0 \
+		CORE_REF=v19.14.0 \
 		HORIZON_REF=horizon-v2.26.1 \
 		SOROBAN_RPC_REF=v0.4.0
 
