@@ -199,7 +199,11 @@ function set_pg_password() {
   fi
 
   # ask for a password when persistent
-  read -s -p "Enter New Postgresql Password: " PGPASS
+  read -s -p "Enter New Postgresql Password: " PGPASS ||
+    (
+      echo Postgresql password not supplied. Set the POSTGRES_PASSWORD environment variable, or run the container interactively and provide the password via stdin.
+      exit 1
+    )
   echo ""
   read -s -p "Confirm: " PGPASS_CONFIRMATION
   echo ""
