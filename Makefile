@@ -26,6 +26,7 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 		CORE_REF=v20.0.0rc2 \
+		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc3
 
