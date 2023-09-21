@@ -71,22 +71,20 @@ are finalized faster than on deployed networks.
 
 ### Soroban Development
 
-For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:soroban-dev` image:
+For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:testing` image:
 
 ```
 $ docker run --rm -it \
     -p "8000:8000" \
     --name stellar \
-    stellar/quickstart:soroban-dev \
+    stellar/quickstart:testing \
     --local \
     --enable-soroban-rpc
 ```
 
-This will run development versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
+This will run the release-candidate versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
 
-**Warning: The Soroban RPC Server is in early development and the version included in any quickstart image is a development release with no production capabilities and no API compatibility guarantee. Not recommended for use in production or any environment requiring stability or safety.**
-
-The Soroban RPC server is supported only with the `--local` and `--futurenet` network options.
+The Soroban RPC server is supported only with the `--local`, `--futurenet`, `--testnet` network options.
 
 To enable the Soroban RPC server provide the following command line flags when starting the container:
 `--enable-soroban-rpc`
