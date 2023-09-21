@@ -54,8 +54,10 @@ jobs:
       arch: arm64
       tag: latest-arm64
       core_ref: v19.14.0
+      core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.26.1
       soroban_tools_ref: v0.4.0
+      soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
           "network": ["pubnet", "local"],
