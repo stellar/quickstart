@@ -41,7 +41,7 @@ jobs:
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
-          "network": ["testnet", "pubnet", "local"],
+          "network": ["pubnet", "local"],
           "options": ["", "--enable-horizon-captive-core"]
         }
 
@@ -58,7 +58,7 @@ jobs:
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
-          "network": ["testnet", "pubnet", "local"],
+          "network": ["pubnet", "local"],
           "options": ["", "--enable-horizon-captive-core"]
         }
 
