@@ -34,11 +34,11 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: v20.0.0rc1
+      core_ref: v20.0.0rc2
       core_configure_flags: --disable-tests
       core_supports_testing_soroban_high_limit_override: "true"
       go_ref: horizon-v2.27.0-rc1
-      soroban_tools_ref: v20.0.0-rc2
+      soroban_tools_ref: v20.0.0-rc3
       test_matrix: |
         {
           "network": ["local"],
@@ -53,12 +53,12 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: v20.0.0rc1
+      core_ref: v20.0.0rc2
       core_configure_flags: --disable-tests
       core_supports_testing_soroban_high_limit_override: "true"
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.27.0-rc1
-      soroban_tools_ref: v20.0.0-rc2
+      soroban_tools_ref: v20.0.0-rc3
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
