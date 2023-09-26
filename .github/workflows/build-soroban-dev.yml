@@ -6,7 +6,7 @@ name: Soroban-Dev
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
 
 # Prevent more than one build of this workflow for a branch to be running at the
@@ -18,14 +18,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   complete:
     if: always()
     needs: [manifest]
     runs-on: ubuntu-latest
     steps:
-    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-      run: exit 1
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
 
   amd64:
     uses: ./.github/workflows/build.yml
@@ -38,7 +37,7 @@ jobs:
       core_ref: v20.0.0rc2
       core_supports_testing_soroban_high_limit_override: "true"
       go_ref: horizon-v2.27.0-rc1
-      soroban_tools_ref: v20.0.0-rc3
+      soroban_tools_ref: v20.0.0-rc4
       test_matrix: |
         {
           "network": ["local"],
@@ -57,7 +56,7 @@ jobs:
       core_supports_testing_soroban_high_limit_override: "true"
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.27.0-rc1
-      soroban_tools_ref: v20.0.0-rc3
+      soroban_tools_ref: v20.0.0-rc4
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
