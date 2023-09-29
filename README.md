@@ -142,7 +142,7 @@ version that is still in development, add
 - `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
 - `SOROBAN_RPC_REF`: The git reference of soroban-rpc to build.
 
-For example, to build the latest soroban-dev variation:
+For example:
 ```
 make build \
   TAG=soroban-dev \
