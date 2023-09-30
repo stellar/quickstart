@@ -137,17 +137,21 @@ built with.
 build with. Typically include `--disable-tests`, and to enable the next protocol
 version that is still in development, add
 `--enable-next-protocol-version-unsafe-for-production`.
-- `GO_REF`: The git reference of stellar-horizon and stellar-friendbot to build.
-- `SOROBAN_TOOLS_REF`: The git reference of soroban-rpc to build.
+- `CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE`: Flag for whether high limits for testing are enabled. Default `false`.
+- `HORIZON_REF`: The git reference of stellar-horizon to build.
+- `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
+- `SOROBAN_RPC_REF`: The git reference of soroban-rpc to build.
 
-For example, to build the latest soroban-dev variation:
+For example:
 ```
 make build \
   TAG=soroban-dev \
-  CORE_REF=c0ad35aa19297e112d71fcc5755458495f99a237 \
-  CORE_CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production' \
-  GO_REF=soroban-v0.0.4 \
-  SOROBAN_TOOLS_REF=v0.4.0
+  CORE_REF=... \
+  CORE_CONFIGURE_FLAGS=... \
+  CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=... \
+  HORIZON_REF=... \
+  FRIENDBOT_REF=... \
+  SOROBAN_RPC_REF=...
 ```
 
 ### Background vs. Interactive containers
