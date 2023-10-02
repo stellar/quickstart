@@ -22,7 +22,6 @@ export PGUSER="stellar"
 export PGPORT=5432
 
 : "${ENABLE_LOGS:=false}"
-: "${ENABLE_HORIZON_CAPTIVE_CORE:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
@@ -111,9 +110,6 @@ function process_args() {
     --enable-asset-stats)
       export ENABLE_ASSET_STATS="$1"
       shift
-      ;;
-    --enable-horizon-captive-core)
-      ENABLE_HORIZON_CAPTIVE_CORE=true
       ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
@@ -353,9 +349,6 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
   local RUN_STANDALONE=false
-  if [ "$NETWORK" = "local" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
-    RUN_STANDALONE=true
-  fi
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
@@ -397,8 +390,6 @@ function init_horizon() {
   perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/horizon.env
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/horizon.env
   perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/horizon.env
-
-  if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
     
     HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
     run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
@@ -418,7 +409,6 @@ export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
 export CAPTIVE_CORE_USE_DB=true
 export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
-  fi
 
   run_silent "chown-horizon" chown -R stellar:stellar .
 
