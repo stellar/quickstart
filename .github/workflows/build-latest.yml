@@ -41,8 +41,7 @@ jobs:
       soroban_tools_ref: v0.4.0
       test_matrix: |
         {
-          "network": ["pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core"]
+          "network": ["pubnet", "local"]
         }
 
   arm64:
@@ -60,8 +59,7 @@ jobs:
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
-          "network": ["pubnet", "local"],
-          "options": ["", "--enable-horizon-captive-core"]
+          "network": ["pubnet", "local"]
         }
 
   manifest:
