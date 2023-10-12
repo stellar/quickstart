@@ -49,6 +49,9 @@ function main() {
     echo "--randomize-network-passphrase is only supported in the local network" >&2
     exit 1
   fi
+  if [ "$NETWORK" = "local" ]; then
+    ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
+  fi
   start
 }
 
