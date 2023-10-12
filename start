@@ -393,7 +393,7 @@ function init_horizon() {
   if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
     run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
   else
-    run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $HORIZON_CAPTIVE_CORE_CFG
+    run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $HORIZON_CAPTIVE_CORE_CFG
   fi
 
   if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
@@ -440,7 +440,7 @@ function init_soroban_rpc() {
   if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
     run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   else
-    run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+    run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   fi
 
   if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
