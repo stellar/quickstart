@@ -38,7 +38,7 @@ function main() {
     echo "--enable-soroban-rpc usage only supported on local/futurenet/testnet networks" >&2
     exit 1
   fi
-  if [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" && [ "$CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" != "true" ]; then
+  if [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ] && [ "$CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" != "true" ]; then
     echo "--enable-soroban-diagnostic-events usage only supported with versions of stellar-core that support it" >&2
     exit 1
   fi
