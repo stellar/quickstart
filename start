@@ -24,6 +24,7 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+: "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
@@ -48,6 +49,9 @@ function main() {
   if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     echo "--randomize-network-passphrase is only supported in the local network" >&2
     exit 1
+  fi
+  if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
+    ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
   fi
   start
 }
@@ -116,6 +120,9 @@ function process_args() {
       ;;
     --enable-soroban-diagnostic-events)
       ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
+      ;;
+    --disable-soroban-diagnostic-events)
+      DISABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
     --enable-soroban-rpc-admin-endpoint)
       ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT=true

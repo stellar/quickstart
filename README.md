@@ -97,6 +97,17 @@ http://<container_host>:6061/metrics
 http://<container_host>:6061/debug/pprof/
 ```
 
+### Soroban Diagnostic Events
+
+Soroban diagnostic events contain logs about internal events that have occurred while a contract is executing. They're particularly useful for debugging why a contract trapped (panicked).
+
+To enable Soroban diagnostic events provide the following command line flag when starting the container:
+`--enable-soroban-diagnostic-events`
+
+In local network mode diagnostics are enabled by default and can be disabled with:
+`--disable-soroban-diagnostic-events`
+
+_Note: Diagnostic events are unmetered and their execution is not metered or contrained by network limits or transaction resource limits. This means the resources consumed by an instance with diagnostic events enabled may exceed resources typically required by a deployment with diagnostic events disabled._
 
 ### Deploy to Digital Ocean
 
