@@ -34,8 +34,7 @@ build-testing:
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		CORE_REF=v20.0.0-rc.2.1 \
-		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
+		CORE_REF=405e9eb9d2d0703e29a8f9792a94ea9345b58c85 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
