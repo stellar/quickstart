@@ -69,6 +69,19 @@ are finalized faster than on deployed networks.
 
 *Note*: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
+### Faucet (Friendbot)
+
+Stellar development/test networks use friendbot as a faucet for the native asset.
+
+When running in local, testnet, and futurenet modes friendbot is available on `:8000/friendbot` and can be used to fund a new account.
+
+For example:
+```
+$ curl http://localhost:8000/friendbot?addr=G...
+```
+
+_Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
+
 ### Soroban Development
 
 For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:testing` image:
