@@ -1,6 +1,7 @@
 __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
 TAG?=dev
+CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
 CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE?=false
@@ -34,7 +35,8 @@ build-testing:
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		CORE_REF=405e9eb9d2d0703e29a8f9792a94ea9345b58c85 \
+		CORE_REPO=https://github.com/sisuresh/stellar-core.git \
+		CORE_REF=cc71408d70172bafa5969fc0e0102af8ba60c3d3 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
@@ -46,7 +48,7 @@ build:
 build-deps: build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
 build-deps-core:
-	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
+	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing $(CORE_REPO)#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
 
 build-deps-horizon:
 	docker build -t stellar-horizon:$(HORIZON_REF) -f Dockerfile.horizon --target builder . --build-arg REF="$(HORIZON_REF)"
