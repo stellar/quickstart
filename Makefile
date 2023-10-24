@@ -36,7 +36,7 @@ build-testing:
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		CORE_REPO=https://github.com/sisuresh/stellar-core.git \
-		CORE_REF=cc71408d70172bafa5969fc0e0102af8ba60c3d3 \
+		CORE_REF=df249816bb86457585a47cf3163e14663a70a484 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
