@@ -35,14 +35,15 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_ref: v20.0.0rc2
+      core_ref: v20.0.0-rc.2.1
       core_supports_testing_soroban_high_limit_override: "true"
+      core_supports_enable_soroban_diagnostic_events: "true"
       go_ref: horizon-v2.27.0-rc1
       soroban_tools_ref: v20.0.0-rc4
       test_matrix: |
         {
           "network": ["local"],
-          "options": ["", "--enable-horizon-captive-core --enable-soroban-rpc"],
+          "options": ["", "--enable-soroban-rpc"],
         }
 
   arm64:
@@ -53,8 +54,9 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_ref: v20.0.0rc2
+      core_ref: v20.0.0-rc.2.1
       core_supports_testing_soroban_high_limit_override: "true"
+      core_supports_enable_soroban_diagnostic_events: "true"
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.27.0-rc1
       soroban_tools_ref: v20.0.0-rc4
@@ -62,7 +64,7 @@ jobs:
       test_matrix: |
         {
           "network": ["local"],
-          "options": ["", "--enable-horizon-captive-core --enable-soroban-rpc"],
+          "options": ["", "--enable-soroban-rpc"],
         }
 
   manifest:

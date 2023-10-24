@@ -22,3 +22,6 @@ spec:
     - key: ENABLE_SOROBAN_RPC
       value: 'false'
       scope: RUN_TIME
+    - key: DISABLE_SOROBAN_DIAGNOSTIC_EVENTS
+      value: 'true'
+      scope: RUN_TIME

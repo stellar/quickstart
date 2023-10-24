@@ -22,12 +22,13 @@ export PGUSER="stellar"
 export PGPORT=5432
 
 : "${ENABLE_LOGS:=false}"
-: "${ENABLE_HORIZON_CAPTIVE_CORE:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+: "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
+: "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -38,8 +39,8 @@ function main() {
     echo "--enable-soroban-rpc usage only supported on local/futurenet/testnet networks" >&2
     exit 1
   fi
-  if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ]; then
-    echo "--enable-soroban-diagnostic-events usage only supported with --enable-soroban-rpc" >&2
+  if [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ] && [ "$CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" != "true" ]; then
+    echo "--enable-soroban-diagnostic-events usage only supported with versions of stellar-core that support it" >&2
     exit 1
   fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" = "true" ]; then
@@ -49,6 +50,9 @@ function main() {
   if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     echo "--randomize-network-passphrase is only supported in the local network" >&2
     exit 1
+  fi
+  if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
+    ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
   fi
   start
 }
@@ -112,14 +116,14 @@ function process_args() {
       export ENABLE_ASSET_STATS="$1"
       shift
       ;;
-    --enable-horizon-captive-core)
-      ENABLE_HORIZON_CAPTIVE_CORE=true
-      ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
       ;;
     --enable-soroban-diagnostic-events)
       ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
+      ;;
+    --disable-soroban-diagnostic-events)
+      DISABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
     --enable-soroban-rpc-admin-endpoint)
       ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT=true
@@ -237,6 +241,7 @@ function copy_defaults() {
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
 
   if [ -d $COREHOME/etc ]; then
@@ -352,14 +357,9 @@ function init_stellar_core() {
   fi
 
   run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
-  local RUN_STANDALONE=false
-  if [ "$NETWORK" = "local" ] && [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "false" ] && [ "$ENABLE_SOROBAN_RPC" = "false" ]; then
-    RUN_STANDALONE=true
-  fi
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
-  run_silent "finalize-core-config-run-local" perl -pi -e "s/__RUN_STANDALONE__/$RUN_STANDALONE/g" etc/stellar-core.cfg
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
   if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
@@ -376,10 +376,6 @@ function init_stellar_core() {
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
-    # Start local history server
-    pushd /tmp/stellar-core/history/vs
-    python3 -m http.server 1570 > /dev/null 2>&1 &
-    popd
   fi
 
   touch .quickstart-initialized
@@ -398,27 +394,25 @@ function init_horizon() {
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/horizon.env
   perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/horizon.env
 
-  if [ "$ENABLE_HORIZON_CAPTIVE_CORE" = "true" ]; then
-    
-    HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
-    run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
-    perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+  HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
+  if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
+    run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
+  else
+    run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $HORIZON_CAPTIVE_CORE_CFG
+  fi
 
-    if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
-      run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $HORIZON_CAPTIVE_CORE_CFG
-    else
-      run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $HORIZON_CAPTIVE_CORE_CFG
-    fi
+  if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
+    run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $HORIZON_CAPTIVE_CORE_CFG
+  else
+    run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $HORIZON_CAPTIVE_CORE_CFG
+  fi
 
-    cat << EOF >> etc/horizon.env
-export ENABLE_CAPTIVE_CORE_INGESTION=true
-export STELLAR_CORE_BINARY_PATH=/usr/bin/stellar-core
+  cat << EOF >> etc/horizon.env
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
 export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
-export CAPTIVE_CORE_USE_DB=true
-export STELLAR_CAPTIVE_CORE_HTTP_PORT=0
 EOF
-  fi
 
   run_silent "chown-horizon" chown -R stellar:stellar .
 
@@ -450,7 +444,11 @@ function init_soroban_rpc() {
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
   run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-core-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
+    run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  else
+    run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  fi
 
   if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
     run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG

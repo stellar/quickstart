@@ -69,6 +69,19 @@ are finalized faster than on deployed networks.
 
 *Note*: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
+### Faucet (Friendbot)
+
+Stellar development/test networks use friendbot as a faucet for the native asset.
+
+When running in local, testnet, and futurenet modes friendbot is available on `:8000/friendbot` and can be used to fund a new account.
+
+For example:
+```
+$ curl http://localhost:8000/friendbot?addr=G...
+```
+
+_Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
+
 ### Soroban Development
 
 For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:testing` image:
@@ -97,6 +110,17 @@ http://<container_host>:6061/metrics
 http://<container_host>:6061/debug/pprof/
 ```
 
+### Soroban Diagnostic Events
+
+Soroban diagnostic events contain logs about internal events that have occurred while a contract is executing. They're particularly useful for debugging why a contract trapped (panicked).
+
+To enable Soroban diagnostic events provide the following command line flag when starting the container:
+`--enable-soroban-diagnostic-events`
+
+In local network mode diagnostics are enabled by default and can be disabled with:
+`--disable-soroban-diagnostic-events`
+
+_Note: Diagnostic events are unmetered and their execution is not metered or contrained by network limits or transaction resource limits. This means the resources consumed by an instance with diagnostic events enabled may exceed resources typically required by a deployment with diagnostic events disabled._
 
 ### Deploy to Digital Ocean
 
@@ -137,17 +161,22 @@ built with.
 build with. Typically include `--disable-tests`, and to enable the next protocol
 version that is still in development, add
 `--enable-next-protocol-version-unsafe-for-production`.
-- `GO_REF`: The git reference of stellar-horizon and stellar-friendbot to build.
-- `SOROBAN_TOOLS_REF`: The git reference of soroban-rpc to build.
+- `CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE`: Flag for whether high limits for testing are enabled. Default `false`.
+- `CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS`: Flag for whether enabling Soroban diagnostic events is supported. Default `false`.
+- `HORIZON_REF`: The git reference of stellar-horizon to build.
+- `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
+- `SOROBAN_RPC_REF`: The git reference of soroban-rpc to build.
 
-For example, to build the latest soroban-dev variation:
+For example:
 ```
 make build \
   TAG=soroban-dev \
-  CORE_REF=c0ad35aa19297e112d71fcc5755458495f99a237 \
-  CORE_CONFIGURE_FLAGS='--disable-tests --enable-next-protocol-version-unsafe-for-production' \
-  GO_REF=soroban-v0.0.4 \
-  SOROBAN_TOOLS_REF=v0.4.0
+  CORE_REF=... \
+  CORE_CONFIGURE_FLAGS=... \
+  CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=... \
+  HORIZON_REF=... \
+  FRIENDBOT_REF=... \
+  SOROBAN_RPC_REF=...
 ```
 
 ### Background vs. Interactive containers
