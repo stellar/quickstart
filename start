@@ -482,10 +482,10 @@ function upgrade_local() {
     fi
     if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
       if [ $PROTOCOL_VERSION -gt 0 ]; then
-        echo "upgrade: upgrading to protocol $PROTOCOL_VERSION"
+        echo "upgrade: protocolversion=$PROTOCOL_VERSION, basereserve=5000000"
         curl -s "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
         while [ "`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; done
-        echo "upgrade: upgraded to protocol $PROTOCOL_VERSION"
+        echo "upgrade: done"
       fi
       # TODO: If protocol version is greater than v20:
       # Generate network config using stellar-core.
