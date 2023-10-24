@@ -487,6 +487,11 @@ function upgrade_local() {
         while [ "`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; done
         echo "upgrade: upgraded to protocol $PROTOCOL_VERSION"
       fi
+      # TODO: If protocol version is greater than v20:
+      # Generate network config using stellar-core.
+      # Submit txs with network config.
+      # Curl upgrade.
+      # Wait for upgrade to complete.
     fi
   fi
 }
