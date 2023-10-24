@@ -29,6 +29,7 @@ export PGPORT=5432
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
 : "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+: "${CONFIG_SETTINGS:=''}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -171,6 +172,9 @@ function process_args() {
   if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
   fi
+  export NETWORK_ID=$(printf "$NETWORK_PASSPHRASE" | sha256sum | cut -f 1 -d " ")
+  export NETWORK_ROOT_SECRET_KEY=$(printf 'SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L') # TODO: Replace with calcualted from NETWORK_ID.
+  export NETWORK_ROOT_ACCOUNT_ID=$(printf 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI') # TODO: Replace with calculated from NETWORK_ROOT_SECRET_KEY.
 
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
@@ -487,13 +491,29 @@ function upgrade_local() {
         while [ "`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; done
         echo "upgrade: done"
       fi
-      # TODO: If protocol version is greater than v20:
+      if [ $PROTOCOL_VERSION -ge 20 ]; then
+        echo "upgrade: config=$CONFIG"
+        # TODO: Make the config-settings-entries.json something that can be overriden by a commandline option.
+        # TODO: Is the below going to work? It's pretty brittle.
+        echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 1 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json | { \
+          curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          curl -s -G 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$(read)"
+        }
+        # TODO: How do we query if the upgrade succeeded? There won't be a protocol version change to watch for.
+        echo "upgrade: done"
+      fi
       # Generate network config using stellar-core.
       # Submit txs with network config.
       # Curl upgrade.
       # Wait for upgrade to complete.
     fi
   fi
+  # Delay friendbot starting till now because the config upgrade above will use
+  # the network root account to submit txs, and friendbot on local is configured
+  # to use the network root account as a funding source.
+  supervisorctl start friendbot
 }
 
 function exec_supervisor() {
