@@ -497,8 +497,11 @@ function upgrade_local() {
         # TODO: Is the below going to work? It's pretty brittle.
         echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 1 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json | { \
           curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          # TODO: Wait for tx to succeed?
           curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          # TODO: Wait for tx to succeed?
           curl -s -G 'http://localhost:11626/tx' --data-urlencode "blob=$(read)"
+          # TODO: Wait for tx to succeed?
           curl -s -G 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$(read)"
         }
         # TODO: How do we query if the upgrade succeeded? There won't be a protocol version change to watch for.
