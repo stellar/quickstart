@@ -60,6 +60,14 @@ function main() {
 function start() {
   echo "Starting Stellar Quickstart"
 
+  echo "versions:"
+  echo "  stellar-core:"
+  echo "$(stellar-core version 2>/dev/null | sed 's/^/    /')"
+  echo "  horizon:"
+  echo "$(stellar-horizon version | sed 's/^/    /')"
+  echo "  soroban-rpc:"
+  echo "$(stellar-soroban-rpc version | sed 's/^/    /')"
+
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
   echo "network passphrase: $NETWORK_PASSPHRASE"
