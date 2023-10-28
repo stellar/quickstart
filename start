@@ -64,6 +64,9 @@ function start() {
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
   echo "network passphrase: $NETWORK_PASSPHRASE"
+  echo "network id: $NETWORK_ID"
+  echo "network root secret key: $NETWORK_ROOT_SECRET_KEY"
+  echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
 
   copy_defaults
   init_db
@@ -172,9 +175,11 @@ function process_args() {
   if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
   fi
+
   export NETWORK_ID=$(printf "$NETWORK_PASSPHRASE" | sha256sum | cut -f 1 -d " ")
-  export NETWORK_ROOT_SECRET_KEY=$(printf 'SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L') # TODO: Replace with calcualted from NETWORK_ID.
-  export NETWORK_ROOT_ACCOUNT_ID=$(printf 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI') # TODO: Replace with calculated from NETWORK_ROOT_SECRET_KEY.
+  local network_id_keys=$(stellar-core convert-id $NETWORK_ID | awk -F': ' '/strKey: /{print $2}' | tail -2)
+  export NETWORK_ROOT_SECRET_KEY=$(printf "$network_id_keys" | head -1)
+  export NETWORK_ROOT_ACCOUNT_ID=$(printf "$network_id_keys" | tail -1)
 
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
@@ -476,80 +481,60 @@ function init_soroban_rpc() {
 }
 
 function upgrade_local() {
-  # Upgrade local network's protocol version and base reserve to match pubnet/testnet
-  if [ "$NETWORK" = "local" ]; then
-    # Wait for server
-    while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
-    if [ -z "$PROTOCOL_VERSION" ]; then
-      # default to latest version supported by core
-      export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
-    fi
-    if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
-      if [ $PROTOCOL_VERSION -gt 0 ]; then
-        echo "upgrade: protocolversion=$PROTOCOL_VERSION, basereserve=5000000"
-        curl -s "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
-        while [ "`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; done
-        echo "upgrade: done"
-      fi
-      if [ $PROTOCOL_VERSION -ge 20 ]; then
-        sleep 5;
-        echo "upgrade: config"
-        local tx='{
-  "source_account": "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-  "fee": 100,
-  "seq_num": 1,
-  "cond": {
-    "time": {
-      "min_time": 0,
-      "max_time": 0
-    }
-  },
-  "memo": "none",
-  "operations": [
-    {
-      "source_account": null,
-      "body": {
-        "bump_sequence": {
-          "bump_to": 1
-        }
-      }
-    }
-  ],
-  "ext": "v0"
-}'
-        local hash=$(printf "$tx" | jq -n '{"network_id":"'"$NETWORK_ID"'","tagged_transaction":{"tx":inputs}}' | stellar-xdr encode --type TransactionSignaturePayload --output single | sha256sum | cut -f 1 -d " ")
-        # TODO: Make the config-settings-entries.json something that can be overriden by a commandline option.
-        # TODO: Is the below going to work? It's pretty brittle.
-        echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json | { \
-          read tx; \
-          echo "upgrade: submitting 1 $tx";
-          curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
-          sleep 2; \
-          read tx; \
-          echo "upgrade: submitting 2 $tx";
-          curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
-          sleep 2; \
-          read tx; \
-          echo "upgrade: submitting 3 $tx";
-          curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
-          sleep 2; \
-          read key; \
-          echo "upgrade: starting upgrade with key $key";
-          curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
-          sleep 2; \
-        }
-        # TODO: How do we query if the upgrade succeeded? There won't be a protocol version change to watch for.
-        echo "upgrade: done"
-      fi
-      # Generate network config using stellar-core.
-      # Submit txs with network config.
-      # Curl upgrade.
-      # Wait for upgrade to complete.
-    fi
+  if [ "$NETWORK" != "local" ]; then
+    return
   fi
-  # Delay friendbot starting till now because the config upgrade above will use
-  # the network root account to submit txs, and friendbot on local is configured
-  # to use the network root account as a funding source.
+
+  # Upgrade local network's protocol version and base reserve to match pubnet/testnet
+
+  # Wait for server
+  while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+
+  # Default to latest version supported by core
+  if [ -z "$PROTOCOL_VERSION" ]; then
+    export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
+  fi
+
+  if [ ".$PROTOCOL_VERSION" == ".none" ] ; then
+    return
+  fi
+
+  if [ $PROTOCOL_VERSION -gt 0 ]; then
+    echo "upgrade: protocolversion=$PROTOCOL_VERSION, basereserve=5000000"
+    curl -s "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
+    while [ "`curl -s http://localhost:11626/info | jq -r '.info.ledger.version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; echo wait protocol change; done
+    echo "upgrade: done"
+  fi
+
+  if [ $PROTOCOL_VERSION -ge 20 ]; then
+    echo "upgrade: soroban config"
+    echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json 2>/dev/null | { \
+      read tx; \
+      read txid; \
+      echo "upgrade: submitting 1 $txid";
+      curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
+      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
+      read tx; \
+      read txid; \
+      echo "upgrade: submitting 2 $txid";
+      curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
+      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
+      read tx; \
+      read txid; \
+      echo "upgrade: submitting 3 $txid";
+      curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
+      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
+      read key; \
+      echo "upgrade: starting upgrade with key $key";
+      curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+    }
+    echo "upgrade: done"
+  fi
+
+  # Delay friendbot starting till now because until network upgrades it won't be
+  # able to create accounts. Also the config upgrade above will use the network
+  # root account to submit txs, and friendbot on local is configured to use the
+  # network root account as a funding source.
   supervisorctl start friendbot
 }
 
