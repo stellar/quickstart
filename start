@@ -508,10 +508,11 @@ function upgrade_local() {
     echo "upgrades: soroban config done"
   fi
 
-  # Delay friendbot starting till now because until network upgrades it won't be
-  # able to create accounts. Also the config upgrade above will use the network
-  # root account to submit txs, and friendbot on local is configured to use the
-  # network root account as a funding source.
+  # Start friendbot once network upgrades are complete and network is ready.
+  # Note that friendbot and the config upgrade txs above use the same
+  # account to submit txs. while friend it is not dependent on the config
+  # upgrade txs, it must not be started until the config upgrades are
+  # complete otherwise the txs sequence numbers will conflict.
   supervisorctl start friendbot
 }
 
