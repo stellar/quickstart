@@ -161,7 +161,6 @@ built with.
 build with. Typically include `--disable-tests`, and to enable the next protocol
 version that is still in development, add
 `--enable-next-protocol-version-unsafe-for-production`.
-- `CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE`: Flag for whether high limits for testing are enabled. Default `false`.
 - `CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS`: Flag for whether enabling Soroban diagnostic events is supported. Default `false`.
 - `HORIZON_REF`: The git reference of stellar-horizon to build.
 - `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
@@ -173,7 +172,6 @@ make build \
   TAG=soroban-dev \
   CORE_REF=... \
   CORE_CONFIGURE_FLAGS=... \
-  CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=... \
   HORIZON_REF=... \
   FRIENDBOT_REF=... \
   SOROBAN_RPC_REF=...
