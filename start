@@ -510,21 +510,21 @@ function upgrade_local() {
     echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json 2>/dev/null | { \
       read tx; \
       read txid; \
-      echo "upgrade: submitting 1 $txid";
+      echo "upgrade: soroban config submitting tx 1: $txid";
       curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
       while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
       read tx; \
       read txid; \
-      echo "upgrade: submitting 2 $txid";
+      echo "upgrade: soroban config submitting tx 2: $txid";
       curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
       while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
       read tx; \
       read txid; \
-      echo "upgrade: submitting 3 $txid";
+      echo "upgrade: soroban config submitting tx 3: $txid";
       curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx"; \
       while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
       read key; \
-      echo "upgrade: starting upgrade with key $key";
+      echo "upgrade: soroban config initiating upgrade: $key";
       curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
     }
     echo "upgrade: done"
