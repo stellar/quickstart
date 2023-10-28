@@ -37,8 +37,8 @@ jobs:
     with:
       arch: amd64
       tag: testing-amd64
-      core_ref: v20.0.0-rc.2.1
-      core_supports_testing_soroban_high_limit_override: "true"
+      core_repo: https://github.com/sisuresh/stellar-core.git
+      core_ref: 9931d1275ae99740b62a452b0c397237c1a32d63
       core_supports_enable_soroban_diagnostic_events: "true"
       go_ref: horizon-v2.27.0-rc1
       soroban_tools_ref: v20.0.0-rc4
@@ -59,8 +59,8 @@ jobs:
     with:
       arch: arm64
       tag: testing-arm64
-      core_ref: v20.0.0-rc.2.1
-      core_supports_testing_soroban_high_limit_override: "true"
+      core_repo: https://github.com/sisuresh/stellar-core.git
+      core_ref: 9931d1275ae99740b62a452b0c397237c1a32d63
       core_supports_enable_soroban_diagnostic_events: "true"
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.27.0-rc1

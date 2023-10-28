@@ -27,8 +27,8 @@ build-latest:
 
 build-testing:
 	$(MAKE) build TAG=testing \
-		CORE_REF=v20.0.0-rc.2.1 \
-		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
+		CORE_REPO=https://github.com/sisuresh/stellar-core.git \
+		CORE_REF=9931d1275ae99740b62a452b0c397237c1a32d63 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
