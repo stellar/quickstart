@@ -53,7 +53,6 @@ jobs:
     with:
       arch: arm64
       tag: soroban-dev-arm64
-      core_repo: https://github.com/sisuresh/stellar-core.git
       core_ref: v20.0.0-rc.2.2
       core_supports_enable_soroban_diagnostic_events: "true"
       core_build_runner_type: ubuntu-latest-16-cores
