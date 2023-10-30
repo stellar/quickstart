@@ -488,7 +488,7 @@ function upgrade_local() {
   # Upgrade local network's soroban config to match testnet
   if [ $PROTOCOL_VERSION -ge 20 ]; then
     echo "upgrades: soroban config"
-    echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --signtxs $COREHOME/etc/config-settings-entries.json 2>/dev/null | { \
+    echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --json $COREHOME/etc/config-settings-entries.json --signtxs 2>/dev/null | { \
       read tx; \
       read txid; \
       echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
