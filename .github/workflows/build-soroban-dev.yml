@@ -35,7 +35,6 @@ jobs:
     with:
       arch: amd64
       tag: soroban-dev-amd64
-      core_repo: https://github.com/sisuresh/stellar-core.git
       core_ref: v20.0.0-rc.2.2
       core_supports_enable_soroban_diagnostic_events: "true"
       go_ref: horizon-v2.27.0-rc1
