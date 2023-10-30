@@ -27,7 +27,7 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 		CORE_REPO=https://github.com/sisuresh/stellar-core.git \
-		CORE_REF=9931d1275ae99740b62a452b0c397237c1a32d63 \
+		CORE_REF=5fc6eba34fe49e55c7b72a55896d8ba3ab254111 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
@@ -35,7 +35,7 @@ build-testing:
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		CORE_REPO=https://github.com/sisuresh/stellar-core.git \
-		CORE_REF=9931d1275ae99740b62a452b0c397237c1a32d63 \
+		CORE_REF=5fc6eba34fe49e55c7b72a55896d8ba3ab254111 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
