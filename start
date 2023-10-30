@@ -488,23 +488,33 @@ function upgrade_local() {
   # Upgrade local network's soroban config to match testnet
   if [ $PROTOCOL_VERSION -ge 20 ]; then
     echo "upgrades: soroban config"
-    echo $NETWORK_ROOT_SECRET_KEY | stellar-core get-settings-upgrade-txs "$NETWORK_ROOT_ACCOUNT_ID" 0 "$NETWORK_PASSPHRASE" --json $COREHOME/etc/config-settings-entries.json --signtxs 2>/dev/null | { \
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: deploy contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: upload config: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
-      read key; \
-      echo "upgrades: soroban config: set config with key: $key";
-      curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
-    }
+    # Generate txs for installing, deploying and executing the contract that
+    # uploads a new config. Use the network root account to submit the txs.
+    echo $NETWORK_ROOT_SECRET_KEY \
+      | stellar-core get-settings-upgrade-txs \
+        "$NETWORK_ROOT_ACCOUNT_ID" \
+        0 \
+        "$NETWORK_PASSPHRASE" \
+        --json $COREHOME/etc/config-settings-entries.json \
+        --signtxs \
+        2>/dev/null \
+      | { \
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: deploy contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: upload config: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
+        read key; \
+        echo "upgrades: soroban config: set config with key: $key";
+        curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+      }
     echo "upgrades: soroban config done"
   fi
 
