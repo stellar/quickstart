@@ -27,7 +27,6 @@ export PGPORT=5432
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
-: "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE:=false}"
 : "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 
 QUICKSTART_INITIALIZED=false
@@ -71,6 +70,9 @@ function start() {
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
   echo "network passphrase: $NETWORK_PASSPHRASE"
+  echo "network id: $NETWORK_ID"
+  echo "network root secret key: $NETWORK_ROOT_SECRET_KEY"
+  echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
 
   copy_defaults
   init_db
@@ -179,6 +181,11 @@ function process_args() {
   if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
   fi
+
+  export NETWORK_ID=$(printf "$NETWORK_PASSPHRASE" | sha256sum | cut -f 1 -d " ")
+  local network_id_keys=$(stellar-core convert-id $NETWORK_ID | awk -F': ' '/strKey: /{print $2}' | tail -2)
+  export NETWORK_ROOT_SECRET_KEY=$(printf "$network_id_keys" | head -1)
+  export NETWORK_ROOT_ACCOUNT_ID=$(printf "$network_id_keys" | tail -1)
 
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
@@ -370,12 +377,6 @@ function init_stellar_core() {
 
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
-  if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
-    run_silent "finalize-core-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" etc/stellar-core.cfg
-  else
-    run_silent "finalize-core-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" etc/stellar-core.cfg
-  fi
-
   start_postgres
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
@@ -409,12 +410,6 @@ function init_horizon() {
     run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
   else
     run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $HORIZON_CAPTIVE_CORE_CFG
-  fi
-
-  if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
-    run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $HORIZON_CAPTIVE_CORE_CFG
-  else
-    run_silent "finalize-horizon-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $HORIZON_CAPTIVE_CORE_CFG
   fi
 
   cat << EOF >> etc/horizon.env
@@ -458,12 +453,6 @@ function init_soroban_rpc() {
     run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   fi
 
-  if [ "$NETWORK" = "local" ] && [ "${CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE}" = "true" ]; then
-    run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-set-true" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__/TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  else
-    run_silent "finalize-soroban-rpc-captivecore-config-testing-soroban-high-limit-override-unset" perl -pi -e "s/__TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  fi
-
   local ADMIN_ENDPOINT=0.0.0.0:6061
   if [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" != "true" ]; then
     ADMIN_ENDPOINT=
@@ -480,20 +469,69 @@ function init_soroban_rpc() {
 }
 
 function upgrade_local() {
-  # Upgrade local network's protocol version and base reserve to match pubnet/testnet
-  if [ "$NETWORK" = "local" ]; then
-    # Wait for server
-    while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
-    if [ -z "$PROTOCOL_VERSION" ]; then
-      # default to latest version supported by core
-      export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
-    fi
-    if [ ".$PROTOCOL_VERSION" != ".none" ] ; then
-      if [ $PROTOCOL_VERSION -gt 0 ]; then
-        curl "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
-      fi
-    fi
+  if [ "$NETWORK" != "local" ]; then
+    return
   fi
+
+  # Wait for server
+  while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+
+  # Default to latest version supported by core
+  if [ -z "$PROTOCOL_VERSION" ]; then
+    export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
+  fi
+
+  if [ ".$PROTOCOL_VERSION" == ".none" ] ; then
+    return
+  fi
+
+  # Upgrade local network's protocol version and base reserve to match pubnet/testnet
+  if [ $PROTOCOL_VERSION -gt 0 ]; then
+    echo "upgrades: protocolversion=$PROTOCOL_VERSION, basereserve=5000000"
+    curl -s "http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z&protocolversion=$PROTOCOL_VERSION&basereserve=5000000"
+    while [ "`curl -s http://localhost:11626/info | jq -r '.info.ledger.version'`" != "$PROTOCOL_VERSION" ]; do sleep 1; done
+    echo "upgrades: protocolversion done"
+  fi
+
+  # Upgrade local network's soroban config to match testnet
+  if [ $PROTOCOL_VERSION -ge 20 ]; then
+    echo "upgrades: soroban config"
+    # Generate txs for installing, deploying and executing the contract that
+    # uploads a new config. Use the network root account to submit the txs.
+    echo $NETWORK_ROOT_SECRET_KEY \
+      | stellar-core get-settings-upgrade-txs \
+        "$NETWORK_ROOT_ACCOUNT_ID" \
+        0 \
+        "$NETWORK_PASSPHRASE" \
+        --json $COREHOME/etc/config-settings-entries.json \
+        --signtxs \
+        2>/dev/null \
+      | { \
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: deploy contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
+        read tx; \
+        read txid; \
+        echo "upgrades: soroban config: upload config: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
+        read key; \
+        echo "upgrades: soroban config: set config with key: $key";
+        curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+      }
+    echo "upgrades: soroban config done"
+  fi
+
+  # Start friendbot once network upgrades are complete and network is ready.
+  # Note that friendbot and the config upgrade txs above use the same
+  # account to submit txs. while friend it is not dependent on the config
+  # upgrade txs, it must not be started until the config upgrades are
+  # complete otherwise the txs sequence numbers will conflict.
+  supervisorctl start friendbot
 }
 
 function exec_supervisor() {
