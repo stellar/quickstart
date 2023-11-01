@@ -35,6 +35,8 @@ Provide either `--pubnet`, `--testnet` or `--local` as a command line flag when 
 
 In public network mode, the node will join the public, production Stellar network.
 
+_Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
+
 #### `--testnet`
 
 In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
