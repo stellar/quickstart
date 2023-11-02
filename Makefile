@@ -1,9 +1,9 @@
 __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
 TAG?=dev
+CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
-CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE?=false
 CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS?=false
 SOROBAN_RPC_REF?=main
 HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF))
@@ -26,28 +26,26 @@ build-latest:
 
 build-testing:
 	$(MAKE) build TAG=testing \
-		CORE_REF=v20.0.0-rc.2.1 \
-		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
+		CORE_REF=v20.0.0-rc.2.2 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		CORE_REF=v20.0.0-rc.2.1 \
-		CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=true \
+		CORE_REF=v20.0.0-rc.2.2 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0-rc1 \
 		SOROBAN_RPC_REF=v20.0.0-rc4
 
 build:
 	$(MAKE) -j 4 build-deps
-	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) --build-arg CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=$(CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE) --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
+	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
 
 build-deps: build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
 build-deps-core:
-	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing https://github.com/stellar/stellar-core.git#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
+	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing $(CORE_REPO)#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
 
 build-deps-horizon:
 	docker build -t stellar-horizon:$(HORIZON_REF) -f Dockerfile.horizon --target builder . --build-arg REF="$(HORIZON_REF)"

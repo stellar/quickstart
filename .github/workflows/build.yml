@@ -14,18 +14,18 @@ on:
         description: 'Tag to use on the image name'
         type: 'string'
         required: true
+      core_repo:
+        description: 'Git repo for stellar-core'
+        type: 'string'
+        default: 'https://github.com/stellar/stellar-core.git'
       core_ref:
-        description: 'Git ref for the stellar/stellar-core repo (stellar-core)'
+        description: 'Git ref for the stellar-core repo'
         type: 'string'
         required: true
       core_configure_flags:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
-      core_supports_testing_soroban_high_limit_override:
-        description: 'Indicator whether stellar-core supports the TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE config'
-        type: 'string'
-        default: 'false'
       core_supports_enable_soroban_diagnostic_events:
         description: 'Indicator whether stellar-core supports the ENABLE_SOROBAN_DIAGNOSTIC_EVENTS config'
         type: 'string'
@@ -60,7 +60,8 @@ env:
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
   GO_REPO_BRANCH: ${{ inputs.go_ref }}
   SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
-  CORE_REPO_BRANCH: ${{ inputs.core_ref }}
+  CORE_REPO: ${{ inputs.core_repo }}
+  CORE_REPO_REF: ${{ inputs.core_ref }}
 
 jobs:
 
@@ -71,7 +72,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_BRANCH }}-${{ inputs.core_configure_flags }}
+        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
     - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -84,7 +85,7 @@ jobs:
         docker buildx build --platform linux/${{ inputs.arch }} 
         -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }} 
         -o type=docker,dest=/tmp/image 
-        https://github.com/stellar/stellar-core.git#${{ env.CORE_REPO_BRANCH }} 
+        ${{ env.CORE_REPO }}#${{ env.CORE_REPO_REF }} 
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
@@ -226,7 +227,7 @@ jobs:
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
     - name: Build Quickstart Image
-      run: docker build --platform linux/${{ inputs.arch }} -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }} --build-arg CORE_SUPPORTS_TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE=${{ inputs.core_supports_testing_soroban_high_limit_override }} --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=${{ inputs.core_supports_enable_soroban_diagnostic_events }}
+      run: docker build --platform linux/${{ inputs.arch }} -f Dockerfile -t $IMAGE --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" . --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }} --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }} --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }} --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }} --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=${{ inputs.core_supports_enable_soroban_diagnostic_events }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
@@ -265,17 +266,20 @@ jobs:
       run: sleep 10
     - name: Run core test
       run: |
+        docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         go run test_core.go
         curl http://localhost:11626/info
     - name: Run horizon up test
       run: |
+        docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_up.go
         curl http://localhost:8000
     - name: Run horizon ingesting test
       if: ${{ matrix.network != 'pubnet' }}
       run: |
+        docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_ingesting.go
@@ -283,12 +287,14 @@ jobs:
     - name: Run friendbot test
       if: ${{ matrix.network == 'local' }}
       run: |
+        docker logs stellar -f &
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
     - name: Run soroban rpc test
       if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
       run: |
+        docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go
 
