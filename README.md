@@ -49,7 +49,14 @@ In futurenet network mode, the node will join the [Soroban] test network that de
 
 #### `--local`
 
-In local network mode, you can optionally pass `--protocol-version {version}` parameter to run a specific protocol version (defaults to latest version).
+In local network mode, you can optionally pass:
+
+- `--protocol-version {version}` to run a specific protocol version (defaults to latest version).
+
+- `--limits {limits}` to configure specific Soroban resource limits to one of:
+   - `default` leaves limits set extremely low which is stellar-core's default configuration
+   - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
+   - `unlimited` sets limits to the maximum resources that can be configured
 
 The network passphrase of the network defaults to:
 ```
