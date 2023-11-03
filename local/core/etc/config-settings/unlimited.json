@@ -1,12 +1,12 @@
 {
     "updated_entry": [
         {
-            "contract_max_size_bytes": 65536
+            "contract_max_size_bytes": 4294967295
         },
         {
             "contract_compute_v0": {
-                "ledger_max_instructions": 9223372036854775807,
-                "tx_max_instructions": 9223372036854775807,
+                "ledger_max_instructions": 2305843009213693951,
+                "tx_max_instructions": 2305843009213693951,
                 "fee_rate_per_instructions_increment": 100,
                 "tx_memory_limit": 4294967295
             }
@@ -340,7 +340,7 @@
             "contract_data_key_size_bytes": 300
         },
         {
-            "contract_data_entry_size_bytes": 65536
+            "contract_data_entry_size_bytes": 4294967295
         },
         {
             "state_expiration": {
@@ -357,7 +357,7 @@
         },
         {
             "contract_execution_lanes": {
-                "ledger_max_tx_count": 42949672950
+                "ledger_max_tx_count": 4294967295
             }
         }
     ]

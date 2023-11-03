@@ -28,12 +28,18 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+: "${LIMITS:=common}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
 function main() {
   process_args $*
+  validate_before_start
+  start
+}
+
+function validate_before_start() {
   if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$NETWORK" != "testnet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     echo "--enable-soroban-rpc usage only supported on local/futurenet/testnet networks" >&2
     exit 1
@@ -53,11 +59,17 @@ function main() {
   if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
     ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
   fi
-  if [ "$NETWORK" != "local" ] && [ -n "$LIMITS" ]; then
-    echo "--limits is only supported with the local network" >&2
-    exit 1
+}
+
+function validate_after_copy_defaults() {
+  if [ "$NETWORK" = "local" ]; then
+    local config_dir="$COREHOME/etc/config-settings"
+    local config_path="$config_dir/$LIMITS.json"
+    if [ ! -f "$config_path" ]; then
+      echo "--limits '$LIMITS' unknown: must be one of: "$(ls $config_dir | sed 's/\.json//g')
+      exit 1
+    fi
   fi
-  start
 }
 
 function start() {
@@ -79,6 +91,7 @@ function start() {
   echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
 
   copy_defaults
+  validate_after_copy_defaults
   init_db
   init_stellar_core
   init_horizon
@@ -504,12 +517,6 @@ function upgrade_local() {
   # Upgrade local network's soroban config to match testnet
   if [ $PROTOCOL_VERSION -ge 20 ]; then
     echo "upgrades: soroban config '$LIMITS' limits"
-    local config_dir="$COREHOME/etc/config-settings"
-    local config_path="$config_dir/$LIMITS.json"
-    if [ ! -f "$config_path" ]; then
-      echo "upgrades: soroban config, unknown limits specified: must be one of $(ls "$config_dir")"
-      exit 1
-    fi
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
     echo $NETWORK_ROOT_SECRET_KEY \
@@ -517,7 +524,7 @@ function upgrade_local() {
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
-        --json $config_path \
+        --json "$COREHOME/etc/config-settings/$LIMITS.json" \
         --signtxs \
         2>/dev/null \
       | { \
