@@ -28,7 +28,7 @@ export PGPORT=5432
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
-: "${LIMITS:=common}"
+: "${LIMITS:=testnet}"
 
 QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
@@ -62,11 +62,11 @@ function validate_before_start() {
 }
 
 function validate_after_copy_defaults() {
-  if [ "$NETWORK" = "local" ]; then
+  if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
     local config_dir="$COREHOME/etc/config-settings"
     local config_path="$config_dir/$LIMITS.json"
     if [ ! -f "$config_path" ]; then
-      echo "--limits '$LIMITS' unknown: must be one of: "$(ls $config_dir | sed 's/\.json//g')
+      echo "--limits '$LIMITS' unknown: must be one of: default "$(ls $config_dir | sed 's/\.json//g')
       exit 1
     fi
   fi
@@ -514,8 +514,10 @@ function upgrade_local() {
     echo "upgrades: protocolversion done"
   fi
 
-  # Upgrade local network's soroban config to match testnet
-  if [ $PROTOCOL_VERSION -ge 20 ]; then
+  # Upgrade local network's soroban config to match testnet, unless the limits
+  # have been configured with 'default', which will cause the limits to be left
+  # in their default state.
+  if [ $PROTOCOL_VERSION -ge 20 ] && [ "$LIMITS" != "default" ]; then
     echo "upgrades: soroban config '$LIMITS' limits"
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
