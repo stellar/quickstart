@@ -53,6 +53,10 @@ function main() {
   if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
     ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
   fi
+  if [ "$NETWORK" != "local" ] && [ -n "$LIMITS" ]; then
+    echo "--limits is only supported with the local network" >&2
+    exit 1
+  fi
   start
 }
 
@@ -124,6 +128,10 @@ function process_args() {
       ;;
     --enable-asset-stats)
       export ENABLE_ASSET_STATS="$1"
+      shift
+      ;;
+    --limits)
+      export LIMITS="$1"
       shift
       ;;
     --enable-soroban-rpc)
@@ -495,7 +503,13 @@ function upgrade_local() {
 
   # Upgrade local network's soroban config to match testnet
   if [ $PROTOCOL_VERSION -ge 20 ]; then
-    echo "upgrades: soroban config"
+    echo "upgrades: soroban config '$LIMITS' limits"
+    local config_dir="$COREHOME/etc/config-settings"
+    local config_path="$config_dir/$LIMITS.json"
+    if [ ! -f "$config_path" ]; then
+      echo "upgrades: soroban config, unknown limits specified: must be one of $(ls "$config_dir")"
+      exit 1
+    fi
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
     echo $NETWORK_ROOT_SECRET_KEY \
@@ -503,7 +517,7 @@ function upgrade_local() {
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
-        --json $COREHOME/etc/config-settings-entries.json \
+        --json $config_path \
         --signtxs \
         2>/dev/null \
       | { \
