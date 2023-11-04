@@ -1,8 +1,10 @@
+ARG STELLAR_XDR_IMAGE_REF
 ARG STELLAR_CORE_IMAGE_REF
 ARG HORIZON_IMAGE_REF
 ARG FRIENDBOT_IMAGE_REF
 ARG SOROBAN_RPC_IMAGE_REF
 
+FROM $STELLAR_XDR_IMAGE_REF AS stellar-xdr
 FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
 FROM $HORIZON_IMAGE_REF AS horizon
 FROM $FRIENDBOT_IMAGE_REF AS friendbot
@@ -19,6 +21,8 @@ EXPOSE 11626
 
 ADD dependencies /
 RUN /dependencies
+
+COPY --from=stellar-xdr /usr/local/cargo/bin/stellar-xdr /usr/local/bin/stellar-xdr
 
 COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
 
