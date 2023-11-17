@@ -1,5 +1,6 @@
 __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
+REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
 CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
@@ -41,7 +42,7 @@ build-soroban-dev:
 build:
 	$(MAKE) -j 4 build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
-	  --build-arg REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty) \
+	  --build-arg REVISION=$(REVISION) \
 	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
