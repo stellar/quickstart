@@ -39,7 +39,7 @@ build-soroban-dev:
 		SOROBAN_RPC_REF=v20.0.0-rc4
 
 build:
-	# $(MAKE) -j 4 build-deps
+	$(MAKE) -j 4 build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 	  --build-arg REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty) \
 	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
