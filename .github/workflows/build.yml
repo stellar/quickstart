@@ -229,16 +229,17 @@ jobs:
     - name: Build Quickstart Image
       run: >
         docker build
-          --platform linux/${{ inputs.arch }}
-          -f Dockerfile
-          -t $IMAGE
-          --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}" .
-          --build-arg REVISION="${{ env.HEAD_SHA }}"
-          --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
-          --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
-          --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
-          --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
-          --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=${{ inputs.core_supports_enable_soroban_diagnostic_events }}
+        --platform linux/${{ inputs.arch }}
+        -f Dockerfile
+        -t $IMAGE
+        --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}"
+        .
+        --build-arg REVISION="${{ env.HEAD_SHA }}"
+        --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
+        --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
+        --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
+        --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
+        --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=${{ inputs.core_supports_enable_soroban_diagnostic_events }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
