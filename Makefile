@@ -11,7 +11,7 @@ HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF
 FRIENDBOT_REF?=$(HORIZON_REF)
 
 run:
-	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --standalone --enable-soroban-rpc
+	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-soroban-rpc
 
 logs:
 	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
