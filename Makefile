@@ -1,5 +1,6 @@
 __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
+REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
 XDR_REF?=main
@@ -12,7 +13,7 @@ HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF
 FRIENDBOT_REF?=$(HORIZON_REF)
 
 run:
-	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --standalone --enable-soroban-rpc
+	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-soroban-rpc
 
 logs:
 	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
@@ -44,7 +45,14 @@ build-soroban-dev:
 
 build:
 	$(MAKE) -j 4 build-deps
-	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:$(XDR_REF) --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
+	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
+	  --build-arg REVISION=$(REVISION) \
+	  --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:$(XDR_REF) \
+	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
+	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
+	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
+	  --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) \
+	  --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
 
 build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 

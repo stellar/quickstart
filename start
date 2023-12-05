@@ -76,6 +76,7 @@ function start() {
   echo "Starting Stellar Quickstart"
 
   echo "versions:"
+  echo "  quickstart: $REVISION"
   echo "  stellar-core:"
   echo "$(stellar-core version 2>/dev/null | sed 's/^/    /')"
   echo "  horizon:"
