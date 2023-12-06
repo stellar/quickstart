@@ -235,6 +235,7 @@ jobs:
         --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}"
         .
         --build-arg REVISION="${{ env.HEAD_SHA }}"
+        --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:${{ inputs.arch }}
         --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
         --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
         --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
