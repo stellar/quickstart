@@ -30,18 +30,18 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.0.1 \
-		CORE_REF=v20.0.0-rc.2.2 \
+		CORE_REF=v20.0.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
-		HORIZON_REF=horizon-v2.27.0-rc1 \
-		SOROBAN_RPC_REF=v20.0.0-rc4
+		HORIZON_REF=horizon-v2.27.0 \
+		SOROBAN_RPC_REF=v20.0.0
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		XDR_REF=v20.0.1 \
-		CORE_REF=v20.0.0-rc.2.2 \
+		CORE_REF=v20.0.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
-		HORIZON_REF=horizon-v2.27.0-rc1 \
-		SOROBAN_RPC_REF=v20.0.0-rc4
+		HORIZON_REF=horizon-v2.27.0 \
+		SOROBAN_RPC_REF=v20.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
