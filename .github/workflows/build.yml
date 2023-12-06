@@ -38,6 +38,10 @@ on:
         description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
         type: 'string'
         required: true
+      xdr_ref:
+        description: 'Git ref for the stellar/rs-stellar-xdr repo'
+        type: 'string'
+        required: false  
       soroban_tools_ref:
         description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
         type: 'string'
@@ -62,6 +66,7 @@ env:
   SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
   CORE_REPO: ${{ inputs.core_repo }}
   CORE_REPO_REF: ${{ inputs.core_ref }}
+  XDR_REPO_REF: ${{ inputs.xdr_ref }}
 
 jobs:
 
@@ -174,8 +179,37 @@ jobs:
         name: image-stellar-soroban-rpc-${{ inputs.arch }}
         path: /tmp/image
 
+  build-rs-stellar-xdr:
+    runs-on: ubuntu-latest
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
+    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
+    - if: steps.cache.outputs.cache-hit != 'true'
+      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - if: steps.cache.outputs.cache-hit != 'true'
+      name: Build Stellar-Rs-Xdr Image
+      run: >
+        docker buildx build --platform linux/${{ inputs.arch }} 
+        -f Dockerfile.xdr --target builder 
+        -t stellar-rs-xdr:${{ inputs.arch }} 
+        -o type=docker,dest=/tmp/image 
+        --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git 
+        --build-arg REF="${{ env.XDR_REPO_REF }}" . 
+    - name: Upload Stellar-Rs-Xdr Image
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-rs-stellar-xdr-${{ inputs.arch }}
+        path: /tmp/image      
+
   build:
-    needs: [build-stellar-core, build-stellar-horizon, build-stellar-friendbot, build-stellar-soroban-rpc]
+    needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
     outputs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
@@ -186,7 +220,7 @@ jobs:
     - name: Download Stellar XDR
       uses: actions/download-artifact@v2
       with:
-        name: image-stellar-xdr-${{ inputs.arch }}
+        name: image-rs-stellar-xdr-${{ inputs.arch }}
         path: /tmp/stellar-xdr
     - name: Download Stellar-Core Image
       uses: actions/download-artifact@v2
@@ -216,6 +250,8 @@ jobs:
       run: docker load -i /tmp/stellar-friendbot/image
     - name: Load Stellar-Soroban-Rpc Image
       run: docker load -i /tmp/stellar-soroban-rpc/image
+    - name: Load Stellar-Rs-Xdr Image
+      run: docker load -i /tmp/stellar-xdr/image
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -240,7 +276,7 @@ jobs:
         --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}"
         .
         --build-arg REVISION="${{ env.HEAD_SHA }}"
-        --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:${{ inputs.arch }}
+        --build-arg STELLAR_XDR_IMAGE_REF=stellar-rs-xdr:${{ inputs.arch }}
         --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
         --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
         --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
