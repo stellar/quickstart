@@ -182,6 +182,10 @@ jobs:
   build-rs-stellar-xdr:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Quickstart for Horizon docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ env.HEAD_SHA }}
     - id: cache
       uses: actions/cache@v3
       with:
