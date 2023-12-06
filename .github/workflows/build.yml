@@ -183,6 +183,11 @@ jobs:
     - uses: actions/checkout@v3
       with:
         ref: ${{ env.HEAD_SHA }}
+    - name: Download Stellar XDR
+      uses: actions/download-artifact@v2
+      with:
+        name: image-stellar-xdr-${{ inputs.arch }}
+        path: /tmp/stellar-xdr
     - name: Download Stellar-Core Image
       uses: actions/download-artifact@v2
       with:
