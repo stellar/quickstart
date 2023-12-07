@@ -27,6 +27,7 @@ build-latest:
 		HORIZON_REF=horizon-v2.26.1 \
 		SOROBAN_RPC_REF=v0.4.0
 
+# The hashes below for CORE_REF and SOROBAN_RPC_REF are the refs for the v20.0.0 release
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.0.1 \
@@ -35,6 +36,7 @@ build-testing:
 		HORIZON_REF=horizon-v2.27.0 \
 		SOROBAN_RPC_REF=91a441ff9593377c11d7e8b26c4942e941d548bb
 
+# The hashes below for CORE_REF and SOROBAN_RPC_REF are the refs for the v20.0.0 release
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		XDR_REF=v20.0.1 \
