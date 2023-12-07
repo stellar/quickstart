@@ -2,6 +2,8 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
+XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
+XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
@@ -25,31 +27,39 @@ build-latest:
 		HORIZON_REF=horizon-v2.26.1 \
 		SOROBAN_RPC_REF=v0.4.0
 
+# The hashes below for CORE_REF and SOROBAN_RPC_REF are the refs for the v20.0.0 release
 build-testing:
 	$(MAKE) build TAG=testing \
-		CORE_REF=v20.0.0-rc.2.2 \
+		XDR_REF=v20.0.1 \
+		CORE_REF=6177299100b114aa108584053414371f38aebf53 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
-		HORIZON_REF=horizon-v2.27.0-rc1 \
-		SOROBAN_RPC_REF=v20.0.0-rc4
+		HORIZON_REF=horizon-v2.27.0 \
+		SOROBAN_RPC_REF=91a441ff9593377c11d7e8b26c4942e941d548bb
 
+# The hashes below for CORE_REF and SOROBAN_RPC_REF are the refs for the v20.0.0 release
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		CORE_REF=v20.0.0-rc.2.2 \
+		XDR_REF=v20.0.1 \
+		CORE_REF=6177299100b114aa108584053414371f38aebf53 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
-		HORIZON_REF=horizon-v2.27.0-rc1 \
-		SOROBAN_RPC_REF=v20.0.0-rc4
+		HORIZON_REF=horizon-v2.27.0 \
+		SOROBAN_RPC_REF=91a441ff9593377c11d7e8b26c4942e941d548bb
 
 build:
 	$(MAKE) -j 4 build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 	  --build-arg REVISION=$(REVISION) \
+	  --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:$(XDR_REF) \
 	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
 	  --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) \
 	  --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
 
-build-deps: build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
+build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
+
+build-deps-xdr:
+	docker build -t stellar-xdr:$(XDR_REF) -f Dockerfile.xdr --target builder . --build-arg REPO="$(XDR_REPO)" --build-arg REF="$(XDR_REF)"
 
 build-deps-core:
 	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing $(CORE_REPO)#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"

@@ -1,0 +1,9 @@
+FROM rust AS builder
+
+ARG REPO
+ARG REF
+WORKDIR /wd
+RUN git clone ${REPO} /wd
+RUN git fetch origin ${REF}
+RUN git checkout ${REF}
+RUN cargo install stellar-xdr --features cli --path .

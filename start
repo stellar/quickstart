@@ -527,7 +527,7 @@ function upgrade_local() {
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
-        --json "$COREHOME/etc/config-settings/$LIMITS.json" \
+        --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$COREHOME/etc/config-settings/$LIMITS.json"` \
         --signtxs \
         2>/dev/null \
       | { \
