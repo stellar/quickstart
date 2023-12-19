@@ -27,22 +27,20 @@ build-latest:
 		HORIZON_REF=horizon-v2.26.1 \
 		SOROBAN_RPC_REF=v0.4.0
 
-# The git ref below for SOROBAN_RPC_REF refers to soroban-tools/v20.0.2 tag
 build-testing:
 	$(MAKE) build TAG=testing \
 		CORE_REF=v20.0.1 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0 \
-		SOROBAN_RPC_REF=514406eb5245b60513f3880201b48efdfe6f9546
+		SOROBAN_RPC_REF=v20.0.2
 
-# The git refs below for CORE_REF, SOROBAN_RPC_REF are refs to the v20.0.0 release tags.
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
 		XDR_REF=v20.0.1 \
-		CORE_REF=6177299100b114aa108584053414371f38aebf53 \
+		CORE_REF=v20.0.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0 \
-		SOROBAN_RPC_REF=91a441ff9593377c11d7e8b26c4942e941d548bb
+		SOROBAN_RPC_REF=v20.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
