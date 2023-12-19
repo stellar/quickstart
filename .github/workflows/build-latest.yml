@@ -36,13 +36,14 @@ jobs:
     with:
       arch: amd64
       tag: latest-amd64
-      core_ref: v19.14.0
-      go_ref: horizon-v2.26.1
-      soroban_tools_ref: v0.4.0
+      xdr_ref: v20.0.1
+      core_ref: v20.0.1
+      go_ref: horizon-v2.27.0
+      soroban_tools_ref: v20.0.2
       test_matrix: |
         {
           "network": ["pubnet", "local"],
-          "options": [""]
+          "options": ["", "--enable-soroban-rpc"],
         }
 
   arm64:
@@ -53,15 +54,16 @@ jobs:
     with:
       arch: arm64
       tag: latest-arm64
-      core_ref: v19.14.0
+      xdr_ref: v20.0.1
+      core_ref: v20.0.1
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: horizon-v2.26.1
-      soroban_tools_ref: v0.4.0
+      go_ref: horizon-v2.27.0
+      soroban_tools_ref: v20.0.2
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
           "network": ["pubnet", "local"],
-          "options": [""]
+          "options": ["", "--enable-soroban-rpc"],
         }
 
   manifest:
