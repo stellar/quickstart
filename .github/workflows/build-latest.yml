@@ -36,8 +36,8 @@ jobs:
     with:
       arch: amd64
       tag: latest-amd64
-      xdr_ref: v20.0.1
-      core_ref: v20.0.1
+      xdr_ref: v20.0.2
+      core_ref: v20.0.2
       go_ref: horizon-v2.27.0
       soroban_tools_ref: v20.0.2
       test_matrix: |
@@ -54,8 +54,8 @@ jobs:
     with:
       arch: arm64
       tag: latest-arm64
-      xdr_ref: v20.0.1
-      core_ref: v20.0.1
+      xdr_ref: v20.0.2
+      core_ref: v20.0.2
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.27.0
       soroban_tools_ref: v20.0.2
