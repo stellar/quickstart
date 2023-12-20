@@ -27,7 +27,6 @@ export PGPORT=5432
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
-: "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${LIMITS:=testnet}"
 
 QUICKSTART_INITIALIZED=false
@@ -40,14 +39,6 @@ function main() {
 }
 
 function validate_before_start() {
-  if [ "$NETWORK" != "local" ] && [ "$NETWORK" != "futurenet" ] && [ "$NETWORK" != "testnet" ] && [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    echo "--enable-soroban-rpc usage only supported on local/futurenet/testnet networks" >&2
-    exit 1
-  fi
-  if [ "$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "true" ] && [ "$CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS" != "true" ]; then
-    echo "--enable-soroban-diagnostic-events usage only supported with versions of stellar-core that support it" >&2
-    exit 1
-  fi
   if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" = "true" ]; then
     echo "--enable-soroban-rpc-admin-endpoint usage only supported with --enable-soroban-rpc" >&2
     exit 1
@@ -428,11 +419,7 @@ function init_horizon() {
   HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
   run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
-  if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
-    run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
-  else
-    run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $HORIZON_CAPTIVE_CORE_CFG
-  fi
+  run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
 
   cat << EOF >> etc/horizon.env
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
@@ -469,11 +456,7 @@ function init_soroban_rpc() {
   SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
   run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  if [ "${CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS}" = "true" ]; then
-    run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  else
-    run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events-unset" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__//g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  fi
+  run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
 
   local ADMIN_ENDPOINT=0.0.0.0:6061
   if [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" != "true" ]; then
