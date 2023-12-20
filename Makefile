@@ -39,8 +39,8 @@ build-testing:
 
 build-soroban-dev:
 	$(MAKE) build TAG=soroban-dev \
-		XDR_REF=v20.0.1 \
-		CORE_REF=v20.0.0 \
+		XDR_REF=v20.0.2 \
+		CORE_REF=v20.0.2 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.27.0 \
 		SOROBAN_RPC_REF=v20.0.2
