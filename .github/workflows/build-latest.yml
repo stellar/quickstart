@@ -44,6 +44,9 @@ jobs:
         {
           "network": ["pubnet", "local"],
           "options": ["", "--enable-soroban-rpc"],
+          "exclude": [
+            { "network": "pubnet", "options": "--enable-soroban-rpc" },
+          ]
         }
 
   arm64:
@@ -64,6 +67,9 @@ jobs:
         {
           "network": ["pubnet", "local"],
           "options": ["", "--enable-soroban-rpc"],
+          "exclude": [
+            { "network": "pubnet", "options": "--enable-soroban-rpc" },
+          ]
         }
 
   manifest:
