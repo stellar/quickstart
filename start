@@ -555,10 +555,18 @@ function print_service_logs() {
   while ! supervisorctl pid > /dev/null ; do
     sleep 1;
   done
+  while true ; do
+    sleep 1;
+    echo "------------------"
+    echo "------------------"
+    cat "/var/log/supervisor/*"
+    echo "------------------"
+    echo "------------------"
+  done
   # Start tailing logs from notable services.
   # supervisorctl tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
   # supervisorctl tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
-  supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
+  # supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
   # if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
   #   supervisorctl tail -f soroban-rpc  stdout > >(sed "s/^/${blue}soroban-rpc  | $clear/") &
   # fi
