@@ -21,6 +21,7 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+: "${NETWORK:=testnet}"
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
@@ -162,11 +163,6 @@ function process_args() {
       exit 1
     esac
   done
-
-  # TODO: ask for what network to use
-  if [ -z "$NETWORK" ]; then
-    NETWORK="testnet"
-  fi
 
   case "$NETWORK" in
   testnet)
