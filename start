@@ -545,7 +545,11 @@ function exec_supervisor() {
   echo "supervisor: starting"
   upgrade_local &
   service_status &
-  exec supervisord -n -c $SUPHOME/etc/supervisord.conf \
+  # Run supervisord in a new environment (using `env -i`) because supervisord
+  # inherits the env vars of its environment for all subprocesses that get
+  # started. This is problematic for services that use the same environment
+  # variable name for things that the start script does, like NETWORK.
+  env -i supervisord -n -c $SUPHOME/etc/supervisord.conf \
     > >(sed -u 's/^/supervisor: /') \
     2> >(sed -u 's/^/supervisor: /' >&2)
 }
