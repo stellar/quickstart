@@ -549,7 +549,7 @@ function exec_supervisor() {
   # inherits the env vars of its environment for all subprocesses that get
   # started. This is problematic for services that use the same environment
   # variable name for things that the start script does, like NETWORK.
-  env -i supervisord -n -c $SUPHOME/etc/supervisord.conf \
+  exec env -i supervisord -n -c $SUPHOME/etc/supervisord.conf \
     > >(sed -u 's/^/supervisor: /') \
     2> >(sed -u 's/^/supervisor: /' >&2)
 }
