@@ -53,7 +53,7 @@ function validate_before_start() {
 }
 
 function validate_after_copy_defaults() {
-  if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
+  if [ "$NETWORK" = "local" ] && [ "$LIMITS" = "unlimited" ]; then
     local config_dir="$COREHOME/etc/config-settings"
     local config_path="$config_dir/$LIMITS.json"
     if [ ! -f "$config_path" ]; then
@@ -498,10 +498,19 @@ function upgrade_local() {
     echo "upgrades: protocolversion done"
   fi
 
-  # Upgrade local network's soroban config to match testnet, unless the limits
+  # Upgrade local network's soroban config to match the phase1 file in stellar-core, unless the limits
   # have been configured with 'default', which will cause the limits to be left
   # in their default state.
   if [ $PROTOCOL_VERSION -ge 20 ] && [ "$LIMITS" != "default" ]; then
+    local SETTINGS_FILE
+    if [ "$LIMITS" = "testnet" ]; then
+      local CORE_VERSION=$(stellar-core version | head -n 1)
+      curl -O "https://raw.githubusercontent.com/stellar/stellar-core/$CORE_VERSION/soroban-settings/phase1.json"
+      SETTINGS_FILE="phase1.json"
+    else
+      SETTINGS_FILE="$COREHOME/etc/config-settings/$LIMITS.json"
+    fi
+
     echo "upgrades: soroban config '$LIMITS' limits"
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
@@ -510,7 +519,7 @@ function upgrade_local() {
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
-        --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$COREHOME/etc/config-settings/$LIMITS.json"` \
+        --xdr `stellar-xdr encode --type ConfigUpgradeSet < $SETTINGS_FILE` \
         --signtxs \
         2>/dev/null \
       | { \
