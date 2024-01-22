@@ -99,7 +99,7 @@ jobs:
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-core-${{ inputs.arch }}
+        name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
 # don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
@@ -126,7 +126,7 @@ jobs:
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-horizon-${{ inputs.arch }}
+        name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
 # don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
@@ -150,7 +150,7 @@ jobs:
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-friendbot-${{ inputs.arch }}
+        name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-stellar-soroban-rpc:
@@ -179,7 +179,7 @@ jobs:
     - name: Upload Stellar-Soroban-Rpc Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.arch }}
+        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-rs-stellar-xdr:
@@ -212,7 +212,7 @@ jobs:
     - name: Upload Stellar-Rs-Xdr Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-rs-stellar-xdr-${{ inputs.arch }}
+        name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image      
 
   build:
@@ -225,29 +225,29 @@ jobs:
       with:
         ref: ${{ inputs.sha }}
     - name: Download Stellar XDR
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-rs-stellar-xdr-${{ inputs.arch }}
+        name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-xdr
     - name: Download Stellar-Core Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-core-${{ inputs.arch }}
+        name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-core
     - name: Download Stellar-Horizon Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-horizon-${{ inputs.arch }}
+        name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-horizon
     - name: Download Stellar-Friendbot Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-friendbot-${{ inputs.arch }}
+        name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-friendbot
     - name: Download Stellar-Soroban-Rpc Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.arch }}
+        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-soroban-rpc
     - name: Load Stellar-Core Image
       run: docker load -i /tmp/stellar-core/image
@@ -294,7 +294,7 @@ jobs:
     - name: Upload Quickstart Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-${{ inputs.arch }}
+        name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   test:
@@ -307,9 +307,9 @@ jobs:
       with:
         ref: ${{ inputs.sha }}
     - name: Download Quickstart Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-${{ inputs.arch }}
+        name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -375,7 +375,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ inputs.sha }}
-        artifact_name: image-${{ inputs.arch }}
+        artifact_name: image-${{ inputs.tag }}-${{ inputs.arch }}
         artifact_image_file: image
         arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
@@ -399,7 +399,7 @@ jobs:
       uses: ./.github/actions/push
       with:
         head_sha: ${{ inputs.sha }}
-        artifact_name: image-${{ inputs.arch }}
+        artifact_name: image-${{ inputs.tag }}-${{ inputs.arch }}
         artifact_image_file: image
         arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
