@@ -31,6 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 0 # Get all history for the sha count below.
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - id: tag-prefix
       run: |
