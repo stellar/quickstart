@@ -77,4 +77,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ inputs.tag-prefix }}latest
+      tag-alias: latest
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}

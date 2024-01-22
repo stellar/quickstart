@@ -27,13 +27,12 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      tag-prefix: ${{ steps.release.outputs.tag-prefix }}
+      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
     steps:
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
-    - id: release
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    - id: tag-prefix
       run:
         count="$(git rev-list HEAD --count --first-parent)"
         echo "tag-prefix=v${count}-" >> $GITHUB_OUTPUT

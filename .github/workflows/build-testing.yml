@@ -80,4 +80,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ inputs.tag-prefix }}testing
+      tag-alias: testing
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
