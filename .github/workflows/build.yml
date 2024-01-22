@@ -45,8 +45,8 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
   testing:
     needs: [setup]
@@ -55,8 +55,8 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
   future:
     needs: [setup]
@@ -65,5 +65,5 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}

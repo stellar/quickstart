@@ -12,14 +12,14 @@ on:
       DOCKERHUB_TOKEN:
         required: false
     inputs:
-      tag-prefix:
-        description: 'Prefix for the tag name'
-        type: 'string'
-        default: ''
       sha:
         description: 'Sha to build'
         type: 'string'
         required: true
+      tag-prefix:
+        description: 'Prefix for the tag name'
+        type: 'string'
+        default: ''
 
 jobs:
 
