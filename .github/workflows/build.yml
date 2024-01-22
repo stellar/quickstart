@@ -24,7 +24,7 @@ jobs:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
       run: exit 1
 
-  tag-prefix:
+  setup:
     runs-on: ubuntu-latest
     outputs:
       tag-prefix: ${{ steps.release.outputs.tag-prefix }}
@@ -39,31 +39,31 @@ jobs:
         echo "tag-prefix=v${count}-" >> $GITHUB_OUTPUT
 
   latest:
-    needs: [tag-prefix]
+    needs: [setup]
     uses: ./.github/workflows/build-latest.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.tag-prefix.outputs.tag-prefix }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   testing:
-    needs: [tag-prefix]
+    needs: [setup]
     uses: ./.github/workflows/build-testing.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.tag-prefix.outputs.tag-prefix }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   future:
-    needs: [tag-prefix]
+    needs: [setup]
     uses: ./.github/workflows/build-future.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag-prefix: ${{ needs.tag-prefix.outputs.tag-prefix }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
