@@ -4,37 +4,33 @@ name: Future
 # software that have been informally released to the futurenet network.
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-
-# Prevent more than one build of this workflow for a branch to be running at the
-# same time, and if multiple are queued, only run the latest, cancelling any
-# already running build. The exception being any protected branch, such as
-# master, where a build for every commit will run.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+    inputs:
+      tag-prefix:
+        description: 'Prefix for the tag name'
+        type: 'string'
+        default: ''
+      sha:
+        description: 'Sha to build'
+        type: 'string'
+        required: true
 
 jobs:
 
-  complete:
-    if: always()
-    needs: [manifest]
-    runs-on: ubuntu-latest
-    steps:
-    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-      run: exit 1
-
   amd64:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/build-image.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
+      sha: ${{ inputs.sha }}
       arch: amd64
-      tag: future-amd64
+      tag: ${{ inputs.tag-prefix }}future-amd64
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_supports_enable_soroban_diagnostic_events: "true"
@@ -47,13 +43,14 @@ jobs:
         }
 
   arm64:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/build-image.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
+      sha: ${{ inputs.sha }}
       arch: arm64
-      tag: future-arm64
+      tag: ${{ inputs.tag-prefix }}future-arm64
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_supports_enable_soroban_diagnostic_events: "true"
@@ -74,5 +71,5 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag: future
+      tag: ${{ inputs.tag-prefix }}future
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
