@@ -25,7 +25,6 @@ jobs:
       run: exit 1
 
   tag-prefix:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     outputs:
       tag-prefix: ${{ steps.release.outputs.tag-prefix }}
@@ -34,6 +33,7 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - id: release
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       run:
         count="$(git rev-list HEAD --count --first-parent)"
         echo "tag-prefix=v${count}-" >> $GITHUB_OUTPUT
