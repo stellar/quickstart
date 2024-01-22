@@ -97,7 +97,7 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-stellar-core-${{ inputs.arch }}
         path: /tmp/image
@@ -124,7 +124,7 @@ jobs:
         -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image 
         --build-arg REF="${{ env.GO_REPO_BRANCH }}" .
     - name: Upload Stellar-Horizon Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-stellar-horizon-${{ inputs.arch }}
         path: /tmp/image
@@ -148,7 +148,7 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-stellar-friendbot-${{ inputs.arch }}
         path: /tmp/image
@@ -177,7 +177,7 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
     - name: Upload Stellar-Soroban-Rpc Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-stellar-soroban-rpc-${{ inputs.arch }}
         path: /tmp/image
@@ -210,7 +210,7 @@ jobs:
         --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git 
         --build-arg REF="${{ env.XDR_REPO_REF }}" . 
     - name: Upload Stellar-Rs-Xdr Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-rs-stellar-xdr-${{ inputs.arch }}
         path: /tmp/image      
@@ -292,7 +292,7 @@ jobs:
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: image-${{ inputs.arch }}
         path: /tmp/image
