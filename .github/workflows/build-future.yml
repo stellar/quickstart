@@ -1,6 +1,6 @@
-name: Soroban-Dev
+name: Future
 
-# The `:soroban-dev` tag points to a build containing unreleased versions of
+# The `:future` tag points to a build containing unreleased versions of
 # software that have been informally released to the futurenet network.
 
 on:
@@ -34,7 +34,7 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       arch: amd64
-      tag: soroban-dev-amd64
+      tag: future-amd64
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_supports_enable_soroban_diagnostic_events: "true"
@@ -53,7 +53,7 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       arch: arm64
-      tag: soroban-dev-arm64
+      tag: future-arm64
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_supports_enable_soroban_diagnostic_events: "true"
@@ -74,5 +74,5 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag: soroban-dev
+      tag: future
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
