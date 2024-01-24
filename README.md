@@ -147,11 +147,11 @@ Some example configurations that can be used are:
   `IMAGE`: `stellar/quickstart:testing`
   `NETWORK`: `local`
 - Local network matching futurenet:
-  `IMAGE`: `stellar/quickstart:soroban-dev`
+  `IMAGE`: `stellar/quickstart:future`
   `NETWORK`: `local`
   `ENABLE_SOROBAN_RPC`: `true`
 - Futurenet node:
-  `IMAGE`: `stellar/quickstart:soroban-dev`
+  `IMAGE`: `stellar/quickstart:future`
   `NETWORK`: `futurenet`
   `ENABLE_SOROBAN_RPC`: `true`
 
@@ -178,7 +178,7 @@ version that is still in development, add
 For example:
 ```
 make build \
-  TAG=soroban-dev \
+  TAG=future \
   CORE_REF=... \
   CORE_CONFIGURE_FLAGS=... \
   HORIZON_REF=... \
