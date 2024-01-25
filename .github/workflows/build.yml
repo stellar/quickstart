@@ -6,6 +6,10 @@ on:
       DOCKERHUB_TOKEN:
         required: false
     inputs:
+      sha:
+        description: 'Sha to build'
+        type: 'string'
+        required: true
       arch:
         description: 'Architecture to build the image for (amd64, arm64)'
         type: 'string'
@@ -60,8 +64,7 @@ on:
         value: ${{ jobs.build.outputs.image }}
 
 env:
-  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
   GO_REPO_BRANCH: ${{ inputs.go_ref }}
   SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
   CORE_REPO: ${{ inputs.core_repo }}
@@ -94,9 +97,9 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-core-${{ inputs.arch }}
+        name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
 # don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
@@ -107,7 +110,7 @@ jobs:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
-        ref: ${{ env.HEAD_SHA }}
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -121,9 +124,9 @@ jobs:
         -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image 
         --build-arg REF="${{ env.GO_REPO_BRANCH }}" .
     - name: Upload Stellar-Horizon Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-horizon-${{ inputs.arch }}
+        name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
 # don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
@@ -145,9 +148,9 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         https://github.com/stellar/go.git#${{ env.GO_REPO_BRANCH }}
     - name: Upload Stellar-Friendbot Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-friendbot-${{ inputs.arch }}
+        name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-stellar-soroban-rpc:
@@ -174,9 +177,9 @@ jobs:
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
         https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
     - name: Upload Stellar-Soroban-Rpc Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.arch }}
+        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-rs-stellar-xdr:
@@ -185,7 +188,7 @@ jobs:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
-        ref: ${{ env.HEAD_SHA }}
+        ref: ${{ inputs.sha }}
     - id: cache
       uses: actions/cache@v3
       with:
@@ -207,9 +210,9 @@ jobs:
         --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git 
         --build-arg REF="${{ env.XDR_REPO_REF }}" . 
     - name: Upload Stellar-Rs-Xdr Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-rs-stellar-xdr-${{ inputs.arch }}
+        name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image      
 
   build:
@@ -220,31 +223,31 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ env.HEAD_SHA }}
+        ref: ${{ inputs.sha }}
     - name: Download Stellar XDR
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-rs-stellar-xdr-${{ inputs.arch }}
+        name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-xdr
     - name: Download Stellar-Core Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-core-${{ inputs.arch }}
+        name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-core
     - name: Download Stellar-Horizon Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-horizon-${{ inputs.arch }}
+        name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-horizon
     - name: Download Stellar-Friendbot Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-friendbot-${{ inputs.arch }}
+        name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-friendbot
     - name: Download Stellar-Soroban-Rpc Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.arch }}
+        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-soroban-rpc
     - name: Load Stellar-Core Image
       run: docker load -i /tmp/stellar-core/image
@@ -277,9 +280,9 @@ jobs:
         --platform linux/${{ inputs.arch }}
         -f Dockerfile
         -t $IMAGE
-        --label org.opencontainers.image.revision="${{ env.HEAD_SHA }}"
+        --label org.opencontainers.image.revision="${{ inputs.sha }}"
         .
-        --build-arg REVISION="${{ env.HEAD_SHA }}"
+        --build-arg REVISION="${{ inputs.sha }}"
         --build-arg STELLAR_XDR_IMAGE_REF=stellar-rs-xdr:${{ inputs.arch }}
         --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
         --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
@@ -289,9 +292,9 @@ jobs:
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: image-${{ inputs.arch }}
+        name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   test:
@@ -302,11 +305,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.HEAD_SHA }}
+        ref: ${{ inputs.sha }}
     - name: Download Quickstart Image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        name: image-${{ inputs.arch }}
+        name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -367,12 +370,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.HEAD_SHA  }}
+        ref: ${{ inputs.sha  }}
     - id: push
       uses: ./.github/actions/push
       with:
-        head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-${{ inputs.arch }}
+        head_sha: ${{ inputs.sha }}
+        artifact_name: image-${{ inputs.tag }}-${{ inputs.arch }}
         artifact_image_file: image
         arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
@@ -391,12 +394,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.HEAD_SHA  }}
+        ref: ${{ inputs.sha  }}
     - id: push
       uses: ./.github/actions/push
       with:
-        head_sha: ${{ env.HEAD_SHA }}
-        artifact_name: image-${{ inputs.arch }}
+        head_sha: ${{ inputs.sha }}
+        artifact_name: image-${{ inputs.tag }}-${{ inputs.arch }}
         artifact_image_file: image
         arch: ${{ inputs.arch }}
         image: ${{ env.IMAGE }}
