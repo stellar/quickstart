@@ -58,7 +58,6 @@ jobs:
       core_ref: v20.1.0
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.28.0
-      soroban_cli_ref: v20.1.0
       soroban_rpc_ref: v20.1.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
