@@ -69,7 +69,6 @@ runs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: `${context.workflow} (${{ inputs.arch }})`,
+            context: `Image ${{ inputs.image }}`,
             target_url: '${{ env.IMAGE_URL }}',
-            description: '${{ inputs.image }}',
           });
