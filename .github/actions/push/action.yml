@@ -69,6 +69,7 @@ runs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: `Image ${{ inputs.image }}`,
+            context: `${{ inputs.image }}`,
             target_url: '${{ env.IMAGE_URL }}',
+            description: 'Available',
           });
