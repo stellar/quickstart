@@ -419,7 +419,7 @@ function init_horizon() {
   HORIZON_CAPTIVE_CORE_CFG=$HZHOME/etc/stellar-captive-core.cfg
   run_silent "finalize-horizon-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$HZHOME/captive-core/stellar.db*g" $HORIZON_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $HORIZON_CAPTIVE_CORE_CFG
-  run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS\nENABLE_DIAGNOSTICS_FOR_TX_SUBMISSION=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
+  run_silent "finalize-horizon-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $HORIZON_CAPTIVE_CORE_CFG
 
   cat << EOF >> etc/horizon.env
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
