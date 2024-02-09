@@ -23,16 +23,16 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-		XDR_REF=v20.0.2 \
-		CORE_REF=v20.1.0 \
+		XDR_REF=v20.1.0 \
+		CORE_REF=v20.2.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.1 \
-		SOROBAN_RPC_REF=v20.1.0
+		SOROBAN_RPC_REF=v20.3.0
 
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.1.0 \
-		CORE_REF=v20.2.0rc3 \
+		CORE_REF=v20.2.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.1 \
 		SOROBAN_RPC_REF=v20.3.0
