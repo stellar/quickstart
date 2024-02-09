@@ -54,7 +54,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}latest-arm64
-      xdr_ref: v20.1.2
+      xdr_ref: v20.1.0
       core_ref: v20.2.0
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.28.1
