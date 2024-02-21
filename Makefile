@@ -27,7 +27,7 @@ build-latest:
 		CORE_REF=v20.2.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.3 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v20.3.2
 
 build-testing:
 	$(MAKE) build TAG=testing \
@@ -35,7 +35,7 @@ build-testing:
 		CORE_REF=v20.2.0 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.3 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v20.3.2
 
 build-future:
 	$(MAKE) build TAG=future \
