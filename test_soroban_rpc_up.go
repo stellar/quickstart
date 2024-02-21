@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const timeout = 6 * time.Minute
+const timeout = 26 * time.Minute
 
 type RPCResult struct {
 	Status string `json:"status"`
