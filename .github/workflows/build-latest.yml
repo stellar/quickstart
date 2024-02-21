@@ -32,10 +32,10 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}latest-amd64
-      xdr_ref: v20.0.2
-      core_ref: v20.1.0
+      xdr_ref: v20.1.0
+      core_ref: v20.2.0
       go_ref: horizon-v2.28.3
-      soroban_tools_ref: v20.1.0
+      soroban_tools_ref: v20.3.0
       test_matrix: |
         {
           "network": ["pubnet", "local"],
@@ -54,11 +54,11 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}latest-arm64
-      xdr_ref: v20.0.2
-      core_ref: v20.1.0
+      xdr_ref: v20.1.0
+      core_ref: v20.2.0
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.28.3
-      soroban_tools_ref: v20.1.0
+      soroban_tools_ref: v20.3.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
         {
