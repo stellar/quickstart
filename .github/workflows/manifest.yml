@@ -68,7 +68,7 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ env.HEAD_SHA }}',
             state: 'success',
-            context: `${context.workflow}`,
+            context: `${{ env.IMAGE }}`,
             target_url: '${{ env.IMAGE_URL }}',
-            description: '${{ env.IMAGE }}',
+            description: 'Available',
           });
