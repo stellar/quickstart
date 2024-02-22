@@ -352,12 +352,18 @@ jobs:
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
-    - name: Run soroban rpc test
+    - name: Run soroban rpc up test
       if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go
+    - name: Run soroban rpc healthy test
+      if: ${{ contains(matrix.options, '--enable-soroban-rpc') && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
+        go run test_soroban_rpc_healthy.go
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
