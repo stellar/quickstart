@@ -55,8 +55,8 @@ func main() {
 
 		logLine(fmt.Sprintf("Soroban RPC health reponse %#v", rpcResponse))
 
-		if rpcResponse.Result.Status != "" || rpcResponse.Error.Message != "" {
-			logLine("Soroban RPC has started!")
+		if rpcResponse.Result.Status == "healthy" {
+			logLine("Soroban RPC is healthy!")
 			os.Exit(0)
 		}
 	}
