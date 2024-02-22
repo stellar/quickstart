@@ -541,10 +541,20 @@ function upgrade_local() {
   supervisorctl start friendbot
 }
 
+function start_optional_services() {
+  # Wait for server
+  while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+
+  if [ "$ENABLE_SOROBAN_RPC" == "true" ]; then
+    supervisorctl start soroban-rpc
+  fi
+}
+
 function exec_supervisor() {
   echo "supervisor: starting"
   upgrade_local &
   service_status &
+  start_optional_services &
   # Run supervisord in a new environment (using `env -i`) because supervisord
   # inherits the env vars of its environment for all subprocesses that get
   # started. This is problematic for services that use the same environment
