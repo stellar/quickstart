@@ -34,6 +34,7 @@ jobs:
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_supports_enable_soroban_diagnostic_events: "true"
+      go_ref: horizon-v2.28.3
       soroban_rpc_ref: v20.1.0
       test_matrix: |
         {
