@@ -543,6 +543,7 @@ function upgrade_local() {
 
 function start_optional_services() {
   # Wait for server
+  # TODO: Replace with checking if supervisord is up.
   while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
 
   if [ "$ENABLE_SOROBAN_RPC" == "true" ]; then
