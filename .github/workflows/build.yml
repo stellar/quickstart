@@ -326,19 +326,21 @@ jobs:
     - name: Sleep until supervisor is up
       run: sleep 10
     - name: Run core test
+      if: ${{ matrix.core }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         go run test_core.go
         curl http://localhost:11626/info
     - name: Run horizon up test
+      if: ${{ matrix.horizon }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_up.go
         curl http://localhost:8000
     - name: Run horizon ingesting test
-      if: ${{ matrix.network != 'pubnet' }}
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
@@ -353,13 +355,13 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
     - name: Run soroban rpc up test
-      if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
+      if: ${{ matrix.rpc && contains(matrix.options, '--enable-soroban-rpc') }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go
     - name: Run soroban rpc healthy test
-      if: ${{ contains(matrix.options, '--enable-soroban-rpc') && matrix.network != 'pubnet' }}
+      if: ${{ matrix.rpc && contains(matrix.options, '--enable-soroban-rpc') && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
