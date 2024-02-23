@@ -355,13 +355,13 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
     - name: Run soroban rpc up test
-      if: ${{ matrix.rpc && contains(matrix.options, '--enable-soroban-rpc') }}
+      if: ${{ matrix.rpc }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go
     - name: Run soroban rpc healthy test
-      if: ${{ matrix.rpc && contains(matrix.options, '--enable-soroban-rpc') && matrix.network != 'pubnet' }}
+      if: ${{ matrix.rpc && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
