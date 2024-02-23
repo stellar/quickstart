@@ -21,7 +21,10 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+: "${ENABLE:=core,horizon,rpc}"
 : "${ENABLE_LOGS:=false}"
+: "${ENABLE_CORE:=false}"
+: "${ENABLE_HORIZON:=false}"
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
@@ -139,6 +142,19 @@ function process_args() {
       export LIMITS="$1"
       shift
       ;;
+    --enable)
+      ENABLE="$1"
+      shift
+      ;;
+    --enable-core)
+      ENABLE_CORE=true
+      ;;
+    --enable-horizon)
+      ENABLE_HORIZON=true
+      ;;
+    --enable-rpc)
+      ENABLE_SOROBAN_RPC=true
+      ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
       ;;
@@ -181,6 +197,8 @@ function process_args() {
     export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
+    ENABLE_CORE=true
+    ENABLE_HORIZON=true
     ;;
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
@@ -190,6 +208,16 @@ function process_args() {
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
   esac
+
+  if [[ ",$ENABLE," = *",core,"* ]]; then
+    ENABLE_CORE=true
+  fi
+  if [[ ",$ENABLE," = *",horizon,"* ]]; then
+    ENABLE_HORIZON=true
+  fi
+  if [[ ",$ENABLE," = *",rpc,"* ]]; then
+    ENABLE_SOROBAN_RPC=true
+  fi
 
   if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"
@@ -328,6 +356,9 @@ function copy_pgpass() {
 }
 
 function init_db() {
+  if [ "$ENABLE_CORE" != "true" ] && [ "$ENABLE_HORIZON" != "true" ]; then
+    return 0
+  fi
   if [ -f $PGHOME/.quickstart-initialized ]; then
     echo "postgres: already initialized"
     return 0
@@ -370,6 +401,10 @@ SQL
 }
 
 function init_stellar_core() {
+  if [ "$ENABLE_CORE" != "true" ]; then
+    return 0
+  fi
+
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
   if [ -f $COREHOME/.quickstart-initialized ]; then
@@ -405,6 +440,10 @@ function init_stellar_core() {
 }
 
 function init_horizon() {
+  if [ "$ENABLE_HORIZON" != "true" ]; then
+    return 0
+  fi
+
   if [ -f $HZHOME/.quickstart-initialized ]; then
     echo "horizon: already initialized"
     return 0
@@ -542,10 +581,18 @@ function upgrade_local() {
 }
 
 function start_optional_services() {
-  # Wait for server
-  # TODO: Replace with checking if supervisord is up.
-  while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
+  while supervisorctl status > /dev/null; [ $? -eq 4 ]; do
+    sleep 1
+  done
 
+  if [ "$ENABLE_CORE" == "true" ]; then
+    supervisorctl start postgresql
+    supervisorctl start stellar-core
+  fi
+  if [ "$ENABLE_HORIZON" == "true" ]; then
+    supervisorctl start postgresql
+    supervisorctl start horizon
+  fi
   if [ "$ENABLE_SOROBAN_RPC" == "true" ]; then
     supervisorctl start soroban-rpc
   fi
@@ -571,9 +618,13 @@ function print_service_logs() {
     sleep 1;
   done
   # Start tailing logs from notable services.
-  supervisorctl tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
-  supervisorctl tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
-  supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
+  if [ "$ENABLE_CORE" = "true" ]; then
+    supervisorctl tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
+    supervisorctl tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
+  fi
+  if [ "$ENABLE_HORIZON" = "true" ]; then
+    supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
+  fi
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
     supervisorctl tail -f soroban-rpc  stdout > >(sed "s/^/${blue}soroban-rpc  | $clear/") &
   fi
@@ -653,12 +704,14 @@ popd() {
 }
 
 function service_status() {
-  stellar_core_status &
-  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+  if [ "$ENABLE_CORE" = "true" ]; then
+    stellar_core_status &
+  fi
+  if [ "$ENABLE_HORIZON" = "true" ]; then
     horizon_status &
-    soroban_rpc_status
-  else
-    horizon_status
+  fi
+  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    soroban_rpc_status &
   fi
 }
 
