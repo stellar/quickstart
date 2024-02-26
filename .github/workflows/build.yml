@@ -371,7 +371,7 @@ jobs:
         go run test_soroban_rpc_healthy.go
     - name: Prepare Test Logs
       if: always()
-      run: chmod -R a+r logs
+      run: sudo chmod -R a+r logs
     - name: Upload Test Logs
       if: always()
       uses: actions/upload-artifact@v4
