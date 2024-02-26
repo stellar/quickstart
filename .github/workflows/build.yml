@@ -319,7 +319,9 @@ jobs:
       with:
         platforms: arm64
     - name: Run Quickstart Image
-      run: docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
+      run: |
+        mkdir -p logs
+        docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" -v "$PWD/logs":/var/logs/supervisor --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -372,7 +374,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: test-logs-${{ inputs.tag }}-${{ inputs.arch }}
-        path: /var/logs/supervisor
+        path: logs
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
