@@ -373,7 +373,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-logs-${{ inputs.tag }}-${{ inputs.arch }}
+        name: logs-${{ inputs.tag }}-${{ inputs.arch }}-test-${{ strategy.job-index }}
         path: logs
 
   push-pr:
