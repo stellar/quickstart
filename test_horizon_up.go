@@ -11,7 +11,7 @@ import (
 const timeout = 3 * time.Minute
 
 type Root struct {
-	CoreSupportedProtocolVersion int32 `json:"core_supported_protocol_version"`
+	SupportedProtocolVersion int32 `json:"supported_protocol_version"`
 }
 
 func main() {
@@ -40,8 +40,8 @@ func main() {
 			continue
 		}
 
-		if root.CoreSupportedProtocolVersion > 0 {
-			logLine("Horizon has started and is communicating with stellar-core!")
+		if root.SupportedProtocolVersion > 0 {
+			logLine("Horizon has started!")
 			os.Exit(0)
 		}
 	}
