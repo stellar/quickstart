@@ -301,6 +301,7 @@ jobs:
     needs: build
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
