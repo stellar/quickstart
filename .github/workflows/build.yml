@@ -342,6 +342,13 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_up.go
         curl http://localhost:8000
+    - name: Run horizon core up test
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run test_horizon_core_up.go
+        curl http://localhost:8000
     - name: Run horizon ingesting test
       if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
       run: |
