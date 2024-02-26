@@ -302,7 +302,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.network == 'pubnet' && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v2
       with:
