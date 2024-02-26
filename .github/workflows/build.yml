@@ -321,7 +321,7 @@ jobs:
     - name: Run Quickstart Image
       run: |
         mkdir -p logs
-        docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" -v "$PWD/logs":/var/logs/supervisor --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
+        docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" -v "$PWD/logs":/var/log/supervisor --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
