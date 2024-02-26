@@ -369,6 +369,9 @@ jobs:
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_healthy.go
+    - name: Prepare Test Logs
+      if: always()
+      run: chmod a+r logs/*
     - name: Upload Test Logs
       if: always()
       uses: actions/upload-artifact@v4
