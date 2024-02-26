@@ -367,6 +367,12 @@ jobs:
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_healthy.go
+    - name: Upload Test Logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /var/logs/supervisor
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
