@@ -19,7 +19,7 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for Horizon to start")
+		logLine("Waiting for Horizon's stellar-core to start reporting")
 
 		if time.Since(startTime) > timeout {
 			logLine("Timeout")
