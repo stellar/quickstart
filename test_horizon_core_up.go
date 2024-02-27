@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const timeout = 60 * time.Minute
+const timeout = 120 * time.Minute
 
 type Root struct {
 	CoreSupportedProtocolVersion int32 `json:"core_supported_protocol_version"`
