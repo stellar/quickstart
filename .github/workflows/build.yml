@@ -333,7 +333,7 @@ jobs:
         --name stellar
         $IMAGE
         --${{ matrix.network }}
-        --enable ${{ matrix.core && "core" }},${{ matrix.horizon && "horizon" }},${{ matrix.rpc && "rpc" }}
+        --enable ${{ matrix.core }},${{ matrix.horizon }},${{ matrix.rpc }}
         ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
