@@ -318,10 +318,23 @@ jobs:
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
+    - name: Prepare Logs Directory
+      run: mkdir -p logs
     - name: Run Quickstart Image
-      run: |
-        mkdir -p logs
-        docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" -v "$PWD/logs":/var/log/supervisor --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
+      run: >
+        docker run
+        --platform linux/${{ inputs.arch }}
+        --rm
+        -d
+        -p
+        "8000:8000"
+        -p "11626:11626"
+        -v "$PWD/logs":/var/log/supervisor
+        --name stellar
+        $IMAGE
+        --${{ matrix.network }}
+        --enable ${{ matrix.core && "core" }},${{ matrix.horizon && "horizon" }},${{ matrix.rpc && "rpc" }}
+        ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
