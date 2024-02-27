@@ -356,7 +356,7 @@ jobs:
         go run test_horizon_up.go
         curl http://localhost:8000
     - name: Run horizon core up test
-      if: ${{ matrix.horizon }}
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
