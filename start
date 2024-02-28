@@ -146,15 +146,6 @@ function process_args() {
       ENABLE="$1"
       shift
       ;;
-    --enable-core)
-      ENABLE_CORE=true
-      ;;
-    --enable-horizon)
-      ENABLE_HORIZON=true
-      ;;
-    --enable-rpc)
-      ENABLE_SOROBAN_RPC=true
-      ;;
     --enable-soroban-rpc)
       ENABLE_SOROBAN_RPC=true
       ;;
