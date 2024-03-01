@@ -32,7 +32,7 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.1.0 \
-		CORE_REF=v20.2.0 \
+		CORE_REF=v20.3.0rc2 \
 		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.3 \
 		SOROBAN_RPC_REF=v20.3.0
