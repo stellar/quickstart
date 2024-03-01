@@ -41,10 +41,10 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-soroban-rpc"],
-          "exclude": [
-            { "network": "pubnet", "options": "--enable-soroban-rpc" },
-          ]
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
         }
 
   arm64:
@@ -66,10 +66,10 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-soroban-rpc"],
-          "exclude": [
-            { "network": "pubnet", "options": "--enable-soroban-rpc" },
-          ]
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
         }
 
   manifest:
