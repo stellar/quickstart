@@ -307,17 +307,15 @@ This image manages two postgres databases:  `core` for stellar-core's data and `
 
 Below is a list of various ways you might want to launch the quickstart container annotated to illustrate what options are enabled.  It's also recommended that you should learn and get familiar with the docker command.
 
-*Launch an ephemeral pubnet node in the background:*
+*Launch an ephemeral local only dev/test network:*
 ```
-$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --pubnet
+$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --local
 ```
 
-*Launch an ephemeral testnet node in the foreground, exposing all ports:*
+*Launch an ephemeral testnet node in the foreground:*
 ```
 $ docker run --rm -it \
     -p "8000:8000" \
-    -p "11626:11626" \
-    -p "11625:11625" \
     --name stellar \
     stellar/quickstart --testnet
 ```
@@ -325,18 +323,10 @@ $ docker run --rm -it \
 *Setup a new persistent node using the host directory `/str`:*
 ```
 $ docker run -it --rm \
-    -v "/str:/opt/stellar" \
-    --name stellar \
-    stellar/quickstart --pubnet
-```
-
-*Start a background persistent container for an already initialized host directory:*
-```
-$ docker run -d \
-    -v "/str:/opt/stellar" \
     -p "8000:8000" \
+    -v "/str:/opt/stellar" \
     --name stellar \
-    stellar/quickstart --pubnet
+    stellar/quickstart --testnet
 ```
 
 ## Troubleshooting
