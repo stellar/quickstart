@@ -19,7 +19,7 @@ The image uses the following software:
 
 To use this project successfully, you should first decide a few things:
 
-First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Alternatively, choose to run a local network (called local) which allows you to run your own private Stellar network.
+First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Alternatively, choose to run a local network (called local) which allows you to run your own acellerated private Stellar network for testing.
 
 Next, you must decide whether you will use a docker volume or not.  When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart.  We recommend persistent mode for anything besides a development or test environment.
 
@@ -78,6 +78,24 @@ are finalized faster than on deployed networks.
 
 *Note*: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
 
+### Service Options
+
+The image runs all services available by default, but can be configured to run only certain services as needed. The option for configuring which services run is the `--enable` option.
+
+The option takes a comma-separated list of service names to enable. To enable all services which is the default behavior, use:
+
+```
+--enable core,horizon,rpc
+```
+
+To run only select services, simply specify only those services. For example, to enable the RPC, use:
+
+```
+--enable rpc
+```
+
+__Note: All services, and in addition friendbot, always run on a local network.__
+
 ### Faucet (Friendbot)
 
 Stellar development/test networks use friendbot as a faucet for the native asset.
@@ -93,25 +111,7 @@ _Note: In local mode a local friendbot is running. In testnet and futurenet mode
 
 ### Soroban Development
 
-For local development of smart contracts on Stellar using [Soroban], run a `local` network and the Soroban stack locally via the `stellar/quickstart:testing` image:
-
-```
-$ docker run --rm -it \
-    -p "8000:8000" \
-    --name stellar \
-    stellar/quickstart:testing \
-    --local \
-    --enable-soroban-rpc
-```
-
-This will run the release-candidate versions of stellar-core, horizon, friendbot, and soroban-rpc server that are Soroban enabled.
-
-The Soroban RPC server is supported only with the `--local`, `--futurenet`, `--testnet` network options.
-
-To enable the Soroban RPC server provide the following command line flags when starting the container:
-`--enable-soroban-rpc`
-
-The Soroban RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
 To enable soroban rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
 ```
@@ -146,14 +146,9 @@ Some example configurations that can be used are:
 - Local network matching testnet:
   `IMAGE`: `stellar/quickstart:testing`
   `NETWORK`: `local`
-- Local network matching futurenet:
-  `IMAGE`: `stellar/quickstart:future`
-  `NETWORK`: `local`
-  `ENABLE_SOROBAN_RPC`: `true`
-- Futurenet node:
-  `IMAGE`: `stellar/quickstart:future`
-  `NETWORK`: `futurenet`
-  `ENABLE_SOROBAN_RPC`: `true`
+- Testnet node:
+  `IMAGE`: `stellar/quickstart:testnet`
+  `NETWORK`: `testnet`
 
 *Disclaimer*: The DigitalOcean server is publicly accessible on the Internet. Do not put sensitive information on the network that you would not want someone else to know. Anyone with access to the network will be able to use the root account above.
 
@@ -231,15 +226,25 @@ Managing UIDs between a docker container and a host volume can be complicated.  
 
 ## Ports
 
+The image exposes one main port through which services provide their APIs:
+
+| Port  | Service                         | Description          |
+|-------|---------------------------------|----------------------|
+| 8000  | horizon, soroban-rpc, friendbot | main http port       |
+
+The image also exposes a few other ports that most developers do not need, but area available:
+
 | Port  | Service                         | Description          |
 |-------|---------------------------------|----------------------|
 | 5432  | postgresql                      | database access port |
-| 8000  | horizon, soroban-rpc, friendbot | main http port       |
 | 6060  | horizon                         | admin port           |
 | 6061  | soroban-rpc                     | admin port           |
 | 11625 | stellar-core                    | peer node port       |
 | 11626 | stellar-core                    | main http port       |
-
+| 11725 | stellar-core (horizon)          | peer node port       |
+| 11726 | stellar-core (horizon)          | main http port       |
+| 11825 | stellar-core (soroban-rpc)      | peer node port       |
+| 11826 | stellar-core (soroban-rpc)      | main http port       |
 
 ### Security Considerations
 
@@ -302,17 +307,15 @@ This image manages two postgres databases:  `core` for stellar-core's data and `
 
 Below is a list of various ways you might want to launch the quickstart container annotated to illustrate what options are enabled.  It's also recommended that you should learn and get familiar with the docker command.
 
-*Launch an ephemeral pubnet node in the background:*
+*Launch an ephemeral local only dev/test network:*
 ```
-$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --pubnet
+$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --local
 ```
 
-*Launch an ephemeral testnet node in the foreground, exposing all ports:*
+*Launch an ephemeral testnet node in the foreground:*
 ```
 $ docker run --rm -it \
     -p "8000:8000" \
-    -p "11626:11626" \
-    -p "11625:11625" \
     --name stellar \
     stellar/quickstart --testnet
 ```
@@ -320,18 +323,10 @@ $ docker run --rm -it \
 *Setup a new persistent node using the host directory `/str`:*
 ```
 $ docker run -it --rm \
-    -v "/str:/opt/stellar" \
-    --name stellar \
-    stellar/quickstart --pubnet
-```
-
-*Start a background persistent container for an already initialized host directory:*
-```
-$ docker run -d \
-    -v "/str:/opt/stellar" \
     -p "8000:8000" \
+    -v "/str:/opt/stellar" \
     --name stellar \
-    stellar/quickstart --pubnet
+    stellar/quickstart --testnet
 ```
 
 ## Troubleshooting

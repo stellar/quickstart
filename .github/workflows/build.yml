@@ -301,7 +301,8 @@ jobs:
     needs: build
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
-    runs-on: ubuntu-latest
+      fail-fast: false
+    runs-on: ${{ matrix.network == 'pubnet' && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -317,8 +318,23 @@ jobs:
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
+    - name: Prepare Logs Directory
+      run: mkdir -p logs
     - name: Run Quickstart Image
-      run: docker run --platform linux/${{ inputs.arch }} --rm -d -p "8000:8000" -p "11626:11626" --name stellar $IMAGE --${{ matrix.network }} ${{ matrix.options }}
+      run: >
+        docker run
+        --platform linux/${{ inputs.arch }}
+        --rm
+        -d
+        -p
+        "8000:8000"
+        -p "11626:11626"
+        -v "$PWD/logs":/var/log/supervisor
+        --name stellar
+        $IMAGE
+        --${{ matrix.network }}
+        --enable ${{ matrix.core }},${{ matrix.horizon }},${{ matrix.rpc }}
+        ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -326,19 +342,28 @@ jobs:
     - name: Sleep until supervisor is up
       run: sleep 10
     - name: Run core test
+      if: ${{ matrix.core }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         go run test_core.go
         curl http://localhost:11626/info
     - name: Run horizon up test
+      if: ${{ matrix.horizon }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_horizon_up.go
         curl http://localhost:8000
+    - name: Run horizon core up test
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run test_horizon_core_up.go
+        curl http://localhost:8000
     - name: Run horizon ingesting test
-      if: ${{ matrix.network != 'pubnet' }}
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
@@ -353,17 +378,26 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
     - name: Run soroban rpc up test
-      if: ${{ contains(matrix.options, '--enable-soroban-rpc') }}
+      if: ${{ matrix.rpc }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_up.go
     - name: Run soroban rpc healthy test
-      if: ${{ contains(matrix.options, '--enable-soroban-rpc') && matrix.network != 'pubnet' }}
+      if: ${{ matrix.rpc && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
         go run test_soroban_rpc_healthy.go
+    - name: Prepare Test Logs
+      if: always()
+      run: sudo chmod -R a+r logs
+    - name: Upload Test Logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs-${{ inputs.tag }}-${{ inputs.arch }}-test-${{ strategy.job-index }}
+        path: logs
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
