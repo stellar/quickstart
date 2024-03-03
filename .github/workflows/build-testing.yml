@@ -34,17 +34,17 @@ jobs:
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
       xdr_ref: v20.1.0
-      core_ref: v20.2.0
+      core_ref: v20.3.0rc2
       core_supports_enable_soroban_diagnostic_events: "true"
       go_ref: horizon-v2.28.3
       soroban_tools_ref: v20.3.0
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-soroban-rpc"],
-          "exclude": [
-            { "network": "pubnet", "options": "--enable-soroban-rpc" },
-          ]
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
         }
 
   arm64:
@@ -57,7 +57,7 @@ jobs:
       arch: arm64
       tag: ${{ inputs.tag-prefix }}testing-arm64
       xdr_ref: v20.1.0
-      core_ref: v20.2.0
+      core_ref: v20.3.0rc2
       core_supports_enable_soroban_diagnostic_events: "true"
       core_build_runner_type: ubuntu-latest-16-cores
       go_ref: horizon-v2.28.3
@@ -66,10 +66,10 @@ jobs:
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
-          "options": ["", "--enable-soroban-rpc"],
-          "exclude": [
-            { "network": "pubnet", "options": "--enable-soroban-rpc" },
-          ]
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
         }
 
   manifest:

@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-const timeout = 3 * time.Minute
+const timeout = 6 * time.Minute
 
 type Root struct {
-	SupportedProtocolVersion int32 `json:"supported_protocol_version"`
+	CoreSupportedProtocolVersion int32 `json:"core_supported_protocol_version"`
 }
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for Horizon to start")
+		logLine("Waiting for Horizon's stellar-core to start reporting")
 
 		if time.Since(startTime) > timeout {
 			logLine("Timeout")
@@ -40,8 +40,8 @@ func main() {
 			continue
 		}
 
-		if root.SupportedProtocolVersion > 0 {
-			logLine("Horizon has started!")
+		if root.CoreSupportedProtocolVersion > 0 {
+			logLine("Horizon is communicating with stellar-core!")
 			os.Exit(0)
 		}
 	}
