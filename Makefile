@@ -7,7 +7,6 @@ XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
-CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS?=false
 SOROBAN_RPC_REF?=main
 HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF))
 FRIENDBOT_REF?=$(HORIZON_REF)
@@ -24,16 +23,14 @@ console:
 build-latest:
 	$(MAKE) build TAG=latest \
 		XDR_REF=v20.1.0 \
-		CORE_REF=v20.2.0 \
-		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
+		CORE_REF=v20.3.0 \
 		HORIZON_REF=horizon-v2.28.3 \
 		SOROBAN_RPC_REF=v20.3.0
 
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.1.0 \
-		CORE_REF=v20.3.0rc2 \
-		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
+		CORE_REF=v20.3.0 \
 		HORIZON_REF=horizon-v2.28.3 \
 		SOROBAN_RPC_REF=v20.3.0
 
@@ -41,7 +38,6 @@ build-future:
 	$(MAKE) build TAG=future \
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
-		CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true \
 		HORIZON_REF=horizon-v2.28.3 \
 		SOROBAN_RPC_REF=v20.1.0
 
@@ -54,7 +50,6 @@ build:
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
 	  --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) \
-	  --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=$(CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS)
 
 build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
 
