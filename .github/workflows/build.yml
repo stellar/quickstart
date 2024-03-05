@@ -30,10 +30,6 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
-      core_supports_enable_soroban_diagnostic_events:
-        description: 'Indicator whether stellar-core supports the ENABLE_SOROBAN_DIAGNOSTIC_EVENTS config'
-        type: 'string'
-        default: 'false'
       core_build_runner_type:
         description: 'The GitHub Runner instance type to build stellar-core on'
         type: 'string'
@@ -288,7 +284,6 @@ jobs:
         --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
         --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
         --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
-        --build-arg CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=${{ inputs.core_supports_enable_soroban_diagnostic_events }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
