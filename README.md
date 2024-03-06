@@ -111,7 +111,7 @@ _Note: In local mode a local friendbot is running. In testnet and futurenet mode
 
 ### Soroban Development
 
-The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/soroban/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
 To enable soroban rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
 ```

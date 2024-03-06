@@ -39,7 +39,7 @@ func main() {
 			os.Exit(-1)
 		}
 
-		resp, err := http.Post("http://localhost:8000/soroban/rpc", "application/json", bytes.NewBuffer(getHealthRPCRequest))
+		resp, err := http.Post("http://localhost:8000/rpc", "application/json", bytes.NewBuffer(getHealthRPCRequest))
 		if err != nil {
 			logLine(err)
 			continue
