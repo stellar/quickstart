@@ -49,9 +49,6 @@ ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD futurenet /opt/stellar-default/futurenet
 
-ARG CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS
-ENV CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS $CORE_SUPPORTS_ENABLE_SOROBAN_DIAGNOSTIC_EVENTS
-
 ADD start /
 RUN ["chmod", "+x", "start"]
 
