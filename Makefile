@@ -24,21 +24,21 @@ build-latest:
 	$(MAKE) build TAG=latest \
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.3.0 \
-		HORIZON_REF=horizon-v2.28.3 \
+		HORIZON_REF=horizon-v2.29.0 \
 		SOROBAN_RPC_REF=v20.3.0
 
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.3.0 \
-		HORIZON_REF=horizon-v2.28.3 \
+		HORIZON_REF=horizon-v2.29.0 \
 		SOROBAN_RPC_REF=v20.3.0
 
 build-future:
 	$(MAKE) build TAG=future \
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
-		HORIZON_REF=horizon-v2.28.3 \
+		HORIZON_REF=horizon-v2.29.0 \
 		SOROBAN_RPC_REF=v20.1.0
 
 build:
