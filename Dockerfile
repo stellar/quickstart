@@ -3,12 +3,14 @@ ARG STELLAR_CORE_IMAGE_REF
 ARG HORIZON_IMAGE_REF
 ARG FRIENDBOT_IMAGE_REF
 ARG SOROBAN_RPC_IMAGE_REF
+ARG CLI_IMAGE_REF
 
 FROM $STELLAR_XDR_IMAGE_REF AS stellar-xdr
 FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
 FROM $HORIZON_IMAGE_REF AS horizon
 FROM $FRIENDBOT_IMAGE_REF AS friendbot
 FROM $SOROBAN_RPC_IMAGE_REF AS soroban-rpc
+FROM $CLI_IMAGE_REF AS cli
 
 FROM ubuntu:22.04
 
@@ -34,6 +36,8 @@ COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 
 COPY --from=soroban-rpc /bin/soroban-rpc /usr/bin/stellar-soroban-rpc
+
+COPY --from=cli /usr/local/cargo/bin/soroban /usr/local/bin/soroban
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 

@@ -219,6 +219,10 @@ function process_args() {
   export NETWORK_ROOT_SECRET_KEY=$(printf "$network_id_keys" | head -1)
   export NETWORK_ROOT_ACCOUNT_ID=$(printf "$network_id_keys" | tail -1)
 
+  # Set environment variables for the CLI
+  export SOROBAN_NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE}"
+  export SOROBAN_RPC_URL="http://localhost:8003"
+
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
     if [ -f "/opt/stellar/.docker-ephemeral" ]; then
@@ -733,6 +737,13 @@ function soroban_rpc_status() {
     sleep 5
   done
   echo "soroban rpc: up and ready"
+
+  # Deploy the native asset once the rpc is up
+  if [ "$NETWORK" == "local" ]; then
+    soroban keys generate self
+    echo -n "stellar native asset: "
+    soroban contract asset deploy --asset native --source self
+  fi
 }
 
 function horizon_status() {

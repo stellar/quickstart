@@ -10,6 +10,8 @@ CORE_CONFIGURE_FLAGS?=--disable-tests
 SOROBAN_RPC_REF?=main
 HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF))
 FRIENDBOT_REF?=$(HORIZON_REF)
+CLI_REPO?=https://github.com/stellar/soroban-cli.git
+CLI_REF?=v20.3.1
 
 run:
 	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-soroban-rpc
@@ -25,21 +27,24 @@ build-latest:
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.3.0 \
 		HORIZON_REF=horizon-v2.29.0 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v20.3.0 \
+		CLI_REF=v20.3.1
 
 build-testing:
 	$(MAKE) build TAG=testing \
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.3.0 \
 		HORIZON_REF=horizon-v2.29.0 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v20.3.0 \
+		CLI_REF=v20.3.1
 
 build-future:
 	$(MAKE) build TAG=future \
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
 		HORIZON_REF=horizon-v2.29.0 \
-		SOROBAN_RPC_REF=v20.1.0
+		SOROBAN_RPC_REF=v20.1.0 \
+		CLI_REF=v20.3.1
 
 build:
 	$(MAKE) -j 4 build-deps
@@ -50,8 +55,9 @@ build:
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
 	  --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) \
+	  --build-arg CLI_IMAGE_REF=cli:$(CLI_REF)
 
-build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
+build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc build-deps-cli
 
 build-deps-xdr:
 	docker build -t stellar-xdr:$(XDR_REF) -f Dockerfile.xdr --target builder . --build-arg REPO="$(XDR_REPO)" --build-arg REF="$(XDR_REF)"
@@ -67,3 +73,6 @@ build-deps-friendbot:
 
 build-deps-soroban-rpc:
 	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+
+build-deps-cli:
+	docker build -t cli:$(CLI_REF) -f Dockerfile.cli --target builder . --build-arg REPO="$(CLI_REPO)" --build-arg REF="$(CLI_REF)"

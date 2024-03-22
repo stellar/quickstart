@@ -37,6 +37,7 @@ jobs:
       core_ref: v20.3.0
       go_ref: horizon-v2.29.0
       soroban_tools_ref: v20.3.0
+      cli_ref: v20.3.1
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
@@ -61,6 +62,7 @@ jobs:
       go_ref: horizon-v2.29.0
       soroban_tools_ref: v20.3.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
+      cli_ref: v20.3.1
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
