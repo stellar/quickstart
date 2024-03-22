@@ -9,7 +9,7 @@ time=$(date +%s)
 
 docker=$(docker stats --no-stream --format json stellar)
 
-ps=$(docker exec stellar ps -u stellar,postgres -o comm=,rss= \
+ps=$(docker exec stellar ps -A -o comm=,rss= \
     | jq -R '. | split(" +";"") | {"comm":.[0],"rss":.[1] | tonumber}' \
     | jq -s 'group_by(.comm) | map({"comm":.[0].comm,"rss":map(.rss) | add})')
 
