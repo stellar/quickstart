@@ -308,7 +308,7 @@ function copy_defaults() {
   fi
 
   if [ -d $SOROBAN_RPC_HOME/etc ]; then
-    echo "soroban-rpc: config directory exists, skipping copy"
+    echo "rpc: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
     if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
@@ -696,22 +696,26 @@ popd() {
 
 function service_status() {
   if [ "$ENABLE_CORE" = "true" ]; then
-    stellar_core_status &
+    stellar_core_status "node" 11626 &
   fi
   if [ "$ENABLE_HORIZON" = "true" ]; then
+    stellar_core_status "horizon" 11726 &
     horizon_status &
   fi
   if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+    stellar_core_status "rpc" 11826 &
     soroban_rpc_status &
   fi
 }
 
 function stellar_core_status() {
+  local name="$1"
+  local port="$2"
   local last_status=""
   while true; do
-    local status="$(curl --silent --location 'http://localhost:11626/info' | jq -r '"\([.info.state] + (.info.status // []) | join("; "))"')"
+    local status="$(curl --silent --location "http://localhost:${port}/info" | jq -r '"\([.info.state] + (.info.status // []) | join("; "))"')"
     if [ "$status" != "$last_status" ]; then
-      echo "stellar-core: $status"
+      echo "stellar-core(${name}): $status"
     fi
     last_status="$status"
     sleep 1
@@ -719,7 +723,7 @@ function stellar_core_status() {
 }
 
 function soroban_rpc_status() {
-  echo "soroban rpc: waiting for ready state..."
+  echo "soroban-rpc: waiting for ready state..."
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8003' \
     --header 'Content-Type: application/json' \
@@ -727,12 +731,12 @@ function soroban_rpc_status() {
     jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false);
   do
     if [ $(expr $COUNTER % 12) -eq 0 ]; then
-      echo "soroban rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
+      echo "soroban-rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
     fi
     COUNTER=$[$COUNTER +1]
     sleep 5
   done
-  echo "soroban rpc: up and ready"
+  echo "soroban-rpc: up and ready"
 }
 
 function horizon_status() {
