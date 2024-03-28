@@ -308,7 +308,7 @@ function copy_defaults() {
   fi
 
   if [ -d $SOROBAN_RPC_HOME/etc ]; then
-    echo "rpc: config directory exists, skipping copy"
+    echo "soroban-rpc: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
     if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
