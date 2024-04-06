@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,7 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for Horizon's stellar-core to start reporting")
+		logLine(fmt.Sprint("Waiting for Horizon's stellar-core to start reporting", time.Since(startTime)))
 
 		// if time.Since(startTime) > timeout {
 		// 	logLine("Timeout")
