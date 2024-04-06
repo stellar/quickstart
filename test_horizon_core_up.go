@@ -42,7 +42,7 @@ func main() {
 		}
 
 		if root.CoreSupportedProtocolVersion > 0 {
-			logLine("Horizon is communicating with stellar-core!")
+			logLine(fmt.Sprintf("Horizon is communicating with stellar-core!", time.Since(startTime)))
 			os.Exit(0)
 		}
 	}
