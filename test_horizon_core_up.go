@@ -2,14 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
-// const timeout = 6 * time.Minute
+const timeout = 10 * time.Minute
 
 type Root struct {
 	CoreSupportedProtocolVersion int32 `json:"core_supported_protocol_version"`
@@ -20,12 +19,12 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine(fmt.Sprint("Waiting for Horizon's stellar-core to start reporting", time.Since(startTime)))
+		logLine("Waiting for Horizon's stellar-core to start reporting")
 
-		// if time.Since(startTime) > timeout {
-		// 	logLine("Timeout")
-		// 	os.Exit(-1)
-		// }
+		if time.Since(startTime) > timeout {
+			logLine("Timeout")
+			os.Exit(-1)
+		}
 
 		resp, err := http.Get("http://localhost:8000")
 		if err != nil {
@@ -42,7 +41,7 @@ func main() {
 		}
 
 		if root.CoreSupportedProtocolVersion > 0 {
-			logLine(fmt.Sprintf("Horizon is communicating with stellar-core!", time.Since(startTime)))
+			logLine("Horizon is communicating with stellar-core!")
 			os.Exit(0)
 		}
 	}
