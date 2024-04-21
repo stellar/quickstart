@@ -33,6 +33,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
+      protocol_version_default: 20
       xdr_ref: v20.1.0
       core_ref: v20.4.0
       go_ref: horizon-v2.29.0
@@ -55,6 +56,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}testing-arm64
+      protocol_version_default: 20
       xdr_ref: v20.1.0
       core_ref: v20.4.0
       core_build_runner_type: ubuntu-latest-16-cores

@@ -21,6 +21,7 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+: "${PROTOCOL_VERSION:=PROTOCOL_VERSION_DEFAULT}"
 : "${ENABLE:=core,horizon,rpc}"
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
@@ -510,11 +511,6 @@ function upgrade_local() {
 
   # Wait for server
   while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
-
-  # Default to latest version supported by core
-  if [ -z "$PROTOCOL_VERSION" ]; then
-    export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
-  fi
 
   if [ ".$PROTOCOL_VERSION" == ".none" ] ; then
     return
