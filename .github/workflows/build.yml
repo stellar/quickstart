@@ -42,8 +42,8 @@ on:
         description: 'Git ref for the stellar/rs-stellar-xdr repo'
         type: 'string'
         required: false  
-      soroban_tools_ref:
-        description: 'Git ref for the stellar/soroban-tools repo (soroban-rpc)'
+      soroban_rpc_ref:
+        description: 'Git ref for the stellar/soroban-rpc repo (soroban-rpc)'
         type: 'string'
         required: true
       soroban_rpc_build_runner_type:
@@ -62,7 +62,7 @@ on:
 env:
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
   GO_REPO_BRANCH: ${{ inputs.go_ref }}
-  SOROBAN_TOOLS_REPO_BRANCH: ${{ inputs.soroban_tools_ref }}
+  SOROBAN_RPC_REPO_BRANCH: ${{ inputs.soroban_rpc_ref }}
   CORE_REPO: ${{ inputs.core_repo }}
   CORE_REPO_REF: ${{ inputs.core_ref }}
   XDR_REPO_REF: ${{ inputs.xdr_ref }}
@@ -156,7 +156,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
+        key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
     - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -171,7 +171,7 @@ jobs:
         -t stellar-soroban-rpc:${{ inputs.arch }} 
         -o type=docker,dest=/tmp/image 
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
-        https://github.com/stellar/soroban-tools.git#${{ env.SOROBAN_TOOLS_REPO_BRANCH }}
+        https://github.com/stellar/soroban-rpc.git#${{ env.SOROBAN_RPC_REPO_BRANCH }}
     - name: Upload Stellar-Soroban-Rpc Image
       uses: actions/upload-artifact@v4
       with:

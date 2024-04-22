@@ -66,4 +66,4 @@ build-deps-friendbot:
 	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(FRIENDBOT_REF)
 
 build-deps-soroban-rpc:
-	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-rpc.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
