@@ -21,7 +21,7 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
-: "${PROTOCOL_VERSION:=PROTOCOL_VERSION_DEFAULT}"
+: "${PROTOCOL_VERSION:=$PROTOCOL_VERSION_DEFAULT}"
 : "${ENABLE:=core,horizon,rpc}"
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
