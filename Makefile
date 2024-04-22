@@ -32,14 +32,14 @@ build-testing:
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.4.0 \
 		HORIZON_REF=horizon-v2.29.0 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v21.0.0
 
 build-future:
 	$(MAKE) build TAG=future \
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
 		HORIZON_REF=horizon-v2.29.0 \
-		SOROBAN_RPC_REF=v20.1.0
+		SOROBAN_RPC_REF=v21.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
