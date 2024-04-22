@@ -52,4 +52,7 @@ ADD futurenet /opt/stellar-default/futurenet
 ADD start /
 RUN ["chmod", "+x", "start"]
 
+ARG PROTOCOL_VERSION_DEFAULT
+ENV PROTOCOL_VERSION_DEFAULT $PROTOCOL_VERSION_DEFAULT
+
 ENTRYPOINT ["/start"]
