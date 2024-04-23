@@ -2,6 +2,7 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
+PROTOCOL_VERSION_DEFAULT?=20
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
 XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
@@ -22,29 +23,33 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
+		PROTOCOL_VERSION_DEFAULT=20 \
 		XDR_REF=v20.1.0 \
 		CORE_REF=v20.4.0 \
-		HORIZON_REF=horizon-v2.29.0 \
+		HORIZON_REF=horizon-v2.30.0 \
 		SOROBAN_RPC_REF=v20.3.0
 
 build-testing:
 	$(MAKE) build TAG=testing \
-		XDR_REF=v20.1.0 \
-		CORE_REF=v20.4.0 \
-		HORIZON_REF=horizon-v2.29.0 \
+	    PROTOCOL_VERSION_DEFAULT=20 \
+		XDR_REF=v21.0.0 \
+		CORE_REF=v21.0.0rc1 \
+		HORIZON_REF=horizon-v2.30.0 \
 		SOROBAN_RPC_REF=v21.0.0
 
 build-future:
 	$(MAKE) build TAG=future \
+		PROTOCOL_VERSION_DEFAULT=20 \
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
-		HORIZON_REF=horizon-v2.29.0 \
+		HORIZON_REF=horizon-v2.30.0 \
 		SOROBAN_RPC_REF=v21.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 	  --build-arg REVISION=$(REVISION) \
+	  --build-arg PROTOCOL_VERSION_DEFAULT=$(PROTOCOL_VERSION_DEFAULT) \
 	  --build-arg STELLAR_XDR_IMAGE_REF=stellar-xdr:$(XDR_REF) \
 	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \

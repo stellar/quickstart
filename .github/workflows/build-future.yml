@@ -31,9 +31,10 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}future-amd64
+      protocol_version_default: 20
       xdr_ref: v20.0.2
       core_ref: v20.1.0
-      go_ref: horizon-v2.29.0
+      go_ref: horizon-v2.30.0
       soroban_rpc_ref: v21.0.0
       test_matrix: |
         {
@@ -53,10 +54,11 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}future-arm64
+      protocol_version_default: 20
       xdr_ref: v20.0.2
       core_ref: v20.1.0
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: horizon-v2.29.0
+      go_ref: horizon-v2.30.0
       soroban_rpc_ref: v21.0.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
