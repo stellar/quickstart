@@ -35,7 +35,7 @@ build-testing:
 		XDR_REF=v21.0.0 \
 		CORE_REF=v21.0.0rc1 \
 		HORIZON_REF=horizon-v2.30.0 \
-		SOROBAN_RPC_REF=v20.3.0
+		SOROBAN_RPC_REF=v21.0.0
 
 build-future:
 	$(MAKE) build TAG=future \
@@ -43,7 +43,7 @@ build-future:
 		XDR_REF=v20.0.2 \
 		CORE_REF=v20.1.0 \
 		HORIZON_REF=horizon-v2.30.0 \
-		SOROBAN_RPC_REF=v20.1.0
+		SOROBAN_RPC_REF=v21.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
@@ -71,4 +71,4 @@ build-deps-friendbot:
 	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(FRIENDBOT_REF)
 
 build-deps-soroban-rpc:
-	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-tools.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-rpc.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
