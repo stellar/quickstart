@@ -32,7 +32,7 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 	    PROTOCOL_VERSION_DEFAULT=21 \
-		XDR_REF=v21.1 \
+		XDR_REF=v21.0.1 \
 		CORE_REF=v21.0.0rc1 \
 		HORIZON_REF=horizon-v2.30.0 \
 		SOROBAN_RPC_REF=v21.0.1
@@ -40,7 +40,7 @@ build-testing:
 build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=20 \
-		XDR_REF=v21.1 \
+		XDR_REF=v21.0.1 \
 		CORE_REF=v21.0.0rc1 \
 		HORIZON_REF=horizon-v2.30.0 \
 		SOROBAN_RPC_REF=v21.0.1
