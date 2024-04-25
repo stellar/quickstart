@@ -61,16 +61,12 @@ jobs:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
-  # TODO: Reenable the future build when the version of soroban-rpc used in the
-  # future build supports the stellar-core ENABLE_DIAGNOSTICS_FOR_TX_SUBMISSION
-  # config, and the time has come for a new preview release.
-  #
-  # future:
-  #   needs: [setup]
-  #   uses: ./.github/workflows/build-future.yml
-  #   secrets:
-  #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  #   with:
-  #     sha: ${{ github.event.pull_request.head.sha || github.sha }}
-  #     tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+  future:
+    needs: [setup]
+    uses: ./.github/workflows/build-future.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
