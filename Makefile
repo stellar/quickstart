@@ -31,7 +31,7 @@ build-latest:
 
 build-testing:
 	$(MAKE) build TAG=testing \
-	    PROTOCOL_VERSION_DEFAULT=20 \
+	    PROTOCOL_VERSION_DEFAULT=21 \
 		XDR_REF=v21.0.0 \
 		CORE_REF=v21.0.0rc1 \
 		HORIZON_REF=horizon-v2.30.0 \
