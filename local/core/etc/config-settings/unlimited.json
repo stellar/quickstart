@@ -164,80 +164,76 @@
               "ext": "v0",
               "const_term": 1059,
               "linear_term": 502
-            }
-          ]
-        },
-        {
-          "contract_cost_params_memory_bytes": [
-            {
-              "ext": "v0",
-              "const_term": 0,
-              "linear_term": 0
             },
             {
               "ext": "v0",
-              "const_term": 16,
-              "linear_term": 128
+              "const_term": 73077,
+              "linear_term": 25410
             },
             {
               "ext": "v0",
               "const_term": 0,
+              "linear_term": 540752
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 176363
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 29989
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 1061449
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 237336
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 328476
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 701845
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 429383
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 28
+            },
+            {
+              "ext": "v0",
+              "const_term": 43030,
               "linear_term": 0
             },
             {
               "ext": "v0",
               "const_term": 0,
-              "linear_term": 0
+              "linear_term": 7556
             },
             {
               "ext": "v0",
               "const_term": 0,
-              "linear_term": 0
+              "linear_term": 10711
             },
             {
               "ext": "v0",
               "const_term": 0,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 242,
-              "linear_term": 384
-            },
-            {
-              "ext": "v0",
-              "const_term": 0,
-              "linear_term": 384
-            },
-            {
-              "ext": "v0",
-              "const_term": 0,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 0,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 0,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 132773,
-              "linear_term": 4903
-            },
-            {
-              "ext": "v0",
-              "const_term": 132773,
-              "linear_term": 4903
-            },
-            {
-              "ext": "v0",
-              "const_term": 14,
-              "linear_term": 0
+              "linear_term": 3300
             },
             {
               "ext": "v0",
@@ -247,41 +243,36 @@
             {
               "ext": "v0",
               "const_term": 0,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 181,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 99,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 99,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 99,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 99,
-              "linear_term": 0
-            },
-            {
-              "ext": "v0",
-              "const_term": 99,
-              "linear_term": 0
+              "linear_term": 23038
             },
             {
               "ext": "v0",
               "const_term": 0,
+              "linear_term": 42488
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 828974
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 297100
+            },
+            {
+              "ext": "v0",
+              "const_term": 0,
+              "linear_term": 14
+            },
+            {
+              "ext": "v0",
+              "const_term": 1882,
+              "linear_term": 0
+            },
+            {
+              "ext": "v0",
+              "const_term": 3000906,
               "linear_term": 0
             }
           ]
