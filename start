@@ -554,7 +554,13 @@ function upgrade_local() {
         while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
         read key; \
         echo "upgrades: soroban config: set config with key: $key";
-        curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+        OUTPUT="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
+        echo "$OUTPUT"; \
+
+        if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
+          echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
+          supervisorctl stop all
+        fi
       }
     echo "upgrades: soroban config done"
   fi
