@@ -34,10 +34,6 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
-      core_build_runner_type:
-        description: 'The GitHub Runner instance type to build stellar-core on'
-        type: 'string'
-        default: 'ubuntu-latest'
       go_ref:
         description: 'Git ref for the stellar/go repo (stellar-horizon, stellar-friendbot)'
         type: 'string'
@@ -50,10 +46,6 @@ on:
         description: 'Git ref for the stellar/soroban-rpc repo (soroban-rpc)'
         type: 'string'
         required: true
-      soroban_rpc_build_runner_type:
-        description: 'The GitHub Runner instance type to build soroban-rpc on'
-        type: 'string'
-        default: 'ubuntu-latest'
       test_matrix:
         description: 'JSON matrix for the test job'
         type: 'string'
@@ -74,17 +66,13 @@ env:
 jobs:
 
   build-stellar-core:
-    runs-on: ${{ inputs.core_build_runner_type }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest-16-cores' }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -105,16 +93,12 @@ jobs:
 # don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
 # different commits over time, cache key won't invalidate correctly. 
   build-stellar-horizon:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
@@ -132,12 +116,8 @@ jobs:
 # don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
 # different commits over time, cache key won't invalidate correctly. 
   build-stellar-friendbot:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest' }}
     steps:
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Friendbot Image
@@ -154,17 +134,13 @@ jobs:
         path: /tmp/image
 
   build-stellar-soroban-rpc:
-    runs-on: ${{ inputs.soroban_rpc_build_runner_type }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest-16-cores' }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -183,7 +159,7 @@ jobs:
         path: /tmp/image
 
   build-rs-stellar-xdr:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
@@ -194,10 +170,6 @@ jobs:
       with:
         path: /tmp/image
         key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -219,7 +191,7 @@ jobs:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
     outputs:
       image: ${{ steps.image.outputs.name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -259,10 +231,6 @@ jobs:
       run: docker load -i /tmp/stellar-soroban-rpc/image
     - name: Load Stellar-Rs-Xdr Image
       run: docker load -i /tmp/stellar-xdr/image
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - id: image
       name: Image Name
       run: echo "name=$IMAGE" >> $GITHUB_OUTPUT
@@ -302,7 +270,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ${{ matrix.network == 'pubnet' && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'macos-14' || matrix.network == 'pubnet' && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -314,10 +282,6 @@ jobs:
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Prepare Logs Directory
       run: mkdir -p logs
     - name: Run Quickstart Image
