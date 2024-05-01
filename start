@@ -512,6 +512,11 @@ function upgrade_local() {
   # Wait for server
   while ! echo "Stellar-core http server listening!" | nc localhost 11626 &> /dev/null; do sleep 1; done
 
+  # Default to latest version supported by core if no default or explicit version was set
+  if [ -z "$PROTOCOL_VERSION" ]; then
+    export PROTOCOL_VERSION=`curl -s http://localhost:11626/info | jq -r '.info.protocol_version'`
+  fi
+
   if [ ".$PROTOCOL_VERSION" == ".none" ] ; then
     return
   fi

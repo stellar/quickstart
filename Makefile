@@ -2,7 +2,7 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
-PROTOCOL_VERSION_DEFAULT?=20
+PROTOCOL_VERSION_DEFAULT?=
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
 XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
@@ -39,7 +39,7 @@ build-testing:
 
 build-future:
 	$(MAKE) build TAG=future \
-		PROTOCOL_VERSION_DEFAULT=20 \
+		PROTOCOL_VERSION_DEFAULT=21 \
 		XDR_REF=v21.0.1 \
 		CORE_REF=v21.0.0rc1 \
 		HORIZON_REF=horizon-v2.30.0 \
