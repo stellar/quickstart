@@ -504,7 +504,15 @@ function init_soroban_rpc() {
   popd
 }
 
+function kill_supervisor() {
+  kill -3 $(cat "/var/run/supervisord.pid")
+}
+
 function upgrade_local() {
+  set -eo pipefail
+
+  trap kill_supervisor ERR
+
   if [ "$NETWORK" != "local" ]; then
     return
   fi
@@ -564,7 +572,7 @@ function upgrade_local() {
 
         if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
           echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
-          supervisorctl stop all
+          kill_supervisor
         fi
       }
     echo "upgrades: soroban config done"
