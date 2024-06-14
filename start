@@ -504,7 +504,15 @@ function init_soroban_rpc() {
   popd
 }
 
+function kill_supervisor() {
+  kill -3 $(cat "/var/run/supervisord.pid")
+}
+
 function upgrade_local() {
+  set -eo pipefail
+
+  trap kill_supervisor ERR
+
   if [ "$NETWORK" != "local" ]; then
     return
   fi
@@ -573,7 +581,13 @@ function upgrade_local() {
         TX_COUNT=$((TX_COUNT+1)); \
         read key; \
         echo "upgrades: soroban config: set config with key: $key";
-        curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+        OUTPUT="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
+        echo "$OUTPUT"; \
+
+        if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
+          echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
+          kill_supervisor
+        fi
       }
     echo "upgrades: soroban config done"
   fi
