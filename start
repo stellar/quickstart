@@ -504,7 +504,15 @@ function init_soroban_rpc() {
   popd
 }
 
+function kill_supervisor() {
+  kill -3 $(cat "/var/run/supervisord.pid")
+}
+
 function upgrade_local() {
+  set -eo pipefail
+
+  trap kill_supervisor ERR
+
   if [ "$NETWORK" != "local" ]; then
     return
   fi
@@ -536,30 +544,50 @@ function upgrade_local() {
     echo "upgrades: soroban config '$LIMITS' limits"
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
-    echo $NETWORK_ROOT_SECRET_KEY \
+    upgrade_output="$(echo $NETWORK_ROOT_SECRET_KEY \
       | stellar-core get-settings-upgrade-txs \
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
         --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$COREHOME/etc/config-settings/$LIMITS.json"` \
-        --signtxs \
-        2>/dev/null \
-      | { \
+        --signtxs)"
+
+    let line_count=$(echo "$upgrade_output" | wc -l)
+
+    echo "$upgrade_output" | { \
+        let TX_COUNT=1;
+        # If the line count is 9 instead of 7, a version of core is being used where the restore op is being returned
+        if [ $line_count = 9 ] ; then
+          read tx;
+          read txid;
+          echo "upgrades: soroban config: restore contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')";
+          while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
+          TX_COUNT=$((TX_COUNT+1))
+        fi
         read tx; \
         read txid; \
         echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "1" ]; do sleep 1; done
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
+        TX_COUNT=$((TX_COUNT+1)); \
         read tx; \
         read txid; \
         echo "upgrades: soroban config: deploy contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "2" ]; do sleep 1; done
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
+        TX_COUNT=$((TX_COUNT+1)); \
         read tx; \
         read txid; \
         echo "upgrades: soroban config: upload config: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "3" ]; do sleep 1; done
+        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
+        TX_COUNT=$((TX_COUNT+1)); \
         read key; \
         echo "upgrades: soroban config: set config with key: $key";
-        curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key"; \
+        OUTPUT="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
+        echo "$OUTPUT"; \
+
+        if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
+          echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
+          kill_supervisor
+        fi
       }
     echo "upgrades: soroban config done"
   fi
