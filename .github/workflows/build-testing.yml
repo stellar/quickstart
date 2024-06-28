@@ -36,7 +36,7 @@ jobs:
       protocol_version_default: 21
       xdr_ref: v21.1.0
       core_ref: v21.1.0
-      go_ref: horizon-v2.30.0
+      go_ref: horizon-v2.31.0
       soroban_rpc_ref: v21.2.0
       test_matrix: |
         {
@@ -60,7 +60,7 @@ jobs:
       xdr_ref: v21.1.0
       core_ref: v21.1.0
       core_build_runner_type: ubuntu-latest-16-cores
-      go_ref: horizon-v2.30.0
+      go_ref: horizon-v2.31.0
       soroban_rpc_ref: v21.2.0
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
       test_matrix: |
