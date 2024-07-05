@@ -371,7 +371,7 @@ jobs:
         go run test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ matrix.network == 'local' }}
+      if: ${{ matrix.horizon && matrix.network == 'local' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
