@@ -539,7 +539,7 @@ function upgrade_local() {
   # Upgrade local network's soroban config to match testnet, unless the limits
   # have been configured with 'default', which will cause the limits to be left
   # in their default state.
-  if [ "$ENABLE_SOROBAN_RPC" == "true" ] && [ $PROTOCOL_VERSION -ge 20 ] && [ "$LIMITS" != "default" ]; then
+  if [ $PROTOCOL_VERSION -ge 20 ] && [ "$LIMITS" != "default" ]; then
     echo "upgrades: soroban config '$LIMITS' limits"
     # Generate txs for installing, deploying and executing the contract that
     # uploads a new config. Use the network root account to submit the txs.
