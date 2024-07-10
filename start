@@ -176,6 +176,16 @@ function process_args() {
     NETWORK="testnet"
   fi
 
+  if [[ ",$ENABLE," = *",core,"* ]]; then
+    ENABLE_CORE=true
+  fi
+  if [[ ",$ENABLE," = *",horizon,"* ]]; then
+    ENABLE_HORIZON=true
+  fi
+  if [[ ",$ENABLE," = *",rpc,"* ]]; then
+    ENABLE_SOROBAN_RPC=true
+  fi
+
   case "$NETWORK" in
   testnet)
     export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
@@ -190,6 +200,9 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
+    if [[ "$ENABLE_SOROBAN_RPC" = "true" ]]; then
+      ENABLE_HORIZON=true
+    fi
     ;;
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
@@ -199,16 +212,6 @@ function process_args() {
     echo "Unknown network: '$NETWORK'" >&2
     exit 1
   esac
-
-  if [[ ",$ENABLE," = *",core,"* ]]; then
-    ENABLE_CORE=true
-  fi
-  if [[ ",$ENABLE," = *",horizon,"* ]]; then
-    ENABLE_HORIZON=true
-  fi
-  if [[ ",$ENABLE," = *",rpc,"* ]]; then
-    ENABLE_SOROBAN_RPC=true
-  fi
 
   if [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE} ; $(openssl rand -hex 32)"

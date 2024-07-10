@@ -58,6 +58,13 @@ In local network mode, you can optionally pass:
    - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
    - `unlimited` sets limits to the maximum resources that can be configured
 
+- `--enable {core, horizon, rpc}` to further select which services are started in the quickstart container. Since using a 'local' network, the core service will be started regardless as it runs the 'local' network, and these additional permutations of `--enable` are applicable:
+   - not specified, the default behavior will be to run core, horizon, friendbot, rpc. 
+   - `core` only runs the stellar core and an associated archive server.
+   - `core,horizon` runs core, horizon, friendbot
+   - `horizon` runs core, horizon, friendbot  
+   - `rpc` runs core, horizon, friendbot, rpc. 
+
 The network passphrase of the network defaults to:
 ```
 Standalone Network ; February 2017
@@ -93,8 +100,6 @@ To run only select services, simply specify only those services. For example, to
 ```
 --enable rpc
 ```
-
-__Note: All services, and in addition friendbot, always run on a local network.__
 
 ### Faucet (Friendbot)
 
