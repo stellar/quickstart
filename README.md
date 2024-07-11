@@ -58,6 +58,7 @@ In local network mode, you can optionally pass:
    - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
    - `unlimited` sets limits to the maximum resources that can be configured
 
+__Note: The `--enable` options behaves differently in local network mode, see [Service Options](#service-otions) for more details.__
 The network passphrase of the network defaults to:
 ```
 Standalone Network ; February 2017
@@ -93,9 +94,7 @@ To run only select services, simply specify only those services. For example, to
 ```
 --enable rpc
 ```
-
-__Note: All services, and in addition friendbot, always run on a local network.__
-
+__Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.__
 ### Faucet (Friendbot)
 
 Stellar development/test networks use friendbot as a faucet for the native asset.
