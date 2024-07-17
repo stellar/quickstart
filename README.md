@@ -338,4 +338,4 @@ $ docker run -it --rm \
 
 ## Troubleshooting
 
-Let us know what you're having trouble with! Open an issue or join us on our public slack channel.
+Let us know what you're having trouble with! Open an issue or join us on our public [Discord server](https://discord.com/invite/stellardev).
