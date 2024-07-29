@@ -261,6 +261,7 @@ jobs:
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
+    if: always()
     outputs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
