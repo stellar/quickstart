@@ -29,8 +29,6 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      runner: ubuntu-latest
-      runner_big: ubuntu-latest-16-cores
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}latest-amd64
@@ -55,8 +53,6 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      runner: ubuntu-jammy-4-cores-arm64
-      runner_big: ubuntu-jammy-16-cores-arm64
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}latest-arm64

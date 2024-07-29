@@ -6,14 +6,6 @@ on:
       DOCKERHUB_TOKEN:
         required: false
     inputs:
-      runner:
-        description: 'GitHub runner to run jobs on'
-        type: 'string'
-        required: true
-      runner_big:
-        description: 'GitHub runner to run larger jobs on'
-        type: 'string'
-        required: true
       sha:
         description: 'Sha to build'
         type: 'string'
@@ -79,17 +71,17 @@ env:
 jobs:
 
   build-stellar-core:
-    runs-on: ${{ inputs.runner_big }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
-    # - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -110,16 +102,16 @@ jobs:
 # don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
 # different commits over time, cache key won't invalidate correctly. 
   build-stellar-horizon:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    # - if: inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
@@ -137,12 +129,12 @@ jobs:
 # don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
 # different commits over time, cache key won't invalidate correctly. 
   build-stellar-friendbot:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ubuntu-latest
     steps:
-    # - if: inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Friendbot Image
@@ -159,17 +151,17 @@ jobs:
         path: /tmp/image
 
   build-stellar-soroban-rpc:
-    runs-on: ${{ inputs.runner_big }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
-    # - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -188,7 +180,7 @@ jobs:
         path: /tmp/image
 
   build-rs-stellar-xdr:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
@@ -199,10 +191,10 @@ jobs:
       with:
         path: /tmp/image
         key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
-    # - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - if: steps.cache.outputs.cache-hit != 'true'
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - if: steps.cache.outputs.cache-hit != 'true'
@@ -224,7 +216,7 @@ jobs:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
     outputs:
       image: ${{ steps.image.outputs.name }}
-    runs-on: ${{ inputs.runner }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
@@ -264,10 +256,10 @@ jobs:
       run: docker load -i /tmp/stellar-soroban-rpc/image
     - name: Load Stellar-Rs-Xdr Image
       run: docker load -i /tmp/stellar-xdr/image
-    # - if: inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - id: image
       name: Image Name
       run: echo "name=$IMAGE" >> $GITHUB_OUTPUT
@@ -307,7 +299,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ${{ matrix.network == 'pubnet' && inputs.runner_big || inputs.runner }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
@@ -319,10 +311,10 @@ jobs:
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
-    # - if: inputs.arch == 'arm64'
-    #   uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-    #   with:
-    #     platforms: arm64
+    - if: inputs.arch == 'arm64'
+      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
+      with:
+        platforms: arm64
     - name: Prepare Logs Directory
       run: mkdir -p logs
     - name: Run Quickstart Image
