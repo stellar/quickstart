@@ -344,6 +344,7 @@ jobs:
 
   test:
     needs: build
+    if: always()
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
@@ -446,7 +447,7 @@ jobs:
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
       packages: write
@@ -470,7 +471,7 @@ jobs:
 
   push-release:
     # Push image to registry after test for master.
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [build, test]
     permissions:
       packages: write
