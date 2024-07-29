@@ -81,7 +81,7 @@ jobs:
         path: /tmp/image
         key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
     - name: Upload Stellar-Core Image
-      if: steps.cache.outputs.cache-hit == 'true' && inputs.arch == 'arm64'
+      if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
@@ -174,7 +174,7 @@ jobs:
         path: /tmp/image
         key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
     - name: Upload Stellar-Core Image
-      if: steps.cache.outputs.cache-hit == 'true' && inputs.arch == 'arm64'
+      if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
@@ -220,7 +220,7 @@ jobs:
         path: /tmp/image
         key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
     - name: Upload Stellar-Core Image
-      if: steps.cache.outputs.cache-hit == 'true' && inputs.arch == 'arm64'
+      if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
