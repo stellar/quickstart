@@ -2,7 +2,10 @@
 
 This docker image provides a simple way to run all the components of a Stelar network locally for development and testing.
 
-**Looking for instructions for how to run stellar-core or horizon in production? Take a look at the docs [here](https://developers.stellar.org/docs/run-core-node/).**
+**Looking for instructions for how to run Stellar services in production?** Take a look at these docs for how to run each service in production:
+- [How to run Stellar Core in production](https://developers.stellar.org/docs/run-core-node/)
+- [How to run Horizon in production](https://developers.stellar.org/docs/data/horizon/admin-guide/overview)
+- [How to run RPC in production](https://developers.stellar.org/docs/data/rpc/admin-guide)
 
 This image provides a default, non-validating, ephemeral configuration that should work for most developers. By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
