@@ -35,9 +35,9 @@ build-testing:
 	    PROTOCOL_VERSION_DEFAULT=21 \
 		XDR_REF=v22.0.0-rc.1.1 \
 		CORE_REF=v22.0.0rc2 \
-		HORIZON_REF=horizon-v2.32.0 \
-		SOROBAN_RPC_REF=v21.5.1 \
-		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
+		HORIZON_REF=cad6c5a2986e69c13db807da03e8e6c39d205a51 \
+		SOROBAN_RPC_REF=c244c4bc0d7a3458f1330be504a492e887426b5c \
+		FRIENDBOT_REF=cad6c5a2986e69c13db807da03e8e6c39d205a51
 
 build-future:
 	$(MAKE) build TAG=future \
@@ -49,7 +49,7 @@ build-future:
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build:
-	$(MAKE) -j 4 build-deps
+	$(MAKE) build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 	  --build-arg REVISION=$(REVISION) \
 	  --build-arg PROTOCOL_VERSION_DEFAULT=$(PROTOCOL_VERSION_DEFAULT) \

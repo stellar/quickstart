@@ -36,9 +36,9 @@ jobs:
       protocol_version_default: 21
       xdr_ref: v22.0.0-rc.1.1
       core_ref: v22.0.0rc2
-      horizon_ref: horizon-v2.32.0
-      soroban_rpc_ref: v21.5.1
-      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
+      horizon_ref: cad6c5a2986e69c13db807da03e8e6c39d205a51
+      soroban_rpc_ref: c244c4bc0d7a3458f1330be504a492e887426b5c
+      friendbot_ref: cad6c5a2986e69c13db807da03e8e6c39d205a51
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
@@ -61,10 +61,10 @@ jobs:
       xdr_ref: v22.0.0-rc.1.1
       core_ref: v22.0.0rc2
       core_build_runner_type: ubuntu-latest-16-cores
-      horizon_ref: horizon-v2.32.0
-      soroban_rpc_ref: v21.5.1
+      horizon_ref: cad6c5a2986e69c13db807da03e8e6c39d205a51
+      soroban_rpc_ref: c244c4bc0d7a3458f1330be504a492e887426b5c
       soroban_rpc_build_runner_type: ubuntu-latest-16-cores
-      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
+      friendbot_ref: cad6c5a2986e69c13db807da03e8e6c39d205a51
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
