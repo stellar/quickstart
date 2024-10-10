@@ -23,29 +23,29 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-		PROTOCOL_VERSION_DEFAULT=20 \
+		PROTOCOL_VERSION_DEFAULT=21 \
 		XDR_REF=v21.1.0 \
-		CORE_REF=v21.2.0 \
-		HORIZON_REF=horizon-v2.31.0 \
-		SOROBAN_RPC_REF=v21.2.0 \
+		CORE_REF=v21.3.1 \
+		HORIZON_REF=horizon-v2.32.0 \
+		SOROBAN_RPC_REF=v21.5.1 \
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build-testing:
 	$(MAKE) build TAG=testing \
 	    PROTOCOL_VERSION_DEFAULT=21 \
-		XDR_REF=v21.1.0 \
-		CORE_REF=v21.2.0 \
-		HORIZON_REF=horizon-v2.31.0 \
-		SOROBAN_RPC_REF=v21.2.0 \
+		XDR_REF=v22.0.0-rc.1.1 \
+		CORE_REF=v22.0.0rc2 \
+		HORIZON_REF=horizon-v2.32.0 \
+		SOROBAN_RPC_REF=v21.5.1 \
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=21 \
-		XDR_REF=v21.1.0 \
-		CORE_REF=v21.2.0 \
-		HORIZON_REF=horizon-v2.31.0 \
-		SOROBAN_RPC_REF=v21.2.0 \
+		XDR_REF=v22.0.0-rc.1.1 \
+		CORE_REF=v22.0.0rc2 \
+		HORIZON_REF=horizon-v2.32.0 \
+		SOROBAN_RPC_REF=v21.5.1 \
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build:
