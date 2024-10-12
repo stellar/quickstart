@@ -34,10 +34,6 @@ on:
         description: 'CONFIGURE_FLAGS used when building stellar-core'
         type: 'string'
         default: '--disable-tests'
-      core_build_runner_type:
-        description: 'The GitHub Runner instance type to build stellar-core on'
-        type: 'string'
-        default: 'ubuntu-latest'
       horizon_ref:
         description: 'Git ref for the stellar/go repo (horizon)'
         type: 'string'
@@ -50,10 +46,6 @@ on:
         description: 'Git ref for the stellar/soroban-rpc repo (soroban-rpc)'
         type: 'string'
         required: true
-      soroban_rpc_build_runner_type:
-        description: 'The GitHub Runner instance type to build soroban-rpc on'
-        type: 'string'
-        default: 'ubuntu-latest'
       friendbot_ref:
         description: 'Git ref for the stellar/go repo (friendbot)'
         type: 'string'
@@ -78,22 +70,39 @@ env:
 
 jobs:
 
-  build-stellar-core:
-    runs-on: ${{ inputs.core_build_runner_type }}
+  load-stellar-core-from-cache:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+    - name: Upload Stellar-Core Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
+  build-stellar-core:
+    needs: [load-stellar-core-from-cache]
+    if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
+    - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
-    - if: steps.cache.outputs.cache-hit != 'true'
-      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - if: steps.cache.outputs.cache-hit != 'true'
-      name: Build Stellar-Core Image
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Build Stellar-Core Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }} 
         -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }} 
@@ -107,8 +116,6 @@ jobs:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-# don't use caches on horizon builds as the git ref for it can be a branch name that refers to 
-# different commits over time, cache key won't invalidate correctly. 
   build-stellar-horizon:
     runs-on: ubuntu-latest
     steps:
@@ -134,8 +141,6 @@ jobs:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-# don't use caches on friendbot builds as the git ref for it can be a branch name that refers to 
-# different commits over time, cache key won't invalidate correctly. 
   build-stellar-friendbot:
     runs-on: ubuntu-latest
     steps:
@@ -158,22 +163,39 @@ jobs:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  build-stellar-soroban-rpc:
-    runs-on: ${{ inputs.soroban_rpc_build_runner_type }}
+  load-stellar-soroban-rpc-from-cache:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+    - name: Upload Stellar-Core Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
+  build-stellar-soroban-rpc:
+    needs: [load-stellar-soroban-rpc-from-cache]
+    if: ${{ needs.load-stellar-soroban-rpc-from-cache.outputs.cache-hit != 'true' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
+    - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
-    - if: steps.cache.outputs.cache-hit != 'true'
-      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - if: steps.cache.outputs.cache-hit != 'true'
-      name: Build Stellar-Soroban-Rpc Image
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Build Stellar-Soroban-Rpc Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }} 
         -f cmd/soroban-rpc/docker/Dockerfile --target build 
@@ -187,8 +209,27 @@ jobs:
         name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  build-rs-stellar-xdr:
+  load-rs-stellar-xdr-from-cache:
     runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
+    - name: Upload Stellar-Core Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
+  build-rs-stellar-xdr:
+    needs: [load-rs-stellar-xdr-from-cache]
+    if: ${{ needs.load-rs-stellar-xdr-from-cache.outputs.cache-hit != 'true' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
@@ -199,14 +240,12 @@ jobs:
       with:
         path: /tmp/image
         key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
-    - if: steps.cache.outputs.cache-hit != 'true' && inputs.arch == 'arm64'
+    - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
-    - if: steps.cache.outputs.cache-hit != 'true'
-      uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - if: steps.cache.outputs.cache-hit != 'true'
-      name: Build Stellar-Rs-Xdr Image
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Build Stellar-Rs-Xdr Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }} 
         -f Dockerfile.xdr --target builder 
@@ -222,6 +261,7 @@ jobs:
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
+    if: always()
     outputs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
@@ -304,10 +344,11 @@ jobs:
 
   test:
     needs: build
+    if: always()
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ${{ matrix.network == 'pubnet' && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
@@ -406,7 +447,7 @@ jobs:
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     needs: build
     permissions:
       packages: write
@@ -430,7 +471,7 @@ jobs:
 
   push-release:
     # Push image to registry after test for master.
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     needs: [build, test]
     permissions:
       packages: write
