@@ -49,7 +49,7 @@ build-future:
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build:
-	$(MAKE) build-deps
+	$(MAKE) -j 4 build-deps
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 	  --build-arg REVISION=$(REVISION) \
 	  --build-arg PROTOCOL_VERSION_DEFAULT=$(PROTOCOL_VERSION_DEFAULT) \
