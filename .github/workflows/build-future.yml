@@ -31,7 +31,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}future-amd64
-      protocol_version_default: 21
+      protocol_version_default: 22
       xdr_ref: v22.0.0-rc.1.1
       core_ref: v22.0.0rc2
       horizon_ref: horizon-v22.0.0-rc1
@@ -55,7 +55,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}future-arm64
-      protocol_version_default: 21
+      protocol_version_default: 22
       xdr_ref: v22.0.0-rc.1.1
       core_ref: v22.0.0rc2
       horizon_ref: horizon-v22.0.0-rc1
