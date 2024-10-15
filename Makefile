@@ -36,7 +36,7 @@ build-testing:
 		XDR_REF=v22.0.0-rc.1.1 \
 		CORE_REF=v22.0.0rc2 \
 		HORIZON_REF=horizon-v22.0.0-rc1 \
-		SOROBAN_RPC_REF=22.0.0-rc2 \
+		SOROBAN_RPC_REF=v22.0.0-rc2 \
 		FRIENDBOT_REF=horizon-v22.0.0-rc1
 
 build-future:
