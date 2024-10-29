@@ -36,7 +36,7 @@ build-testing:
 		XDR_REF=v22.0.0-rc.1.1 \
 		CORE_REF=92923c2db65de63f6524bf6931dd14b05aa488bb \
 		HORIZON_REF=horizon-v22.0.0-rc2 \
-		SOROBAN_RPC_REF=v22.0.0-rc2 \
+		SOROBAN_RPC_REF=59328520f14ab4d7f67f80736bcd5f6e883014da \
 		FRIENDBOT_REF=horizon-v22.0.0-rc2
 
 build-future:
@@ -45,7 +45,7 @@ build-future:
 		XDR_REF=v22.0.0-rc.1.1 \
 		CORE_REF=92923c2db65de63f6524bf6931dd14b05aa488bb \
 		HORIZON_REF=horizon-v22.0.0-rc2 \
-		SOROBAN_RPC_REF=v22.0.0-rc2 \
+		SOROBAN_RPC_REF=59328520f14ab4d7f67f80736bcd5f6e883014da \
 		FRIENDBOT_REF=horizon-v22.0.0-rc2
 
 build:
