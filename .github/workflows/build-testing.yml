@@ -35,10 +35,10 @@ jobs:
       tag: ${{ inputs.tag-prefix }}testing-amd64
       protocol_version_default: 22
       xdr_ref: v22.0.0-rc.1.1
-      core_ref: v22.0.0rc2
-      horizon_ref: horizon-v22.0.0-rc1
+      core_ref: 92923c2db65de63f6524bf6931dd14b05aa488bb
+      horizon_ref: horizon-v22.0.0-rc2
       soroban_rpc_ref: v22.0.0-rc2
-      friendbot_ref: horizon-v22.0.0-rc1
+      friendbot_ref: horizon-v22.0.0-rc2
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
@@ -59,10 +59,10 @@ jobs:
       tag: ${{ inputs.tag-prefix }}testing-arm64
       protocol_version_default: 22
       xdr_ref: v22.0.0-rc.1.1
-      core_ref: v22.0.0rc2
-      horizon_ref: horizon-v22.0.0-rc1
+      core_ref: 92923c2db65de63f6524bf6931dd14b05aa488bb
+      horizon_ref: horizon-v22.0.0-rc2
       soroban_rpc_ref: v22.0.0-rc2
-      friendbot_ref: horizon-v22.0.0-rc1
+      friendbot_ref: horizon-v22.0.0-rc2
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
