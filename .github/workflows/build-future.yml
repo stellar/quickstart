@@ -35,7 +35,7 @@ jobs:
       xdr_ref: v22.0.0-rc.1.1
       core_ref: 92923c2db65de63f6524bf6931dd14b05aa488bb
       horizon_ref: horizon-v22.0.0-rc2
-      soroban_rpc_ref: v22.0.0-rc2
+      soroban_rpc_ref: v22.0.0-rc3
       friendbot_ref: horizon-v22.0.0-rc2
       test_matrix: |
         {
@@ -59,7 +59,7 @@ jobs:
       xdr_ref: v22.0.0-rc.1.1
       core_ref: 92923c2db65de63f6524bf6931dd14b05aa488bb
       horizon_ref: horizon-v22.0.0-rc2
-      soroban_rpc_ref: v22.0.0-rc2
+      soroban_rpc_ref: v22.0.0-rc3
       friendbot_ref: horizon-v22.0.0-rc2
       test_matrix: |
         {
