@@ -35,9 +35,9 @@ jobs:
       protocol_version_default: 22
       xdr_ref: v22.0.0
       core_ref: v22.0.0
-      horizon_ref: horizon-v22.0.0-rc2
-      soroban_rpc_ref: v22.0.0-rc3
-      friendbot_ref: horizon-v22.0.0-rc2
+      horizon_ref: horizon-v2.32.0
+      soroban_rpc_ref: v21.5.1
+      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
       test_matrix: |
         {
           "network": ["pubnet", "local"],
@@ -59,9 +59,9 @@ jobs:
       protocol_version_default: 22
       xdr_ref: v22.0.0
       core_ref: v22.0.0
-      horizon_ref: horizon-v22.0.0-rc2
-      soroban_rpc_ref: v22.0.0-rc3
-      friendbot_ref: horizon-v22.0.0-rc2
+      horizon_ref: horizon-v2.32.0
+      soroban_rpc_ref: v21.5.1
+      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
       test_matrix: |
         {
           "network": ["pubnet", "local"],
