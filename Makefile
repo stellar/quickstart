@@ -33,8 +33,8 @@ build-latest:
 build-testing:
 	$(MAKE) build TAG=testing \
 	    PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0-rc.1.1 \
-		CORE_REF=v22.0.0rc3 \
+		XDR_REF=v22.0.0 \
+		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.0-rc2 \
 		SOROBAN_RPC_REF=v22.0.0-rc3 \
 		FRIENDBOT_REF=horizon-v22.0.0-rc2
@@ -42,8 +42,8 @@ build-testing:
 build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0-rc.1.1 \
-		CORE_REF=v22.0.0rc3 \
+		XDR_REF=v22.0.0 \
+		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.0-rc2 \
 		SOROBAN_RPC_REF=v22.0.0-rc3 \
 		FRIENDBOT_REF=horizon-v22.0.0-rc2

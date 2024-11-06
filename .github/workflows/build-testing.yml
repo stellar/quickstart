@@ -34,8 +34,8 @@ jobs:
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
       protocol_version_default: 22
-      xdr_ref: v22.0.0-rc.1.1
-      core_ref: v22.0.0rc3
+      xdr_ref: v22.0.0
+      core_ref: v22.0.0
       horizon_ref: horizon-v22.0.0-rc2
       soroban_rpc_ref: v22.0.0-rc3
       friendbot_ref: horizon-v22.0.0-rc2
@@ -58,8 +58,8 @@ jobs:
       arch: arm64
       tag: ${{ inputs.tag-prefix }}testing-arm64
       protocol_version_default: 22
-      xdr_ref: v22.0.0-rc.1.1
-      core_ref: v22.0.0rc3
+      xdr_ref: v22.0.0
+      core_ref: v22.0.0
       horizon_ref: horizon-v22.0.0-rc2
       soroban_rpc_ref: v22.0.0-rc3
       friendbot_ref: horizon-v22.0.0-rc2
