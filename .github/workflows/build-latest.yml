@@ -32,7 +32,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}latest-amd64
-      protocol_version_default: 22
+      protocol_version_default: 21
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v2.32.0
