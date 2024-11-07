@@ -23,7 +23,7 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-	    PROTOCOL_VERSION_DEFAULT=22 \
+	    PROTOCOL_VERSION_DEFAULT=21 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v2.32.0 \
