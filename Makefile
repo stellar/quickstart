@@ -35,18 +35,18 @@ build-testing:
 	    PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
-		HORIZON_REF=horizon-v22.0.0-rc2 \
-		SOROBAN_RPC_REF=v22.0.0-rc3 \
-		FRIENDBOT_REF=horizon-v22.0.0-rc2
+		HORIZON_REF=horizon-v22.0.0 \
+		SOROBAN_RPC_REF=v22.0.0 \
+		FRIENDBOT_REF=horizon-v22.0.0
 
 build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
-		HORIZON_REF=horizon-v22.0.0-rc2 \
-		SOROBAN_RPC_REF=v22.0.0-rc3 \
-		FRIENDBOT_REF=horizon-v22.0.0-rc2
+		HORIZON_REF=horizon-v22.0.0 \
+		SOROBAN_RPC_REF=v22.0.0 \
+		FRIENDBOT_REF=horizon-v22.0.0
 
 build:
 	$(MAKE) -j 4 build-deps
