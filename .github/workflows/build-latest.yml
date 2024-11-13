@@ -37,7 +37,7 @@ jobs:
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
       soroban_rpc_ref: v22.0.0
-      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
+      friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
           "network": ["pubnet", "local"],
@@ -61,7 +61,7 @@ jobs:
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
       soroban_rpc_ref: v22.0.0
-      friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
+      friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
           "network": ["pubnet", "local"],
