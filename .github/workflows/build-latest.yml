@@ -36,7 +36,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.0
-      soroban_rpc_ref: v22.0.0
+      soroban_rpc_ref: v22.1.0
       friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
       test_matrix: |
         {
@@ -60,7 +60,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.0
-      soroban_rpc_ref: v22.0.0
+      soroban_rpc_ref: v22.1.0
       friendbot_ref: 31fc8f4236388f12fc609228b7a7f5494867a1f9
       test_matrix: |
         {
