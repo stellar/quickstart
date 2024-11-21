@@ -3,5 +3,5 @@
 set -e
 set -o pipefail
 
-echo "starting soroban-rpc..."
-exec /usr/bin/stellar-soroban-rpc --config-path=/opt/stellar/soroban-rpc/etc/soroban-rpc.cfg
+echo "starting stellar-rpc..."
+exec /usr/bin/stellar-stellar-rpc --config-path=/opt/stellar/stellar-rpc/etc/stellar-rpc.cfg

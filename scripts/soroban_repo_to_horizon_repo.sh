@@ -16,9 +16,9 @@ fi
 
 GO_MONOREPO=github.com/stellar/go
 SOROBAN_BRANCH=$1
-SOROBAN_REPO_GOMOD=https://raw.githubusercontent.com/stellar/soroban-rpc/${SOROBAN_BRANCH}/go.mod
+SOROBAN_REPO_GOMOD=https://raw.githubusercontent.com/stellar/stellar-rpc/${SOROBAN_BRANCH}/go.mod
 
-# find the short commit from the soroban-rpc repository.
+# find the short commit from the stellar-rpc repository.
 SHORT_COMMIT=$(curl -s ${SOROBAN_REPO_GOMOD} -o - | grep "${GO_MONOREPO} " | cut -d- -f3)
 
 # find the long commit from the actual go repository using the short commit.

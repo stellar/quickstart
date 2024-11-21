@@ -42,8 +42,8 @@ on:
         description: 'Git ref for the stellar/rs-stellar-xdr repo'
         type: 'string'
         required: false  
-      soroban_rpc_ref:
-        description: 'Git ref for the stellar/soroban-rpc repo (soroban-rpc)'
+      stellar_rpc_ref:
+        description: 'Git ref for the stellar/stellar-rpc repo (stellar-rpc)'
         type: 'string'
         required: true
       friendbot_ref:
@@ -63,7 +63,7 @@ env:
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
   HORIZON_REPO_REF: ${{ inputs.horizon_ref }}
   FRIENDBOT_REPO_REF: ${{ inputs.friendbot_ref }}
-  SOROBAN_RPC_REPO_BRANCH: ${{ inputs.soroban_rpc_ref }}
+  STELLAR_RPC_REPO_BRANCH: ${{ inputs.stellar_rpc_ref }}
   CORE_REPO: ${{ inputs.core_repo }}
   CORE_REPO_REF: ${{ inputs.core_ref }}
   XDR_REPO_REF: ${{ inputs.xdr_ref }}
@@ -163,7 +163,7 @@ jobs:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  load-stellar-soroban-rpc-from-cache:
+  load-stellar-stellar-rpc-from-cache:
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
@@ -172,41 +172,41 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
+        key: image-stellar-stellar-rpc-${{ inputs.arch }}-${{ env.STELLAR_RPC_REPO_BRANCH }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
+        name: image-stellar-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  build-stellar-soroban-rpc:
-    needs: [load-stellar-soroban-rpc-from-cache]
-    if: ${{ needs.load-stellar-soroban-rpc-from-cache.outputs.cache-hit != 'true' }}
+  build-stellar-stellar-rpc:
+    needs: [load-stellar-stellar-rpc-from-cache]
+    if: ${{ needs.load-stellar-stellar-rpc-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-soroban-rpc-${{ inputs.arch }}-${{ env.SOROBAN_RPC_REPO_BRANCH }}
+        key: image-stellar-stellar-rpc-${{ inputs.arch }}-${{ env.STELLAR_RPC_REPO_BRANCH }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
         platforms: arm64
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
-    - name: Build Stellar-Soroban-Rpc Image
+    - name: Build Stellar-stellar-rpc Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }} 
-        -f cmd/soroban-rpc/docker/Dockerfile --target build 
-        -t stellar-soroban-rpc:${{ inputs.arch }} 
+        -f cmd/stellar-rpc/docker/Dockerfile --target build 
+        -t stellar-stellar-rpc:${{ inputs.arch }} 
         -o type=docker,dest=/tmp/image 
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
-        https://github.com/stellar/soroban-rpc.git#${{ env.SOROBAN_RPC_REPO_BRANCH }}
-    - name: Upload Stellar-Soroban-Rpc Image
+        https://github.com/stellar/stellar-rpc.git#${{ env.STELLAR_RPC_REPO_BRANCH }}
+    - name: Upload Stellar-stellar-rpc Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
+        name: image-stellar-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   load-rs-stellar-xdr-from-cache:
@@ -260,7 +260,7 @@ jobs:
         path: /tmp/image      
 
   build:
-    needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-soroban-rpc]
+    needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-stellar-rpc]
     if: always()
     outputs:
       image: ${{ steps.image.outputs.name }}
@@ -289,19 +289,19 @@ jobs:
       with:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-friendbot
-    - name: Download Stellar-Soroban-Rpc Image
+    - name: Download Stellar-stellar-rpc Image
       uses: actions/download-artifact@v4
       with:
-        name: image-stellar-soroban-rpc-${{ inputs.tag }}-${{ inputs.arch }}
-        path: /tmp/stellar-soroban-rpc
+        name: image-stellar-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/stellar-stellar-rpc
     - name: Load Stellar-Core Image
       run: docker load -i /tmp/stellar-core/image
     - name: Load Stellar-Horizon Image
       run: docker load -i /tmp/stellar-horizon/image
     - name: Load Stellar-Friendbot Image
       run: docker load -i /tmp/stellar-friendbot/image
-    - name: Load Stellar-Soroban-Rpc Image
-      run: docker load -i /tmp/stellar-soroban-rpc/image
+    - name: Load Stellar-stellar-rpc Image
+      run: docker load -i /tmp/stellar-stellar-rpc/image
     - name: Load Stellar-Rs-Xdr Image
       run: docker load -i /tmp/stellar-xdr/image
     - if: inputs.arch == 'arm64'
@@ -333,7 +333,7 @@ jobs:
         --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:${{ inputs.arch }}
         --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ inputs.arch }}
         --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ inputs.arch }}
-        --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:${{ inputs.arch }}
+        --build-arg STELLAR_RPC_IMAGE_REF=stellar-stellar-rpc:${{ inputs.arch }}
     - name: Save Quickstart Image
       run: docker save $IMAGE -o /tmp/image
     - name: Upload Quickstart Image
@@ -423,18 +423,18 @@ jobs:
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run test_friendbot.go
-    - name: Run soroban rpc up test
+    - name: Run stellar rpc up test
       if: ${{ matrix.rpc }}
       run: |
         docker logs stellar -f &
-        echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
-        go run test_soroban_rpc_up.go
-    - name: Run soroban rpc healthy test
+        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
+        go run test_stellar_rpc_up.go
+    - name: Run stellar rpc healthy test
       if: ${{ matrix.rpc && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
-        echo "supervisorctl tail -f soroban-rpc" | docker exec -i stellar sh &
-        go run test_soroban_rpc_healthy.go
+        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
+        go run test_stellar_rpc_healthy.go
     - name: Prepare Test Logs
       if: always()
       run: sudo chmod -R a+r logs
