@@ -77,7 +77,7 @@ function start() {
   echo "  horizon:"
   echo "$(stellar-horizon version | sed 's/^/    /')"
   echo "  stellar-rpc:"
-  echo "$(stellar-stellar-rpc version | sed 's/^/    /')"
+  echo "$(stellar-rpc version | sed 's/^/    /')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"

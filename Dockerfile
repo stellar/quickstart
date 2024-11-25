@@ -33,7 +33,7 @@ COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 
-COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-stellar-rpc
+COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-rpc
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
