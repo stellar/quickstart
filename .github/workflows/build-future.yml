@@ -35,7 +35,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
-      stellar_rpc_ref: v22.0.0-rc3
+      stellar_rpc_ref: fb9f8c7c146485e0d4f7e4285e62e1678c89ce3d
       friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
@@ -59,7 +59,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
-      stellar_rpc_ref: v22.0.0-rc3
+      stellar_rpc_ref: fb9f8c7c146485e0d4f7e4285e62e1678c89ce3d
       friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
