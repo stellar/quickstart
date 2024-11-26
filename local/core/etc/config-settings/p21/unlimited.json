@@ -49,6 +49,235 @@
             }
         },
         {
+        "contract_cost_params_cpu_instructions": [
+            {
+            "ext": "v0",
+            "const_term": 4,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 434,
+            "linear_term": 16
+            },
+            {
+            "ext": "v0",
+            "const_term": 42,
+            "linear_term": 16
+            },
+            {
+            "ext": "v0",
+            "const_term": 44,
+            "linear_term": 16
+            },
+            {
+            "ext": "v0",
+            "const_term": 295,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 60,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 221,
+            "linear_term": 26
+            },
+            {
+            "ext": "v0",
+            "const_term": 331,
+            "linear_term": 4369
+            },
+            {
+            "ext": "v0",
+            "const_term": 3636,
+            "linear_term": 7013
+            },
+            {
+            "ext": "v0",
+            "const_term": 40256,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 377551,
+            "linear_term": 4059
+            },
+            {
+            "ext": "v0",
+            "const_term": 417482,
+            "linear_term": 45712
+            },
+            {
+            "ext": "v0",
+            "const_term": 41142,
+            "linear_term": 634
+            },
+            {
+            "ext": "v0",
+            "const_term": 1945,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 6481,
+            "linear_term": 5943
+            },
+            {
+            "ext": "v0",
+            "const_term": 711,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 2314804,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 4176,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 4716,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 4680,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 4256,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 884,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 1059,
+            "linear_term": 502
+            },
+            {
+            "ext": "v0",
+            "const_term": 73077,
+            "linear_term": 25410
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 540752
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 176363
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 29989
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 1061449
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 237336
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 328476
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 701845
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 429383
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 28
+            },
+            {
+            "ext": "v0",
+            "const_term": 43030,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 7556
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 10711
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 3300
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 23038
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 42488
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 828974
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 297100
+            },
+            {
+            "ext": "v0",
+            "const_term": 0,
+            "linear_term": 14
+            },
+            {
+            "ext": "v0",
+            "const_term": 1882,
+            "linear_term": 0
+            },
+            {
+            "ext": "v0",
+            "const_term": 3000906,
+            "linear_term": 0
+            }
+        ]
+        },
+        {
             "contract_data_key_size_bytes": 4294967295
         },
         {
