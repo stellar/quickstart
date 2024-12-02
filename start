@@ -59,7 +59,7 @@ function validate_before_start() {
 function validate_after_copy_defaults() {
   if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
     local config_dir="$COREHOME/etc/config-settings"
-    local config_path="$config_dir/$LIMITS.json"
+    local config_path="$config_dir/p$PROTOCOL_VERSION/$LIMITS.json"
     if [ ! -f "$config_path" ]; then
       echo "--limits '$LIMITS' unknown: must be one of: default "$(ls $config_dir | sed 's/\.json//g')
       exit 1
@@ -551,7 +551,7 @@ function upgrade_local() {
         "$NETWORK_ROOT_ACCOUNT_ID" \
         0 \
         "$NETWORK_PASSPHRASE" \
-        --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$COREHOME/etc/config-settings/$LIMITS.json"` \
+        --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json"` \
         --signtxs)"
 
     let line_count=$(echo "$upgrade_output" | wc -l)
