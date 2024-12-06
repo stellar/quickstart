@@ -16,7 +16,7 @@ The image uses the following software:
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
-- [soroban-rpc](https://github.com/stellar/soroban-rpc/tree/main/cmd/soroban-rpc)
+- [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
 - [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
 ## Usage
@@ -119,9 +119,9 @@ _Note: In local mode a local friendbot is running. In testnet and futurenet mode
 
 ### Soroban Development
 
-The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Soroban RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Stellar RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
 
-To enable soroban rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-soroban-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
+To enable stellar rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-stellar-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
 
 ```
 http://<container_host>:6061/metrics
@@ -177,7 +177,7 @@ built with.
   `--enable-next-protocol-version-unsafe-for-production`.
 - `HORIZON_REF`: The git reference of stellar-horizon to build.
 - `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
-- `SOROBAN_RPC_REF`: The git reference of soroban-rpc to build.
+- `STELLAR_RPC_REF`: The git reference of stellar-rpc to build.
 
 For example:
 
@@ -188,7 +188,7 @@ make build \
   CORE_CONFIGURE_FLAGS=... \
   HORIZON_REF=... \
   FRIENDBOT_REF=... \
-  SOROBAN_RPC_REF=...
+  STELLAR_RPC_REF=...
 ```
 
 ### Background vs. Interactive containers
@@ -239,7 +239,7 @@ The image exposes one main port through which services provide their APIs:
 
 | Port | Service                         | Description    |
 | ---- | ------------------------------- | -------------- |
-| 8000 | horizon, soroban-rpc, friendbot | main http port |
+| 8000 | horizon, stellar-rpc, friendbot | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -247,13 +247,13 @@ The image also exposes a few other ports that most developers do not need, but a
 | ----- | -------------------------- | -------------------- |
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
-| 6061  | soroban-rpc                | admin port           |
+| 6061  | stellar-rpc                | admin port           |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
 | 11726 | stellar-core (horizon)     | main http port       |
-| 11825 | stellar-core (soroban-rpc) | peer node port       |
-| 11826 | stellar-core (soroban-rpc) | main http port       |
+| 11825 | stellar-core (stellar-rpc) | peer node port       |
+| 11826 | stellar-core (stellar-rpc) | main http port       |
 
 ### Security Considerations
 

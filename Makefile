@@ -1,4 +1,4 @@
-__PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
+__PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-deps-friendbot build-deps-stellar-rpc
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
@@ -8,12 +8,12 @@ XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
-SOROBAN_RPC_REF?=main
-HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(SOROBAN_RPC_REF))
+STELLAR_RPC_REF?=main
+HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(STELLAR_RPC_REF))
 FRIENDBOT_REF?=$(HORIZON_REF)
 
 run:
-	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-soroban-rpc
+	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-stellar-rpc
 
 logs:
 	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
@@ -27,7 +27,7 @@ build-latest:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.1 \
-		SOROBAN_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.0 \
 		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
 
 build-testing:
@@ -36,7 +36,7 @@ build-testing:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.1 \
-		SOROBAN_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.0 \
 		FRIENDBOT_REF=horizon-v22.0.1
 
 build-future:
@@ -45,7 +45,7 @@ build-future:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.1 \
-		SOROBAN_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.0 \
 		FRIENDBOT_REF=horizon-v22.0.1
 
 build:
@@ -57,9 +57,9 @@ build:
 	  --build-arg STELLAR_CORE_IMAGE_REF=stellar-core:$(CORE_REF) \
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
-	  --build-arg SOROBAN_RPC_IMAGE_REF=stellar-soroban-rpc:$(SOROBAN_RPC_REF) \
+	  --build-arg STELLAR_RPC_IMAGE_REF=stellar-rpc:$(STELLAR_RPC_REF) \
 
-build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-soroban-rpc
+build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-stellar-rpc
 
 build-deps-xdr:
 	docker build -t stellar-xdr:$(XDR_REF) -f Dockerfile.xdr --target builder . --build-arg REPO="$(XDR_REPO)" --build-arg REF="$(XDR_REF)"
@@ -73,5 +73,5 @@ build-deps-horizon:
 build-deps-friendbot:
 	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(FRIENDBOT_REF)
 
-build-deps-soroban-rpc:
-	docker build -t stellar-soroban-rpc:$(SOROBAN_RPC_REF) -f cmd/soroban-rpc/docker/Dockerfile --target build https://github.com/stellar/soroban-rpc.git#$(SOROBAN_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+build-deps-stellar-rpc:
+	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f cmd/stellar-rpc/docker/Dockerfile --target build https://github.com/stellar/stellar-rpc.git#$(STELLAR_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
