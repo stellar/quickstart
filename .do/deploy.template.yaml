@@ -19,7 +19,7 @@ spec:
     - key: NETWORK
       value: 'local'
       scope: RUN_TIME
-    - key: ENABLE_STELLAR_RPC
+    - key: ENABLE_RPC
       value: 'false'
       scope: RUN_TIME
     - key: DISABLE_SOROBAN_DIAGNOSTIC_EVENTS

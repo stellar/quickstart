@@ -26,10 +26,10 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
-: "${ENABLE_STELLAR_RPC:=false}"
+: "${ENABLE_RPC:=false}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
-: "${ENABLE_STELLAR_RPC_ADMIN_ENDPOINT:=false}"
+: "${ENABLE_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${LIMITS:=testnet}"
 
@@ -43,7 +43,7 @@ function main() {
 }
 
 function validate_before_start() {
-  if [ "$ENABLE_STELLAR_RPC" != "true" ] && [ "$ENABLE_STELLAR_RPC_ADMIN_ENDPOINT" = "true" ]; then
+  if [ "$ENABLE_RPC" != "true" ] && [ "$ENABLE_RPC_ADMIN_ENDPOINT" = "true" ]; then
     echo "--enable-stellar-rpc-admin-endpoint usage only supported with --enable-stellar-rpc" >&2
     exit 1
   fi
@@ -147,8 +147,9 @@ function process_args() {
       ENABLE="$1"
       shift
       ;;
-    --enable-stellar-rpc)
-      ENABLE_STELLAR_RPC=true
+    # TODO: remove once the Soroban RPC name is fully deprecated
+    --enable-soroban-rpc)
+      ENABLE_RPC=true
       ;;
     --enable-soroban-diagnostic-events)
       ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
@@ -157,8 +158,12 @@ function process_args() {
       DISABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
     --enable-stellar-rpc-admin-endpoint)
-      ENABLE_STELLAR_RPC_ADMIN_ENDPOINT=true
-      ;;  
+      ENABLE_RPC_ADMIN_ENDPOINT=true
+      ;;
+    # TODO: remove once the Soroban RPC name is fully deprecated
+    --enable-soroban-rpc-admin-endpoint)
+      ENABLE_RPC_ADMIN_ENDPOINT=true
+      ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
       ;;
@@ -183,7 +188,7 @@ function process_args() {
     ENABLE_HORIZON=true
   fi
   if [[ ",$ENABLE," = *",rpc,"* ]]; then
-    ENABLE_STELLAR_RPC=true
+    ENABLE_RPC=true
   fi
 
   case "$NETWORK" in
@@ -200,7 +205,7 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
-    if [[ "$ENABLE_STELLAR_RPC" = "true" ]]; then
+    if [[ "$ENABLE_RPC" = "true" ]]; then
       ENABLE_HORIZON=true
     fi
     ;;
@@ -287,7 +292,7 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    if [ "$ENABLE_STELLAR_RPC" = "true" ]; then
+    if [ "$ENABLE_RPC" = "true" ]; then
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
@@ -474,7 +479,7 @@ EOF
 }
 
 function init_stellar_rpc() {
-  if [ "$ENABLE_STELLAR_RPC" != "true" ]; then
+  if [ "$ENABLE_RPC" != "true" ]; then
     return 0
   fi
 
@@ -492,7 +497,7 @@ function init_stellar_rpc() {
   run_silent "finalize-stellar-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $STELLAR_RPC_CAPTIVE_CORE_CFG
 
   local ADMIN_ENDPOINT=0.0.0.0:6061
-  if [ "$ENABLE_STELLAR_RPC_ADMIN_ENDPOINT" != "true" ]; then
+  if [ "$ENABLE_RPC_ADMIN_ENDPOINT" != "true" ]; then
     ADMIN_ENDPOINT=
   fi
   
@@ -617,7 +622,7 @@ function start_optional_services() {
     supervisorctl start postgresql
     supervisorctl start horizon
   fi
-  if [ "$ENABLE_STELLAR_RPC" == "true" ]; then
+  if [ "$ENABLE_RPC" == "true" ]; then
     supervisorctl start stellar-rpc
   fi
 }
@@ -649,7 +654,7 @@ function print_service_logs() {
   if [ "$ENABLE_HORIZON" = "true" ]; then
     supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
   fi
-  if [ "$ENABLE_STELLAR_RPC" = "true" ]; then
+  if [ "$ENABLE_RPC" = "true" ]; then
     supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
   fi
 }
@@ -735,7 +740,7 @@ function service_status() {
     stellar_core_status "horizon" 11726 &
     horizon_status &
   fi
-  if [ "$ENABLE_STELLAR_RPC" = "true" ]; then
+  if [ "$ENABLE_RPC" = "true" ]; then
     stellar_core_status "rpc" 11826 &
     stellar_rpc_status &
   fi
