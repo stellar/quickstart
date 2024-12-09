@@ -26,10 +26,14 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
-: "${ENABLE_RPC:=false}"
+# TODO: Remove once the Soroban RPC name is fully deprecated
+: "${ENABLE_SOROBAN_RPC:=false}"
+: "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
-: "${ENABLE_RPC_ADMIN_ENDPOINT:=false}"
+# TODO: Remove once the Soroban RPC name is fully deprecated
+: "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
+: "${ENABLE_RPC_ADMIN_ENDPOINT:=$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${LIMITS:=testnet}"
 
