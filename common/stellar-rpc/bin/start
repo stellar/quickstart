@@ -1,0 +1,7 @@
+#! /bin/bash
+
+set -e
+set -o pipefail
+
+echo "starting stellar-rpc..."
+exec /usr/bin/stellar-rpc --config-path=/opt/stellar/stellar-rpc/etc/stellar-rpc.cfg

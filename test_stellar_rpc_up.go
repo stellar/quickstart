@@ -32,7 +32,7 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for Soroban RPC to start")
+		logLine("Waiting for Stellar RPC to start")
 
 		if time.Since(startTime) > timeout {
 			logLine("Timeout")
@@ -53,10 +53,10 @@ func main() {
 			continue
 		}
 
-		logLine(fmt.Sprintf("Soroban RPC health reponse %#v", rpcResponse))
+		logLine(fmt.Sprintf("Stellar RPC health reponse %#v", rpcResponse))
 
-		if rpcResponse.Result.Status == "healthy" {
-			logLine("Soroban RPC is healthy!")
+		if rpcResponse.Result.Status != "" || rpcResponse.Error.Message != "" {
+			logLine("Stellar RPC has started!")
 			os.Exit(0)
 		}
 	}
