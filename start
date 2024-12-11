@@ -14,7 +14,7 @@ export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
 export NXHOME="$STELLAR_HOME/nginx"
-export SOROBAN_RPC_HOME="$STELLAR_HOME/soroban-rpc"
+export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
 export PGBIN="/usr/lib/postgresql/14/bin/"
 export PGDATA="$PGHOME/data"
@@ -26,10 +26,14 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
+# TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
+: "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
 : "${ENABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
 : "${DISABLE_SOROBAN_DIAGNOSTIC_EVENTS:=false}"
+# TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
+: "${ENABLE_RPC_ADMIN_ENDPOINT:=$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${LIMITS:=testnet}"
 
@@ -43,8 +47,8 @@ function main() {
 }
 
 function validate_before_start() {
-  if [ "$ENABLE_SOROBAN_RPC" != "true" ] && [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" = "true" ]; then
-    echo "--enable-soroban-rpc-admin-endpoint usage only supported with --enable-soroban-rpc" >&2
+  if [ "$ENABLE_RPC" != "true" ] && [ "$ENABLE_RPC_ADMIN_ENDPOINT" = "true" ]; then
+    echo "--enable-stellar-rpc-admin-endpoint usage only supported with --enable-stellar-rpc" >&2
     exit 1
   fi
   if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
@@ -76,8 +80,8 @@ function start() {
   echo "$(stellar-core version 2>/dev/null | sed 's/^/    /')"
   echo "  horizon:"
   echo "$(stellar-horizon version | sed 's/^/    /')"
-  echo "  soroban-rpc:"
-  echo "$(stellar-soroban-rpc version | sed 's/^/    /')"
+  echo "  stellar-rpc:"
+  echo "$(stellar-rpc version | sed 's/^/    /')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
@@ -92,7 +96,7 @@ function start() {
   init_stellar_core
   init_horizon
   copy_pgpass
-  init_soroban_rpc
+  init_stellar_rpc
 
   stop_postgres  # this gets started in init_db
 
@@ -147,8 +151,9 @@ function process_args() {
       ENABLE="$1"
       shift
       ;;
+    # TODO: remove once the Soroban RPC name is fully deprecated
     --enable-soroban-rpc)
-      ENABLE_SOROBAN_RPC=true
+      ENABLE_RPC=true
       ;;
     --enable-soroban-diagnostic-events)
       ENABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
@@ -156,9 +161,13 @@ function process_args() {
     --disable-soroban-diagnostic-events)
       DISABLE_SOROBAN_DIAGNOSTIC_EVENTS=true
       ;;
+    --enable-stellar-rpc-admin-endpoint)
+      ENABLE_RPC_ADMIN_ENDPOINT=true
+      ;;
+    # TODO: remove once the Soroban RPC name is fully deprecated
     --enable-soroban-rpc-admin-endpoint)
-      ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT=true
-      ;;  
+      ENABLE_RPC_ADMIN_ENDPOINT=true
+      ;;
     --enable-core-manual-close)
       ENABLE_CORE_MANUAL_CLOSE=true
       ;;
@@ -183,7 +192,7 @@ function process_args() {
     ENABLE_HORIZON=true
   fi
   if [[ ",$ENABLE," = *",rpc,"* ]]; then
-    ENABLE_SOROBAN_RPC=true
+    ENABLE_RPC=true
   fi
 
   case "$NETWORK" in
@@ -200,7 +209,7 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
-    if [[ "$ENABLE_SOROBAN_RPC" = "true" ]]; then
+    if [[ "$ENABLE_RPC" = "true" ]]; then
       ENABLE_HORIZON=true
     fi
     ;;
@@ -287,8 +296,8 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/soroban-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    if [ "$ENABLE_RPC" = "true" ]; then
+      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
@@ -310,12 +319,12 @@ function copy_defaults() {
     fi
   fi
 
-  if [ -d $SOROBAN_RPC_HOME/etc ]; then
-    echo "soroban-rpc: config directory exists, skipping copy"
+  if [ -d $STELLAR_RPC_HOME/etc ]; then
+    echo "stellar-rpc: config directory exists, skipping copy"
   else
-    $CP /opt/stellar-default/common/soroban-rpc/ $SOROBAN_RPC_HOME
-    if [ -d /opt/stellar-default/$NETWORK/soroban-rpc/ ]; then
-      $CP /opt/stellar-default/$NETWORK/soroban-rpc/ $SOROBAN_RPC_HOME
+    $CP /opt/stellar-default/common/stellar-rpc/ $STELLAR_RPC_HOME
+    if [ -d /opt/stellar-default/$NETWORK/stellar-rpc/ ]; then
+      $CP /opt/stellar-default/$NETWORK/stellar-rpc/ $STELLAR_RPC_HOME
     fi
   fi
 
@@ -473,34 +482,34 @@ EOF
   popd
 }
 
-function init_soroban_rpc() {
-  if [ "$ENABLE_SOROBAN_RPC" != "true" ]; then
+function init_stellar_rpc() {
+  if [ "$ENABLE_RPC" != "true" ]; then
     return 0
   fi
 
-  if [ -f $SOROBAN_RPC_HOME/.quickstart-initialized ]; then
-    echo "soroban rpc: already initialized"
+  if [ -f $STELLAR_RPC_HOME/.quickstart-initialized ]; then
+    echo "stellar rpc: already initialized"
     return 0
   fi
 
-  pushd $SOROBAN_RPC_HOME
+  pushd $STELLAR_RPC_HOME
   mkdir ./captive-core
 
-  SOROBAN_RPC_CAPTIVE_CORE_CFG=$SOROBAN_RPC_HOME/etc/stellar-captive-core.cfg
-  run_silent "finalize-soroban-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$SOROBAN_RPC_HOME/captive-core/stellar-rpc.db*g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
-  run_silent "finalize-soroban-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $SOROBAN_RPC_CAPTIVE_CORE_CFG
+  STELLAR_RPC_CAPTIVE_CORE_CFG=$STELLAR_RPC_HOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-stellar-rpc-captivecore-db" perl -pi -e "s*__DATABASE__*sqlite3://$STELLAR_RPC_HOME/captive-core/stellar-rpc.db*g" $STELLAR_RPC_CAPTIVE_CORE_CFG
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" $STELLAR_RPC_CAPTIVE_CORE_CFG
+  run_silent "finalize-stellar-rpc-captivecore-config-enable-soroban-diagnostic-events" perl -pi -e "s/__ENABLE_SOROBAN_DIAGNOSTIC_EVENTS__/$ENABLE_SOROBAN_DIAGNOSTIC_EVENTS/g" $STELLAR_RPC_CAPTIVE_CORE_CFG
 
   local ADMIN_ENDPOINT=0.0.0.0:6061
-  if [ "$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT" != "true" ]; then
+  if [ "$ENABLE_RPC_ADMIN_ENDPOINT" != "true" ]; then
     ADMIN_ENDPOINT=
   fi
   
-  perl -pi -e "s/__SOROBAN_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/soroban-rpc.cfg
-  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/soroban-rpc.cfg
-  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/soroban-rpc.cfg
+  perl -pi -e "s/__STELLAR_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/stellar-rpc.cfg
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-rpc.cfg
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.cfg
 
-  run_silent "init-soroban-rpc" chown -R stellar:stellar .
+  run_silent "init-stellar-rpc" chown -R stellar:stellar .
 
   touch .quickstart-initialized
   popd
@@ -617,8 +626,8 @@ function start_optional_services() {
     supervisorctl start postgresql
     supervisorctl start horizon
   fi
-  if [ "$ENABLE_SOROBAN_RPC" == "true" ]; then
-    supervisorctl start soroban-rpc
+  if [ "$ENABLE_RPC" == "true" ]; then
+    supervisorctl start stellar-rpc
   fi
 }
 
@@ -649,8 +658,8 @@ function print_service_logs() {
   if [ "$ENABLE_HORIZON" = "true" ]; then
     supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
   fi
-  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
-    supervisorctl tail -f soroban-rpc  stdout > >(sed "s/^/${blue}soroban-rpc  | $clear/") &
+  if [ "$ENABLE_RPC" = "true" ]; then
+    supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
   fi
 }
 
@@ -735,9 +744,9 @@ function service_status() {
     stellar_core_status "horizon" 11726 &
     horizon_status &
   fi
-  if [ "$ENABLE_SOROBAN_RPC" = "true" ]; then
+  if [ "$ENABLE_RPC" = "true" ]; then
     stellar_core_status "rpc" 11826 &
-    soroban_rpc_status &
+    stellar_rpc_status &
   fi
 }
 
@@ -755,8 +764,8 @@ function stellar_core_status() {
   done
 }
 
-function soroban_rpc_status() {
-  echo "soroban-rpc: waiting for ready state..."
+function stellar_rpc_status() {
+  echo "stellar-rpc: waiting for ready state..."
   COUNTER=1
   while ! $(curl --silent --location --request POST 'http://localhost:8003' \
     --header 'Content-Type: application/json' \
@@ -764,12 +773,12 @@ function soroban_rpc_status() {
     jq --exit-status '.result.status == "healthy"' 2>/dev/null | grep -o true || echo false);
   do
     if [ $(expr $COUNTER % 12) -eq 0 ]; then
-      echo "soroban-rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
+      echo "stellar-rpc: waiting for ready state, $(expr $COUNTER / 12) minutes..."
     fi
     COUNTER=$[$COUNTER +1]
     sleep 5
   done
-  echo "soroban-rpc: up and ready"
+  echo "stellar-rpc: up and ready"
 }
 
 function horizon_status() {

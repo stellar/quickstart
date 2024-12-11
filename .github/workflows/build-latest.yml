@@ -36,7 +36,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
-      soroban_rpc_ref: v22.1.0
+      stellar_rpc_ref: v22.1.1
       friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
@@ -60,7 +60,7 @@ jobs:
       xdr_ref: v22.0.0
       core_ref: v22.0.0
       horizon_ref: horizon-v22.0.1
-      soroban_rpc_ref: v22.1.0
+      stellar_rpc_ref: v22.1.1
       friendbot_ref: horizon-v22.0.1
       test_matrix: |
         {
