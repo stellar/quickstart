@@ -34,7 +34,7 @@ jobs:
       tag: ${{ inputs.tag-prefix }}latest-amd64
       protocol_version_default: 22
       xdr_ref: v22.0.0
-      core_ref: v22.0.0
+      core_ref: v22.1.0
       horizon_ref: horizon-v22.0.1
       stellar_rpc_ref: v22.1.1
       friendbot_ref: horizon-v22.0.1
@@ -58,7 +58,7 @@ jobs:
       tag: ${{ inputs.tag-prefix }}latest-arm64
       protocol_version_default: 22
       xdr_ref: v22.0.0
-      core_ref: v22.0.0
+      core_ref: v22.1.0
       horizon_ref: horizon-v22.0.1
       stellar_rpc_ref: v22.1.1
       friendbot_ref: horizon-v22.0.1
