@@ -35,9 +35,9 @@ jobs:
       protocol_version_default: 22
       xdr_ref: v22.0.0
       core_ref: v22.1.0
-      horizon_ref: horizon-v22.0.1
+      horizon_ref: horizon-v22.0.2
       stellar_rpc_ref: v22.1.1
-      friendbot_ref: horizon-v22.0.1
+      friendbot_ref: horizon-v22.0.2
       test_matrix: |
         {
           "network": ["pubnet", "local"],
@@ -59,9 +59,9 @@ jobs:
       protocol_version_default: 22
       xdr_ref: v22.0.0
       core_ref: v22.1.0
-      horizon_ref: horizon-v22.0.1
+      horizon_ref: horizon-v22.0.2
       stellar_rpc_ref: v22.1.1
-      friendbot_ref: horizon-v22.0.1
+      friendbot_ref: horizon-v22.0.2
       test_matrix: |
         {
           "network": ["pubnet", "local"],

@@ -26,27 +26,27 @@ build-latest:
 		PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
-		HORIZON_REF=horizon-v22.0.1 \
+		HORIZON_REF=horizon-v22.0.2 \
 		STELLAR_RPC_REF=v22.1.0 \
-		FRIENDBOT_REF=31fc8f4236388f12fc609228b7a7f5494867a1f9
+		FRIENDBOT_REF=horizon-v22.0.2
 
 build-testing:
 	$(MAKE) build TAG=testing \
 	    PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
-		HORIZON_REF=horizon-v22.0.1 \
+		HORIZON_REF=horizon-v22.0.2 \
 		STELLAR_RPC_REF=v22.1.0 \
-		FRIENDBOT_REF=horizon-v22.0.1
+		FRIENDBOT_REF=horizon-v22.0.2
 
 build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
-		HORIZON_REF=horizon-v22.0.1 \
+		HORIZON_REF=horizon-v22.0.2 \
 		STELLAR_RPC_REF=v22.1.0 \
-		FRIENDBOT_REF=horizon-v22.0.1
+		FRIENDBOT_REF=horizon-v22.0.2
 
 build:
 	$(MAKE) -j 4 build-deps
