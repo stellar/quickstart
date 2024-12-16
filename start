@@ -62,8 +62,8 @@ function validate_before_start() {
 
 function validate_after_copy_defaults() {
   if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
-    local config_dir="$COREHOME/etc/config-settings"
-    local config_path="$config_dir/p$PROTOCOL_VERSION/$LIMITS.json"
+    local config_dir="$COREHOME/etc/config-settings/p$PROTOCOL_VERSION"
+    local config_path="$config_dir/$LIMITS.json"
     if [ ! -f "$config_path" ]; then
       echo "--limits '$LIMITS' unknown: must be one of: default "$(ls $config_dir | sed 's/\.json//g')
       exit 1
