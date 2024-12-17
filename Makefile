@@ -2,7 +2,7 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
-PROTOCOL_VERSION_DEFAULT?=
+PROTOCOL_VERSION_DEFAULT?=22
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
 XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
