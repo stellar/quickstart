@@ -53,7 +53,7 @@ ADD start /
 RUN ["chmod", "+x", "start"]
 
 ARG PROTOCOL_VERSION_DEFAULT
-RUN test -n "$PROTOCOL_VERSION_DEFAULT" || (echo "Docker build arg PROTOCOL_VERSION_DEFAULT required and not set" && false)
+RUN test -n "$PROTOCOL_VERSION_DEFAULT" || (echo "Image build arg PROTOCOL_VERSION_DEFAULT required and not set" && false)
 ENV PROTOCOL_VERSION_DEFAULT $PROTOCOL_VERSION_DEFAULT
 
 ENTRYPOINT ["/start"]
