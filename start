@@ -60,15 +60,16 @@ function validate_before_start() {
   fi
 }
 
-function validate_after_copy_defaults() {
+function validate_limits() {
   if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
     local config_dir="$COREHOME/etc/config-settings/p$PROTOCOL_VERSION"
     local config_path="$config_dir/$LIMITS.json"
     if [ ! -f "$config_path" ]; then
       echo "--limits '$LIMITS' unknown: must be one of: default "$(ls $config_dir | sed 's/\.json//g')
-      exit 1
+      return false
     fi
   fi
+  return true
 }
 
 function start() {
@@ -91,7 +92,6 @@ function start() {
   echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
 
   copy_defaults
-  validate_after_copy_defaults
   init_db
   init_stellar_core
   init_horizon
@@ -539,6 +539,11 @@ function upgrade_local() {
   if [ ".$PROTOCOL_VERSION" == ".none" ] ; then
     return
   fi
+
+  if [ ! validate_limits ] ; then
+    echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
+    kill_supervisor
+  fi   
 
   # Upgrade local network's protocol version and base reserve to match pubnet/testnet
   if [ $PROTOCOL_VERSION -gt 0 ]; then
