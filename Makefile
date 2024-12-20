@@ -9,7 +9,7 @@ CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
 STELLAR_RPC_REF?=main
-HORIZON_REF?=$(shell ./scripts/soroban_repo_to_horizon_repo.sh $(STELLAR_RPC_REF))
+HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
 
 run:
