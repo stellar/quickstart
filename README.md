@@ -1,5 +1,16 @@
 # Stellar Quickstart Docker Image
 
+> [!TIP]  
+> Install the [`stellar-cli`] and start development containers running this image with:
+>
+> ```
+> stellar container start local
+> ```
+
+[`stellar-cli`]: https://github.com/stellar/stellar-cli
+
+---
+
 This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing.
 
 > [!IMPORTANT]  
