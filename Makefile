@@ -27,7 +27,7 @@ build-latest:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.2 \
-		STELLAR_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.2 \
 		FRIENDBOT_REF=horizon-v22.0.2
 
 build-testing:
@@ -36,7 +36,7 @@ build-testing:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.2 \
-		STELLAR_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.2 \
 		FRIENDBOT_REF=horizon-v22.0.2
 
 build-future:
@@ -45,7 +45,7 @@ build-future:
 		XDR_REF=v22.0.0 \
 		CORE_REF=v22.0.0 \
 		HORIZON_REF=horizon-v22.0.2 \
-		STELLAR_RPC_REF=v22.1.0 \
+		STELLAR_RPC_REF=v22.1.2 \
 		FRIENDBOT_REF=horizon-v22.0.2
 
 build:
