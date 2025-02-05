@@ -4,7 +4,7 @@
 > Install the [`stellar-cli`] and start development containers running this image with:
 >
 > ```
-> stellar container start local
+> stellar container start
 > ```
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
