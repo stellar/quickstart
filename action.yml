@@ -20,6 +20,7 @@ runs:
       if: runner.os != 'windows'
       shell: bash
     - run: |
+        i=0
         while true; do
           status=`docker inspect -f {{.State.Health.Status}} quickstart`
           echo "quickstart status: $status"
@@ -27,6 +28,11 @@ runs:
             break
           fi
           sleep 1;
+          i=$((i + 1))
+          if [ i > 30 ]; then
+            i=0
+            docker logs quickstart
+          fi
         done;
       if: runner.os != 'windows'
       shell: bash
