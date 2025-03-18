@@ -16,7 +16,7 @@ runs:
         brew install colima
         colima start
     - run: |
-        docker run -d --name quickstart -p 8000:8000 -e ENABLE_LOGS=true -e NETWORK=local -e ENABLE_SOROBAN_RPC=true --health-cmd "curl --no-progress-meter --fail-with-body -X POST \"http://localhost:8000/soroban/rpc\" -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":8675309,\"method\":\"getNetwork\"}' && curl --no-progress-meter \"http://localhost:8000/friendbot\" | grep '\"invalid_field\": \"addr\"'" --health-interval 10s --health-timeout 5s --health-retries 50 stellar/quickstart:testing
+        docker run -d --name quickstart -p 8000:8000 -e ENABLE_LOGS=true -e NETWORK=local -e ENABLE_SOROBAN_RPC=true --health-cmd "curl --no-progress-meter --fail-with-body -X POST \"http://localhost:8000/soroban/rpc\" -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":8675309,\"method\":\"getNetwork\"}' && curl --no-progress-meter \"http://localhost:8000/friendbot\" | grep '\"invalid_field\": \"addr\"'" --health-interval 10s --health-timeout 5s --health-retries 50 stellar/quickstart:${{ inputs.version }}
       if: runner.os != 'windows'
       shell: bash
     - run: |
@@ -29,7 +29,8 @@ runs:
           fi
           sleep 1;
           i=$((i + 1))
-          if [ i > 30 ]; then
+          if [ i > 180 ]; then
+            echo "quickstart is slow to start, printing logs:"
             i=0
             docker logs quickstart
           fi
