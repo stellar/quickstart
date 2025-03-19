@@ -29,9 +29,9 @@ runs:
           fi
           sleep 1;
           i=$((i + 1))
-          if (( $i > 180 )); then
+          if (( $i > 300 )); then
             echo "quickstart is slow to start, printing logs:"
-            i=$((i - 180))
+            i=$((i - 300))
             docker logs quickstart
           fi
         done;
