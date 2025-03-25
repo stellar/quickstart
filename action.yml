@@ -46,7 +46,7 @@ runs:
       shell: bash
       if: runner.os == 'macos'
       run: |
-        brew install docker colima
+        brew install --formula docker colima
         colima start
     - run: >
         docker run -d --name stellar 
