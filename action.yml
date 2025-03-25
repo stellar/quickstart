@@ -72,17 +72,17 @@ runs:
       run: |
         i=0
         while true; do
-          status=`docker inspect -f {{.State.Health.Status}} quickstart`
-          echo "quickstart status: $status"
+          status=`docker inspect -f {{.State.Health.Status}} stellar`
+          echo "stellar image status: $status"
           if [ "$status" == "healthy" ]; then
             break
           fi
           sleep 1;
           i=$((i + 1))
           if (( $i > 300 )); then
-            echo "quickstart is slow to start, printing logs:"
+            echo "stellar image is slow to start, printing logs:"
             i=$((i - 300))
-            docker logs quickstart
+            docker logs stellar
           fi
         done;
       shell: bash
