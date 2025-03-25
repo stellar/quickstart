@@ -56,7 +56,7 @@ runs:
         -e ENABLE_LOGS="${{ inputs.enable }}"
         -e NETWORK="${{ inputs.network }}" 
         --health-cmd "curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
-        '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"getHealth\"}' 'http://localhost:8000/rpc'" 
+        '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"getHealth\"}' 'http://localhost:8000/rpc' 
         | grep 'healthy'
         && curl --no-progress-meter \"http://localhost:8000/friendbot\" | 
         grep '\"invalid_field\": \"addr\"'" 
