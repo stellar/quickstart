@@ -1,0 +1,88 @@
+name: 'Run quickstart'
+description: 'Runs quickstart docker image'
+inputs:
+  tag:
+    description: "Image tag of quickstart image to use"
+    required: true
+    default: "latest"
+  image:
+    description: "Image for the quickstart image to use"
+    required: true
+    default: "docker.io/stellar/quickstart"
+  enable:
+    description: "Services to enable"
+    default: "core,horizon,rpc"
+  network:
+    description: "Network to run"
+    default: "local"
+  enable_logs:
+    description: "Boolean flag enabling the logs"
+    default: "true"
+  health_interval:
+    description: "Time between running the check (in seconds)"
+    default: "10"
+  health_timeout:
+    description: "Maximum time to allow one check to run (in seconds)"
+    default: "5"
+  health_retries:
+    description: "Consecutive failures needed to report unhealthy"
+    default: "50"
+runs:
+  using: "composite"
+  steps:
+    - name: "Check if Windows (unsupported)"
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        echo "Windows runners are not supported"
+        exit 1
+    - name: "Check if macOS Apple Silicon (unsupported)"
+      if: runner.os == 'macOS' && (runner.arch == 'ARM' || runner.arch == 'ARM64')
+      shell: bash
+      run: |
+        echo "ARM MacOS runner is not yet supported, see https://github.com/douglascamata/setup-docker-macos-action"
+        exit 1
+    - name: Setup Colima and Docker (macOS only)
+      shell: bash
+      if: runner.os == 'macos'
+      run: |
+        brew install docker
+        brew install colima
+        colima start
+    - run: >
+        docker run -d --name stellar 
+        -p 8000:8000 
+        -p 11626:11626 
+        -p 11726:11726 
+        -p 11826:11826 
+        -e ENABLE_LOGS="${{ inputs.enable_logs }}"
+        -e ENABLE_LOGS="${{ inputs.enable }}"
+        -e NETWORK="${{ inputs.network }}" 
+        --health-cmd "curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
+        '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"getHealth\"}' 'http://localhost:8000/rpc' 
+        | grep 'healthy'
+        && curl --no-progress-meter \"http://localhost:8000/friendbot\" | 
+        grep '\"invalid_field\": \"addr\"'" 
+        --health-interval ${{ inputs.health_interval }}s 
+        --health-timeout ${{ inputs.health_timeout }}s 
+        --health-retries ${{ inputs.health_retries }} 
+        ${{ inputs.image }}:${{ inputs.tag }}
+      shell: bash
+    - name: "Wait for container to be healthy"
+      run: |
+        i=0
+        while true; do
+          status=`docker inspect -f {{.State.Health.Status}} stellar`
+          echo "stellar image status: $status"
+          if [ "$status" == "healthy" ]; then
+            break
+          fi
+          sleep 1;
+          i=$((i + 1))
+          if (( $i > 300 )); then
+            echo "stellar image is slow to start, printing logs:"
+            i=$((i - 300))
+            docker logs stellar
+          fi
+        done;
+      shell: bash
