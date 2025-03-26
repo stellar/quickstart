@@ -70,3 +70,9 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+
+  action-test:
+    needs: [latest, testing]
+    uses: ./.github/workflows/action-test.yml
+    with:
+      test_tags: "[${{ needs.setup.outputs.tag-prefix }}latest, ${{ needs.setup.outputs.tag-prefix }}testing]"

@@ -1,8 +1,12 @@
 name: Action test
 
 on:
-  push:
-    branches: [main, release/**]
+  workflow_call:
+    inputs:
+      test_tags:
+        description: 'Test tags to use'
+        type: 'string'
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
@@ -21,7 +25,7 @@ jobs:
           - os: ubuntu-jammy-16-cores-arm64
             # Intel
           - os: macos-13
-        tag: [latest, testing]
+        tag: ${{ fromJSON(inputs.test_tags) }}
     runs-on: ${{ matrix.sys.os }}
     steps:
       - uses: stellar/quickstart@main
