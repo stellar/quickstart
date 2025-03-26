@@ -470,8 +470,8 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   push-release:
-    # Push image to registry after test for master.
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    # Push image to registry after test for main.
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs: [build, test]
     permissions:
       packages: write
