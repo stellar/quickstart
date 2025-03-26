@@ -1,4 +1,4 @@
-name: Basic test
+name: Action test
 
 on:
   push:
