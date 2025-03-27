@@ -8,10 +8,6 @@ on:
         type: 'string'
         default: ''
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   basic-test:
     name: Basic tests
