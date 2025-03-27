@@ -76,11 +76,16 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/action-test.yml
     with:
-      test_tags: "[latest, testing]"
+      test_tags: |
+        [latest, testing]
 
   action-test-pr:
     needs: [latest, testing]
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/action-test.yml
     with:
-      test_tags: "[${{ needs.setup.outputs.tag-prefix }}latest, ${{ needs.setup.outputs.tag-prefix }}testing]"
+      test_tags: |
+        [
+            ${{ needs.setup.outputs.tag-prefix }}latest, 
+            ${{ needs.setup.outputs.tag-prefix }}testing
+        ]
