@@ -4,4 +4,4 @@ set -e
 set -o pipefail
 
 echo "starting lab..."
-npm start
+./node_modules/.bin/next start --port 8002

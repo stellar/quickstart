@@ -59,7 +59,7 @@ build:
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
 	  --build-arg STELLAR_RPC_IMAGE_REF=stellar-rpc:$(STELLAR_RPC_REF) \
-	  --build-arg LAB_IMAGE_REF=stellar-lab:$(LAB_REF) \
+	  --build-arg LAB_IMAGE_REF=stellar-lab:$(LAB_REF)
 
 build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-stellar-rpc build-deps-lab
 
