@@ -3,12 +3,14 @@ ARG STELLAR_CORE_IMAGE_REF
 ARG HORIZON_IMAGE_REF
 ARG FRIENDBOT_IMAGE_REF
 ARG STELLAR_RPC_IMAGE_REF
+ARG LAB_IMAGE_REF
 
 FROM $STELLAR_XDR_IMAGE_REF AS stellar-xdr
 FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
 FROM $HORIZON_IMAGE_REF AS horizon
 FROM $FRIENDBOT_IMAGE_REF AS friendbot
 FROM $STELLAR_RPC_IMAGE_REF AS stellar-rpc
+FROM $LAB_IMAGE_REF AS lab
 
 FROM ubuntu:22.04
 
@@ -19,6 +21,7 @@ EXPOSE 5432
 EXPOSE 8000
 EXPOSE 6060
 EXPOSE 6061
+EXPOSE 9876
 EXPOSE 11625
 EXPOSE 11626
 
@@ -26,14 +29,11 @@ ADD dependencies /
 RUN /dependencies
 
 COPY --from=stellar-xdr /usr/local/cargo/bin/stellar-xdr /usr/local/bin/stellar-xdr
-
 COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
-
 COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
-
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
-
 COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-rpc
+COPY --from=lab /lab /opt/stellar/lab
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
