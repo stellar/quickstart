@@ -21,7 +21,7 @@ EXPOSE 5432
 EXPOSE 8000
 EXPOSE 6060
 EXPOSE 6061
-EXPOSE 9876
+EXPOSE 8002
 EXPOSE 11625
 EXPOSE 11626
 
@@ -34,6 +34,15 @@ COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
+COPY --from=lab /usr/local/bin/node \
+                /usr/local/bin/npm \
+                /usr/local/bin/corepack \
+                /usr/local/bin/npx \
+                /usr/local/bin/yarn \
+                /usr/local/bin/yarnpkg \
+                /usr/bin/
+COPY --from=lab /usr/local/include/node /usr/local/include/node
+COPY --from=lab /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
