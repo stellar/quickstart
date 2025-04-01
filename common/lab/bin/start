@@ -4,4 +4,7 @@ set -e
 set -o pipefail
 
 echo "starting lab..."
-./node_modules/.bin/next start --port 8002
+export PORT=8002
+export NEXT_BASE_PATH=/lab
+export NEXT_PUBLIC_DEFAULT_NETWORK=custom
+./node_modules/.bin/next start

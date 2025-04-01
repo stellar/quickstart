@@ -11,7 +11,7 @@ CORE_CONFIGURE_FLAGS?=--disable-tests
 STELLAR_RPC_REF?=main
 HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
-LAB_REF?=main
+LAB_REF?=default-network
 
 run:
 	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-stellar-rpc
@@ -79,4 +79,4 @@ build-deps-stellar-rpc:
 	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f cmd/stellar-rpc/docker/Dockerfile --target build https://github.com/stellar/stellar-rpc.git#$(STELLAR_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
 
 build-deps-lab:
-	docker build -t stellar-lab:$(LAB_REF) -f Dockerfile.lab --target builder . --build-arg NEXT_PUBLIC_COMMIT_HASH=main
+	docker build -t stellar-lab:$(LAB_REF) -f Dockerfile.lab --target builder . --build-arg NEXT_PUBLIC_COMMIT_HASH=$(LAB_REF)
