@@ -12,8 +12,8 @@ jobs:
       - uses: actions/stale@v9
         with:
           debug-only: false
-          days-before-stale: 30
-          days-before-close: 30
+          days-before-stale: 90
+          days-before-close: 90
           stale-issue-message: 'This issue is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
           stale-pr-message: 'This pull request is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
           stale-issue-label: stale
