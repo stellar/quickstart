@@ -94,6 +94,7 @@ function start() {
   validate_after_copy_defaults
   init_db
   init_stellar_core
+  init_friendbot
   init_horizon
   copy_pgpass
   init_stellar_rpc
@@ -439,6 +440,15 @@ function init_stellar_core() {
   fi
 
   touch .quickstart-initialized
+  popd
+}
+
+function init_friendbot() {
+  pushd $FBHOME
+
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/friendbot.cfg
+  perl -pi -e "s/__NETWORK_ROOT_SECRET_KEY__/$NETWORK_ROOT_SECRET_KEY/g" etc/friendbot.cfg
+
   popd
 }
 
