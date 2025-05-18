@@ -206,7 +206,9 @@ function process_args() {
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
   local)
-    export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    if [ -z "$NETWORK_PASSPHRASE" ]; then
+      export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    fi
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
