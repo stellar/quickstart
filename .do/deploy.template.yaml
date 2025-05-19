@@ -6,7 +6,7 @@ spec:
       registry_type: DOCKER_HUB
       registry: stellar
       repository: quickstart
-      tag: latest
+      tag: pr690-v488-latest # normally latest changing temporarily to test
     instance_count: 1
     http_port: 8000
     health_check:
