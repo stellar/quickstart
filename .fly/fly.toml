@@ -5,6 +5,8 @@
 image = "docker.io/stellar/quickstart:latest"
 
 [env]
+# NETWORK chooses the network the image will connect to. Use "local" to start a
+# new network local to the container, ideal for development and testing.
 NETWORK="local"
 
 # LIMITS sets the network configuration that is deployed on network start.
