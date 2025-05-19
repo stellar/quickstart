@@ -604,25 +604,25 @@ function upgrade_local() {
   # upgrade txs, it must not be started until the config upgrades are
   # complete otherwise the txs sequence numbers will conflict.
   if [ "$ENABLE_HORIZON" == "true" ]; then
-      supervisorctl -c $SUPHOME/etc/supervisord.conf start friendbot
+      supervisorctl start friendbot
   fi    
 }
 
 function start_optional_services() {
-  while supervisorctl -c $SUPHOME/etc/supervisord.conf status > /dev/null; [ $? -eq 4 ]; do
+  while supervisorctl status > /dev/null; [ $? -eq 4 ]; do
     sleep 1
   done
 
   if [ "$ENABLE_CORE" == "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf start postgresql
-    supervisorctl -c $SUPHOME/etc/supervisord.conf start stellar-core
+    supervisorctl start postgresql
+    supervisorctl start stellar-core
   fi
   if [ "$ENABLE_HORIZON" == "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf start postgresql
-    supervisorctl -c $SUPHOME/etc/supervisord.conf start horizon
+    supervisorctl start postgresql
+    supervisorctl start horizon
   fi
   if [ "$ENABLE_RPC" == "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf start stellar-rpc
+    supervisorctl start stellar-rpc
   fi
 }
 
@@ -642,19 +642,19 @@ function exec_supervisor() {
 
 function print_service_logs() {
   # Wait for supervisord to be up.
-  while ! supervisorctl -c $SUPHOME/etc/supervisord.conf pid > /dev/null ; do
+  while ! supervisorctl pid > /dev/null ; do
     sleep 1;
   done
   # Start tailing logs from notable services.
   if [ "$ENABLE_CORE" = "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
-    supervisorctl -c $SUPHOME/etc/supervisord.conf tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
+    supervisorctl tail -f stellar-core stdout > >(sed "s/^/${purple}stellar-core | $clear/") &
+    supervisorctl tail -f stellar-core stderr > >(sed "s/^/${purple}stellar-core | $clear/" >&2) &
   fi
   if [ "$ENABLE_HORIZON" = "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
+    supervisorctl tail -f horizon      stdout > >(sed  "s/^/${green}horizon      | $clear/") &
   fi
   if [ "$ENABLE_RPC" = "true" ]; then
-    supervisorctl -c $SUPHOME/etc/supervisord.conf tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
+    supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
   fi
 }
 
@@ -790,6 +790,10 @@ function horizon_status() {
     sleep 5
   done
   echo "horizon: ingestion caught up"
+}
+
+function supervisorctl() {
+  /usr/bin/supervisorctl -c $SUPHOME/etc/supervisord.conf "$@"
 }
 
 main $@
