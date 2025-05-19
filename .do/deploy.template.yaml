@@ -14,14 +14,27 @@ spec:
     - path: /
     envs:
     - key: IMAGE
-      value: stellar/quickstart:latest
+      value: docker.io/stellar/quickstart:latest
       scope: BUILD_TIME
     - key: NETWORK
       value: 'local'
       scope: RUN_TIME
-    - key: ENABLE_RPC
-      value: 'false'
-      scope: RUN_TIME
-    - key: DISABLE_SOROBAN_DIAGNOSTIC_EVENTS
-      value: 'true'
-      scope: RUN_TIME
+
+    # LIMITS sets the network configuration that is deployed on network start.
+    # - "testnet" to match the network configuration of the public Stellar testnet.
+    # - "unlimited" raises limits to max, useful for testing prior to optimization.
+    #- key: LIMITS
+    #  value: 'testnet'
+    #  scope: RUN_TIME
+
+    # RANDOMIZE_NETWORK_PASSPHRASE sets a random network passphrase on network
+    # start. Find out what the network passphrase is by requesting the root URL.
+    #- key: RANDOMIZE_NETWORK_PASSPHRASE
+    #  value: 'true'
+    #  scope: RUN_TIME
+
+    # NETWORK_PASSPHRASE sets a network passphrase to uniquely identify the network
+    # and prevent use of transactions for the test network with other networks.
+    #- key: NETWORK_PASSPHRASE
+    #  value: 'My Network'
+    #  scope: RUN_TIME
