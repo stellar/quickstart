@@ -13,6 +13,7 @@ export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
+export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
@@ -26,6 +27,7 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
+: "${ENABLE_LAB:=false}"
 # TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
@@ -629,12 +631,18 @@ function start_optional_services() {
     supervisorctl start postgresql
     supervisorctl start stellar-core
   fi
+
   if [ "$ENABLE_HORIZON" == "true" ]; then
     supervisorctl start postgresql
     supervisorctl start horizon
   fi
+
   if [ "$ENABLE_RPC" == "true" ]; then
     supervisorctl start stellar-rpc
+  fi
+
+  if [ "$ENABLE_LAB" == "true" ]; then
+    supervisorctl start stellar-lab
   fi
 }
 
