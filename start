@@ -804,4 +804,8 @@ function horizon_status() {
   echo "horizon: ingestion caught up"
 }
 
+function supervisorctl() {
+  /usr/bin/supervisorctl -c $SUPHOME/etc/supervisord.conf "$@"
+}
+
 main $@

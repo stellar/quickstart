@@ -265,6 +265,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 11726 | stellar-core (horizon)     | main http port       |
 | 11825 | stellar-core (stellar-rpc) | peer node port       |
 | 11826 | stellar-core (stellar-rpc) | main http port       |
+| 9001  | supervisord                | supervisord port     |
 
 ### Security Considerations
 
