@@ -2,13 +2,13 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
-PROTOCOL_VERSION_DEFAULT?=22
+PROTOCOL_VERSION_DEFAULT?=23
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
-XDR_REF?=main
+XDR_REF?=v23.0.0-rc.1
 CORE_REPO?=https://github.com/stellar/stellar-core.git
-CORE_REF?=master
+CORE_REF?=v23.0.0rc.1
 CORE_CONFIGURE_FLAGS?=--disable-tests
-STELLAR_RPC_REF?=main
+STELLAR_RPC_REF?=protocol-23
 HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
 LAB_REF?=main
