@@ -9,7 +9,7 @@ CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=v23.0.0rc.1
 CORE_CONFIGURE_FLAGS?=--disable-tests
 STELLAR_RPC_REF?=protocol-23
-HORIZON_REF?=master
+HORIZON_REF?=protocol-23
 FRIENDBOT_REF?=$(HORIZON_REF)
 LAB_REF?=main
 
