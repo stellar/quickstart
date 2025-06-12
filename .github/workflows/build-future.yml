@@ -33,9 +33,9 @@ jobs:
       protocol_version_default: 23
       xdr_ref: v23.0.0-rc.1
       core_ref: v23.0.0rc.1
-      horizon_ref: master
+      horizon_ref: protocol-23
       stellar_rpc_ref: protocol-23
-      friendbot_ref: master
+      friendbot_ref: protocol-23
       lab_ref: main
       test_matrix: |
         {
@@ -58,9 +58,9 @@ jobs:
       protocol_version_default: 23
       xdr_ref: v23.0.0-rc.1
       core_ref: v23.0.0rc.1
-      horizon_ref: master
+      horizon_ref: protocol-23
       stellar_rpc_ref: protocol-23
-      friendbot_ref: master
+      friendbot_ref: protocol-23
       lab_ref: main
       test_matrix: |
         {
