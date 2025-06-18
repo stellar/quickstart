@@ -2,14 +2,14 @@ __PHONY__: run logs build build-deps build-deps-core build-deps-horizon build-de
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=dev
-PROTOCOL_VERSION_DEFAULT?=23
+PROTOCOL_VERSION_DEFAULT?=22
 XDR_REPO?=https://github.com/stellar/rs-stellar-xdr.git
-XDR_REF?=v23.0.0-rc.1
+XDR_REF?=main
 CORE_REPO?=https://github.com/stellar/stellar-core.git
 CORE_REF?=master
 CORE_CONFIGURE_FLAGS?=--disable-tests
-STELLAR_RPC_REF?=protocol-23
-HORIZON_REF?=protocol-23
+STELLAR_RPC_REF?=main
+HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
 LAB_REF?=main
 
@@ -42,12 +42,12 @@ build-testing:
 
 build-future:
 	$(MAKE) build TAG=future \
-		PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0 \
-		CORE_REF=v22.3.0 \
-		HORIZON_REF=horizon-v22.0.3 \
-		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.3
+		PROTOCOL_VERSION_DEFAULT=23 \
+		XDR_REF=v23.0.0-rc.1 \
+		CORE_REF=master \
+		HORIZON_REF=protocol-23 \
+		STELLAR_RPC_REF=protocol-23 \
+		FRIENDBOT_REF=horizon-protocol-23
 
 build:
 	$(MAKE) -j 4 build-deps
