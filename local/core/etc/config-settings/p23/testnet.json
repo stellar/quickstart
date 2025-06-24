@@ -13,26 +13,21 @@
     },
     {
       "contract_ledger_cost_v0": {
-        "fee_disk_read_ledger_entry": 6250,
-        "fee_disk_read1_kb": 1786,
-        "fee_write_ledger_entry": 10000,
-        "ledger_max_disk_read_bytes": 500000,
-        "ledger_max_disk_read_entries": 5,
-        "ledger_max_read_bytes": 500000,
-        "ledger_max_read_ledger_entries": 200,
+        "ledger_max_disk_read_entries": 500,
+        "ledger_max_disk_read_bytes": 3500000,
+        "ledger_max_write_ledger_entries": 250,
         "ledger_max_write_bytes": 143360,
-        "ledger_max_write_ledger_entries": 125,
-        "rent_fee1_kb_soroban_state_size_high": 10000,
-        "rent_fee1_kb_soroban_state_size_low": 100,
-        "soroban_state_rent_fee_growth_factor": 1,
-        "soroban_state_target_size_bytes": 500000,
+        "tx_max_disk_read_entries": 100,
         "tx_max_disk_read_bytes": 200000,
-        "tx_max_disk_read_entries": 40,
-        "tx_max_read_ledger_entries": 40,
+        "tx_max_write_ledger_entries": 50,
         "tx_max_write_bytes": 132096,
-        "tx_max_write_ledger_entries": 25,
-        "write_fee1_kb_bucket_list_high": 115390,
-        "write_fee1_kb_bucket_list_low": -12034
+        "fee_disk_read_ledger_entry": 6250,
+        "fee_write_ledger_entry": 10000,
+        "fee_disk_read1_kb": 1786,
+        "soroban_state_target_size_bytes": 300000000,
+        "rent_fee1_kb_soroban_state_size_low": 9836,
+        "rent_fee1_kb_soroban_state_size_high": 12116,
+        "soroban_state_rent_fee_growth_factor": 5000
       }
     },
     {
