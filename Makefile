@@ -47,7 +47,7 @@ build-future:
 		CORE_REF=master \
 		HORIZON_REF=protocol-23 \
 		STELLAR_RPC_REF=protocol-23 \
-		FRIENDBOT_REF=horizon-protocol-23
+		FRIENDBOT_REF=protocol-23
 
 build:
 	$(MAKE) -j 4 build-deps
