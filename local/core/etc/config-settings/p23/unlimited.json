@@ -411,8 +411,8 @@
     {
       "state_archival": {
         "eviction_scan_size": 100000,
-        "live_soroban_state_size_window_sample_period": 0,
-        "live_soroban_state_size_window_sample_size": 0,
+        "live_soroban_state_size_window_sample_period": 64,
+        "live_soroban_state_size_window_sample_size": 30,
         "max_entries_to_archive": 100,
         "max_entry_ttl": 3110400,
         "min_persistent_ttl": 120960,
