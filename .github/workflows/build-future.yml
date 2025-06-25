@@ -32,7 +32,7 @@ jobs:
       tag: ${{ inputs.tag-prefix }}future-amd64
       protocol_version_default: 23
       xdr_ref: v23.0.0-rc.1
-      core_ref: v23.0.0rc.1
+      core_ref: master
       horizon_ref: protocol-23
       stellar_rpc_ref: protocol-23
       friendbot_ref: protocol-23
