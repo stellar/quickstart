@@ -1,9 +1,25 @@
+---
 name: Future
 
 # The `:future` tag points to a build containing unreleased versions of
 # software that have been informally released to the futurenet network.
 
 on:
+  workflow_dispatch:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+    inputs:
+      sha:
+        description: "Sha to build"
+        type: "string"
+        required: true
+      tag-prefix:
+        description: "Prefix for the tag name"
+        type: "string"
+        default: ""
   workflow_call:
     secrets:
       DOCKERHUB_USERNAME:
@@ -12,16 +28,15 @@ on:
         required: false
     inputs:
       sha:
-        description: 'Sha to build'
-        type: 'string'
+        description: "Sha to build"
+        type: "string"
         required: true
       tag-prefix:
-        description: 'Prefix for the tag name'
-        type: 'string'
-        default: ''
+        description: "Prefix for the tag name"
+        type: "string"
+        default: ""
 
 jobs:
-
   amd64:
     uses: ./.github/workflows/build.yml
     secrets:
