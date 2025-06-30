@@ -226,11 +226,9 @@ jobs:
     - name: Build Stellar-lab Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f Dockerfile.lab
-        -t stellar-lab:${{ inputs.arch }}
-        --build-arg NEXT_PUBLIC_COMMIT_HASH=${{ env.LAB_REPO_REF }}
-        -o type=docker,dest=/tmp/image
-        https://github.com/stellar/go.git#${{ env.LAB_REPO_REF }}
+        -f Dockerfile.lab --target builder
+        -t stellar-lab:${{ inputs.arch }} -o type=docker,dest=/tmp/image
+        --build-arg NEXT_PUBLIC_COMMIT_HASH=${{ env.LAB_REPO_REF }} .
     - name: Upload Stellar-lab Image
       uses: actions/upload-artifact@v4
       with:
