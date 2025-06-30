@@ -223,12 +223,12 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.arch }}-${{ env.LAB_REPO_REF }}
+        key: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}-${{ inputs.arch }}
     - name: Upload Stellar-Lab Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-stellar-lab:
@@ -239,7 +239,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.arch }}-${{ env.LAB_REPO_REF }}
+        key: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}-${{ inputs.arch }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
@@ -259,7 +259,7 @@ jobs:
     - name: Upload Stellar-lab Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}-${{ inputs.arch }}
         path: /tmp/image
 
   load-rs-stellar-xdr-from-cache:
@@ -354,7 +354,7 @@ jobs:
     - name: Download Stellar-Lab Image
       uses: actions/download-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}-${{ inputs.arch }}
         path: /tmp/stellar-lab
     - name: Download Stellar-rpc Image
       uses: actions/download-artifact@v4
