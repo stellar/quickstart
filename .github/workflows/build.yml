@@ -325,8 +325,6 @@ jobs:
         sudo rm -rf /usr/local/lib/android
         sudo rm -rf /opt/ghc
         sudo rm -rf /opt/hostedtoolcache/CodeQL
-        sudo docker image prune --all --force
-        sudo docker builder prune -a
         df -h
     - uses: actions/checkout@v3
       with:
