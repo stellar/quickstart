@@ -11,7 +11,7 @@ CORE_CONFIGURE_FLAGS?=--disable-tests
 STELLAR_RPC_REF?=main
 HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
-LAB_REF?=default-network
+LAB_REF?=main
 
 run:
 	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-stellar-rpc
