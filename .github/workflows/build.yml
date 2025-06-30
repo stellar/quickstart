@@ -67,7 +67,7 @@ env:
   HORIZON_REPO_REF: ${{ inputs.horizon_ref }}
   FRIENDBOT_REPO_REF: ${{ inputs.friendbot_ref }}
   STELLAR_RPC_REPO_BRANCH: ${{ inputs.stellar_rpc_ref }}
-  LAB_REPO_REF: ${{ input.lab_ref }}
+  LAB_REPO_REF: ${{ inputs.lab_ref }}
   CORE_REPO: ${{ inputs.core_repo }}
   CORE_REPO_REF: ${{ inputs.core_ref }}
   XDR_REPO_REF: ${{ inputs.xdr_ref }}
