@@ -37,6 +37,7 @@ jobs:
       horizon_ref: horizon-v22.0.2
       stellar_rpc_ref: v22.1.2
       friendbot_ref: horizon-v22.0.2
+      lab_ref: main
       test_matrix: |
         {
           "network": ["local"],
@@ -61,6 +62,7 @@ jobs:
       horizon_ref: horizon-v22.0.2
       stellar_rpc_ref: v22.1.2
       friendbot_ref: horizon-v22.0.2
+      lab_ref: main
       test_matrix: |
         {
           "network": ["local"],
