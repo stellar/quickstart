@@ -52,6 +52,7 @@ on:
         required: true
       lab_ref:
         description: 'Git ref for the stellar/laboratory (lab)'
+        type: 'string'
         required: true
       test_matrix:
         description: 'JSON matrix for the test job'
