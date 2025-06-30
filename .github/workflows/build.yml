@@ -214,9 +214,32 @@ jobs:
         name: image-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
+  load-stellar-lab-from-cache:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-lab-${{ inputs.arch }}-${{ env.LAB_REPO_REF }}
+    - name: Upload Stellar-Lab Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
   build-stellar-lab:
+    if: ${{ needs.load-stellar-lab-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ubuntu-latest
     steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-lab-${{ inputs.arch }}-${{ env.LAB_REPO_REF }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
