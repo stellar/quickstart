@@ -146,6 +146,10 @@ function process_args() {
       export ENABLE_ASSET_STATS="$1"
       shift
       ;;
+    --enable-lab)
+      export ENABLE_LAB=true
+      shift
+      ;;
     --limits)
       export LIMITS="$1"
       shift
