@@ -45,9 +45,9 @@ build-future:
 		PROTOCOL_VERSION_DEFAULT=23 \
 		XDR_REF=v23.0.0-rc.1 \
 		CORE_REF=master \
-		HORIZON_REF=protocol-23 \
+		HORIZON_REF=horizon-v23.0.0-rc1 \
 		STELLAR_RPC_REF=protocol-23 \
-		FRIENDBOT_REF=protocol-23
+		FRIENDBOT_REF=horizon-v23.0.0-rc1
 
 build:
 	$(MAKE) -j 4 build-deps
