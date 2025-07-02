@@ -147,8 +147,7 @@ function process_args() {
       shift
       ;;
     --enable-lab)
-      export ENABLE_LAB=true
-      shift
+      ENABLE_LAB=true
       ;;
     --limits)
       export LIMITS="$1"
