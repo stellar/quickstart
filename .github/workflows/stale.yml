@@ -17,12 +17,10 @@ jobs:
           days-before-close: -1
           stale-issue-message:
             "This issue is stale because it has been open for 90 days with no
-            activity. It will be closed in 30 days unless the stale label is
-            removed."
+            activity."
           stale-pr-message:
             "This pull request is stale because it has been open for 90 days
-            with no activity. It will be closed in 30 days unless the stale
-            label is removed."
+            with no activity."
           stale-issue-label: stale
           stale-pr-label: stale
           remove-stale-when-updated: true
