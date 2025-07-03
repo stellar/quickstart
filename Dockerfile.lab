@@ -1,0 +1,18 @@
+FROM node:22 AS builder
+
+ARG NEXT_PUBLIC_COMMIT_HASH
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=8100
+WORKDIR /lab
+RUN git clone https://github.com/stellar/laboratory /lab
+RUN git fetch origin ${NEXT_PUBLIC_COMMIT_HASH}
+RUN git checkout ${NEXT_PUBLIC_COMMIT_HASH}
+RUN rm -rf .git
+RUN yarn install
+ENV NEXT_PUBLIC_ENABLE_EXPLORER=true
+ENV NEXT_PUBLIC_DEFAULT_NETWORK=custom
+ENV NEXT_BASE_PATH=/lab
+RUN yarn build
+
+EXPOSE 8100
+CMD ["npm", "start"]
