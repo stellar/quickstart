@@ -11,7 +11,7 @@
 
 ---
 
-This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing.
+This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing
 
 > [!IMPORTANT]  
 > This docker image is intended for use in development, not production. See these docs for how to run Stellar services in production:
