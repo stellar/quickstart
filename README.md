@@ -1,5 +1,7 @@
 # Stellar Quickstart Docker Image
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stellar/quickstart)
+
 > [!TIP]  
 > Install the [`stellar-cli`] and start development containers running this image with:
 >
