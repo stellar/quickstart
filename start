@@ -194,11 +194,17 @@ function process_args() {
   if [[ ",$ENABLE," = *",core,"* ]]; then
     ENABLE_CORE=true
   fi
+
   if [[ ",$ENABLE," = *",horizon,"* ]]; then
     ENABLE_HORIZON=true
   fi
+
   if [[ ",$ENABLE," = *",rpc,"* ]]; then
     ENABLE_RPC=true
+  fi
+
+  if [[ ",$ENABLE," = *",lab,"* ]]; then
+    ENABLE_LAB=true
   fi
 
   case "$NETWORK" in
