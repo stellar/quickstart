@@ -128,6 +128,37 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
+### Readiness Endpoint
+
+The quickstart image provides a `/ready` endpoint that indicates when all services are fully ready for use. This endpoint reports HTTP 200 when the image is ready and HTTP 503 when services are still starting up or experiencing issues.
+
+Example usage:
+
+```bash
+$ curl http://localhost:8000/ready
+```
+
+Example response when ready:
+```json
+{
+  "status": "ready",
+  "services": {
+    "stellar-core": "ready",
+    "horizon": "ready",
+    "horizon_health": {
+      "database_connected": true,
+      "core_up": true,
+      "core_synced": true
+    },
+    "stellar-rpc": "ready"
+  }
+}
+```
+
+The endpoint automatically detects which services are running and only reports "ready" when all detected services are functioning properly. This eliminates the need to write custom scripts to test multiple service endpoints individually.
+
+_Note: The `/ready` endpoint provides overall readiness status, while Horizon's existing `/health` endpoint provides Horizon-specific health information._
+
 ### Soroban Development
 
 The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Stellar RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
@@ -248,9 +279,9 @@ Managing UIDs between a docker container and a host volume can be complicated. A
 
 The image exposes one main port through which services provide their APIs:
 
-| Port | Service                         | Description    |
-| ---- | ------------------------------- | -------------- |
-| 8000 | horizon, stellar-rpc, friendbot | main http port |
+| Port | Service                                | Description    |
+| ---- | -------------------------------------- | -------------- |
+| 8000 | horizon, stellar-rpc, friendbot, ready | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -259,6 +290,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
+| 8004  | readiness service          | internal port        |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
