@@ -10,9 +10,9 @@ import (
 
 const timeout = 6 * time.Minute
 
-type HealthResponse struct {
+type ReadinessResponse struct {
 	Status   string            `json:"status"`
-	Services map[string]string `json:"services"`
+	Services map[string]interface{} `json:"services"`
 }
 
 func main() {
@@ -20,37 +20,37 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for health endpoint to be ready")
+		logLine("Waiting for readiness endpoint to be ready")
 
 		if time.Since(startTime) > timeout {
 			logLine("Timeout")
 			os.Exit(-1)
 		}
 
-		resp, err := http.Get("http://localhost:8000/health")
+		resp, err := http.Get("http://localhost:8000/ready")
 		if err != nil {
 			logLine(err)
 			continue
 		}
 
-		var healthResponse HealthResponse
+		var readinessResponse ReadinessResponse
 		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&healthResponse)
+		err = decoder.Decode(&readinessResponse)
 		resp.Body.Close()
 		if err != nil {
 			logLine(err)
 			continue
 		}
 
-		logLine("Health response:", healthResponse)
+		logLine("Readiness response:", readinessResponse)
 
-		if resp.StatusCode == http.StatusOK && healthResponse.Status == "healthy" {
-			logLine("Health endpoint reports all services are healthy!")
+		if resp.StatusCode == http.StatusOK && readinessResponse.Status == "ready" {
+			logLine("Readiness endpoint reports all services are ready!")
 			os.Exit(0)
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			logLine("Health endpoint returned status:", resp.StatusCode)
+			logLine("Readiness endpoint returned status:", resp.StatusCode)
 		}
 	}
 }
