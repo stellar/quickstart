@@ -25,9 +25,12 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     
     def handle_readiness_check(self):
         """Handle readiness check requests"""
-        enable_core = os.getenv('ENABLE_CORE', 'false').lower() == 'true'
-        enable_horizon = os.getenv('ENABLE_HORIZON', 'false').lower() == 'true'
-        enable_rpc = os.getenv('ENABLE_RPC', 'false').lower() == 'true'
+        
+        # Detect enabled services by checking if they're running
+        # rather than relying on environment variables which may not be passed to supervisord
+        enable_core = self.is_service_intended_to_run('stellar-core')
+        enable_horizon = self.is_service_intended_to_run('horizon')
+        enable_rpc = self.is_service_intended_to_run('stellar-rpc')
         
         response = {
             'status': 'ready',
@@ -78,6 +81,43 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.wfile.write(response_json.encode('utf-8'))
         
         logger.info(f"Readiness check - Status: {response['status']}, Services: {response['services']}")
+    
+    def is_service_intended_to_run(self, service_name):
+        """Check if a service is intended to run by testing if it's reachable"""
+        if service_name == 'stellar-core':
+            # Check if stellar-core is running on its default port
+            try:
+                with urllib.request.urlopen('http://localhost:11626/info', timeout=2) as resp:
+                    return True
+            except:
+                return False
+        elif service_name == 'horizon':
+            # Check if horizon is running on its default port  
+            try:
+                with urllib.request.urlopen('http://localhost:8001', timeout=2) as resp:
+                    return True
+            except:
+                return False
+        elif service_name == 'stellar-rpc':
+            # Check if stellar-rpc is running by calling its health method
+            try:
+                request_data = {
+                    'jsonrpc': '2.0',
+                    'id': 10235,
+                    'method': 'getHealth'
+                }
+                
+                req = urllib.request.Request(
+                    'http://localhost:8003',
+                    data=json.dumps(request_data).encode('utf-8'),
+                    headers={'Content-Type': 'application/json'}
+                )
+                
+                with urllib.request.urlopen(req, timeout=2) as resp:
+                    return True
+            except:
+                return False
+        return False
     
     def check_stellar_core(self):
         """Check if stellar-core is healthy"""
