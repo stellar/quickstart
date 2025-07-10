@@ -151,6 +151,76 @@ In local network mode diagnostics are enabled by default and can be disabled wit
 
 _Note: Diagnostic events are unmetered and their execution is not metered or contrained by network limits or transaction resource limits. This means the resources consumed by an instance with diagnostic events enabled may exceed resources typically required by a deployment with diagnostic events disabled._
 
+### Using in GitHub Actions
+
+The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
+
+**Supported Platforms:**
+- Linux (ubuntu-latest, ubuntu-22.04, etc.)
+- macOS Intel (macos-13, macos-12, etc.)
+
+**Note:** Windows and macOS ARM (Apple Silicon) runners are not currently supported.
+
+#### Basic Usage
+
+Add this step to your GitHub Actions workflow:
+
+```yaml
+- name: Run Stellar quickstart
+  uses: stellar/quickstart@main
+```
+
+This will start a local Stellar network with all services (stellar-core, horizon, and stellar-rpc) available on the default ports.
+
+#### Configuration Options
+
+The action supports several configuration options:
+
+```yaml
+- name: Run Stellar quickstart
+  uses: stellar/quickstart@main
+  with:
+    tag: "latest"                         # Image tag (default: "latest")
+    image: "docker.io/stellar/quickstart" # Image name (default: "docker.io/stellar/quickstart")
+    network: "local"                      # Network: local, testnet, futurenet (default: "local")
+    enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
+    enable_logs: "true"                   # Enable container logs (default: "true")
+```
+
+**Advanced Health Check Options:**
+- `health_interval`: Time between health checks in seconds (default: "10")
+- `health_timeout`: Maximum time for each health check in seconds (default: "5") 
+- `health_retries`: Number of consecutive failures before marking unhealthy (default: "50")
+
+#### Example: Running Tests Against Local Network
+
+```yaml
+name: Test Smart Contract
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Start Stellar network
+        uses: stellar/quickstart@main
+        with:
+          network: "local"
+          enable: "core,horizon,rpc"
+      
+      - name: Run contract tests
+        run: |
+          # Your test commands here
+          # Services are available at:
+          # - Horizon: http://localhost:8000
+          # - RPC: http://localhost:8000/rpc  
+          # - Friendbot: http://localhost:8000/friendbot
+```
+
+The action automatically waits for all services to be healthy before proceeding to the next step in your workflow.
+
 ### Deploy to Digital Ocean
 
 You can deploy the quickstart image to DigitalOcean by clicking the button below. It will by default create a container that can be used for development and testing, running the `latest` tag, in ephemeral mode, and on the `local` network.
