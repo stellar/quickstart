@@ -155,14 +155,6 @@ _Note: Diagnostic events are unmetered and their execution is not metered or con
 
 The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
 
-**Supported Platforms:**
-- Linux (ubuntu-latest, ubuntu-22.04, etc.)
-- macOS Intel (macos-13, macos-12, etc.)
-
-**Note:** Windows and macOS ARM (Apple Silicon) runners are not currently supported.
-
-#### Basic Usage
-
 Add this step to your GitHub Actions workflow:
 
 ```yaml
@@ -170,7 +162,7 @@ Add this step to your GitHub Actions workflow:
   uses: stellar/quickstart@main
 ```
 
-This will start a local Stellar network with all services (stellar-core, horizon, and stellar-rpc) available on the default ports.
+This will start a local Stellar network with all services available on port 8000.
 
 #### Configuration Options
 
@@ -195,7 +187,6 @@ The action supports several configuration options:
 #### Example: Running Tests Against Local Network
 
 ```yaml
-name: Test Smart Contract
 on: [push, pull_request]
 
 jobs:
@@ -206,9 +197,6 @@ jobs:
       
       - name: Start Stellar network
         uses: stellar/quickstart@main
-        with:
-          network: "local"
-          enable: "core,horizon,rpc"
       
       - name: Run contract tests
         run: |
