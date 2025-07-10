@@ -177,12 +177,10 @@ The action supports several configuration options:
     network: "local"                      # Network: local, testnet, futurenet (default: "local")
     enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
     enable_logs: "true"                   # Enable container logs (default: "true")
+    health_interval: "10"                 # Time between health checks in seconds (default: "10")
+    health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")
+    health_retries: "50"                  # Number of consecutive failures before marking unhealthy (default: "50")
 ```
-
-**Advanced Health Check Options:**
-- `health_interval`: Time between health checks in seconds (default: "10")
-- `health_timeout`: Maximum time for each health check in seconds (default: "5") 
-- `health_retries`: Number of consecutive failures before marking unhealthy (default: "50")
 
 #### Example: Running Tests Against Local Network
 
