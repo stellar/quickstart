@@ -15,4 +15,4 @@ ENV NEXT_BASE_PATH=/lab
 RUN yarn build
 
 EXPOSE 8100
-CMD ["npm", "start"]
+CMD ["node", "build/standalone/server.js"]
