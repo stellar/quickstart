@@ -1,5 +1,13 @@
 # Stellar Quickstart Docker Image
 
+[![Apache 2.0 licensed](https://img.shields.io/badge/license-apache%202.0-blue.svg)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stellar/quickstart)
+
+
+Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The quickstart image is explicitly intended for development and testing environments, not production deployments. For production deployment guidance, see the individual service documentation for [stellar-core](https://developers.stellar.org/docs/validators](https://developers.stellar.org/docs/validators/admin-guide/prerequisites)), [stellar-rpc](https://developers.stellar.org/docs/data/apis/horizon/admin-guide/overview), and [Horizon](https://developers.stellar.org/docs/data/apis/horizon/admin-guide/overview).
+
+
+### Tip
 > [!TIP]  
 > Install the [`stellar-cli`] and start development containers running this image with:
 >
@@ -9,7 +17,8 @@
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
----
+
+## Details
 
 This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing.
 
@@ -27,6 +36,7 @@ The image uses the following software:
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
+- [lab](https://github.com/stellar/laboratory)
 - [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
 - [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
@@ -54,7 +64,7 @@ _Note: In pubnet mode the node will consume more disk, memory, and CPU resources
 
 #### `--testnet`
 
-In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
+In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Lab](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
 
 #### `--futurenet`
 
@@ -103,7 +113,7 @@ The image runs all services available by default, but can be configured to run o
 The option takes a comma-separated list of service names to enable. To enable all services which is the default behavior, use:
 
 ```
---enable core,horizon,rpc
+--enable core,horizon,rpc,lab
 ```
 
 To run only select services, simply specify only those services. For example, to enable the RPC, use:
@@ -112,7 +122,23 @@ To run only select services, simply specify only those services. For example, to
 --enable rpc
 ```
 
+To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use the local network:
+
+```
+--enable lab
+```
+
 **Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.**
+
+### Stellar Lab
+
+Stellar Lab is an interactive toolkit for exploring and testing on the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the RPC and Horizon APIs. You can also run Lab locally as part of Quickstart, backed by your own RPC, Horizon, and local network setup.
+
+When running Lab in Quickstart, Lab is available at:
+
+```
+http://localhost:8000/lab
+```
 
 ### Faucet (Friendbot)
 
@@ -127,6 +153,7 @@ $ curl http://localhost:8000/friendbot?addr=G...
 ```
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
+
 
 ### Soroban Development
 
