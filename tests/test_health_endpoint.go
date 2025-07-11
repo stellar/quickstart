@@ -27,7 +27,7 @@ func main() {
 			os.Exit(-1)
 		}
 
-		resp, err := http.Get("http://localhost:8000/ready")
+		resp, err := http.Get("http://localhost:8000/health")
 		if err != nil {
 			logLine(err)
 			continue

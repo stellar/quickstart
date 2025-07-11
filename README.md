@@ -130,12 +130,12 @@ _Note: In local mode a local friendbot is running. In testnet and futurenet mode
 
 ### Readiness Endpoint
 
-The quickstart image provides a `/ready` endpoint that indicates when all services are fully ready for use. This endpoint reports HTTP 200 when the image is ready and HTTP 503 when services are still starting up or experiencing issues.
+The quickstart image provides a `/health` endpoint that indicates when all services are fully ready for use. This endpoint reports HTTP 200 when the image is ready and HTTP 503 when services are still starting up or experiencing issues.
 
 Example usage:
 
 ```bash
-$ curl http://localhost:8000/ready
+$ curl http://localhost:8000/health
 ```
 
 Example response when ready:
@@ -157,7 +157,7 @@ Example response when ready:
 
 The endpoint automatically detects which services are running and only reports "ready" when all detected services are functioning properly. This eliminates the need to write custom scripts to test multiple service endpoints individually.
 
-_Note: The `/ready` endpoint provides overall readiness status, while Horizon's existing `/health` endpoint provides Horizon-specific health information._
+_Note: The `/health` endpoint provides comprehensive readiness status for all detected services, replacing Horizon's built-in `/health` endpoint with expanded functionality._
 
 ### Soroban Development
 
@@ -281,7 +281,7 @@ The image exposes one main port through which services provide their APIs:
 
 | Port | Service                                | Description    |
 | ---- | -------------------------------------- | -------------- |
-| 8000 | horizon, stellar-rpc, friendbot, ready | main http port |
+| 8000 | horizon, stellar-rpc, friendbot, health | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -290,7 +290,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
-| 8004  | readiness service          | internal port        |
+| 8004  | health service             | internal port        |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |

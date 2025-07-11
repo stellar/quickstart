@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/' or self.path == '/ready':
+        if self.path == '/' or self.path == '/health':
             self.handle_readiness_check()
         else:
             self.send_error(404)
