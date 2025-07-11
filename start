@@ -11,6 +11,7 @@ export STELLAR_HOME="/opt/stellar"
 export PGHOME="$STELLAR_HOME/postgresql"
 export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
+export COREWATCHERHOME="$STELLAR_HOME/core-watcher"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
 export LABHOME="$STELLAR_HOME/lab"
@@ -96,6 +97,7 @@ function start() {
   validate_after_copy_defaults
   init_db
   init_stellar_core
+  init_stellar_core_watcher
   init_friendbot
   init_horizon
   copy_pgpass
@@ -324,6 +326,13 @@ function copy_defaults() {
     $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
   fi
 
+  if [ -d $COREWATCHERHOME/etc ]; then
+    echo "stellar-core(watcher): config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/core-watcher/ $COREWATCHERHOME
+    # TODO: $CP /opt/stellar-default/$NETWORK/core-watcher/ $COREWATCHERHOME
+  fi
+
   if [ -d $HZHOME/etc ]; then
     echo "horizon: config directory exists, skipping copy"
   else
@@ -453,6 +462,16 @@ function init_stellar_core() {
   fi
 
   touch .quickstart-initialized
+  popd
+}
+
+function init_stellar_core_watcher() {
+  if [ "$ENABLE_CORE" != "true" ]; then
+    return 0
+  fi
+  pushd $COREWATCHERHOME
+  run_silent "chown-core" chown -R stellar:stellar .
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
   popd
 }
 
@@ -639,6 +658,7 @@ function start_optional_services() {
   if [ "$ENABLE_CORE" == "true" ]; then
     supervisorctl start postgresql
     supervisorctl start stellar-core
+    supervisorctl start stellar-core-watcher
   fi
 
   if [ "$ENABLE_HORIZON" == "true" ]; then

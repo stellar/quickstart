@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "starting core..."
+set -e
+exec /usr/bin/stellar-core --conf "/opt/stellar/core-watcher/etc/stellar-core.cfg" run
