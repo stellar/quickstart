@@ -34,16 +34,9 @@ COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
 COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-rpc
-COPY --from=lab /lab /opt/stellar/lab
-COPY --from=lab /usr/local/bin/node \
-                /usr/local/bin/npm \
-                /usr/local/bin/corepack \
-                /usr/local/bin/npx \
-                /usr/local/bin/yarn \
-                /usr/local/bin/yarnpkg \
-                /usr/bin/
-COPY --from=lab /usr/local/include/node /usr/local/include/node
-COPY --from=lab /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=lab /lab/build/standalone /opt/stellar/lab
+COPY --from=lab /lab/build/static /opt/stellar/lab/public/_next/static
+COPY --from=lab /usr/local/bin/node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
