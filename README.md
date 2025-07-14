@@ -4,8 +4,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stellar/quickstart)
 
 
-Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The quickstart image is explicitly intended for development and testing environments, not production deployments. For production deployment guidance, see the individual service documentation for [stellar-core](https://developers.stellar.org/docs/validators](https://developers.stellar.org/docs/validators/admin-guide/prerequisites)), [stellar-rpc](https://developers.stellar.org/docs/data/apis/horizon/admin-guide/overview), and [Horizon](https://developers.stellar.org/docs/data/apis/horizon/admin-guide/overview).
-
+Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The quickstart image is explicitly intended for development and testing environments, not production deployments. 
 
 ### Tip
 > [!TIP]  
