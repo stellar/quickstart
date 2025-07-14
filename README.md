@@ -3,10 +3,8 @@
 [![Apache 2.0 licensed](https://img.shields.io/badge/license-apache%202.0-blue.svg)](LICENSE)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stellar/quickstart)
 
+Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The image provides a simple way to run all components of a Stellar network locally or in CI for development and testing. The image is not intended for production deployment.
 
-Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The quickstart image is explicitly intended for development and testing environments, not production deployments. 
-
-### Tip
 > [!TIP]  
 > Install the [`stellar-cli`] and start development containers running this image with:
 >
@@ -15,11 +13,6 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 > ```
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
-
-
-## Details
-
-This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing.
 
 > [!IMPORTANT]  
 > This docker image is intended for use in development, not production. See these docs for how to run Stellar services in production:
