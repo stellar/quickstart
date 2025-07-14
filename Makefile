@@ -44,7 +44,7 @@ build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=23 \
 		XDR_REF=v23.0.0-rc.1 \
-		CORE_REF=master \
+		CORE_REF=v23.0.0rc3 \
 		HORIZON_REF=horizon-v23.0.0-rc1 \
 		STELLAR_RPC_REF=protocol-23 \
 		FRIENDBOT_REF=horizon-v23.0.0-rc1
