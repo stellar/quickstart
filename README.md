@@ -259,8 +259,8 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
-| 11625 | stellar-core               | peer node port       |
-| 11626 | stellar-core               | main http port       |
+| 11625 | stellar-core (validator)   | peer node port       |
+| 11626 | stellar-core (validator)   | main http port       |
 | 11925 | stellar-core (watcher)     | peer node port       |
 | 11926 | stellar-core (watcher)     | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
