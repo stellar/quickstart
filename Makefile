@@ -42,12 +42,12 @@ build-testing:
 
 build-future:
 	$(MAKE) build TAG=future \
-		PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0 \
-		CORE_REF=v22.3.0 \
-		HORIZON_REF=horizon-v22.0.3 \
-		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.3
+		PROTOCOL_VERSION_DEFAULT=23 \
+		XDR_REF=v23.0.0-rc.1 \
+		CORE_REF=v23.0.0rc3 \
+		HORIZON_REF=horizon-v23.0.0-rc1 \
+		STELLAR_RPC_REF=protocol-23 \
+		FRIENDBOT_REF=horizon-v23.0.0-rc1
 
 build:
 	$(MAKE) -j 4 build-deps
