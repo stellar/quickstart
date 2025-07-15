@@ -20,15 +20,6 @@ on:
         type: "string"
         default: ""
 
-env:
-  protocol_version_default: 23
-  xdr_ref: v23.0.0-rc.1
-  core_ref: v23.0.0rc3
-  horizon_ref: horizon-v23.0.0-rc1
-  stellar_rpc_ref: protocol-23
-  friendbot_ref: horizon-v23.0.0-rc1
-  lab_ref: main
-
 jobs:
   amd64:
     uses: ./.github/workflows/build.yml
@@ -39,13 +30,13 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}future-amd64
-      protocol_version_default: ${{ env.protocol_version_default }}
-      xdr_ref: ${{ env.xdr_ref }}
-      core_ref: ${{ env.core_ref }}
-      horizon_ref: ${{ env.horizon_ref }}
-      stellar_rpc_ref: ${{ env.stellar_rpc_ref }}
-      friendbot_ref: ${{ env.friendbot_ref }}
-      lab_ref: ${{ env.lab_ref }}
+      protocol_version_default: 23
+      xdr_ref: v23.0.0-rc.1
+      core_ref: v23.0.0rc3
+      horizon_ref: horizon-v23.0.0-rc1
+      stellar_rpc_ref: protocol-23
+      friendbot_ref: horizon-v23.0.0-rc1
+      lab_ref: main
       test_matrix: |
         {
           "network": ["local"],
@@ -64,12 +55,13 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}future-arm64
-      xdr_ref: ${{ env.xdr_ref }}
-      core_ref: ${{ env.core_ref }}
-      horizon_ref: ${{ env.horizon_ref }}
-      stellar_rpc_ref: ${{ env.stellar_rpc_ref }}
-      friendbot_ref: ${{ env.friendbot_ref }}
-      lab_ref: ${{ env.lab_ref }}
+      protocol_version_default: 23
+      xdr_ref: v23.0.0-rc.1
+      core_ref: v23.0.0rc3
+      horizon_ref: horizon-v23.0.0-rc1
+      stellar_rpc_ref: protocol-23
+      friendbot_ref: horizon-v23.0.0-rc1
+      lab_ref: main
       test_matrix: |
         {
           "network": ["local"],
