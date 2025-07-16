@@ -34,7 +34,7 @@ jobs:
       xdr_ref: v23.0.0-rc.1
       core_ref: v23.0.0rc4
       horizon_ref: horizon-v23.0.0-rc2
-      stellar_rpc_ref: protocol-23
+      stellar_rpc_ref: v23.0.0-rc.2
       friendbot_ref: horizon-v23.0.0-rc2
       lab_ref: main
       test_matrix: |

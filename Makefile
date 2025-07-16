@@ -37,7 +37,7 @@ build-testing:
 		XDR_REF=v23.0.0-rc.1 \
 		CORE_REF=v23.0.0rc4 \
 		HORIZON_REF=horizon-v23.0.0-rc2 \
-		STELLAR_RPC_REF=protocol-23 \
+		STELLAR_RPC_REF=v23.0.0-rc.2 \
 		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build-future:
@@ -46,7 +46,7 @@ build-future:
 		XDR_REF=v23.0.0-rc.1 \
 		CORE_REF=v23.0.0rc4 \
 		HORIZON_REF=horizon-v23.0.0-rc2 \
-		STELLAR_RPC_REF=protocol-23 \
+		STELLAR_RPC_REF=v23.0.0-rc.2 \
 		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build:
