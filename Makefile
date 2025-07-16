@@ -38,7 +38,7 @@ build-testing:
 		CORE_REF=v23.0.0rc4 \
 		HORIZON_REF=horizon-v23.0.0-rc2 \
 		STELLAR_RPC_REF=protocol-23 \
-		FRIENDBOT_REF=horizon-v23.0.0-rc1
+		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build-future:
 	$(MAKE) build TAG=future \
@@ -47,7 +47,7 @@ build-future:
 		CORE_REF=v23.0.0rc4 \
 		HORIZON_REF=horizon-v23.0.0-rc2 \
 		STELLAR_RPC_REF=protocol-23 \
-		FRIENDBOT_REF=horizon-v23.0.0-rc1
+		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build:
 	$(MAKE) -j 4 build-deps
