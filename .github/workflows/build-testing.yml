@@ -34,7 +34,7 @@ jobs:
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
       protocol_version_default: 23
-      xdr_ref: v23.0.0-rc.1
+      xdr_ref: v23.0.0-rc.2
       core_ref: v23.0.0rc4
       horizon_ref: horizon-v23.0.0-rc2
       stellar_rpc_ref: v23.0.0-rc.2
