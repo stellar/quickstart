@@ -422,6 +422,8 @@ function init_stellar_core() {
     return 0
   fi
 
+  mkdir -p /var/log/stellar-core
+
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
   if [ -f $COREHOME/.quickstart-initialized ]; then
