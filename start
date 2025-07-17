@@ -17,6 +17,8 @@ export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
+export CORELOG="/var/log/stellar-core"
+
 export PGBIN="/usr/lib/postgresql/14/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
@@ -422,7 +424,8 @@ function init_stellar_core() {
     return 0
   fi
 
-  mkdir -p /var/log/stellar-core
+  run_silent "mkdir-core-log" mkdir -p "$CORELOG"
+  run_silent "chown-core-log" chown -R stellar:stellar "$CORELOG"
 
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
