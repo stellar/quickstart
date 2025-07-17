@@ -5,6 +5,8 @@ while ! psql -U stellar -c 'select 1' core &> /dev/null ; do
   sleep 1
 done
 
+mkdir -p /var/log/stellar-core
+
 echo "starting core..."
 set -e
 exec /usr/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg" run
