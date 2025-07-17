@@ -443,7 +443,7 @@ jobs:
         -p
         "8000:8000"
         -p "11626:11626"
-        -v "$PWD/logs":/var/log/supervisor
+        -v "$PWD/logs":/var/log
         --name stellar
         $IMAGE
         --${{ matrix.network }}
