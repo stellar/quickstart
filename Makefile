@@ -11,6 +11,7 @@ CORE_CONFIGURE_FLAGS?=--disable-tests
 STELLAR_RPC_REF?=main
 HORIZON_REF?=master
 FRIENDBOT_REF?=$(HORIZON_REF)
+LAB_REF?=main
 
 run:
 	docker run --rm --name stellar -p 8000:8000 stellar/quickstart:$(TAG) --local --enable-stellar-rpc
@@ -25,28 +26,28 @@ build-latest:
 	$(MAKE) build TAG=latest \
 		PROTOCOL_VERSION_DEFAULT=22 \
 		XDR_REF=v22.0.0 \
-		CORE_REF=v22.2.0 \
-		HORIZON_REF=horizon-v22.0.2 \
+		CORE_REF=v22.3.0 \
+		HORIZON_REF=horizon-v22.0.3 \
 		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.2
+		FRIENDBOT_REF=horizon-v22.0.3
 
 build-testing:
 	$(MAKE) build TAG=testing \
-	    PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0 \
-		CORE_REF=v22.2.0 \
-		HORIZON_REF=horizon-v22.0.2 \
-		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.2
+		PROTOCOL_VERSION_DEFAULT=23 \
+		XDR_REF=v23.0.0-rc.2 \
+		CORE_REF=v23.0.0rc4 \
+		HORIZON_REF=horizon-v23.0.0-rc2 \
+		STELLAR_RPC_REF=v23.0.0-rc.2 \
+		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build-future:
 	$(MAKE) build TAG=future \
-		PROTOCOL_VERSION_DEFAULT=22 \
-		XDR_REF=v22.0.0 \
-		CORE_REF=v22.2.0 \
-		HORIZON_REF=horizon-v22.0.2 \
-		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.2
+		PROTOCOL_VERSION_DEFAULT=23 \
+		XDR_REF=v23.0.0-rc.2 \
+		CORE_REF=v23.0.0rc4 \
+		HORIZON_REF=horizon-v23.0.0-rc2 \
+		STELLAR_RPC_REF=v23.0.0-rc.2 \
+		FRIENDBOT_REF=horizon-v23.0.0-rc2
 
 build:
 	$(MAKE) -j 4 build-deps
@@ -58,8 +59,9 @@ build:
 	  --build-arg HORIZON_IMAGE_REF=stellar-horizon:$(HORIZON_REF) \
 	  --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:$(FRIENDBOT_REF) \
 	  --build-arg STELLAR_RPC_IMAGE_REF=stellar-rpc:$(STELLAR_RPC_REF) \
+	  --build-arg LAB_IMAGE_REF=stellar-lab:$(LAB_REF)
 
-build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-stellar-rpc
+build-deps: build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-stellar-rpc build-deps-lab
 
 build-deps-xdr:
 	docker build -t stellar-xdr:$(XDR_REF) -f Dockerfile.xdr --target builder . --build-arg REPO="$(XDR_REPO)" --build-arg REF="$(XDR_REF)"
@@ -75,3 +77,6 @@ build-deps-friendbot:
 
 build-deps-stellar-rpc:
 	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f cmd/stellar-rpc/docker/Dockerfile --target build https://github.com/stellar/stellar-rpc.git#$(STELLAR_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+
+build-deps-lab:
+	docker build -t stellar-lab:$(LAB_REF) -f Dockerfile.lab --target builder . --build-arg NEXT_PUBLIC_COMMIT_HASH=$(LAB_REF)

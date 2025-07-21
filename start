@@ -13,6 +13,7 @@ export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
+export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
@@ -26,6 +27,7 @@ export PGPORT=5432
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
+: "${ENABLE_LAB:=false}"
 # TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
@@ -94,6 +96,7 @@ function start() {
   validate_after_copy_defaults
   init_db
   init_stellar_core
+  init_friendbot
   init_horizon
   copy_pgpass
   init_stellar_rpc
@@ -143,6 +146,9 @@ function process_args() {
       export ENABLE_ASSET_STATS="$1"
       shift
       ;;
+    --enable-lab)
+      ENABLE_LAB=true
+      ;;
     --limits)
       export LIMITS="$1"
       shift
@@ -188,11 +194,17 @@ function process_args() {
   if [[ ",$ENABLE," = *",core,"* ]]; then
     ENABLE_CORE=true
   fi
+
   if [[ ",$ENABLE," = *",horizon,"* ]]; then
     ENABLE_HORIZON=true
   fi
+
   if [[ ",$ENABLE," = *",rpc,"* ]]; then
     ENABLE_RPC=true
+  fi
+
+  if [[ ",$ENABLE," = *",lab,"* ]]; then
+    ENABLE_LAB=true
   fi
 
   case "$NETWORK" in
@@ -205,7 +217,9 @@ function process_args() {
     export HISTORY_ARCHIVE_URLS="https://history.stellar.org/prd/core-live/core_live_001"
     ;;
   local)
-    export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    if [ -z "$NETWORK_PASSPHRASE" ]; then
+      export NETWORK_PASSPHRASE="Standalone Network ; February 2017"
+    fi
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
@@ -442,6 +456,15 @@ function init_stellar_core() {
   popd
 }
 
+function init_friendbot() {
+  pushd $FBHOME
+
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/friendbot.cfg
+  perl -pi -e "s/__NETWORK_ROOT_SECRET_KEY__/$NETWORK_ROOT_SECRET_KEY/g" etc/friendbot.cfg
+
+  popd
+}
+
 function init_horizon() {
   if [ "$ENABLE_HORIZON" != "true" ]; then
     return 0
@@ -617,12 +640,18 @@ function start_optional_services() {
     supervisorctl start postgresql
     supervisorctl start stellar-core
   fi
+
   if [ "$ENABLE_HORIZON" == "true" ]; then
     supervisorctl start postgresql
     supervisorctl start horizon
   fi
+
   if [ "$ENABLE_RPC" == "true" ]; then
     supervisorctl start stellar-rpc
+  fi
+
+  if [ "$ENABLE_LAB" == "true" ]; then
+    supervisorctl start stellar-lab
   fi
 }
 
@@ -790,6 +819,10 @@ function horizon_status() {
     sleep 5
   done
   echo "horizon: ingestion caught up"
+}
+
+function supervisorctl() {
+  /usr/bin/supervisorctl -c $SUPHOME/etc/supervisord.conf "$@"
 }
 
 main $@
