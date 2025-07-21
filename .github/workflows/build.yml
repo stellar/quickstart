@@ -109,9 +109,9 @@ jobs:
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Core Image
       run: >
-        docker buildx build --platform linux/${{ inputs.arch }} 
-        -f Dockerfile.core -t stellar-core:${{ inputs.arch }} 
-        -o type=docker,dest=/tmp/image 
+        docker buildx build --platform linux/${{ inputs.arch }}
+        -f Dockerfile.core -t stellar-core:${{ inputs.arch }}
+        -o type=docker,dest=/tmp/image
         --build-arg REPO='${{ env.CORE_REPO }}'
         --build-arg REF='${{ env.CORE_REPO_REF }}'
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
