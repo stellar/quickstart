@@ -18,8 +18,8 @@ RUN git clone ${REPO} /wd
 RUN git fetch origin ${REF}
 RUN git checkout ${REF}
 
-ADD depmods/stellar-core /depmods
-RUN git am /depmods/*.patch
+ADD patches/stellar-core /patches
+RUN git am /patches/*.patch
 RUN git log
 
 RUN git clean -dXf
