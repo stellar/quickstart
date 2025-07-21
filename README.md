@@ -282,6 +282,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 11626 | stellar-core (validator)   | main http port       |
 | 11925 | stellar-core (watcher)     | peer node port       |
 | 11926 | stellar-core (watcher)     | main http port       |
+| 11927 | stellar-core (watcher)     | query http port      |
 | 11725 | stellar-core (horizon)     | peer node port       |
 | 11726 | stellar-core (horizon)     | main http port       |
 | 11825 | stellar-core (stellar-rpc) | peer node port       |
