@@ -79,7 +79,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
+        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}-${{ hashFiles('patches/stellar-core/*.patch') }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -96,7 +96,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
+        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}-${{ hashFiles('patches/stellar-core/*.patch') }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -105,11 +105,12 @@ jobs:
     - name: Build Stellar-Core Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }} 
-        -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }} 
+        -f Dockerfile.core -t stellar-core:${{ inputs.arch }} 
         -o type=docker,dest=/tmp/image 
-        ${{ env.CORE_REPO }}#${{ env.CORE_REPO_REF }} 
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true 
+        --build-arg REPO='${{ env.CORE_REPO }}'
+        --build-arg REF='${{ env.CORE_REPO_REF }}'
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
+        .
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v4
       with:
