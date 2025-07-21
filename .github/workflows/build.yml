@@ -80,6 +80,10 @@ jobs:
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
+    - name: Checkout Quickstart for Core patches
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - id: cache
       uses: actions/cache@v3
       with:
@@ -97,15 +101,15 @@ jobs:
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
+    - name: Checkout Quickstart for Core docker file and patches
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - id: cache
       uses: actions/cache@v3
       with:
         path: /tmp/image
         key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}-${{ hashFiles('patches/stellar-core/*.patch') }}
-    - name: Checkout Quickstart for Core docker file
-      uses: actions/checkout@v3
-      with:
-        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
