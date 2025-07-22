@@ -12,16 +12,15 @@ on:
         required: false
     inputs:
       sha:
-        description: 'Sha to build'
-        type: 'string'
+        description: "Sha to build"
+        type: "string"
         required: true
       tag-prefix:
-        description: 'Prefix for the tag name'
-        type: 'string'
-        default: ''
+        description: "Prefix for the tag name"
+        type: "string"
+        default: ""
 
 jobs:
-
   amd64:
     uses: ./.github/workflows/build.yml
     secrets:
@@ -31,12 +30,12 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}future-amd64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.3.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0-rc.2
+      core_ref: v23.0.0rc4
+      horizon_ref: horizon-v23.0.0-rc2
+      stellar_rpc_ref: v23.0.0-rc.2
+      friendbot_ref: horizon-v23.0.0-rc2
       lab_ref: main
       test_matrix: |
         {
@@ -56,12 +55,12 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}future-arm64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.3.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0-rc.2
+      core_ref: v23.0.0rc4
+      horizon_ref: horizon-v23.0.0-rc2
+      stellar_rpc_ref: v23.0.0-rc.2
+      friendbot_ref: horizon-v23.0.0-rc2
       lab_ref: main
       test_matrix: |
         {
