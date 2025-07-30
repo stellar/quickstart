@@ -426,6 +426,12 @@
       "contract_execution_lanes": {
         "ledger_max_tx_count": 100
       }
+    },
+    {
+      "contract_ledger_cost_ext_v0": {
+        "tx_max_footprint_entries": 100,
+        "fee_write1_kb": "3500"
+      }
     }
   ]
 }
