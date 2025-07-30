@@ -429,7 +429,7 @@
     },
     {
       "eviction_iterator": {
-        "bucket_file_offset": "93820636",
+        "bucket_file_offset": "197833056",
         "bucket_list_level": 9,
         "is_curr_bucket": false
       }
