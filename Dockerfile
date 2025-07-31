@@ -43,6 +43,9 @@ RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
 
+RUN ["rm", "-fr", "/etc/supervisor"]
+RUN ["ln", "-sT", "/opt/stellar/supervisor/etc", "/etc/supervisor"]
+
 RUN ["ln", "-s", "/opt/stellar", "/stellar"]
 RUN ["ln", "-s", "/opt/stellar/core/etc/stellar-core.cfg", "/stellar-core.cfg"]
 RUN ["ln", "-s", "/opt/stellar/horizon/etc/horizon.env", "/horizon.env"]
