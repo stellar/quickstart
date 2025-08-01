@@ -32,13 +32,20 @@ The image uses the following software:
 - [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
 - [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
+HTTP APIs and Tools are available at the following port and paths:
+
+- Horizon: `http://localhost:8000/`
+- RPC: `http://localhost:8000/rpc`
+- Lab: `http://localhost:8000/lab`
+- Friendbot: `http://localhost:8000/friendbot`
+
 ## Usage
 
 To use this project successfully, you should first decide a few things:
 
 First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Alternatively, choose to run a local network (called local) which allows you to run your own acellerated private Stellar network for testing.
 
-Next, you must decide whether you will use a docker volume or not. When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart. We recommend persistent mode for anything besides a development or test environment.
+Next, you must decide whether you will use a docker volume or not. When not using a volume, the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart. We recommend persistent mode for anything besides a development or test environment.
 
 Finally, you must decide what ports to expose. The software in these images listen on 4 ports, each of which you may or may not want to expose to the network your host system is connected to. A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port. See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
 
@@ -46,23 +53,7 @@ After deciding on the questions above, you can setup your container. Please refe
 
 ### Network Options
 
-Provide either `--pubnet`, `--testnet` or `--local` as a command line flag when starting the container to determine which network (and base configuration file) to use.
-
-#### `--pubnet`
-
-In public network mode, the node will join the public, production Stellar network.
-
-_Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
-
-#### `--testnet`
-
-In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Lab](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
-
-#### `--futurenet`
-
-In futurenet network mode, the node will join the [Soroban] test network that developers use while developing smart contracts on Stellar.
-
-[Soroban]: https://soroban.stellar.org
+Provide either `--local`, `--testnet` or `--pubnet` as a command line flag when starting the container to determine which network (and base configuration file) to use.
 
 #### `--local`
 
@@ -70,12 +61,11 @@ In local network mode, you can optionally pass:
 
 - `--protocol-version {version}` to run a specific protocol version (defaults to latest version).
 
-- `--limits {limits}` to configure specific Soroban resource limits to one of:
+- `--limits {limits}` to configure specific Stellar's contract resource limits to one of:
   - `default` leaves limits set extremely low which is stellar-core's default configuration
   - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
   - `unlimited` sets limits to the maximum resources that can be configured
 
-**Note: The `--enable` options behaves differently in local network mode, see [Service Options](#service-otions) for more details.**
 The network passphrase of the network defaults to:
 
 ```
@@ -84,19 +74,21 @@ Standalone Network ; February 2017
 
 Set the network passphrase in the SDK or tool you're using. If an incorrect network passphrase is used in clients signing transactions, the transactions will fail with a bad authentication error.
 
-The root account of the network is fixed to:
+In local network mode a ledger occurs every one second and so transactions are finalized faster than on testnet or pubnet.
 
-```
-Public Key: GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI
-Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
-```
+#### `--testnet`
 
-The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
+In test network mode, the node will join the network that developers can use while developing contracts and applications. Use the [Stellar Lab](https://laboratory.stellar.org/#account-creator?network=test) or Friendbot's API to create an account on the test network.
 
-In local network mode a ledger occurs every one second and so transactions
-are finalized faster than on deployed networks.
+#### `--futurenet`
 
-_Note_: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
+In futurenet network mode, the node will join the Stellar futurenet test network that developers use to test unreleased upcoming protocol changes.
+
+#### `--pubnet`
+
+In public network mode, the node will join the public, production Stellar network.
+
+_Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
 
 ### Service Options
 
@@ -124,19 +116,23 @@ To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use th
 
 ### Stellar Lab
 
-Stellar Lab is an interactive toolkit for exploring and testing on the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the RPC and Horizon APIs. You can also run Lab locally as part of Quickstart, backed by your own RPC, Horizon, and local network setup.
+Stellar Lab is an interactive toolkit for exploring and interacting with the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the Friendbot, RPC, and Horizon APIs. Lab is also built-in to Quickstart.
 
-When running Lab in Quickstart, Lab is available at:
+Lab is available at:
 
 ```
 http://localhost:8000/lab
 ```
 
+Lab is also deployed at:
+
+https://lab.stellar.org
+
 ### Faucet (Friendbot)
 
-Stellar development/test networks use friendbot as a faucet for the native asset.
+Stellar development/test networks use Friendbot as a faucet for the native asset.
 
-When running in local, testnet, and futurenet modes friendbot is available on `:8000/friendbot` and can be used to fund a new account.
+When running in local, testnet, and futurenet modes Friendbot is available on `:8000/friendbot` and can be used to fund a new account.
 
 For example:
 
@@ -325,7 +321,7 @@ The image exposes one main port through which services provide their APIs:
 
 | Port | Service                         | Description    |
 | ---- | ------------------------------- | -------------- |
-| 8000 | horizon, stellar-rpc, friendbot | main http port |
+| 8000 | lab, horizon, stellar-rpc, friendbot | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -351,6 +347,10 @@ It is safe to open the horizon http port. Horizon is designed to listen on an in
 The HTTP port for stellar-core should only be exposed to a trusted network, as it provides no security itself. An attacker that can make requests to the port will be able to perform administrative commands such as forcing a catchup or changing the logging level and more, many of which could be used to disrupt operations or deny service.
 
 The peer port for stellar-core however can be exposed, and ideally would be routable from the internet. This would allow external peers to initiate connections to your node, improving connectivity of the overlay network. However, this is not required as your container will also establish outgoing connections to peers.
+
+Local mode uses a fixed network passphrase. It is important to use a unique network passphrase for any shared network, otherwise signatures for transactions on one network would be valid on another.
+
+The network's root account master key, that contains the minted native asset, is derived from the network passphrase, and so is easily known allowing anyone to act as that account. In local mode Friendbot uses the root account as the source of the native asset for funding new accounts and uses the master key to sign transactions. The funding method would need to be changed, or a new signer introduced to prevent others from signing for the root account. There are no built in feature to facilitate this at this time.
 
 ## Accessing and debugging a running container
 
