@@ -6,11 +6,21 @@
 Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The image provides a simple way to run all components of a Stellar network locally or in CI for development and testing. The image is not intended for production deployment.
 
 > [!TIP]  
-> Install the [`stellar-cli`] and start development containers running this image with:
+> Run the image using the [`stellar-cli`] with:
 >
 > ```
 > stellar container start
 > ```
+
+> [!TIP]  
+> Run the image in GitHub Actions with:
+>
+> ```yaml
+> - name: Run Stellar Quickstart
+>   uses: stellar/quickstart@main
+> ```
+>
+> See [Using in GitHub Actions] for more configuration options.
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
@@ -142,30 +152,6 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
-
-### Soroban Development
-
-The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Stellar RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
-
-To enable stellar rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-stellar-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
-
-```
-http://<container_host>:6061/metrics
-http://<container_host>:6061/debug/pprof/
-```
-
-### Soroban Diagnostic Events
-
-Soroban diagnostic events contain logs about internal events that have occurred while a contract is executing. They're particularly useful for debugging why a contract trapped (panicked).
-
-To enable Soroban diagnostic events provide the following command line flag when starting the container:
-`--enable-soroban-diagnostic-events`
-
-In local network mode diagnostics are enabled by default and can be disabled with:
-`--disable-soroban-diagnostic-events`
-
-_Note: Diagnostic events are unmetered and their execution is not metered or contrained by network limits or transaction resource limits. This means the resources consumed by an instance with diagnostic events enabled may exceed resources typically required by a deployment with diagnostic events disabled._
-
 ### Using in GitHub Actions
 
 The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
@@ -173,7 +159,7 @@ The quickstart image can be run in GitHub Actions workflows using the provided a
 Add this step to your GitHub Actions workflow:
 
 ```yaml
-- name: Run Stellar quickstart
+- name: Run Stellar Quickstart
   uses: stellar/quickstart@main
 ```
 
@@ -184,7 +170,7 @@ This will start a local Stellar network with all services available on port 8000
 The action supports several configuration options:
 
 ```yaml
-- name: Run Stellar quickstart
+- name: Run Stellar Quickstart
   uses: stellar/quickstart@main
   with:
     tag: "latest"                         # Image tag (default: "latest")
@@ -430,3 +416,6 @@ $ docker run -it --rm \
 ## Troubleshooting
 
 Let us know what you're having trouble with! Open an issue or join us on our public [Discord server](https://discord.com/invite/stellardev).
+
+
+[Using in GitHub Actions]: #using-in-github-actions
