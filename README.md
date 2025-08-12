@@ -16,7 +16,7 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 > Run the image in GitHub Actions with:
 >
 > ```yaml
-> - name: Run Stellar Quickstart
+> - name: Start Stellar network
 >   uses: stellar/quickstart@main
 > ```
 >
@@ -159,18 +159,20 @@ The quickstart image can be run in GitHub Actions workflows using the provided a
 Add this step to your GitHub Actions workflow:
 
 ```yaml
-- name: Run Stellar Quickstart
+- name: Start Stellar network
   uses: stellar/quickstart@main
 ```
 
 This will start a local Stellar network with all services available on port 8000.
 
+The action waits for all services to be healthy before proceeding to the next step in the workflow.
+
 #### Configuration Options
 
-The action supports several configuration options:
+The action supports several configuration options. None are required and defaults are suitable in most cases.
 
 ```yaml
-- name: Run Stellar Quickstart
+- name: Start Stellar network
   uses: stellar/quickstart@main
   with:
     tag: "latest"                         # Image tag (default: "latest")
@@ -183,7 +185,7 @@ The action supports several configuration options:
     health_retries: "50"                  # Number of consecutive failures before marking unhealthy (default: "50")
 ```
 
-#### Example: Running Tests Against Local Network
+#### Example Workflow
 
 ```yaml
 on: [push, pull_request]
@@ -197,7 +199,7 @@ jobs:
       - name: Start Stellar network
         uses: stellar/quickstart@main
       
-      - name: Run contract tests
+      - name: Run tests
         run: |
           # Your test commands here
           # Services are available at:
@@ -206,7 +208,6 @@ jobs:
           # - Friendbot: http://localhost:8000/friendbot
 ```
 
-The action automatically waits for all services to be healthy before proceeding to the next step in your workflow.
 
 ### Deploy to Digital Ocean
 
