@@ -6,11 +6,21 @@
 Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The image provides a simple way to run all components of a Stellar network locally or in CI for development and testing. The image is not intended for production deployment.
 
 > [!TIP]  
-> Install the [`stellar-cli`] and start development containers running this image with:
+> Run the image using the [`stellar-cli`] with:
 >
 > ```
 > stellar container start
 > ```
+
+> [!TIP]  
+> Run the image in GitHub Actions with:
+>
+> ```yaml
+> - name: Start Stellar network
+>   uses: stellar/quickstart@main
+> ```
+>
+> See [Using in GitHub Actions] for more configuration options.
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
@@ -141,6 +151,62 @@ $ curl http://localhost:8000/friendbot?addr=G...
 ```
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
+
+### Using in GitHub Actions
+
+The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
+
+Add this step to your GitHub Actions workflow:
+
+```yaml
+- name: Start Stellar network
+  uses: stellar/quickstart@main
+```
+
+This will start a local Stellar network with all services available on port 8000.
+
+The action waits for all services to be healthy before proceeding to the next step in the workflow.
+
+#### Configuration Options
+
+The action supports several configuration options. None are required and defaults are suitable in most cases.
+
+```yaml
+- name: Start Stellar network
+  uses: stellar/quickstart@main
+  with:
+    tag: "latest"                         # Image tag (default: "latest")
+    image: "docker.io/stellar/quickstart" # Image name (default: "docker.io/stellar/quickstart")
+    network: "local"                      # Network: local, testnet, futurenet (default: "local")
+    enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
+    enable_logs: "true"                   # Enable container logs (default: "true")
+    health_interval: "10"                 # Time between health checks in seconds (default: "10")
+    health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")
+    health_retries: "50"                  # Number of consecutive failures before marking unhealthy (default: "50")
+```
+
+#### Example Workflow
+
+```yaml
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Start Stellar network
+        uses: stellar/quickstart@main
+      
+      - name: Run tests
+        run: |
+          # Your test commands here
+          # Services are available at:
+          # - Horizon: http://localhost:8000
+          # - RPC: http://localhost:8000/rpc  
+          # - Friendbot: http://localhost:8000/friendbot
+```
 
 
 ### Deploy to Digital Ocean
@@ -352,3 +418,6 @@ $ docker run -it --rm \
 ## Troubleshooting
 
 Let us know what you're having trouble with! Open an issue or join us on our public [Discord server](https://discord.com/invite/stellardev).
+
+
+[Using in GitHub Actions]: #using-in-github-actions

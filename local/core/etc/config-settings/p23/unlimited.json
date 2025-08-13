@@ -432,6 +432,6 @@
         "tx_max_footprint_entries": 4294967295,
         "fee_write1_kb": "3500"
       }
-    },
+    }
   ]
 }

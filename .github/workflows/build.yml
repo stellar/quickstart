@@ -425,7 +425,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
