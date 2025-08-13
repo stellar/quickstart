@@ -179,6 +179,7 @@ The action supports several configuration options. None are required and default
     image: "docker.io/stellar/quickstart" # Image name (default: "docker.io/stellar/quickstart")
     network: "local"                      # Network: local, testnet, futurenet (default: "local")
     enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
+    protocol_version: ""                  # Protocol version to run for 'local' network only (leave blank for default for image)"
     enable_logs: "true"                   # Enable container logs (default: "true")
     health_interval: "10"                 # Time between health checks in seconds (default: "10")
     health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")

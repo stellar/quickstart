@@ -93,6 +93,8 @@ function start() {
   echo "network id: $NETWORK_ID"
   echo "network root secret key: $NETWORK_ROOT_SECRET_KEY"
   echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
+  echo "protocol version default: $PROTOCOL_VERSION_DEFAULT"
+  echo "protocol version set: $PROTOCOL_VERSION"
 
   copy_defaults
   validate_after_copy_defaults
