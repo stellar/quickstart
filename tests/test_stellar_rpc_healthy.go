@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const timeout = 6 * time.Minute
+const timeout = 12 * time.Minute
 
 type RPCResponse struct {
 	Result struct {
