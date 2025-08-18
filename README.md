@@ -1,17 +1,28 @@
 # Stellar Quickstart Docker Image
 
+[![Apache 2.0 licensed](https://img.shields.io/badge/license-apache%202.0-blue.svg)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stellar/quickstart)
+
+Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain development environment. The image provides a simple way to run all components of a Stellar network locally or in CI for development and testing. The image is not intended for production deployment.
+
 > [!TIP]  
-> Install the [`stellar-cli`] and start development containers running this image with:
+> Run the image using the [`stellar-cli`] with:
 >
 > ```
 > stellar container start
 > ```
 
+> [!TIP]  
+> Run the image in GitHub Actions with:
+>
+> ```yaml
+> - name: Start Stellar network
+>   uses: stellar/quickstart@main
+> ```
+>
+> See [Using in GitHub Actions] for more configuration options.
+
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
-
----
-
-This docker image provides a simple way to run all the components of a Stellar network locally or in CI for development and testing.
 
 > [!IMPORTANT]  
 > This docker image is intended for use in development, not production. See these docs for how to run Stellar services in production:
@@ -27,8 +38,16 @@ The image uses the following software:
 - [stellar-core](https://github.com/stellar/stellar-core)
 - [horizon](https://github.com/stellar/go/tree/master/services/horizon)
 - [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
+- [lab](https://github.com/stellar/laboratory)
 - [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
 - [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
+
+HTTP APIs and Tools are available at the following port and paths:
+
+- Horizon: `http://localhost:8000/`
+- RPC: `http://localhost:8000/rpc`
+- Lab: `http://localhost:8000/lab`
+- Friendbot: `http://localhost:8000/friendbot`
 
 ## Usage
 
@@ -36,7 +55,7 @@ To use this project successfully, you should first decide a few things:
 
 First, decide whether you want your container to be part of the public, production Stellar network (referred to as the _pubnet_) or the test network (called testnet) that we recommend you use while developing software because you need not worry about losing money on the testnet. Alternatively, choose to run a local network (called local) which allows you to run your own acellerated private Stellar network for testing.
 
-Next, you must decide whether you will use a docker volume or not. When not using a volume, we say that the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart. We recommend persistent mode for anything besides a development or test environment.
+Next, you must decide whether you will use a docker volume or not. When not using a volume, the container is in _ephemeral mode_, that is, nothing will be persisted between runs of the container. _Persistent mode_ is the alternative, which should be used in the case that you need to either customize your configuration (such as to add a validation seed) or would like avoid a slow catchup to the Stellar network in the case of a crash or server restart. We recommend persistent mode for anything besides a development or test environment.
 
 Finally, you must decide what ports to expose. The software in these images listen on 4 ports, each of which you may or may not want to expose to the network your host system is connected to. A container that exposes no ports isn't very useful, so we recommend at a minimum you expose the horizon http port. See the "Ports" section below for a more nuanced discussion regarding the decision about what ports to expose.
 
@@ -44,23 +63,7 @@ After deciding on the questions above, you can setup your container. Please refe
 
 ### Network Options
 
-Provide either `--pubnet`, `--testnet` or `--local` as a command line flag when starting the container to determine which network (and base configuration file) to use.
-
-#### `--pubnet`
-
-In public network mode, the node will join the public, production Stellar network.
-
-_Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
-
-#### `--testnet`
-
-In test network mode, the node will join the network that developers use while developing software. Use the [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test) to create an account on the test network.
-
-#### `--futurenet`
-
-In futurenet network mode, the node will join the [Soroban] test network that developers use while developing smart contracts on Stellar.
-
-[Soroban]: https://soroban.stellar.org
+Provide either `--local`, `--testnet` or `--pubnet` as a command line flag when starting the container to determine which network (and base configuration file) to use.
 
 #### `--local`
 
@@ -68,12 +71,11 @@ In local network mode, you can optionally pass:
 
 - `--protocol-version {version}` to run a specific protocol version (defaults to latest version).
 
-- `--limits {limits}` to configure specific Soroban resource limits to one of:
+- `--limits {limits}` to configure specific Stellar's contract resource limits to one of:
   - `default` leaves limits set extremely low which is stellar-core's default configuration
   - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
   - `unlimited` sets limits to the maximum resources that can be configured
 
-**Note: The `--enable` options behaves differently in local network mode, see [Service Options](#service-otions) for more details.**
 The network passphrase of the network defaults to:
 
 ```
@@ -82,19 +84,21 @@ Standalone Network ; February 2017
 
 Set the network passphrase in the SDK or tool you're using. If an incorrect network passphrase is used in clients signing transactions, the transactions will fail with a bad authentication error.
 
-The root account of the network is fixed to:
+In local network mode a ledger occurs every one second and so transactions are finalized faster than on testnet or pubnet.
 
-```
-Public Key: GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI
-Secret Key: SC5O7VZUXDJ6JBDSZ74DSERXL7W3Y5LTOAMRF7RQRL3TAGAPS7LUVG3L
-```
+#### `--testnet`
 
-The root account is derived from the network passphrase and if the network passphrase is changed the root account will change. To find out the root account when changing the network passphrase view the logs for stellar-core on its first start. See [Viewing logs](#viewing-logs) for more details.
+In test network mode, the node will join the network that developers can use while developing contracts and applications. Use the [Stellar Lab](https://laboratory.stellar.org/#account-creator?network=test) or Friendbot's API to create an account on the test network.
 
-In local network mode a ledger occurs every one second and so transactions
-are finalized faster than on deployed networks.
+#### `--futurenet`
 
-_Note_: The local network in this container is not suitable for any production use as it has a fixed root account. Any private network intended for production use would also required a unique network passphrase.
+In futurenet network mode, the node will join the Stellar futurenet test network that developers use to test unreleased upcoming protocol changes.
+
+#### `--pubnet`
+
+In public network mode, the node will join the public, production Stellar network.
+
+_Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
 
 ### Service Options
 
@@ -103,7 +107,7 @@ The image runs all services available by default, but can be configured to run o
 The option takes a comma-separated list of service names to enable. To enable all services which is the default behavior, use:
 
 ```
---enable core,horizon,rpc
+--enable core,horizon,rpc,lab
 ```
 
 To run only select services, simply specify only those services. For example, to enable the RPC, use:
@@ -112,13 +116,33 @@ To run only select services, simply specify only those services. For example, to
 --enable rpc
 ```
 
+To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use the local network:
+
+```
+--enable lab
+```
+
 **Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.**
+
+### Stellar Lab
+
+Stellar Lab is an interactive toolkit for exploring and interacting with the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the Friendbot, RPC, and Horizon APIs. Lab is also built-in to Quickstart.
+
+Lab is available at:
+
+```
+http://localhost:8000/lab
+```
+
+Lab is also deployed at:
+
+https://lab.stellar.org
 
 ### Faucet (Friendbot)
 
-Stellar development/test networks use friendbot as a faucet for the native asset.
+Stellar development/test networks use Friendbot as a faucet for the native asset.
 
-When running in local, testnet, and futurenet modes friendbot is available on `:8000/friendbot` and can be used to fund a new account.
+When running in local, testnet, and futurenet modes Friendbot is available on `:8000/friendbot` and can be used to fund a new account.
 
 For example:
 
@@ -159,28 +183,63 @@ The endpoint automatically detects which services are running and only reports "
 
 _Note: The `/health` endpoint provides comprehensive readiness status for all detected services, replacing Horizon's built-in `/health` endpoint with expanded functionality._
 
-### Soroban Development
+### Using in GitHub Actions
 
-The RPC Server will be avaialble on port 8000 of the container, and the base URL path for Stellar RPC will be `http://<container_host>:8000/rpc`. This endpoint uses [JSON-RPC](https://www.jsonrpc.org/specification) protocol. Refer to example usages in [soroban-example-dapp](https://github.com/stellar/soroban-example-dapp).
+The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
 
-To enable stellar rpc admin endpoint for access to metrics and [Go pprof (profiling)](https://pkg.go.dev/net/http/pprof), include the `--enable-stellar-rpc-admin-endpoint` flag, the HTTP endpoint will be listening on container port 6061, which can be exposed with standard docker port rule `-p "6061:6061"`, the published endpoints are:
+Add this step to your GitHub Actions workflow:
 
+```yaml
+- name: Start Stellar network
+  uses: stellar/quickstart@main
 ```
-http://<container_host>:6061/metrics
-http://<container_host>:6061/debug/pprof/
+
+This will start a local Stellar network with all services available on port 8000.
+
+The action waits for all services to be healthy before proceeding to the next step in the workflow.
+
+#### Configuration Options
+
+The action supports several configuration options. None are required and defaults are suitable in most cases.
+
+```yaml
+- name: Start Stellar network
+  uses: stellar/quickstart@main
+  with:
+    tag: "latest"                         # Image tag (default: "latest")
+    image: "docker.io/stellar/quickstart" # Image name (default: "docker.io/stellar/quickstart")
+    network: "local"                      # Network: local, testnet, futurenet (default: "local")
+    enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
+    protocol_version: ""                  # Protocol version to run for 'local' network only (leave blank for default for image)"
+    enable_logs: "true"                   # Enable container logs (default: "true")
+    health_interval: "10"                 # Time between health checks in seconds (default: "10")
+    health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")
+    health_retries: "50"                  # Number of consecutive failures before marking unhealthy (default: "50")
 ```
 
-### Soroban Diagnostic Events
+#### Example Workflow
 
-Soroban diagnostic events contain logs about internal events that have occurred while a contract is executing. They're particularly useful for debugging why a contract trapped (panicked).
+```yaml
+on: [push, pull_request]
 
-To enable Soroban diagnostic events provide the following command line flag when starting the container:
-`--enable-soroban-diagnostic-events`
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Start Stellar network
+        uses: stellar/quickstart@main
+      
+      - name: Run tests
+        run: |
+          # Your test commands here
+          # Services are available at:
+          # - Horizon: http://localhost:8000
+          # - RPC: http://localhost:8000/rpc  
+          # - Friendbot: http://localhost:8000/friendbot
+```
 
-In local network mode diagnostics are enabled by default and can be disabled with:
-`--disable-soroban-diagnostic-events`
-
-_Note: Diagnostic events are unmetered and their execution is not metered or contrained by network limits or transaction resource limits. This means the resources consumed by an instance with diagnostic events enabled may exceed resources typically required by a deployment with diagnostic events disabled._
 
 ### Deploy to Digital Ocean
 
@@ -279,9 +338,15 @@ Managing UIDs between a docker container and a host volume can be complicated. A
 
 The image exposes one main port through which services provide their APIs:
 
+<<<<<<< HEAD
 | Port | Service                                | Description    |
 | ---- | -------------------------------------- | -------------- |
 | 8000 | horizon, stellar-rpc, friendbot, health | main http port |
+=======
+| Port | Service                         | Description    |
+| ---- | ------------------------------- | -------------- |
+| 8000 | lab, horizon, stellar-rpc, friendbot | main http port |
+>>>>>>> origin/main
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -308,6 +373,10 @@ It is safe to open the horizon http port. Horizon is designed to listen on an in
 The HTTP port for stellar-core should only be exposed to a trusted network, as it provides no security itself. An attacker that can make requests to the port will be able to perform administrative commands such as forcing a catchup or changing the logging level and more, many of which could be used to disrupt operations or deny service.
 
 The peer port for stellar-core however can be exposed, and ideally would be routable from the internet. This would allow external peers to initiate connections to your node, improving connectivity of the overlay network. However, this is not required as your container will also establish outgoing connections to peers.
+
+Local mode uses a fixed network passphrase. It is important to use a unique network passphrase for any shared network, otherwise signatures for transactions on one network would be valid on another.
+
+The network's root account master key, that contains the minted native asset, is derived from the network passphrase, and so is easily known allowing anyone to act as that account. In local mode Friendbot uses the root account as the source of the native asset for funding new accounts and uses the master key to sign transactions. The funding method would need to be changed, or a new signer introduced to prevent others from signing for the root account. There are no built in feature to facilitate this at this time.
 
 ## Accessing and debugging a running container
 
@@ -387,3 +456,6 @@ $ docker run -it --rm \
 ## Troubleshooting
 
 Let us know what you're having trouble with! Open an issue or join us on our public [Discord server](https://discord.com/invite/stellardev).
+
+
+[Using in GitHub Actions]: #using-in-github-actions

@@ -33,15 +33,15 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.3.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.0
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.0
+      friendbot_ref: horizon-v23.0.0
       lab_ref: main
       test_matrix: |
-        {
+        {j
           "network": ["testnet", "pubnet", "local"],
           "core": ["core", null],
           "horizon": ["horizon", null],
@@ -58,12 +58,12 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}testing-arm64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.3.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.0
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.0
+      friendbot_ref: horizon-v23.0.0
       lab_ref: main
       test_matrix: |
         {
