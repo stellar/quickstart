@@ -338,15 +338,9 @@ Managing UIDs between a docker container and a host volume can be complicated. A
 
 The image exposes one main port through which services provide their APIs:
 
-<<<<<<< HEAD
-| Port | Service                                | Description    |
-| ---- | -------------------------------------- | -------------- |
-| 8000 | horizon, stellar-rpc, friendbot, health | main http port |
-=======
-| Port | Service                         | Description    |
-| ---- | ------------------------------- | -------------- |
-| 8000 | lab, horizon, stellar-rpc, friendbot | main http port |
->>>>>>> origin/main
+| Port | Service                                    | Description    |
+| ---- | ------------------------------------------ | -------------- |
+| 8000 | lab, horizon, stellar-rpc, friendbot, health | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
