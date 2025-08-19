@@ -234,7 +234,7 @@ function process_args() {
     ;;
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
-    export HISTORY_ARCHIVE_URLS="http://history-futurenet.stellar.org"
+    export HISTORY_ARCHIVE_URLS="http://history.stellar.org/dev/core-futurenet/core_futurenet_001"
     ;;
   *)
     echo "Unknown network: '$NETWORK'" >&2
