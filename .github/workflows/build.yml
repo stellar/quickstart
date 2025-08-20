@@ -482,6 +482,13 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run tests/test_horizon_ingesting.go
         curl http://localhost:8000
+    # Test our custom readiness service on port 8004
+    - name: Run health endpoint test
+      if: ${{ matrix.horizon }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run tests/test_health_endpoint.go
     - name: Run friendbot test
       if: ${{ matrix.horizon && matrix.network == 'local' }}
       run: |

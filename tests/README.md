@@ -88,6 +88,17 @@ go run test_health_endpoint.go
 
 The custom readiness service (port 8004) is implemented in Python (`common/readiness/bin/readiness-service.py`) and provides enhanced health checking capabilities:
 
+**✅ Now integrated into CI!** The health endpoint test runs automatically in GitHub Actions when `matrix.horizon` is enabled.
+
+## CI Integration
+
+The health endpoint test (`test_health_endpoint.go`) is now part of the GitHub Actions CI pipeline:
+
+- **Trigger**: Runs when `matrix.horizon` is enabled
+- **Timing**: Executes after Horizon is confirmed to be running
+- **Logs**: Captures Horizon supervisor logs during testing
+- **Matrix**: Runs on both `pubnet` and `local` network configurations
+
 - **Auto-detection**: Automatically detects which services are enabled
 - **Kubernetes-compatible**: Uses "ready"/"not ready" terminology
 - **Comprehensive**: Checks individual service health  
