@@ -1,3 +1,7 @@
+// test_health_endpoint.go tests the custom readiness service endpoint
+// This test verifies that our custom readiness service on port 8004 is working
+// and reports all services as "ready". This is different from Horizon's built-in
+// health endpoint on port 8000/health which has a different response format.
 package main
 
 import (
@@ -27,7 +31,9 @@ func main() {
 			os.Exit(-1)
 		}
 
-		resp, err := http.Get("http://localhost:8000/health")
+		// Test our custom readiness service on port 8004
+		// This endpoint returns {"status": "ready", "services": {...}}
+		resp, err := http.Get("http://localhost:8004")
 		if err != nil {
 			logLine(err)
 			continue
