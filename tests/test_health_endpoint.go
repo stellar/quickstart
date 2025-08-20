@@ -33,7 +33,7 @@ func main() {
 
 		// Test our custom readiness service on port 8004
 		// This endpoint returns {"status": "ready", "services": {...}}
-		resp, err := http.Get("http://localhost:8004")
+		resp, err := http.Get("http://127.0.0.1:8004")
 		if err != nil {
 			logLine(err)
 			continue
