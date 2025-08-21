@@ -349,7 +349,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
-| 8004  | health service             | internal port        |
+| 8004  | health service             | http port            |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
