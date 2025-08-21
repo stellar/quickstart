@@ -1,6 +1,9 @@
 // test_health_endpoint.go tests the /health endpoint through nginx
 // This test verifies that the /health endpoint accessible through nginx on port 8000
 // reports all services as "ready". This tests the complete health check pipeline.
+//
+// Note: This test uses a 20-minute timeout to accommodate longer sync times
+// for networks like pubnet, which can take 10-15 minutes or more to fully sync.
 package main
 
 import (
@@ -11,7 +14,7 @@ import (
 	"time"
 )
 
-const timeout = 6 * time.Minute
+const timeout = 20 * time.Minute
 
 type ReadinessResponse struct {
 	Status   string            `json:"status"`
@@ -23,12 +26,15 @@ func main() {
 
 	for {
 		time.Sleep(5 * time.Second)
-		logLine("Waiting for health endpoint to be ready")
-
-		if time.Since(startTime) > timeout {
-			logLine("Timeout")
+		elapsed := time.Since(startTime)
+		remaining := timeout - elapsed
+		
+		if remaining <= 0 {
+			logLine("Timeout after", elapsed.Round(time.Second))
 			os.Exit(-1)
 		}
+		
+		logLine("Waiting for health endpoint to be ready (elapsed:", elapsed.Round(time.Second), "remaining:", remaining.Round(time.Second), ")")
 
 		// Test the /health endpoint through nginx on port 8000
 		// This endpoint returns {"status": "ready", "services": {...}}
@@ -50,7 +56,7 @@ func main() {
 		logLine("Health response:", readinessResponse)
 
 		if resp.StatusCode == http.StatusOK && readinessResponse.Status == "ready" {
-			logLine("Health endpoint reports all services are ready!")
+			logLine("Health endpoint reports all services are ready after", elapsed.Round(time.Second))
 			os.Exit(0)
 		}
 
