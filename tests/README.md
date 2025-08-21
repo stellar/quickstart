@@ -101,21 +101,3 @@ The custom readiness service runs internally on port 8004 and provides enhanced 
 
 **Smart Startup Handling**: The readiness service intelligently handles the startup sequence by considering Horizon ready when Stellar-Core is syncing, even if Horizon hasn't ingested ledgers yet. This prevents false negatives during the normal startup process.
 
-**✅ Now integrated into CI!** The health endpoint test runs automatically in GitHub Actions when `matrix.horizon` is enabled.
-
-## CI Integration
-
-The health endpoint test (`test_health_endpoint.go`) is now part of the GitHub Actions CI pipeline:
-
-- **Trigger**: Runs when `matrix.horizon` is enabled
-- **Timing**: Executes after Horizon is confirmed to be running
-- **Logs**: Captures Horizon supervisor logs during testing
-- **Matrix**: Runs on both `pubnet` and `local` network configurations
-- **Timeout**: 6 minutes (readiness service handles startup sequence properly)
-
-- **Auto-detection**: Automatically detects which services are enabled
-- **Kubernetes-compatible**: Uses "ready"/"not ready" terminology
-- **Comprehensive**: Checks individual service health  
-- **Detailed reporting**: Includes nested health information from Horizon
-- **Proper HTTP codes**: Returns 200 for ready, 503 for not ready
-- **Internal architecture**: Runs on port 8004, proxied through nginx on port 8000
