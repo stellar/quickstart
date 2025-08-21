@@ -41,7 +41,7 @@ jobs:
       friendbot_ref: horizon-v23.0.0
       lab_ref: main
       test_matrix: |
-        {j
+        {
           "network": ["testnet", "pubnet", "local"],
           "core": ["core", null],
           "horizon": ["horizon", null],
