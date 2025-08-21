@@ -8,4 +8,4 @@ export PORT=8100
 export NEXT_BASE_PATH=/lab
 export NEXT_PUBLIC_DEFAULT_NETWORK=custom
 export NEXT_PUBLIC_ENABLE_EXPLORER=true
-./node_modules/.bin/next start
+node server.js

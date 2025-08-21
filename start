@@ -17,6 +17,8 @@ export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
+export CORELOG="/var/log/stellar-core"
+
 export PGBIN="/usr/lib/postgresql/14/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
@@ -94,6 +96,8 @@ function start() {
   echo "network id: $NETWORK_ID"
   echo "network root secret key: $NETWORK_ROOT_SECRET_KEY"
   echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
+  echo "protocol version default: $PROTOCOL_VERSION_DEFAULT"
+  echo "protocol version set: $PROTOCOL_VERSION"
 
   copy_defaults
   validate_after_copy_defaults
@@ -232,7 +236,7 @@ function process_args() {
     ;;
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
-    export HISTORY_ARCHIVE_URLS="http://history-futurenet.stellar.org"
+    export HISTORY_ARCHIVE_URLS="http://history.stellar.org/dev/core-futurenet/core_futurenet_001"
     ;;
   *)
     echo "Unknown network: '$NETWORK'" >&2
@@ -424,6 +428,9 @@ function init_stellar_core() {
   if [ "$ENABLE_CORE" != "true" ]; then
     return 0
   fi
+
+  run_silent "mkdir-core-log" mkdir -p "$CORELOG"
+  run_silent "chown-core-log" chown -R stellar:stellar "$CORELOG"
 
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
@@ -823,10 +830,6 @@ function horizon_status() {
     sleep 5
   done
   echo "horizon: ingestion caught up"
-}
-
-function supervisorctl() {
-  /usr/bin/supervisorctl -c $SUPHOME/etc/supervisord.conf "$@"
 }
 
 main $@

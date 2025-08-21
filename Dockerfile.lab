@@ -9,10 +9,11 @@ RUN git fetch origin ${NEXT_PUBLIC_COMMIT_HASH}
 RUN git checkout ${NEXT_PUBLIC_COMMIT_HASH}
 RUN rm -rf .git
 RUN yarn install --frozen-lockfile
+ENV NEXT_PUBLIC_ENABLE_STANDALONE_OUTPUT=true
 ENV NEXT_PUBLIC_ENABLE_EXPLORER=true
 ENV NEXT_PUBLIC_DEFAULT_NETWORK=custom
 ENV NEXT_BASE_PATH=/lab
 RUN yarn build
 
 EXPOSE 8100
-CMD ["npm", "start"]
+CMD ["node", "build/standalone/server.js"]
