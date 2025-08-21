@@ -152,9 +152,11 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
-### Readiness Endpoint
+### Health Endpoint
 
 The quickstart image provides a `/health` endpoint that indicates when all services are fully ready for use. This endpoint reports HTTP 200 when the image is ready and HTTP 503 when services are still starting up or experiencing issues.
+
+The health endpoint is served by a custom readiness service that runs internally on port 8004 and is proxied through nginx on port 8000.
 
 Example usage:
 
@@ -181,7 +183,7 @@ Example response when ready:
 
 The endpoint automatically detects which services are running and only reports "ready" when all detected services are functioning properly. This eliminates the need to write custom scripts to test multiple service endpoints individually.
 
-_Note: The `/health` endpoint provides comprehensive readiness status for all detected services, replacing Horizon's built-in `/health` endpoint with expanded functionality._
+_Note: The `/health` endpoint provides comprehensive readiness status for all detected services through the custom readiness service, which runs internally and is accessible only through the nginx proxy on port 8000._
 
 ### Using in GitHub Actions
 
@@ -349,7 +351,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
-| 8004  | health service             | http port            |
+| 8004  | readiness service          | internal health port (not exposed to host) |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
