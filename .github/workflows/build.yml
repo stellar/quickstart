@@ -491,9 +491,7 @@ jobs:
         echo "supervisorctl tail -f readiness" | docker exec -i stellar sh &
         # Ensure readiness service is running
         docker exec stellar supervisorctl status readiness || docker exec stellar supervisorctl start readiness
-        # Copy the test file into the container and run it there
-        docker cp tests/test_health_endpoint.go stellar:/tmp/
-        docker exec stellar sh -c "cd /tmp && go run test_health_endpoint.go"
+        go run tests/test_health_endpoint.go
     - name: Run friendbot test
       if: ${{ matrix.horizon && matrix.network == 'local' }}
       run: |
