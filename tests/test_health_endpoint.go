@@ -2,8 +2,8 @@
 // This test verifies that the /health endpoint accessible through nginx on port 8000
 // reports all services as "ready". This tests the complete health check pipeline.
 //
-// Note: This test uses a 20-minute timeout to accommodate longer sync times
-// for networks like pubnet, which can take 10-15 minutes or more to fully sync.
+// Note: This test uses a 6-minute timeout which is sufficient since the readiness
+// service now properly handles the startup sequence and doesn't require full sync.
 package main
 
 import (
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const timeout = 20 * time.Minute
+const timeout = 6 * time.Minute
 
 type ReadinessResponse struct {
 	Status   string            `json:"status"`

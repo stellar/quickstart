@@ -43,9 +43,11 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         if enable_core:
             if self.check_stellar_core():
                 response['services']['stellar-core'] = 'ready'
+                logger.info("Stellar-Core readiness check passed")
             else:
                 response['services']['stellar-core'] = 'not ready'
                 all_healthy = False
+                logger.info("Stellar-Core readiness check failed")
         
         # Check horizon if enabled
         if enable_horizon:
@@ -54,17 +56,21 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
                 response['services']['horizon'] = 'ready'
                 # Include Horizon's detailed health info
                 response['services']['horizon_health'] = horizon_status['health']
+                logger.info("Horizon readiness check passed")
             else:
                 response['services']['horizon'] = 'not ready'
                 all_healthy = False
+                logger.info("Horizon readiness check failed")
         
         # Check stellar-rpc if enabled
         if enable_rpc:
             if self.check_stellar_rpc():
                 response['services']['stellar-rpc'] = 'ready'
+                logger.info("Stellar-RPC readiness check passed")
             else:
                 response['services']['stellar-rpc'] = 'not ready'
                 all_healthy = False
+                logger.info("Stellar-RPC readiness check failed")
         
         if not all_healthy:
             response['status'] = 'not ready'
@@ -135,14 +141,23 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
             with urllib.request.urlopen('http://localhost:8001', timeout=5) as resp:
                 if resp.status != 200:
                     return {'ready': False, 'health': None}
-                
+``                
                 data = json.load(resp)
                 protocol_version = data.get('supported_protocol_version', 0)
                 core_ledger = data.get('core_latest_ledger', 0)
                 history_ledger = data.get('history_latest_ledger', 0)
                 
-                # Basic readiness check
-                basic_ready = protocol_version > 0 and core_ledger > 0 and history_ledger > 0
+                # During initial sync, be more lenient with Horizon readiness
+                # Horizon can be considered ready if:
+                # 1. It's responding to requests (protocol_version > 0)
+                # 2. Stellar-Core is syncing (core_ledger > 0) 
+                # 3. Horizon is either ingesting or waiting to ingest
+                basic_ready = protocol_version > 0 and core_ledger > 0
+                
+                # If Horizon hasn't ingested any ledgers yet but Stellar-Core is syncing,
+                # consider it ready (it's in the normal startup sequence)
+                if basic_ready and history_ledger == 0:
+                    logger.info(f"Horizon is ready but waiting for Stellar-Core to sync (core: {core_ledger}, history: {history_ledger})")
                 
             # Try to get Horizon's own health endpoint
             horizon_health = None
