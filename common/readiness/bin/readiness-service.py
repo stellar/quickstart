@@ -141,7 +141,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
             with urllib.request.urlopen('http://localhost:8001', timeout=5) as resp:
                 if resp.status != 200:
                     return {'ready': False, 'health': None}
-``                
+                
                 data = json.load(resp)
                 protocol_version = data.get('supported_protocol_version', 0)
                 core_ledger = data.get('core_latest_ledger', 0)
