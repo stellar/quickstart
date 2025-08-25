@@ -25,8 +25,8 @@
         "fee_write_ledger_entry": 10000,
         "fee_disk_read1_kb": 1786,
         "soroban_state_target_size_bytes": 300000000,
-        "rent_fee1_kb_soroban_state_size_low": "-17000",
-        "rent_fee1_kb_soroban_state_size_high": "10000",
+        "rent_fee1_kb_soroban_state_size_low": -17000,
+        "rent_fee1_kb_soroban_state_size_high": 10000,
         "soroban_state_rent_fee_growth_factor": 5000
       }
     },
