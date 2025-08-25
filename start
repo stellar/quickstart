@@ -634,13 +634,13 @@ function upgrade_local() {
   if [ $PROTOCOL_VERSION -ge 20 ] && [ "$LIMITS" != "default" ]; then
     # First upgrade with the settings_enable_upgrades.json file
     # to enable the upcoming, larger upgrade.
-    upgrade_soroban_config "$COREHOME/etc/config-settings/settings_enable_upgrades.json" 0 
+    upgrade_soroban_config "$COREHOME/etc/config-settings/settings_enable_upgrades.json" 0
     
     echo "upgrades: soroban config '$LIMITS' limits"
 
     # Then upgrade with the existing protocol version specific file
     # Pass the expected sequence number of the root account after the first call to upgrade_soroban_config
-    upgrade_soroban_config "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json" 4 
+    upgrade_soroban_config "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json" 4
   fi
 
   # Start friendbot once network upgrades are complete and network is ready.
