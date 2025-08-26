@@ -81,17 +81,17 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - id: xdr
-      run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: core
-      run: echo "sha=$(gh api repos/"${{inputs.core_repo}}"/commits/"${{inputs.core_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/"${{inputs.core_repo}}"/commits/"${{inputs.core_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: rpc
-      run: echo "sha=$(gh api repos/stellar/stellar-rpc/commits/"${{inputs.stellar_rpc_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/stellar-rpc/commits/"${{inputs.stellar_rpc_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: horizon
-      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.horizon_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.horizon_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: friendbot
-      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.friendbot_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.friendbot_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: lab
-      run: echo "sha=$(gh api repos/stellar/laboratory/commits/"${{inputs.lab_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/laboratory/commits/"${{inputs.lab_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
 
   load-stellar-core-from-cache:
     needs: [shas]
