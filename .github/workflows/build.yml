@@ -257,7 +257,7 @@ jobs:
   build-stellar-lab:
     needs: [shas, load-stellar-lab-from-cache]
     if: ${{ needs.load-stellar-lab-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
