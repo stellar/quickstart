@@ -1,6 +1,8 @@
 name: Build
 
 on:
+  schedule:
+  - cron: '0 3 * * 1-5' # Mon-Fri 3pm UTC
   push:
     branches:
     - main
@@ -64,6 +66,16 @@ jobs:
   future:
     needs: [setup]
     uses: ./.github/workflows/build-future.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+
+  nightly:
+    needs: [setup]
+    uses: ./.github/workflows/build-nightly.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

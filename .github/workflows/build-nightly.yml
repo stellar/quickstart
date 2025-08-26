@@ -1,0 +1,85 @@
+name: Nightly
+
+# The `:nightly` tag builds unreleased typically main branch software.
+# This file should not need routinely updating, except for bumping the protocol
+# version.
+
+on:
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+    inputs:
+      sha:
+        description: 'Sha to build'
+        type: 'string'
+        required: true
+      tag-prefix:
+        description: 'Prefix for the tag name'
+        type: 'string'
+        default: ''
+
+jobs:
+
+  amd64:
+    uses: ./.github/workflows/build.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ inputs.sha }}
+      arch: amd64
+      tag: ${{ inputs.tag-prefix }}nightly-amd64
+      protocol_version_default: 23
+      xdr_ref: main
+      core_ref: master
+      horizon_ref: main
+      stellar_rpc_ref: main
+      friendbot_ref: main
+      lab_ref: main
+      test_matrix: |
+        {
+          "network": ["testnet", "pubnet", "local"],
+          "core": ["core"],
+          "horizon": ["horizon"],
+          "rpc": ["rpc"],
+          "options": [""]
+        }
+
+  arm64:
+    uses: ./.github/workflows/build.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      sha: ${{ inputs.sha }}
+      arch: arm64
+      tag: ${{ inputs.tag-prefix }}nightly-arm64
+      protocol_version_default: 23
+      xdr_ref: main
+      core_ref: master
+      horizon_ref: main
+      stellar_rpc_ref: main
+      friendbot_ref: main
+      lab_ref: main
+      test_matrix: |
+        {
+          "network": ["testnet", "pubnet", "local"],
+          "core": ["core"],
+          "horizon": ["horizon"],
+          "rpc": ["rpc"],
+          "options": [""]
+        }
+
+  manifest:
+    needs: [amd64, arm64]
+    uses: ./.github/workflows/manifest.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      tag: ${{ inputs.tag-prefix }}testing
+      tag-alias: testing
+      images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
