@@ -35,9 +35,9 @@ jobs:
       protocol_version_default: 23
       xdr_ref: main
       core_ref: master
-      horizon_ref: main
+      horizon_ref: master
       stellar_rpc_ref: main
-      friendbot_ref: main
+      friendbot_ref: master
       lab_ref: main
       test_matrix: |
         {
@@ -60,9 +60,9 @@ jobs:
       protocol_version_default: 23
       xdr_ref: main
       core_ref: master
-      horizon_ref: main
+      horizon_ref: master
       stellar_rpc_ref: main
-      friendbot_ref: main
+      friendbot_ref: master
       lab_ref: main
       test_matrix: |
         {
