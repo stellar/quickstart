@@ -77,6 +77,8 @@ jobs:
       horizon: ${{ steps.horizon.outputs.sha }}
       friendbot: ${{ steps.friendbot.outputs.sha }}
       lab: ${{ steps.lab.outputs.sha }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - id: xdr
       run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
@@ -90,7 +92,6 @@ jobs:
       run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.friendbot_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
     - id: lab
       run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.lab_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
-    # needs.shas.outputs.lab
 
   load-stellar-core-from-cache:
     needs: [shas]
