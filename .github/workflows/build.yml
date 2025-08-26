@@ -91,7 +91,7 @@ jobs:
     - id: friendbot
       run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.friendbot_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
     - id: lab
-      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.lab_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/stellar/laboratory/commits/"${{inputs.lab_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
 
   load-stellar-core-from-cache:
     needs: [shas]
