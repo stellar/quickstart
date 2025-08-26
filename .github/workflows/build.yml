@@ -25,7 +25,7 @@ on:
       core_repo:
         description: 'Git repo for stellar-core'
         type: 'string'
-        default: 'https://github.com/stellar/stellar-core.git'
+        default: 'stellar/stellar-core'
       core_ref:
         description: 'Git ref for the stellar-core repo'
         type: 'string'
@@ -65,17 +65,35 @@ on:
 
 env:
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
-  HORIZON_REPO_REF: ${{ inputs.horizon_ref }}
-  FRIENDBOT_REPO_REF: ${{ inputs.friendbot_ref }}
-  STELLAR_RPC_REPO_BRANCH: ${{ inputs.stellar_rpc_ref }}
-  LAB_REPO_REF: ${{ inputs.lab_ref }}
-  CORE_REPO: ${{ inputs.core_repo }}
-  CORE_REPO_REF: ${{ inputs.core_ref }}
-  XDR_REPO_REF: ${{ inputs.xdr_ref }}
 
 jobs:
 
+  shas:
+    runs-on: ubuntu-latest
+    outputs:
+      xdr: ${{ steps.xdr.outputs.sha }}
+      core: ${{ steps.core.outputs.sha }}
+      rpc: ${{ steps.rpc.outputs.sha }}
+      horizon: ${{ steps.horizon.outputs.sha }}
+      friendbot: ${{ steps.friendbot.outputs.sha }}
+      lab: ${{ steps.lab.outputs.sha }}
+    steps:
+    - id: xdr
+      run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    - id: core
+      run: echo "sha=$(gh api repos/"${{inputs.core_repo}}"/commits/"${{inputs.core_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    - id: rpc
+      run: echo "sha=$(gh api repos/stellar/stellar-rpc/commits/"${{inputs.stellar_rpc_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    - id: horizon
+      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.horizon_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    - id: friendbot
+      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.friendbot_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    - id: lab
+      run: echo "sha=$(gh api repos/stellar/go/commits/"${{inputs.lab_ref}}" --jq '.sha')" >> $GITHUB_OUTPUT
+    # needs.shas.outputs.lab
+
   load-stellar-core-from-cache:
+    needs: [shas]
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
@@ -84,7 +102,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
+        key: image-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -93,7 +111,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-core:
-    needs: [load-stellar-core-from-cache]
+    needs: [shas, load-stellar-core-from-cache]
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
@@ -101,7 +119,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ env.CORE_REPO_REF }}-${{ inputs.core_configure_flags }}
+        key: image-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -112,7 +130,7 @@ jobs:
         docker buildx build --platform linux/${{ inputs.arch }}
         -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        ${{ env.CORE_REPO }}#${{ env.CORE_REPO_REF }}
+        https://github.com/${{ inputs.core_repo }}.git#${{ needs.shas.outputs.core }}
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
     - name: Upload Stellar-Core Image
@@ -122,6 +140,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-horizon:
+    needs: [shas]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Quickstart for Horizon docker file
@@ -139,7 +158,7 @@ jobs:
         docker buildx build --platform linux/${{ inputs.arch }}
         -f Dockerfile.horizon --target builder
         -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image
-        --build-arg REF="${{ env.HORIZON_REPO_REF }}" .
+        --build-arg REF="${{ needs.shas.outputs.horizon }}" .
     - name: Upload Stellar-Horizon Image
       uses: actions/upload-artifact@v4
       with:
@@ -147,6 +166,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-friendbot:
+    needs: [shas]
     runs-on: ubuntu-latest
     steps:
     - if: inputs.arch == 'arm64'
@@ -161,7 +181,7 @@ jobs:
         -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/go.git#${{ env.FRIENDBOT_REPO_REF }}
+        https://github.com/stellar/go.git#${{ needs.shas.outputs.friendbot }}
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v4
       with:
@@ -169,6 +189,7 @@ jobs:
         path: /tmp/image
 
   load-stellar-rpc-from-cache:
+    needs: [shas]
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
@@ -177,7 +198,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-rpc-${{ inputs.arch }}-${{ env.STELLAR_RPC_REPO_BRANCH }}
+        key: image-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -186,7 +207,7 @@ jobs:
         path: /tmp/image
 
   build-stellar-rpc:
-    needs: [load-stellar-rpc-from-cache]
+    needs: [shas, load-stellar-rpc-from-cache]
     if: ${{ needs.load-stellar-rpc-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
@@ -194,7 +215,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-rpc-${{ inputs.arch }}-${{ env.STELLAR_RPC_REPO_BRANCH }}
+        key: image-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -207,7 +228,7 @@ jobs:
         -t stellar-rpc:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
         --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/stellar-rpc.git#${{ env.STELLAR_RPC_REPO_BRANCH }}
+        https://github.com/stellar/stellar-rpc.git#${{ needs.shas.outputs.rpc }}
     - name: Upload Stellar-rpc Image
       uses: actions/upload-artifact@v4
       with:
@@ -215,6 +236,7 @@ jobs:
         path: /tmp/image
 
   load-stellar-lab-from-cache:
+    needs: [shas]
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
@@ -223,15 +245,16 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}
+        key: image-stellar-lab-${{ inputs.tag }}-${{ needs.shas.outputs.lab }}
     - name: Upload Stellar-Lab Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   build-stellar-lab:
+    needs: [shas, load-stellar-lab-from-cache]
     if: ${{ needs.load-stellar-lab-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -239,7 +262,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}
+        key: image-stellar-lab-${{ inputs.tag }}-${{ needs.shas.outputs.lab }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
@@ -255,14 +278,15 @@ jobs:
         docker buildx build --platform linux/${{ inputs.arch }}
         -f Dockerfile.lab --target builder
         -t stellar-lab:${{ inputs.arch }} -o type=docker,dest=/tmp/image
-        --build-arg NEXT_PUBLIC_COMMIT_HASH=${{ env.LAB_REPO_REF }} .
+        --build-arg NEXT_PUBLIC_COMMIT_HASH=${{ needs.shas.outputs.lab }} .
     - name: Upload Stellar-lab Image
       uses: actions/upload-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
   load-rs-stellar-xdr-from-cache:
+    needs: [shas]
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
@@ -271,7 +295,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
+        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -280,7 +304,7 @@ jobs:
         path: /tmp/image
 
   build-rs-stellar-xdr:
-    needs: [load-rs-stellar-xdr-from-cache]
+    needs: [shas, load-rs-stellar-xdr-from-cache]
     if: ${{ needs.load-rs-stellar-xdr-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
@@ -292,7 +316,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ env.XDR_REPO_REF }}
+        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -305,7 +329,7 @@ jobs:
         -t stellar-rs-xdr:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
         --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git
-        --build-arg REF="${{ env.XDR_REPO_REF }}" .
+        --build-arg REF="${{ needs.shas.outputs.xdr }}" .
     - name: Upload Stellar-Rs-Xdr Image
       uses: actions/upload-artifact@v4
       with:
@@ -352,7 +376,7 @@ jobs:
     - name: Download Stellar-Lab Image
       uses: actions/download-artifact@v4
       with:
-        name: image-stellar-lab-${{ inputs.tag }}-${{ env.LAB_REPO_REF }}
+        name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/stellar-lab
     - name: Download Stellar-rpc Image
       uses: actions/download-artifact@v4
