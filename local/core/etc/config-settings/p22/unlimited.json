@@ -44,7 +44,7 @@
     {
       "contract_bandwidth_v0": {
         "ledger_max_txs_size_bytes": 4294967295,
-        "tx_max_size_bytes": 4294967295,
+        "tx_max_size_bytes": 4294965295,
         "fee_tx_size1_kb": 500
       }
     },
