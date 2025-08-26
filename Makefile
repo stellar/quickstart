@@ -35,7 +35,7 @@ build-testing:
 	$(MAKE) build TAG=testing \
 		PROTOCOL_VERSION_DEFAULT=23 \
 		XDR_REF=v23.0.0 \
-		CORE_REF=v23.0.0 \
+		CORE_REF=v23.0.1 \
 		HORIZON_REF=horizon-v23.0.0 \
 		STELLAR_RPC_REF=v23.0.1 \
 		FRIENDBOT_REF=horizon-v23.0.0
@@ -44,7 +44,7 @@ build-future:
 	$(MAKE) build TAG=future \
 		PROTOCOL_VERSION_DEFAULT=23 \
 		XDR_REF=v23.0.0 \
-		CORE_REF=v23.0.0 \
+		CORE_REF=v23.0.1 \
 		HORIZON_REF=horizon-v23.0.0 \
 		STELLAR_RPC_REF=v23.0.1 \
 		FRIENDBOT_REF=horizon-v23.0.0
