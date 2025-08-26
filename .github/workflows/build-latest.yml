@@ -32,12 +32,12 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}latest-amd64
-      protocol_version_default: 22
+      protocol_version_default: 23
       xdr_ref: v23.0.0
-      core_ref: v22.3.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      core_ref: v23.0.1
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.1
+      friendbot_ref: horizon-v23.0.0
       lab_ref: main
       test_matrix: |
         {
