@@ -24,12 +24,12 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-		PROTOCOL_VERSION_DEFAULT=22 \
+		PROTOCOL_VERSION_DEFAULT=23 \
 		XDR_REF=v23.0.0 \
-		CORE_REF=v22.3.0 \
-		HORIZON_REF=horizon-v22.0.3 \
-		STELLAR_RPC_REF=v22.1.2 \
-		FRIENDBOT_REF=horizon-v22.0.3
+		CORE_REF=v23.0.1 \
+		HORIZON_REF=horizon-v23.0.0 \
+		STELLAR_RPC_REF=v23.0.1 \
+		FRIENDBOT_REF=horizon-v23.0.0
 
 build-testing:
 	$(MAKE) build TAG=testing \
