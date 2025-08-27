@@ -583,3 +583,10 @@ jobs:
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+
+  action-test:
+    needs: [push-pr, push-release]
+    if: ${{ always() }}
+    uses: ./.github/workflows/action-test.yml
+    with:
+      tag: ${{ inputs.tag }}
