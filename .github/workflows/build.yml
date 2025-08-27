@@ -339,6 +339,7 @@ jobs:
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-rpc, build-stellar-lab]
+    if: always()
     outputs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
@@ -436,6 +437,7 @@ jobs:
 
   test:
     needs: build
+    if: always()
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
