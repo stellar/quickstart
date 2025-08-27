@@ -57,7 +57,7 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}latest-arm64
-      protocol_version_default: 22
+      protocol_version_default: 23
       xdr_ref: v23.0.0
       core_ref: v23.0.1
       horizon_ref: horizon-v23.0.0
