@@ -29,14 +29,13 @@ EXPOSE 11626
 ADD dependencies /
 RUN /dependencies
 
-COPY --from=stellar-xdr /usr/local/cargo/bin/stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
-COPY --from=horizon /go/bin/horizon /usr/bin/stellar-horizon
+COPY --from=horizon /horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /app/friendbot /usr/local/bin/friendbot
 COPY --from=stellar-rpc /bin/stellar-rpc /usr/bin/stellar-rpc
-COPY --from=lab /lab/build/standalone /opt/stellar/lab
-COPY --from=lab /lab/build/static /opt/stellar/lab/public/_next/static
-COPY --from=lab /usr/local/bin/node /usr/bin/
+COPY --from=lab /lab /opt/stellar/lab
+COPY --from=lab /node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
