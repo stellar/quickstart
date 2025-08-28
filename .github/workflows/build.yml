@@ -157,7 +157,7 @@ jobs:
     - name: Build Stellar-Horizon Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f Dockerfile.horizon --target builder
+        -f Dockerfile.horizon
         -t stellar-horizon:${{ inputs.arch }} -o type=docker,dest=/tmp/image
         --build-arg REF="${{ needs.shas.outputs.horizon }}" .
     - name: Upload Stellar-Horizon Image
@@ -277,7 +277,7 @@ jobs:
     - name: Build Stellar-lab Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f Dockerfile.lab --target builder
+        -f Dockerfile.lab
         -t stellar-lab:${{ inputs.arch }} -o type=docker,dest=/tmp/image
         --build-arg NEXT_PUBLIC_COMMIT_HASH=${{ needs.shas.outputs.lab }} .
     - name: Upload Stellar-lab Image
@@ -326,7 +326,7 @@ jobs:
     - name: Build Stellar-Rs-Xdr Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f Dockerfile.xdr --target builder
+        -f Dockerfile.xdr
         -t stellar-rs-xdr:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
         --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git
