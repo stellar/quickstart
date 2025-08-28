@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ./action.yml
       with:
         tag: ${{ inputs.tag }}
