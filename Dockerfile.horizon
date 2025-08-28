@@ -8,3 +8,7 @@ RUN git checkout ${REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${REF}-(built-from-source)"
 RUN go install github.com/stellar/go/services/horizon
+
+FROM scratch AS artifacts
+
+COPY --from=builder /go/bin/horizon /horizon
