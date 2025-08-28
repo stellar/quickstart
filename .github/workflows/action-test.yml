@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 20
     steps:
-    - uses: stellar/quickstart@main
+    - uses: stellar/quickstart@${{ github.sha }}
       with:
         tag: ${{ inputs.tag }}
     - name: "Run basic test making sure RPC and Horizon are available"
