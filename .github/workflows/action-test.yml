@@ -1,44 +1,39 @@
-name: Action test
+name: Action Test
 
 on:
   workflow_call:
     inputs:
-      test_tags:
-        description: 'Test tags to use'
+      tag:
+        description: 'Tag to use'
         type: 'string'
         default: ''
 
 jobs:
-  basic-test:
-    name: Basic tests
+  action-test:
     strategy:
       fail-fast: false
       matrix:
         sys:
-          # x64
-          - os: ubuntu-latest-16-cores
-            # ARM
-          - os: ubuntu-jammy-16-cores-arm64
-            # Intel
-          - os: macos-13
-        tag: ${{ fromJSON(inputs.test_tags) }}
+        - os: ubuntu-latest-16-cores # x64
+        - os: ubuntu-jammy-16-cores-arm64 # ARM
+        - os: macos-13 # Intel
     runs-on: ${{ matrix.sys.os }}
     steps:
-      - uses: stellar/quickstart@main
-        with:
-          tag: ${{ matrix.tag }}
-      - name: "Run basic test making sure RPC and Horizon are available"
-        run: >
-          RESP=`curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
-          '{"jsonrpc": "2.0", "id": 8675309, "method": "getLatestLedger"}' http://localhost:8000/rpc`
-          
-          echo "RPC getLatestLedger response: $RESP"
+    - uses: stellar/quickstart@main
+      with:
+        tag: ${{ inputs.tag }}
+    - name: "Run basic test making sure RPC and Horizon are available"
+      run: >
+        RESP=`curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
+        '{"jsonrpc": "2.0", "id": 8675309, "method": "getLatestLedger"}' http://localhost:8000/rpc`
+        
+        echo "RPC getLatestLedger response: $RESP"
 
-          echo "$RESP" | grep sequence
-          
-          RESP=`curl -i -o - --silent 'http://localhost:8000/ledgers?limit=1'
-          -H 'Accept: application/json'`
-          
-          echo "Horizon ledgers response: $RESP"
-          
-          echo "$RESP" | grep "200 OK"
+        echo "$RESP" | grep sequence
+        
+        RESP=`curl -i -o - --silent 'http://localhost:8000/ledgers?limit=1'
+        -H 'Accept: application/json'`
+        
+        echo "Horizon ledgers response: $RESP"
+        
+        echo "$RESP" | grep "200 OK"
