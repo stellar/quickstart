@@ -35,8 +35,9 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - id: tag-prefix
       run: |
+        pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) }}"
         count="$(git rev-list HEAD --count --first-parent)"
-        echo "tag-prefix=v${count}-" >> $GITHUB_OUTPUT
+        echo "tag-prefix=${pr_prefix}v${count}-" >> $GITHUB_OUTPUT
 
   latest:
     needs: [setup]

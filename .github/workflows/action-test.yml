@@ -9,7 +9,7 @@ on:
         default: ''
 
 jobs:
-  test:
+  action-test:
     strategy:
       fail-fast: false
       matrix:
