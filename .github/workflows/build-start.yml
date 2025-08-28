@@ -50,7 +50,7 @@ jobs:
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
   latest-action-test:
-    needs: [latest]
+    needs: [setup, latest]
     if: github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/action-test.yml
     with:
@@ -67,7 +67,7 @@ jobs:
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
   testing-action-test:
-    needs: [testing]
+    needs: [setup, testing]
     if: github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/action-test.yml
     with:
