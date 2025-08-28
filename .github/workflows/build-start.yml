@@ -38,6 +38,7 @@ jobs:
         pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) }}"
         count="$(git rev-list HEAD --count --first-parent)"
         echo "tag-prefix=${pr_prefix}v${count}-" >> $GITHUB_OUTPUT
+        echo "tag-alias-prefix=${pr_prefix}" >> $GITHUB_OUTPUT
 
   latest:
     needs: [setup]
@@ -48,6 +49,7 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
 
   latest-action-test:
     needs: [setup, latest]
@@ -65,6 +67,7 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
 
   testing-action-test:
     needs: [setup, testing]
@@ -82,3 +85,4 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}

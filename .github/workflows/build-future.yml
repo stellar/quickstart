@@ -19,6 +19,10 @@ on:
         description: "Prefix for the tag name"
         type: "string"
         default: ""
+      tag-alias-prefix:
+        description: 'Prefix for the alias tag name'
+        type: 'string'
+        default: ''
 
 jobs:
   amd64:
@@ -79,5 +83,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ inputs.tag-prefix }}future
-      tag-alias: future
+      tag-alias: ${{ inputs.tag-alias-prefix }}future
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
