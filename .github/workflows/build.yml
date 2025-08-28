@@ -339,7 +339,7 @@ jobs:
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-rpc, build-stellar-lab]
-    if: always()
+    if: always() && !failed() && !cancelled()
     outputs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
@@ -437,7 +437,7 @@ jobs:
 
   test:
     needs: build
-    if: always()
+    if: always() && !failed() && !cancelled()
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
@@ -538,7 +538,7 @@ jobs:
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
-    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: always() && !failed() && !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: build
     permissions:
       packages: write
@@ -562,7 +562,7 @@ jobs:
 
   push-release:
     # Push image to registry after test for main.
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: always() && !failed() && !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [build, test]
     permissions:
       packages: write
