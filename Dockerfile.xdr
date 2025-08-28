@@ -8,3 +8,7 @@ RUN git fetch origin ${REF}
 RUN git checkout ${REF}
 RUN rustup show active-toolchain || rustup toolchain install
 RUN cargo install stellar-xdr --features cli --path . --locked
+
+FROM scratch AS artifacts
+
+COPY --from=builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr

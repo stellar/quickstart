@@ -15,5 +15,8 @@ ENV NEXT_PUBLIC_DEFAULT_NETWORK=custom
 ENV NEXT_BASE_PATH=/lab
 RUN yarn build
 
-EXPOSE 8100
-CMD ["node", "build/standalone/server.js"]
+FROM scratch AS artifacts
+
+COPY --from=builder /lab/build/standalone /lab
+COPY --from=builder /lab/build/static /lab/public/_next/static
+COPY --from=builder /usr/local/bin/node /node
