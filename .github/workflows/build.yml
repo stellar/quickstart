@@ -65,6 +65,10 @@ on:
 
 env:
   IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
+  # Cache ID is a value inserted into cache keys. Whenever changing the build
+  # in a way that needs to use entirely new fresh builds, increment the number
+  # by one so that all the keys become new.
+  CACHE_ID: 1
 
 jobs:
 
@@ -103,7 +107,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
+        key: image-${{ env.CACHE_ID }}-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -120,7 +124,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
+        key: image-${{ env.CACHE_ID }}-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -199,7 +203,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -216,7 +220,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -246,7 +250,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.arch }}-${{ needs.shas.outputs.lab }}
+        key: image-${{ env.CACHE_ID }}-stellar-lab-${{ inputs.arch }}-${{ needs.shas.outputs.lab }}
     - name: Upload Stellar-Lab Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -263,7 +267,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-lab-${{ inputs.arch }}-${{ needs.shas.outputs.lab }}
+        key: image-${{ env.CACHE_ID }}-stellar-lab-${{ inputs.arch }}-${{ needs.shas.outputs.lab }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
@@ -296,7 +300,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
+        key: image-${{ env.CACHE_ID }}-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
     - name: Upload Stellar-Core Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -317,7 +321,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
+        key: image-${{ env.CACHE_ID }}-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
