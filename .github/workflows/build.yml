@@ -144,10 +144,34 @@ jobs:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  build-stellar-horizon:
+  load-stellar-horizon-from-cache:
     needs: [shas]
     runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+    - name: Upload Stellar-Horizon Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
+  build-stellar-horizon:
+    needs: [shas, load-stellar-horizon-from-cache]
+    if: ${{ needs.load-stellar-horizon-from-cache.outputs.cache-hit != 'true' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
@@ -170,10 +194,34 @@ jobs:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
 
-  build-stellar-friendbot:
+  load-stellar-friendbot-from-cache:
     needs: [shas]
     runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+    - name: Upload Stellar-Friendbot Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
+        path: /tmp/image
+
+  build-stellar-friendbot:
+    needs: [shas, load-stellar-friendbot-from-cache]
+    if: ${{ needs.load-stellar-friendbot-from-cache.outputs.cache-hit != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+    - id: cache
+      uses: actions/cache@v3
+      with:
+        path: /tmp/image
+        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
