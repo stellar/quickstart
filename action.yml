@@ -33,24 +33,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Check if Windows (unsupported)"
-      if: runner.os == 'Windows'
-      shell: powershell
-      run: |
-        echo "Windows runners are not supported"
-        exit 1
-    - name: "Check if macOS Apple Silicon (unsupported)"
-      if: runner.os == 'macOS' && (runner.arch == 'ARM' || runner.arch == 'ARM64')
-      shell: bash
-      run: |
-        echo "ARM MacOS runner is not yet supported, see https://github.com/douglascamata/setup-docker-macos-action"
-        exit 1
-    - name: Setup Colima and Docker (macOS only)
-      shell: bash
-      if: runner.os == 'macos'
-      run: |
-        brew install --formula docker colima
-        colima start
+    - name: Set up Docker
+      uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4
     - run: >
         docker run -d --name stellar 
         -p 8000:8000 
