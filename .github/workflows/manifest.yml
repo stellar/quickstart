@@ -31,7 +31,23 @@ env:
 
 jobs:
 
+  input-validations:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check tag and tag-alias format has pr prefix for pr builds
+      if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+      run: |
+        if ! [[ "${{ inputs.tag }}" =~ ^pr[0-9]+- ]]; then
+          echo "Error: 'tag' input must start with 'prN-'"
+          exit 1
+        fi
+        if ! [[ "${{ inputs.tag-alias }}" =~ ^pr[0-9]+- ]]; then
+          echo "Error: 'tag-alias' input must start with 'prN-'"
+          exit 1
+        fi
+
   push:
+    needs: input-validations
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       packages: write
