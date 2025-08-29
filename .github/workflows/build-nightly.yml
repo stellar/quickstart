@@ -20,6 +20,10 @@ on:
         description: 'Prefix for the tag name'
         type: 'string'
         default: ''
+      tag-alias-prefix:
+        description: 'Prefix for the alias tag name'
+        type: 'string'
+        default: ''
 
 jobs:
 
@@ -80,6 +84,6 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
-      tag: ${{ inputs.tag-prefix }}testing
-      tag-alias: testing
+      tag: ${{ inputs.tag-prefix }}nightly
+      tag-alias: ${{ inputs.tag-alias-prefix }}nightly
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
