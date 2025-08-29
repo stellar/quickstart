@@ -72,8 +72,6 @@ env:
 
 jobs:
 
-  # Map the git refs of each software component to a commit sha, and use the
-  # sha for caching, builds, etc.
   shas:
     runs-on: ubuntu-latest
     outputs:
