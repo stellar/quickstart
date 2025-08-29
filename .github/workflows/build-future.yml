@@ -19,6 +19,10 @@ on:
         description: "Prefix for the tag name"
         type: "string"
         default: ""
+      tag-alias-prefix:
+        description: 'Prefix for the alias tag name'
+        type: 'string'
+        default: ''
 
 jobs:
   amd64:
@@ -32,7 +36,7 @@ jobs:
       tag: ${{ inputs.tag-prefix }}future-amd64
       protocol_version_default: 23
       xdr_ref: v23.0.0
-      core_ref: v23.0.0
+      core_ref: v23.0.1
       horizon_ref: horizon-v23.0.0
       stellar_rpc_ref: v23.0.1
       friendbot_ref: horizon-v23.0.0
@@ -57,7 +61,7 @@ jobs:
       tag: ${{ inputs.tag-prefix }}future-arm64
       protocol_version_default: 23
       xdr_ref: v23.0.0
-      core_ref: v23.0.0
+      core_ref: v23.0.1
       horizon_ref: horizon-v23.0.0
       stellar_rpc_ref: v23.0.1
       friendbot_ref: horizon-v23.0.0
@@ -79,5 +83,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ inputs.tag-prefix }}future
-      tag-alias: future
+      tag-alias: ${{ inputs.tag-alias-prefix }}future
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}
