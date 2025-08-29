@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
-      tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
     steps:
     - uses: actions/checkout@v2
       with:
