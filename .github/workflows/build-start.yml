@@ -18,10 +18,7 @@ jobs:
 
   complete:
     if: always()
-    needs:
-    - action-test-merge
-    - action-test-pr
-    # - future
+    needs: [latest, testing, future, latest-action-test, testing-action-test]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -38,8 +35,10 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - id: tag-prefix
       run: |
+        pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) }}"
         count="$(git rev-list HEAD --count --first-parent)"
-        echo "tag-prefix=v${count}-" >> $GITHUB_OUTPUT
+        echo "tag-prefix=${pr_prefix}v${count}-" >> $GITHUB_OUTPUT
+        echo "tag-alias-prefix=${pr_prefix}" >> $GITHUB_OUTPUT
 
   latest:
     needs: [setup]
@@ -50,6 +49,14 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
+
+  latest-action-test:
+    needs: [setup, latest]
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/action-test.yml
+    with:
+      tag: ${{ needs.setup.outputs.tag-prefix }}latest
 
   testing:
     needs: [setup]
@@ -60,6 +67,14 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
+
+  testing-action-test:
+    needs: [setup, testing]
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/action-test.yml
+    with:
+      tag: ${{ needs.setup.outputs.tag-prefix }}testing
 
   future:
     needs: [setup]
@@ -70,17 +85,4 @@ jobs:
     with:
       sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
-
-  action-test-merge:
-    needs: [latest, testing]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/action-test.yml
-    with:
-      test_tags: '["latest", "testing"]'
-
-  action-test-pr:
-    needs: [latest, testing]
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    uses: ./.github/workflows/action-test.yml
-    with:
-      test_tags: '["${{ needs.setup.outputs.tag-prefix }}latest", "${{ needs.setup.outputs.tag-prefix }}testing"]'
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
