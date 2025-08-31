@@ -1,4 +1,6 @@
 import { readAll } from "jsr:@std/io/read-all";
+import { Octokit } from "octokit";
+import "jsr:@std/dotenv/load";
 
 // Load the input (images.json).
 const images = JSON.parse(new TextDecoder().decode(await readAll(Deno.stdin)));
@@ -12,23 +14,20 @@ const repoMapping = {
   "lab": "stellar/laboratory",
 };
 
+const octokit = new Octokit({ auth: Deno.env.get("GITHUB_TOKEN") });
+
 async function getSha(repo, ref) {
-  const p = Deno.run({
-    cmd: ["gh", "api", `repos/${repo}/commits/${ref}`],
-    stdout: "piped",
-    stderr: "piped",
-  });
-
-  const { code } = await p.status();
-  if (code !== 0) {
-    const rawError = await p.stderrOutput();
-    const errorString = new TextDecoder().decode(rawError);
-    throw new Error(`Failed to fetch SHA for ${repo}#${ref}: ${errorString}`);
+  try {
+    const [owner, repoName] = repo.split('/');
+    const response = await octokit.rest.repos.getCommit({
+      owner,
+      repo: repoName,
+      ref,
+    });
+    return response.data.sha;
+  } catch (error) {
+    throw new Error(`Failed to fetch SHA for ${repo}#${ref}: ${error.message}`);
   }
-
-  const rawOutput = await p.output();
-  const data = JSON.parse(new TextDecoder().decode(rawOutput));
-  return data.sha;
 }
 
 const newImages = {};
