@@ -24,30 +24,33 @@ console:
 
 build-latest:
 	$(MAKE) build TAG=latest \
-		PROTOCOL_VERSION_DEFAULT=23 \
-		XDR_REF=v23.0.0 \
-		CORE_REF=v23.0.1 \
-		HORIZON_REF=horizon-v23.0.0 \
-		STELLAR_RPC_REF=v23.0.1 \
-		FRIENDBOT_REF=horizon-v23.0.0
+		PROTOCOL_VERSION_DEFAULT=$(shell jq -r '.latest.protocol_version_default' images.json) \
+		XDR_REF=$(shell jq -r '.latest.xdr_ref' images.json) \
+		CORE_REF=$(shell jq -r '.latest.core_ref' images.json) \
+		HORIZON_REF=$(shell jq -r '.latest.horizon_ref' images.json) \
+		STELLAR_RPC_REF=$(shell jq -r '.latest.stellar_rpc_ref' images.json) \
+		FRIENDBOT_REF=$(shell jq -r '.latest.friendbot_ref' images.json) \
+		LAB_REF=$(shell jq -r '.latest.lab_ref' images.json)
 
 build-testing:
 	$(MAKE) build TAG=testing \
-		PROTOCOL_VERSION_DEFAULT=23 \
-		XDR_REF=v23.0.0 \
-		CORE_REF=v23.0.1 \
-		HORIZON_REF=horizon-v23.0.0 \
-		STELLAR_RPC_REF=v23.0.1 \
-		FRIENDBOT_REF=horizon-v23.0.0
+		PROTOCOL_VERSION_DEFAULT=$(shell jq -r '.testing.protocol_version_default' images.json) \
+		XDR_REF=$(shell jq -r '.testing.xdr_ref' images.json) \
+		CORE_REF=$(shell jq -r '.testing.core_ref' images.json) \
+		HORIZON_REF=$(shell jq -r '.testing.horizon_ref' images.json) \
+		STELLAR_RPC_REF=$(shell jq -r '.testing.stellar_rpc_ref' images.json) \
+		FRIENDBOT_REF=$(shell jq -r '.testing.friendbot_ref' images.json) \
+		LAB_REF=$(shell jq -r '.testing.lab_ref' images.json)
 
 build-future:
 	$(MAKE) build TAG=future \
-		PROTOCOL_VERSION_DEFAULT=23 \
-		XDR_REF=v23.0.0 \
-		CORE_REF=v23.0.1 \
-		HORIZON_REF=horizon-v23.0.0 \
-		STELLAR_RPC_REF=v23.0.1 \
-		FRIENDBOT_REF=horizon-v23.0.0
+		PROTOCOL_VERSION_DEFAULT=$(shell jq -r '.future.protocol_version_default' images.json) \
+		XDR_REF=$(shell jq -r '.future.xdr_ref' images.json) \
+		CORE_REF=$(shell jq -r '.future.core_ref' images.json) \
+		HORIZON_REF=$(shell jq -r '.future.horizon_ref' images.json) \
+		STELLAR_RPC_REF=$(shell jq -r '.future.stellar_rpc_ref' images.json) \
+		FRIENDBOT_REF=$(shell jq -r '.future.friendbot_ref' images.json) \
+		LAB_REF=$(shell jq -r '.future.lab_ref' images.json)
 
 build:
 	$(MAKE) -j 4 build-deps
