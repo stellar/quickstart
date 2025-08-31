@@ -27,34 +27,7 @@ on:
 
 jobs:
 
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      protocol_version_default: ${{ steps.versions.outputs.protocol_version_default }}
-      xdr_ref: ${{ steps.versions.outputs.xdr_ref }}
-      core_ref: ${{ steps.versions.outputs.core_ref }}
-      horizon_ref: ${{ steps.versions.outputs.horizon_ref }}
-      stellar_rpc_ref: ${{ steps.versions.outputs.stellar_rpc_ref }}
-      friendbot_ref: ${{ steps.versions.outputs.friendbot_ref }}
-      lab_ref: ${{ steps.versions.outputs.lab_ref }}
-      test_matrix: ${{ steps.versions.outputs.test_matrix }}
-    steps:
-    - uses: actions/checkout@v2
-    - id: versions
-      run: |
-        echo "protocol_version_default=$(jq -r '.latest.protocol_version_default' images.json)" >> $GITHUB_OUTPUT
-        echo "xdr_ref=$(jq -r '.latest.xdr_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "core_ref=$(jq -r '.latest.core_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "horizon_ref=$(jq -r '.latest.horizon_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "stellar_rpc_ref=$(jq -r '.latest.stellar_rpc_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "friendbot_ref=$(jq -r '.latest.friendbot_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "lab_ref=$(jq -r '.latest.lab_ref' images.json)" >> $GITHUB_OUTPUT
-        echo "test_matrix<<EOF" >> $GITHUB_OUTPUT
-        jq -r '.latest.test_matrix' images.json >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-
   amd64:
-    needs: [setup]
     uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -63,17 +36,23 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}latest-amd64
-      protocol_version_default: ${{ needs.setup.outputs.protocol_version_default }}
-      xdr_ref: ${{ needs.setup.outputs.xdr_ref }}
-      core_ref: ${{ needs.setup.outputs.core_ref }}
-      horizon_ref: ${{ needs.setup.outputs.horizon_ref }}
-      stellar_rpc_ref: ${{ needs.setup.outputs.stellar_rpc_ref }}
-      friendbot_ref: ${{ needs.setup.outputs.friendbot_ref }}
-      lab_ref: ${{ needs.setup.outputs.lab_ref }}
-      test_matrix: ${{ needs.setup.outputs.test_matrix }}
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.1
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.1
+      friendbot_ref: horizon-v23.0.0
+      lab_ref: main
+      test_matrix: |
+        {
+          "network": ["pubnet", "local"],
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
+        }
 
   arm64:
-    needs: [setup]
     uses: ./.github/workflows/build.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -82,14 +61,21 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}latest-arm64
-      protocol_version_default: ${{ needs.setup.outputs.protocol_version_default }}
-      xdr_ref: ${{ needs.setup.outputs.xdr_ref }}
-      core_ref: ${{ needs.setup.outputs.core_ref }}
-      horizon_ref: ${{ needs.setup.outputs.horizon_ref }}
-      stellar_rpc_ref: ${{ needs.setup.outputs.stellar_rpc_ref }}
-      friendbot_ref: ${{ needs.setup.outputs.friendbot_ref }}
-      lab_ref: ${{ needs.setup.outputs.lab_ref }}
-      test_matrix: ${{ needs.setup.outputs.test_matrix }}
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.1
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.1
+      friendbot_ref: horizon-v23.0.0
+      lab_ref: main
+      test_matrix: |
+        {
+          "network": ["pubnet", "local"],
+          "core": ["core", null],
+          "horizon": ["horizon", null],
+          "rpc": ["rpc", null],
+          "options": [""]
+        }
 
   manifest:
     needs: [amd64, arm64]
