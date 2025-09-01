@@ -4,7 +4,7 @@
 import { readAll } from "jsr:@std/io/read-all";
 import { Octokit } from "octokit";
 
-const octokit = new Octokit({ auth: Deno.env.get("GITHUB_TOKEN")});
+const octokit = new Octokit({ auth: Deno.env.get("GITHUB_TOKEN") });
 
 // Load the input (images.json).
 const images = JSON.parse(new TextDecoder().decode(await readAll(Deno.stdin)));
@@ -24,9 +24,9 @@ for (const key in images) {
 console.log(JSON.stringify(images, null, 2));
 
 // Given an owner/repo@ref string, return owner/repo@sha.
-async function getSha(ownerRepoRef : string) : Promise<string> {
-  const [ownerRepo, ref] = ownerRepoRef.split('@');
-  const [owner, repo] = ownerRepo.split('/');
+async function getSha(ownerRepoRef: string): Promise<string> {
+  const [ownerRepo, ref] = ownerRepoRef.split("@");
+  const [owner, repo] = ownerRepo.split("/");
   const response = await octokit.rest.repos.getCommit({ owner, repo, ref });
   return `${ownerRepo}@${response.data.sha}`;
 }
