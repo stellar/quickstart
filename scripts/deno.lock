@@ -253,7 +253,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/dotenv@0.224",
       "jsr:@std/io@0.224",
       "npm:octokit@^5.0.3"
     ]
