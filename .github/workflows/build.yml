@@ -69,6 +69,8 @@ env:
   # in a way that needs to use entirely new fresh builds, increment the number
   # by one so that all the keys become new.
   CACHE_ID: 1
+  ARTIFACT_RETENTION_DAYS_FOR_IMAGE: 7
+  ARTIFACT_RETENTION_DAYS_FOR_LOGS: 60
 
 jobs:
 
@@ -114,6 +116,7 @@ jobs:
       with:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-core:
     needs: [shas, load-stellar-core-from-cache]
@@ -143,6 +146,7 @@ jobs:
       with:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-horizon-from-cache:
     needs: [shas]
@@ -161,6 +165,7 @@ jobs:
       with:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-horizon:
     needs: [shas, load-stellar-horizon-from-cache]
@@ -193,6 +198,7 @@ jobs:
       with:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-friendbot-from-cache:
     needs: [shas]
@@ -211,6 +217,7 @@ jobs:
       with:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-friendbot:
     needs: [shas, load-stellar-friendbot-from-cache]
@@ -240,6 +247,7 @@ jobs:
       with:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-rpc-from-cache:
     needs: [shas]
@@ -258,6 +266,7 @@ jobs:
       with:
         name: image-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-rpc:
     needs: [shas, load-stellar-rpc-from-cache]
@@ -287,6 +296,7 @@ jobs:
       with:
         name: image-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-lab-from-cache:
     needs: [shas]
@@ -305,6 +315,7 @@ jobs:
       with:
         name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-lab:
     needs: [shas, load-stellar-lab-from-cache]
@@ -337,6 +348,7 @@ jobs:
       with:
         name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-rs-stellar-xdr-from-cache:
     needs: [shas]
@@ -355,6 +367,7 @@ jobs:
       with:
         name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-rs-stellar-xdr:
     needs: [shas, load-rs-stellar-xdr-from-cache]
@@ -388,6 +401,7 @@ jobs:
       with:
         name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-rpc, build-stellar-lab]
@@ -486,6 +500,7 @@ jobs:
       with:
         name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   test:
     needs: build
@@ -587,6 +602,7 @@ jobs:
       with:
         name: logs-${{ inputs.tag }}-${{ inputs.arch }}-test-${{ strategy.job-index }}
         path: logs
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_LOGS }}
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
