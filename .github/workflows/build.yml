@@ -238,10 +238,10 @@ jobs:
     - name: Build Stellar-Friendbot Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }}
+        -f Dockerfile.friendbot
+        -t stellar-friendbot:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/go.git#${{ needs.shas.outputs.friendbot }}
+        --build-arg REF="${{ needs.shas.outputs.friendbot }}" .
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v4
       with:
