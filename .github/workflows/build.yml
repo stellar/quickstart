@@ -158,7 +158,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.horizon }}
     - name: Upload Stellar-Horizon Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -176,7 +176,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.horizon }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
