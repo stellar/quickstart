@@ -1,0 +1,41 @@
+name: Action Test
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Tag to use'
+        type: 'string'
+        default: ''
+
+jobs:
+  action-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        sys:
+        - os: ubuntu-latest-16-cores # x64
+        - os: ubuntu-jammy-16-cores-arm64 # ARM
+        - os: macos-13 # Intel
+    runs-on: ${{ matrix.sys.os }}
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./
+      with:
+        tag: ${{ inputs.tag }}
+    - name: "Run basic test making sure RPC and Horizon are available"
+      run: >
+        RESP=`curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
+        '{"jsonrpc": "2.0", "id": 8675309, "method": "getLatestLedger"}' http://localhost:8000/rpc`
+        
+        echo "RPC getLatestLedger response: $RESP"
+
+        echo "$RESP" | grep sequence
+        
+        RESP=`curl -i -o - --silent 'http://localhost:8000/ledgers?limit=1'
+        -H 'Accept: application/json'`
+        
+        echo "Horizon ledgers response: $RESP"
+        
+        echo "$RESP" | grep "200 OK"

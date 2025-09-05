@@ -21,6 +21,10 @@ on:
         description: 'Prefix for the tag name'
         type: 'string'
         default: ''
+      tag-alias-prefix:
+        description: 'Prefix for the alias tag name'
+        type: 'string'
+        default: ''
 
 jobs:
 
@@ -33,12 +37,13 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: amd64
       tag: ${{ inputs.tag-prefix }}testing-amd64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.2.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.1
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.1
+      friendbot_ref: horizon-v23.0.0
+      lab_ref: main
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
@@ -57,12 +62,13 @@ jobs:
       sha: ${{ inputs.sha }}
       arch: arm64
       tag: ${{ inputs.tag-prefix }}testing-arm64
-      protocol_version_default: 22
-      xdr_ref: v22.0.0
-      core_ref: v22.2.0
-      horizon_ref: horizon-v22.0.2
-      stellar_rpc_ref: v22.1.2
-      friendbot_ref: horizon-v22.0.2
+      protocol_version_default: 23
+      xdr_ref: v23.0.0
+      core_ref: v23.0.1
+      horizon_ref: horizon-v23.0.0
+      stellar_rpc_ref: v23.0.1
+      friendbot_ref: horizon-v23.0.0
+      lab_ref: main
       test_matrix: |
         {
           "network": ["testnet", "pubnet", "local"],
@@ -80,5 +86,5 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ inputs.tag-prefix }}testing
-      tag-alias: testing
+      tag-alias: ${{ inputs.tag-alias-prefix }}testing
       images: ${{ needs.amd64.outputs.image }} ${{ needs.arm64.outputs.image }}

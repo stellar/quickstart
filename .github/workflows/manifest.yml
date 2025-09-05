@@ -25,13 +25,29 @@ on:
 
 env:
   HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag) || inputs.tag) }}
-  IMAGE_ALIAS: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, github.event_name == 'pull_request' && format('pr{0}-{1}', github.event.pull_request.number, inputs.tag-alias) || inputs.tag-alias) }}
+  IMAGE: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, inputs.tag) }}
+  IMAGE_ALIAS: ${{ format('{0}/{1}:{2}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository, inputs.tag-alias) }}
   REGISTRY: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
 
 jobs:
 
+  input-validations:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check tag and tag-alias format has pr prefix for pr builds
+      if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+      run: |
+        if ! [[ "${{ inputs.tag }}" =~ ^pr[0-9]+- ]]; then
+          echo "Error: 'tag' input must start with 'prN-'"
+          exit 1
+        fi
+        if ! [[ "${{ inputs.tag-alias }}" =~ ^pr[0-9]+- ]]; then
+          echo "Error: 'tag-alias' input must start with 'prN-'"
+          exit 1
+        fi
+
   push:
+    needs: input-validations
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       packages: write

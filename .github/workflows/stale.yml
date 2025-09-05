@@ -1,9 +1,10 @@
-name: 'Stale Issues'
+---
+name: "Stale Issues"
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 18 * * *' # approx 9:30am daily
+    - cron: "0 18 * * *" # approx 9:30am daily
 
 jobs:
   stale:
@@ -12,10 +13,14 @@ jobs:
       - uses: actions/stale@v9
         with:
           debug-only: false
-          days-before-stale: 30
-          days-before-close: 30
-          stale-issue-message: 'This issue is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
-          stale-pr-message: 'This pull request is stale because it has been open for 30 days with no activity. It will be closed in 30 days unless the stale label is removed.'
+          days-before-stale: 90
+          days-before-close: -1
+          stale-issue-message:
+            "This issue is stale because it has been open for 90 days with no
+            activity."
+          stale-pr-message:
+            "This pull request is stale because it has been open for 90 days
+            with no activity."
           stale-issue-label: stale
           stale-pr-label: stale
           remove-stale-when-updated: true
