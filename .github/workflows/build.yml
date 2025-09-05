@@ -210,7 +210,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - name: Upload Stellar-Friendbot Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -228,7 +228,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
