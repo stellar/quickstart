@@ -278,6 +278,10 @@ jobs:
       with:
         path: /tmp/image
         key: image-${{ env.CACHE_ID }}-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+    - name: Checkout Quickstart for RPC docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -286,11 +290,10 @@ jobs:
     - name: Build Stellar-rpc Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f cmd/stellar-rpc/docker/Dockerfile --target build
+        -f Dockerfile.rpc
         -t stellar-rpc:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/stellar-rpc.git#${{ needs.shas.outputs.rpc }}
+        --build-arg REF="${{ needs.shas.outputs.rpc }}" .
     - name: Upload Stellar-rpc Image
       uses: actions/upload-artifact@v4
       with:
