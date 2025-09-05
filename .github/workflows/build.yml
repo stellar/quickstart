@@ -229,6 +229,10 @@ jobs:
       with:
         path: /tmp/image
         key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
+    - name: Checkout Quickstart for Friendbot docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
