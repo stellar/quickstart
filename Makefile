@@ -73,7 +73,7 @@ build-deps-horizon:
 	docker build -t stellar-horizon:$(HORIZON_REF) -f Dockerfile.horizon . --build-arg REF="$(HORIZON_REF)"
 
 build-deps-friendbot:
-	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f services/friendbot/docker/Dockerfile https://github.com/stellar/go.git#$(FRIENDBOT_REF)
+	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f Dockerfile.friendbot . --build-arg REF="$(FRIENDBOT_REF)"
 
 build-deps-stellar-rpc:
 	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f Dockerfile.stellar-rpc . --build-arg REF="$(STELLAR_RPC_REF)"

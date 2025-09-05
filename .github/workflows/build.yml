@@ -210,7 +210,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - name: Upload Stellar-Friendbot Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -228,7 +228,11 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
+    - name: Checkout Quickstart for Friendbot docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -238,10 +242,10 @@ jobs:
     - name: Build Stellar-Friendbot Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }}
+        -f Dockerfile.friendbot
+        -t stellar-friendbot:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/go.git#${{ needs.shas.outputs.friendbot }}
+        --build-arg REF="${{ needs.shas.outputs.friendbot }}" .
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v4
       with:
