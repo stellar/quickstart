@@ -25,10 +25,12 @@ jobs:
           - 'action.yml'
     - uses: actions/github-script@v8
       id: os
+      env:
+        ACTION_CHANGED: ${{ steps.changes.outputs.action-changed }}
       with:
         script: |
           const os = ['ubuntu-latest-16-cores'];
-          if (steps.changes.outputs['action-changed'] === 'true') {
+          if (process.env.ACTION_CHANGED === 'true') {
             os.push('ubuntu-jammy-16-cores-arm64');
             os.push('macos-13');
           }
