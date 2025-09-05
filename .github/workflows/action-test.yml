@@ -9,14 +9,32 @@ on:
         default: ''
 
 jobs:
+  action-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      action-changed: ${{ steps.changes.outputs.action }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      id: changes
+      with:
+        filters: |
+          action:
+          - 'action.yml'
+
   action-test:
+    needs: setup
     strategy:
       fail-fast: false
       matrix:
         sys:
         - os: ubuntu-latest-16-cores # x64
+        ${{ fromJSON(needs.action-setup.outputs.action-changed == 'true' && '
         - os: ubuntu-jammy-16-cores-arm64 # ARM
         - os: macos-13 # Intel
+        ' || '') }}
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 60
     steps:
