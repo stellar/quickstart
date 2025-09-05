@@ -28,7 +28,7 @@ jobs:
       with:
         script: |
           const os = ['ubuntu-latest-16-cores'];
-          if ('${{ steps.changes.outputs.action-changed }}' === 'true') {
+          if (steps.changes.outputs['action-changed'] === 'true') {
             os.push('ubuntu-jammy-16-cores-arm64');
             os.push('macos-13');
           }
