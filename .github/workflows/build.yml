@@ -210,7 +210,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - name: Upload Stellar-Friendbot Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
@@ -228,7 +228,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - name: Checkout Quickstart for Friendbot docker file
       uses: actions/checkout@v3
       with:
