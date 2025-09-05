@@ -9,7 +9,7 @@ on:
         default: ''
 
 jobs:
-  action-setup-matrix:
+  action-setup:
     runs-on: ubuntu-latest
     outputs:
       os: ${{ steps.os.outputs.os }}
@@ -37,11 +37,11 @@ jobs:
         
 
   action-test:
-    needs: setup
+    needs: action-setup
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.setup.outputs.os) }}
+        os: ${{ fromJson(needs.action-setup.outputs.os) }}
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 60
     steps:
