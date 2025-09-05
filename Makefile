@@ -76,7 +76,7 @@ build-deps-friendbot:
 	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f Dockerfile.friendbot . --build-arg REF="$(FRIENDBOT_REF)"
 
 build-deps-stellar-rpc:
-	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f cmd/stellar-rpc/docker/Dockerfile --target build https://github.com/stellar/stellar-rpc.git#$(STELLAR_RPC_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
+	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f Dockerfile.stellar-rpc . --build-arg REF="$(STELLAR_RPC_REF)"
 
 build-deps-lab:
 	docker build -t stellar-lab:$(LAB_REF) -f Dockerfile.lab . --build-arg NEXT_PUBLIC_COMMIT_HASH=$(LAB_REF)
