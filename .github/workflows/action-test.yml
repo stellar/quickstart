@@ -29,8 +29,8 @@ jobs:
         echo '[' >> $GITHUB_OUTPUT
         echo '"ubuntu-latest-16-cores",' >> $GITHUB_OUTPUT
         ${{ steps.changes.outputs.action-changed == 'true' &&
-        echo '"ubuntu-jammy-16-cores-arm64",' >> $GITHUB_OUTPUT
-        echo '"macos-13",' >> $GITHUB_OUTPUT
+        'echo "ubuntu-jammy-16-cores-arm64", >> $GITHUB_OUTPUT
+        echo '"macos-13",' >> $GITHUB_OUTPUT'
         }}
         echo ']' >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
