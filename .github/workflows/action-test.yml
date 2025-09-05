@@ -9,10 +9,10 @@ on:
         default: ''
 
 jobs:
-  action-setup:
+  action-setup-matrix:
     runs-on: ubuntu-latest
     outputs:
-      action-changed: ${{ steps.changes.outputs.action }}
+      os: ${{ steps.os.outputs.os }}
     steps:
     - uses: actions/checkout@v4
       with:
@@ -23,17 +23,25 @@ jobs:
         filters: |
           action:
           - 'action.yml'
+    - id: os
+      run: |
+        echo "os<<EOF" >> $GITHUB_OUTPUT
+        echo '[' >> $GITHUB_OUTPUT
+        echo '"ubuntu-latest-16-cores",' >> $GITHUB_OUTPUT
+        ${{ steps.changes.outputs.action-changed == 'true' &&
+        echo '"ubuntu-jammy-16-cores-arm64",' >> $GITHUB_OUTPUT
+        echo '"macos-13",' >> $GITHUB_OUTPUT
+        }}
+        echo ']' >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
 
   action-test:
     needs: setup
     strategy:
       fail-fast: false
       matrix:
-        os: [
-          ubuntu-latest-16-cores,
-          ${{ needs.action-setup.outputs.action-changed == 'true' && 'ubuntu-jammy-16-cores-arm64,' }}
-          ${{ needs.action-setup.outputs.action-changed == 'true' && 'macos-13,' }}
-        ]
+        os: ${{ fromJson(needs.setup.outputs.os) }}
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 60
     steps:
