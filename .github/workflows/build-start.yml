@@ -29,6 +29,7 @@ jobs:
     outputs:
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
+      action-changed: ${{ steps.changes.outputs.action }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -40,6 +41,12 @@ jobs:
         count="$(git rev-list HEAD --count --first-parent)"
         echo "tag-prefix=${pr_prefix}v${count}-" >> $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" >> $GITHUB_OUTPUT
+    - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      id: changes
+      with:
+        filters: |
+          action:
+          - 'action.yml'
 
   latest:
     needs: [setup]
@@ -54,7 +61,12 @@ jobs:
 
   latest-action-test:
     needs: [setup, latest]
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+      || (
+        github.event.pull_request.head.repo.full_name == github.repository
+        && needs.setup.outputs.action-changed == 'true'
+      )
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}latest
@@ -72,7 +84,12 @@ jobs:
 
   testing-action-test:
     needs: [setup, testing]
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+      || (
+        github.event.pull_request.head.repo.full_name == github.repository
+        && needs.setup.outputs.action-changed == 'true'
+      )
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}testing
