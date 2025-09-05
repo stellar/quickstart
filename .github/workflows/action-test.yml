@@ -29,12 +29,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sys:
-        - os: ubuntu-latest-16-cores # x64
-        ${{ fromJSON(needs.action-setup.outputs.action-changed == 'true' && '
-        - os: ubuntu-jammy-16-cores-arm64 # ARM
-        - os: macos-13 # Intel
-        ' || '') }}
+        os: [
+          ubuntu-latest-16-cores,
+          ${{ needs.action-setup.outputs.action-changed == 'true' && 'ubuntu-jammy-16-cores-arm64,' }}
+          ${{ needs.action-setup.outputs.action-changed == 'true' && 'macos-13,' }}
+        ]
     runs-on: ${{ matrix.sys.os }}
     timeout-minutes: 60
     steps:
