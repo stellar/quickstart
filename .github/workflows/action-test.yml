@@ -23,17 +23,16 @@ jobs:
         filters: |
           action:
           - 'action.yml'
-    - uses: actions/github-script@v7
+    - uses: actions/github-script@v8
       id: os
       with:
         script: |
-          const actionChanged = '${{ steps.changes.outputs.action-changed }}' === 'true';
-          const osArray = ['ubuntu-latest-16-cores'];
-          if (actionChanged) {
-            osArray.push('ubuntu-jammy-16-cores-arm64');
-            osArray.push('macos-13');
+          const os = ['ubuntu-latest-16-cores'];
+          if ('${{ steps.changes.outputs.action-changed }}' === 'true') {
+            os.push('ubuntu-jammy-16-cores-arm64');
+            os.push('macos-13');
           }
-          core.setOutput('os', JSON.stringify(osArray));
+          core.setOutput('os', JSON.stringify(os));
         
 
   action-test:
