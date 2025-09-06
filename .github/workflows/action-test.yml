@@ -28,7 +28,7 @@ jobs:
     - uses: actions/github-script@v8
       id: os
       env:
-        ACTION_CHANGED: ${{ steps.changes.outputs.action-changed }}
+        ACTION_CHANGED: ${{ steps.changes.outputs.action }}
       with:
         script: |
           const os = ['ubuntu-latest'];
@@ -37,7 +37,8 @@ jobs:
             os.push('macos-13');
           }
           core.setOutput('os', JSON.stringify(os));
-    - run: echo "action-changed = ${{ steps.changes.outputs.action-changed }}"
+    - run: echo "action-changed = ${{ steps.changes.outputs.action }}"
+    - run: echo "os = ${{ steps.os.outputs.os }}"
 
   action-test:
     needs: action-setup
