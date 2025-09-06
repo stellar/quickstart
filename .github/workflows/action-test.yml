@@ -37,7 +37,7 @@ jobs:
             os.push('macos-13');
           }
           core.setOutput('os', JSON.stringify(os));
-    - run: echo "action-changed: ${{ steps.changes.outputs.action-changed }}"
+    - run: echo "action-changed = ${{ steps.changes.outputs.action-changed }}"
 
   action-test:
     needs: action-setup
