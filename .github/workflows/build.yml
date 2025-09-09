@@ -75,7 +75,7 @@ env:
 jobs:
 
   shas:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       xdr: ${{ steps.xdr.outputs.sha }}
       core: ${{ steps.core.outputs.sha }}
@@ -101,7 +101,7 @@ jobs:
 
   load-stellar-core-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -121,7 +121,7 @@ jobs:
   build-stellar-core:
     needs: [shas, load-stellar-core-from-cache]
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'self-hosted' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -150,7 +150,7 @@ jobs:
 
   load-stellar-horizon-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -170,7 +170,7 @@ jobs:
   build-stellar-horizon:
     needs: [shas, load-stellar-horizon-from-cache]
     if: ${{ needs.load-stellar-horizon-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'self-hosted' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -202,7 +202,7 @@ jobs:
 
   load-stellar-friendbot-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -222,7 +222,7 @@ jobs:
   build-stellar-friendbot:
     needs: [shas, load-stellar-friendbot-from-cache]
     if: ${{ needs.load-stellar-friendbot-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -255,7 +255,7 @@ jobs:
 
   load-stellar-rpc-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -275,7 +275,7 @@ jobs:
   build-stellar-rpc:
     needs: [shas, load-stellar-rpc-from-cache]
     if: ${{ needs.load-stellar-rpc-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'self-hosted' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -307,7 +307,7 @@ jobs:
 
   load-stellar-lab-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -327,7 +327,7 @@ jobs:
   build-stellar-lab:
     needs: [shas, load-stellar-lab-from-cache]
     if: ${{ needs.load-stellar-lab-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'self-hosted' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -359,7 +359,7 @@ jobs:
 
   load-rs-stellar-xdr-from-cache:
     needs: [shas]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -379,7 +379,7 @@ jobs:
   build-rs-stellar-xdr:
     needs: [shas, load-rs-stellar-xdr-from-cache]
     if: ${{ needs.load-rs-stellar-xdr-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'self-hosted' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
@@ -415,7 +415,7 @@ jobs:
     if: always() && !failure() && !cancelled()
     outputs:
       image: ${{ steps.image.outputs.name }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v3
       with:
@@ -508,7 +508,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
       with:
@@ -611,7 +611,7 @@ jobs:
     permissions:
       packages: write
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
       with:
@@ -635,7 +635,7 @@ jobs:
     permissions:
       packages: write
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
       with:
