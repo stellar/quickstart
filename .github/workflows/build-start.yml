@@ -56,7 +56,9 @@ jobs:
 
   latest-action-test:
     needs: [setup, latest]
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+      || github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}latest
@@ -74,7 +76,9 @@ jobs:
 
   testing-action-test:
     needs: [setup, testing]
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
+      || github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}testing

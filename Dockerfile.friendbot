@@ -1,0 +1,14 @@
+FROM golang:1.23 AS builder
+
+ARG REF
+WORKDIR /go/src/github.com/stellar/go
+RUN git clone https://github.com/stellar/go /go/src/github.com/stellar/go
+RUN git fetch origin ${REF}
+RUN git checkout ${REF}
+ENV CGO_ENABLED=0
+ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${REF}-(built-from-source)"
+RUN go install github.com/stellar/go/services/friendbot
+
+FROM scratch AS artifacts
+
+COPY --from=builder /go/bin/friendbot /friendbot

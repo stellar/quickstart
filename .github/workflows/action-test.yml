@@ -9,15 +9,42 @@ on:
         default: ''
 
 jobs:
+  action-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      os: ${{ steps.os.outputs.os }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      id: changes
+      with:
+        filters: |
+          action:
+          - 'action.yml'
+          - '.github/workflows/action-test.yml'
+        list-files: shell
+    - uses: actions/github-script@v8
+      id: os
+      env:
+        ACTION_CHANGED: ${{ steps.changes.outputs.action }}
+      with:
+        script: |
+          const os = ['ubuntu-latest'];
+          if (process.env.ACTION_CHANGED === 'true') {
+            os.push('ubuntu-24.04-arm');
+            os.push('macos-13');
+          }
+          core.setOutput('os', JSON.stringify(os));
+
   action-test:
+    needs: action-setup
     strategy:
       fail-fast: false
       matrix:
-        sys:
-        - os: ubuntu-latest-16-cores # x64
-        - os: ubuntu-jammy-16-cores-arm64 # ARM
-        - os: macos-13 # Intel
-    runs-on: ${{ matrix.sys.os }}
+        os: ${{ fromJson(needs.action-setup.outputs.os) }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v4

@@ -68,7 +68,9 @@ env:
   # Cache ID is a value inserted into cache keys. Whenever changing the build
   # in a way that needs to use entirely new fresh builds, increment the number
   # by one so that all the keys become new.
-  CACHE_ID: 1
+  CACHE_ID: 3
+  ARTIFACT_RETENTION_DAYS_FOR_IMAGE: 7
+  ARTIFACT_RETENTION_DAYS_FOR_LOGS: 60
 
 jobs:
 
@@ -114,6 +116,7 @@ jobs:
       with:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-core:
     needs: [shas, load-stellar-core-from-cache]
@@ -143,6 +146,7 @@ jobs:
       with:
         name: image-stellar-core-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-horizon-from-cache:
     needs: [shas]
@@ -154,13 +158,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.horizon }}
     - name: Upload Stellar-Horizon Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-horizon:
     needs: [shas, load-stellar-horizon-from-cache]
@@ -171,7 +176,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-horizon-${{ inputs.arch }}-${{ needs.shas.outputs.horizon }}
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
       with:
@@ -193,6 +198,7 @@ jobs:
       with:
         name: image-stellar-horizon-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-friendbot-from-cache:
     needs: [shas]
@@ -204,13 +210,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
     - name: Upload Stellar-Friendbot Image
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-friendbot:
     needs: [shas, load-stellar-friendbot-from-cache]
@@ -221,7 +228,11 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/image
-        key: image-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+        key: image-${{ env.CACHE_ID }}-stellar-friendbot-${{ inputs.arch }}-${{ needs.shas.outputs.friendbot }}
+    - name: Checkout Quickstart for Friendbot docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -231,15 +242,16 @@ jobs:
     - name: Build Stellar-Friendbot Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f services/friendbot/docker/Dockerfile -t stellar-friendbot:${{ inputs.arch }}
+        -f Dockerfile.friendbot
+        -t stellar-friendbot:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/go.git#${{ needs.shas.outputs.friendbot }}
+        --build-arg REF="${{ needs.shas.outputs.friendbot }}" .
     - name: Upload Stellar-Friendbot Image
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-friendbot-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-rpc-from-cache:
     needs: [shas]
@@ -258,6 +270,7 @@ jobs:
       with:
         name: image-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-rpc:
     needs: [shas, load-stellar-rpc-from-cache]
@@ -269,6 +282,10 @@ jobs:
       with:
         path: /tmp/image
         key: image-${{ env.CACHE_ID }}-stellar-rpc-${{ inputs.arch }}-${{ needs.shas.outputs.rpc }}
+    - name: Checkout Quickstart for RPC docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - if: inputs.arch == 'arm64'
       uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
       with:
@@ -277,16 +294,16 @@ jobs:
     - name: Build Stellar-rpc Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f cmd/stellar-rpc/docker/Dockerfile --target build
+        -f Dockerfile.rpc
         -t stellar-rpc:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        https://github.com/stellar/stellar-rpc.git#${{ needs.shas.outputs.rpc }}
+        --build-arg REF="${{ needs.shas.outputs.rpc }}" .
     - name: Upload Stellar-rpc Image
       uses: actions/upload-artifact@v4
       with:
         name: image-stellar-rpc-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-stellar-lab-from-cache:
     needs: [shas]
@@ -305,6 +322,7 @@ jobs:
       with:
         name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-stellar-lab:
     needs: [shas, load-stellar-lab-from-cache]
@@ -337,6 +355,7 @@ jobs:
       with:
         name: image-stellar-lab-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   load-rs-stellar-xdr-from-cache:
     needs: [shas]
@@ -355,6 +374,7 @@ jobs:
       with:
         name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build-rs-stellar-xdr:
     needs: [shas, load-rs-stellar-xdr-from-cache]
@@ -388,6 +408,7 @@ jobs:
       with:
         name: image-rs-stellar-xdr-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   build:
     needs: [build-stellar-core, build-stellar-horizon, build-rs-stellar-xdr, build-stellar-friendbot, build-stellar-rpc, build-stellar-lab]
@@ -396,13 +417,6 @@ jobs:
       image: ${{ steps.image.outputs.name }}
     runs-on: ubuntu-latest
     steps:
-    - name: Free up disk space
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        df -h
     - uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
@@ -486,6 +500,7 @@ jobs:
       with:
         name: image-${{ inputs.tag }}-${{ inputs.arch }}
         path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
 
   test:
     needs: build
@@ -587,6 +602,7 @@ jobs:
       with:
         name: logs-${{ inputs.tag }}-${{ inputs.arch }}-test-${{ strategy.job-index }}
         path: logs
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_LOGS }}
 
   push-pr:
     # Push image to registry after build for pull requests from a local branch.
