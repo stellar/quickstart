@@ -76,7 +76,7 @@ build-deps-friendbot:
 	docker build -t stellar-friendbot:$(FRIENDBOT_REF) -f Dockerfile.friendbot . --build-arg REF="$(FRIENDBOT_REF)"
 
 build-deps-stellar-rpc:
-	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f Dockerfile.stellar-rpc . --build-arg REF="$(STELLAR_RPC_REF)"
+	docker build -t stellar-rpc:$(STELLAR_RPC_REF) -f Dockerfile.rpc . --build-arg REF="$(STELLAR_RPC_REF)"
 
 build-deps-lab:
 	docker build -t stellar-lab:$(LAB_REF) -f Dockerfile.lab . --build-arg NEXT_PUBLIC_COMMIT_HASH=$(LAB_REF)
