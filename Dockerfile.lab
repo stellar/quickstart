@@ -18,5 +18,6 @@ RUN yarn build
 FROM scratch AS artifacts
 
 COPY --from=builder /lab/build/standalone /lab
+COPY --from=builder /lab/public /lab/public
 COPY --from=builder /lab/build/static /lab/public/_next/static
 COPY --from=builder /usr/local/bin/node /node
