@@ -89,7 +89,7 @@ jobs:
     - id: xdr
       run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: core
-      run: echo "sha=$(gh api repos/"${{inputs.core_repo}}"/commits/"${{inputs.core_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/${{inputs.core_repo}}/commits/"${{inputs.core_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: rpc
       run: echo "sha=$(gh api repos/stellar/stellar-rpc/commits/"${{inputs.stellar_rpc_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: horizon
@@ -144,7 +144,7 @@ jobs:
         -t stellar-core:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
         --build-arg REPO="${{ inputs.core_repo }}"
-        --build-arg REF="${{ needs.shas.outputs.xdr }}"
+        --build-arg REF="${{ needs.shas.outputs.core }}"
         --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}' .
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v4
