@@ -134,6 +134,16 @@ Lab is available at:
 http://localhost:8000/lab
 ```
 
+
+### Stellar Lab Explorer
+
+When running Lab in Quickstart, a block explorer is also made available at the following URL:
+
+```
+http://localhost:8000/lab/transactions-explorer
+```
+
+
 Lab is also deployed at:
 
 https://lab.stellar.org
