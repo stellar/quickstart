@@ -1,0 +1,38 @@
+FROM ubuntu:focal AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get -y install iproute2 procps lsb-release \
+                       git build-essential pkg-config autoconf automake libtool \
+                       bison flex sed perl libpq-dev parallel libunwind-dev \
+                       clang-12 libc++abi-12-dev libc++-12-dev \
+                       postgresql curl
+
+ARG REPO
+ARG REF
+WORKDIR /wd
+RUN git clone ${REPO} /wd
+RUN git fetch origin ${REF}
+RUN git checkout ${REF}
+
+RUN git clean -dXf
+RUN git submodule foreach --recursive git clean -dXf
+
+ARG CC=clang-12
+ARG CXX=clang++-12
+ARG CFLAGS='-O3 -g1 -fno-omit-frame-pointer'
+ARG CXXFLAGS='-O3 -g1 -fno-omit-frame-pointer -stdlib=libc++'
+ARG CONFIGURE_FLAGS=''
+
+RUN sysctl vm.mmap_rnd_bits=28
+
+RUN ./autogen.sh
+RUN ./install-rust.sh
+ENV PATH "/root/.cargo/bin:$PATH"
+RUN ./configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" ${CONFIGURE_FLAGS}
+RUN sh -c 'make -j $(nproc)'
+RUN make install
+
+FROM scratch AS artifacts
+
+COPY --from=builder /usr/local/bin/stellar-core /stellar-core

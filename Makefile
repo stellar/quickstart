@@ -67,7 +67,7 @@ build-deps-xdr:
 	docker build -t stellar-xdr:$(XDR_REF) -f Dockerfile.xdr . --build-arg REPO="$(XDR_REPO)" --build-arg REF="$(XDR_REF)"
 
 build-deps-core:
-	docker build -t stellar-core:$(CORE_REF) -f docker/Dockerfile.testing $(CORE_REPO)#$(CORE_REF) --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
+	docker build -t stellar-core:$(CORE_REF) -f Dockerfile.core . --build-arg REPO="$(CORE_REPO)" --build-arg REF="$(CORE_REF)" --build-arg CONFIGURE_FLAGS="$(CORE_CONFIGURE_FLAGS)"
 
 build-deps-horizon:
 	docker build -t stellar-horizon:$(HORIZON_REF) -f Dockerfile.horizon . --build-arg REF="$(HORIZON_REF)"

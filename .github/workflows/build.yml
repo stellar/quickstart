@@ -123,6 +123,10 @@ jobs:
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
     steps:
+    - name: Checkout Quickstart for Core docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - id: cache
       uses: actions/cache@v3
       with:
@@ -136,11 +140,12 @@ jobs:
     - name: Build Stellar-Core Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }}
+        -f Dockerfile.core
+        -t stellar-core:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        https://github.com/${{ inputs.core_repo }}.git#${{ needs.shas.outputs.core }}
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
+        --build-arg REPO="${{ inputs.core_repo }}"
+        --build-arg REF="${{ needs.shas.outputs.xdr }}"
+        --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}' .
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v4
       with:
