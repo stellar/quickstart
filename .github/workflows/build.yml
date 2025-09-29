@@ -25,7 +25,7 @@ on:
       core_repo:
         description: 'Git repo for stellar-core'
         type: 'string'
-        default: 'https://github.com/stellar/stellar-core.git'
+        default: 'stellar/stellar-core'
       core_ref:
         description: 'Git ref for the stellar-core repo'
         type: 'string'
