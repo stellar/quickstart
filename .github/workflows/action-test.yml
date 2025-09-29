@@ -34,7 +34,7 @@ jobs:
           const os = ['ubuntu-latest'];
           if (process.env.ACTION_CHANGED === 'true') {
             os.push('ubuntu-24.04-arm');
-            os.push('macos-13');
+            os.push('macos-15-intel');
           }
           core.setOutput('os', JSON.stringify(os));
 
