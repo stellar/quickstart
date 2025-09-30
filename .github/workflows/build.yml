@@ -121,7 +121,7 @@ jobs:
   build-stellar-core:
     needs: [shas, load-stellar-core-from-cache]
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Core docker file
       uses: actions/checkout@v3
@@ -132,10 +132,6 @@ jobs:
       with:
         path: /tmp/image
         key: image-${{ env.CACHE_ID }}-stellar-core-${{ inputs.arch }}-${{ needs.shas.outputs.core }}-${{ inputs.core_configure_flags }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Core Image
       run: >
@@ -175,7 +171,7 @@ jobs:
   build-stellar-horizon:
     needs: [shas, load-stellar-horizon-from-cache]
     if: ${{ needs.load-stellar-horizon-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -186,10 +182,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Horizon Image
@@ -227,7 +219,7 @@ jobs:
   build-stellar-friendbot:
     needs: [shas, load-stellar-friendbot-from-cache]
     if: ${{ needs.load-stellar-friendbot-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -238,10 +230,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Friendbot Image
@@ -280,7 +268,7 @@ jobs:
   build-stellar-rpc:
     needs: [shas, load-stellar-rpc-from-cache]
     if: ${{ needs.load-stellar-rpc-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -291,10 +279,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-rpc Image
       run: >
@@ -332,7 +316,7 @@ jobs:
   build-stellar-lab:
     needs: [shas, load-stellar-lab-from-cache]
     if: ${{ needs.load-stellar-lab-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - id: cache
       uses: actions/cache@v3
@@ -343,10 +327,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: ${{ inputs.sha }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - name: Setup buildx
       uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-lab Image
@@ -384,7 +364,7 @@ jobs:
   build-rs-stellar-xdr:
     needs: [shas, load-rs-stellar-xdr-from-cache]
     if: ${{ needs.load-rs-stellar-xdr-from-cache.outputs.cache-hit != 'true' }}
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-jammy-4-cores-arm64' || 'ubuntu-latest' }}
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - name: Checkout Quickstart for Horizon docker file
       uses: actions/checkout@v3
@@ -395,10 +375,6 @@ jobs:
       with:
         path: /tmp/image
         key: image-${{ env.CACHE_ID }}-rs-stellar-xdr-${{ inputs.arch }}-${{ needs.shas.outputs.xdr }}
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Stellar-Rs-Xdr Image
       run: >
@@ -420,7 +396,7 @@ jobs:
     if: always() && !failure() && !cancelled()
     outputs:
       image: ${{ steps.image.outputs.name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -467,10 +443,6 @@ jobs:
       run: docker load -i /tmp/stellar-rpc/image
     - name: Load Stellar-Rs-Xdr Image
       run: docker load -i /tmp/stellar-xdr/image
-    - if: inputs.arch == 'arm64'
-      uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18
-      with:
-        platforms: arm64
     - id: image
       name: Image Name
       run: echo "name=$IMAGE" >> $GITHUB_OUTPUT
@@ -513,7 +485,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - name: Free up disk space
       if: matrix.network == 'pubnet'
