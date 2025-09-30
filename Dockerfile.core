@@ -3,7 +3,7 @@ FROM ubuntu:focal AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -y install postgresql git build-essential pkg-config autoconf \
-    automake libtool bison flex libpq-dev parallel libunwind-dev sed perl
+    automake libtool bison flex libpq-dev parallel libunwind-dev sed perl curl
 
 
 ARG REPO
@@ -18,11 +18,9 @@ RUN git submodule foreach --recursive git clean -dXf
 
 ARG CC=clang-12
 ARG CXX=clang++-12
-ARG CFLAGS='-O3 -g1 -fno-omit-frame-pointer'
-ARG CXXFLAGS='-O3 -g1 -fno-omit-frame-pointer -stdlib=libc++'
+ARG CFLAGS='-O3 -g1'
+ARG CXXFLAGS='-O3 -g1'
 ARG CONFIGURE_FLAGS=''
-
-RUN sysctl vm.mmap_rnd_bits=28
 
 RUN ./autogen.sh
 RUN ./install-rust.sh
