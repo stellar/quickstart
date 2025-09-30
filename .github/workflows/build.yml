@@ -508,7 +508,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-jammy-16-cores-amd64
     steps:
     - uses: actions/checkout@v2
       with:
