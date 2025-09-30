@@ -30,7 +30,7 @@ ADD dependencies /
 RUN /dependencies
 
 COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
-COPY --from=stellar-core /usr/local/bin/stellar-core /usr/bin/stellar-core
+COPY --from=stellar-core /stellar-core /usr/bin/stellar-core
 COPY --from=horizon /horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
 COPY --from=stellar-rpc /stellar-rpc /usr/bin/stellar-rpc
