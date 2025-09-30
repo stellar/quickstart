@@ -49,7 +49,7 @@ jobs:
           "network": ["local"],
           "core": ["core", null],
           "horizon": ["horizon", null],
-          "rpc": ["horizon", null],
+          "rpc": ["rpc", null],
           "options": [""],
           "include": [
             { "network": "testnet", "core": "core", "horizon": "horizon", "rpc": "rpc" },
@@ -78,7 +78,7 @@ jobs:
           "network": ["local"],
           "core": ["core", null],
           "horizon": ["horizon", null],
-          "rpc": ["horizon", null],
+          "rpc": ["rpc", null],
           "options": [""],
           "include": [
             { "network": "testnet", "core": "core", "horizon": "horizon", "rpc": "rpc" },
