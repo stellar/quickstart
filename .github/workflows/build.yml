@@ -406,7 +406,7 @@ jobs:
         -f Dockerfile.xdr
         -t stellar-rs-xdr:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git
+        --build-arg REPO=stellar/rs-stellar-xdr
         --build-arg REF="${{ needs.shas.outputs.xdr }}" .
     - name: Upload Stellar-Rs-Xdr Image
       uses: actions/upload-artifact@v4
