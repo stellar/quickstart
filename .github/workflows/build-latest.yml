@@ -45,11 +45,14 @@ jobs:
       lab_ref: main
       test_matrix: |
         {
-          "network": ["pubnet", "local"],
-          "core": ["core", null],
-          "horizon": ["horizon", null],
-          "rpc": ["rpc", null],
-          "options": [""]
+          "network": ["local"],
+          "core": [true, false],
+          "horizon": [true, false],
+          "rpc": [true, false],
+          "options": [""],
+          "include": [
+            { "network": "pubnet", "core": true, "horizon": true, "rpc": true }
+          ]
         }
 
   arm64:
@@ -70,11 +73,14 @@ jobs:
       lab_ref: main
       test_matrix: |
         {
-          "network": ["pubnet", "local"],
-          "core": ["core", null],
-          "horizon": ["horizon", null],
-          "rpc": ["rpc", null],
-          "options": [""]
+          "network": ["local"],
+          "core": [true, false],
+          "horizon": [true, false],
+          "rpc": [true, false],
+          "options": [""],
+          "include": [
+            { "network": "pubnet", "core": true, "horizon": true, "rpc": true }
+          ]
         }
 
   manifest:
