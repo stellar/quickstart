@@ -68,7 +68,7 @@ env:
   # Cache ID is a value inserted into cache keys. Whenever changing the build
   # in a way that needs to use entirely new fresh builds, increment the number
   # by one so that all the keys become new.
-  CACHE_ID: 3
+  CACHE_ID: 4
   ARTIFACT_RETENTION_DAYS_FOR_IMAGE: 7
   ARTIFACT_RETENTION_DAYS_FOR_LOGS: 60
 
@@ -89,7 +89,7 @@ jobs:
     - id: xdr
       run: echo "sha=$(gh api repos/stellar/rs-stellar-xdr/commits/"${{inputs.xdr_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: core
-      run: echo "sha=$(gh api repos/"${{inputs.core_repo}}"/commits/"${{inputs.core_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
+      run: echo "sha=$(gh api repos/${{inputs.core_repo}}/commits/"${{inputs.core_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: rpc
       run: echo "sha=$(gh api repos/stellar/stellar-rpc/commits/"${{inputs.stellar_rpc_ref}}" --jq '.sha')" | tee -a $GITHUB_OUTPUT
     - id: horizon
@@ -123,6 +123,10 @@ jobs:
     if: ${{ needs.load-stellar-core-from-cache.outputs.cache-hit != 'true' }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
+    - name: Checkout Quickstart for Core docker file
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha }}
     - id: cache
       uses: actions/cache@v3
       with:
@@ -132,11 +136,12 @@ jobs:
     - name: Build Stellar-Core Image
       run: >
         docker buildx build --platform linux/${{ inputs.arch }}
-        -f docker/Dockerfile.testing -t stellar-core:${{ inputs.arch }}
+        -f Dockerfile.core
+        -t stellar-core:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        https://github.com/${{ inputs.core_repo }}.git#${{ needs.shas.outputs.core }}
-        --build-arg BUILDKIT_CONTEXT_KEEP_GIT_DIR=true
-        --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}'
+        --build-arg REPO="${{ inputs.core_repo }}"
+        --build-arg REF="${{ needs.shas.outputs.core }}"
+        --build-arg CONFIGURE_FLAGS='${{ inputs.core_configure_flags }}' .
     - name: Upload Stellar-Core Image
       uses: actions/upload-artifact@v4
       with:
@@ -377,7 +382,7 @@ jobs:
         -f Dockerfile.xdr
         -t stellar-rs-xdr:${{ inputs.arch }}
         -o type=docker,dest=/tmp/image
-        --build-arg REPO=https://github.com/stellar/rs-stellar-xdr.git
+        --build-arg REPO=stellar/rs-stellar-xdr
         --build-arg REF="${{ needs.shas.outputs.xdr }}" .
     - name: Upload Stellar-Rs-Xdr Image
       uses: actions/upload-artifact@v4
