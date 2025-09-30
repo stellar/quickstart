@@ -138,6 +138,14 @@ Lab is also deployed at:
 
 https://lab.stellar.org
 
+### Stellar Lab Block/Transactions Explorer
+
+When running Lab in Quickstart, a block explorer is also made available at the following URL:
+
+```
+http://localhost:8000/lab/transactions-explorer
+```
+
 ### Faucet (Friendbot)
 
 Stellar development/test networks use Friendbot as a faucet for the native asset.
