@@ -508,7 +508,7 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(inputs.test_matrix) }}
       fail-fast: false
-    runs-on: ${{ matrix.network == "pubnet" && "ubuntu-jammy-16-cores-amd64" || "ubuntu-latest" }}
+    runs-on: ${{ matrix.network == 'pubnet' && 'ubuntu-jammy-16-cores-amd64' || 'ubuntu-latest' }}
     steps:
     - uses: actions/checkout@v2
       with:
