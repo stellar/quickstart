@@ -68,7 +68,7 @@ env:
   # Cache ID is a value inserted into cache keys. Whenever changing the build
   # in a way that needs to use entirely new fresh builds, increment the number
   # by one so that all the keys become new.
-  CACHE_ID: 4
+  CACHE_ID: 5
   ARTIFACT_RETENTION_DAYS_FOR_IMAGE: 7
   ARTIFACT_RETENTION_DAYS_FOR_LOGS: 60
 
