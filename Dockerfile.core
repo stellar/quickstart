@@ -20,9 +20,11 @@ RUN git submodule foreach --recursive git clean -dXf
 
 ARG CC=clang-12
 ARG CXX=clang++-12
-ARG CFLAGS='-O3 -g1'
-ARG CXXFLAGS='-O3 -g1'
+ARG CFLAGS='-O3 -g1 -fno-omit-frame-pointer'
+ARG CXXFLAGS='-O3 -g1 -fno-omit-frame-pointer -stdlib=libc++'
 ARG CONFIGURE_FLAGS=''
+
+RUN sysctl vm.mmap_rnd_bits=28
 
 RUN ./autogen.sh
 RUN ./install-rust.sh
