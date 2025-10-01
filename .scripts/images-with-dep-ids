@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+import subprocess
+import hashlib
+
+# Accepts as stdin a JSON object in the format of images.json. Hashes the
+# entire dep details and injects the hash as an id into the deps details. The
+# id can be used to uniquely identify a dep configuration.
+# Usage: < images.json ./.scripts/images-with-dep-ids
+
+images = json.load(sys.stdin)
+
+cache = {}
+
+for image in images:
+    for dep in image["deps"]:
+        dep_str = json.dumps(dep, separators=(',', ':'))
+        hash = hashlib.sha256(dep_str.encode()).hexdigest()
+        dep["id"] = hash
+        dep["id_short"] = hash[:5]
+
+print(json.dumps(images, separators=(',', ':')))

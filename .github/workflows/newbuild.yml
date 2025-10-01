@@ -1,0 +1,446 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+# Prevent more than one build of this workflow for a branch to be running at the
+# same time, and if multiple are queued, only run the latest, cancelling any
+# already running build. The exception being any protected branch, such as
+# main, where a build for every commit will run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+env:
+  sha: ${{ github.event.pull_request.head.sha || github.sha }}
+  image_repo: ${{ format('{0}/{1}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository) }}
+  # Cache ID is a value inserted into cache keys. Whenever changing the build
+  # in a way that needs to use entirely new fresh builds, increment the number
+  # by one so that all the keys become new.
+  cache_id: 5
+  artifact_retention_days_for_image: 7
+  artifact_retention_days_for_tombstone: 7
+  artifact_retention_days_for_logs: 60
+
+jobs:
+
+  complete:
+    if: always()
+    needs: [setup, load, build, test, push, manifest]
+    runs-on: ubuntu-latest
+    steps:
+    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
+      images: ${{ steps.images.outputs.images }}
+      deps: ${{ steps.deps.outputs.deps }}
+      additional-tests: ${{ steps.tests.outputs.additional-tests }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Get all history for the sha count below.
+        ref: ${{ env.sha }}
+    - name: Tag Prefix
+      id: tag-prefix
+      run: |
+        pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '' }}"
+        count="$(git rev-list HEAD --count --first-parent)"
+        echo "tag-prefix=${pr_prefix}v${count}-" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
+    - name: Images
+      id: images
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        images="$(<images.json)"
+        images="$(<<< $images ./.scripts/images-with-dep-shas)"
+        images="$(<<< $images ./.scripts/images-with-dep-ids)"
+        <<< $images jq
+        echo "images=$images" >> $GITHUB_OUTPUT
+        echo "images=$images" >> $GITHUB_ENV
+    - name: Deps
+      id: deps
+      run: |
+        deps="$(<<< $images ./.scripts/images-deps)"
+        <<< $deps jq
+        echo "deps=$deps" >> $GITHUB_OUTPUT
+    - name: Additional Tests
+      id: tests
+      run: |
+        tests="$(<<< $images ./.scripts/images-additional-tests)"
+        <<< $tests jq
+        echo "additional-tests=$tests" >> $GITHUB_OUTPUT
+
+  load:
+    needs: [setup]
+    strategy:
+      matrix:
+        dep: ${{ fromJSON(needs.setup.outputs.deps) }}
+        arch: ["amd64", "arm64"]
+      fail-fast: false
+    name: load ${{ matrix.dep.name }} ${{ matrix.dep.repo }} ${{ matrix.dep.ref }} ${{ matrix.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    runs-on: ubuntu-latest
+    env:
+      dep_json: ${{ toJSON(matrix.dep) }}
+      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.tar
+      json_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
+      missing_filename: missing-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
+    steps:
+    - name: Create Dep Details JSON (with arch)
+      run: >
+        echo "${dep_json}"
+        | jq --arg arch ${{ matrix.arch }} '.arch = $arch'
+        | tee /tmp/${{ env.json_filename }}
+    - name: Upload Dep Details JSON
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.json_filename }}
+        path: /tmp/${{ env.json_filename }}
+        retention-days: ${{ env.artifact_retention_days_for_tombstone }}
+    - name: Find Image in Cache
+      id: cache
+      uses: actions/cache/restore@v3
+      with:
+        key: ${{ env.cache_id }}-${{ env.image_filename }}
+        path: /tmp/${{ env.image_filename }}
+    - name: Upload Image
+      if: steps.cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.image_filename }}
+        path: /tmp/${{ env.image_filename }}
+        retention-days: ${{ env.artifact_retention_days_for_image }}
+    - name: Upload Dep Details as Missing Marker Due to Cache Miss
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.missing_filename }}
+        path: /tmp/${{ env.json_filename }}
+        retention-days: ${{ env.artifact_retention_days_for_tombstone }}
+
+  prepare:
+    needs: [load]
+    name: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      deps-to-build: ${{ steps.deps-to-build.outputs.deps }}
+    steps:
+    - name: Download Missing Markers
+      uses: actions/download-artifact@v4
+      with:
+        pattern: missing-*
+        merge-multiple: true
+        path: /tmp/missing
+    - name: Collect Deps-to-Build from Missing Markers
+      id: deps-to-build
+      run: |
+        deps="$(find /tmp/missing -name "*.json" -exec cat {} \; | jq -c -s '.')"
+        echo "deps=$deps" | tee -a $GITHUB_OUTPUT
+
+  build-dep:
+    needs: [setup, prepare]
+    if: needs.prepare.outputs.deps-to-build != '[]'
+    strategy:
+      matrix:
+        dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
+      fail-fast: false
+    name: build ${{ matrix.dep.name }} ${{ matrix.dep.repo }} ${{ matrix.dep.ref }} ${{ matrix.dep.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    runs-on: ${{ matrix.dep.name == 'core' && (matrix.dep.arch == 'arm64' && 'ubuntu-jammy-16-cores-amd64' || 'ubuntu-latest-16-cores') || (matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest') }}
+    env:
+      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ env.sha }}
+    - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Build Image
+      env:
+        options_json: ${{ toJSON(matrix.dep.options) }}
+      run: >
+        docker buildx build
+        --platform linux/${{ matrix.dep.arch }}
+        -f Dockerfile.${{ matrix.dep.name }}
+        -t stellar-${{ matrix.dep.name }}:${{ matrix.dep.arch }}
+        -o type=docker,dest=/tmp/${image_filename}
+        --build-arg REPO="${{ matrix.dep.repo }}"
+        --build-arg REF="${{ matrix.dep.sha }}"
+        --build-arg OPTIONS="${options_json}"
+        .
+    - name: Upload Image to Cache
+      uses: actions/cache/save@v3
+      id: cache
+      with:
+        key: ${{ env.cache_id }}-${{env.image_filename }}
+        path: /tmp/${{ env.image_filename }}
+    - name: Upload Image to Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.image_filename }}
+        path: /tmp/${{ env.image_filename }}
+        retention-days: ${{ env.artifact_retention_days_for_image }}
+
+  build:
+    needs: [setup, build-dep]
+    if: always() && !failure() && !cancelled()
+    strategy:
+      matrix:
+        image: ${{ fromJSON(needs.setup.outputs.images) }}
+        arch: ["amd64", "arm64"]
+      fail-fast: false
+    name: build quickstart ${{ matrix.image.tag }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ env.sha }}
+    - name: Download Images
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-*-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Load Image into Docker
+      run: |
+        ls -lah /tmp/images/
+        for image in /tmp/images/*.tar; do
+          echo Loading image $image
+          < "${image/%.tar/.json}" jq
+          docker load -i $image
+        done
+    - name: Create Tag
+      id: tag
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+    - name: Pull Base Image
+      run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
+    # Docker buildx cannot be used to build the dev quickstart image because
+    # buildx does not yet support importing existing images, like the core and
+    # horizon images above, into a buildx builder's cache. Buildx would be
+    # preferred because it can output a smaller image file faster than docker
+    # save can.  Once buildx supports it we can update.
+    # https://github.com/docker/buildx/issues/847
+    - name: Build Image
+      run: >
+        docker build
+        --platform linux/${{ matrix.arch }}
+        -f Dockerfile
+        -t ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        --label org.opencontainers.image.revision="${{ env.sha }}"
+        --build-arg REVISION="${{ env.sha }}"
+        --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
+        --build-arg XDR_IMAGE_REF=stellar-xdr:${{ matrix.arch }}
+        --build-arg CORE_IMAGE_REF=stellar-core:${{ matrix.arch }}
+        --build-arg RPC_IMAGE_REF=stellar-rpc:${{ matrix.arch }}
+        --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ matrix.arch }}
+        --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ matrix.arch }}
+        --build-arg LAB_IMAGE_REF=stellar-lab:${{ matrix.arch }}
+        .
+    - name: Save Quickstart Image
+      run: docker save ${{ env.image_repo }}:${{ steps.tag.outputs.tag }} -o /tmp/image
+    - name: Upload Quickstart Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
+        path: /tmp/image
+        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
+
+  test:
+    needs: [setup, build]
+    if: always() && !failure() && !cancelled()
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
+        arch: ["amd64", "arm64"]
+        network: ["local"]
+        core: [true, false]
+        horizon: [true, false]
+        rpc: [true, false]
+        options: [""]
+        include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
+      fail-fast: false
+    name: test ${{ matrix.tag }} ${{ matrix.arch }} ${{ matrix.network }} ${{ matrix.core && 'core' || '' }} ${{ matrix.rpc && 'rpc' || '' }} ${{ matrix.horizon && 'horizon' || '' }} ${{ matrix.options || '' }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    steps:
+    - name: Free up disk space
+      if: matrix.network == 'pubnet'
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        df -h
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.sha }}
+    - name: Download Quickstart Image
+      uses: actions/download-artifact@v4
+      with:
+        name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
+        path: /tmp/
+    - name: Load Quickstart Image
+      run: docker load -i /tmp/image
+    - name: Create Tag
+      id: tag
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+    - name: Prepare Logs Directory
+      run: mkdir -p logs
+    - name: Run Quickstart Image
+      run: >
+        docker run
+        --platform linux/${{ matrix.arch }}
+        -d
+        -p
+        "8000:8000"
+        -p "11626:11626"
+        --name stellar
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        --${{ matrix.network }}
+        --enable ${{ matrix.core && 'core' }},${{ matrix.rpc && 'rpc' }},${{ matrix.horizon && 'horizon' }}
+        ${{ matrix.options }}
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1
+    - name: Sleep until supervisor is up
+      run: sleep 10
+    - name: Run core test
+      if: ${{ matrix.core }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+        go run tests/test_core.go
+        curl http://localhost:11626/info
+    - name: Run horizon up test
+      if: ${{ matrix.horizon }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run tests/test_horizon_up.go
+        curl http://localhost:8000
+    - name: Run horizon core up test
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run tests/test_horizon_core_up.go
+        curl http://localhost:8000
+    - name: Run horizon ingesting test
+      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run tests/test_horizon_ingesting.go
+        curl http://localhost:8000
+    - name: Run friendbot test
+      if: ${{ matrix.horizon && matrix.network == 'local' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        go run tests/test_friendbot.go
+    - name: Run stellar rpc up test
+      if: ${{ matrix.rpc }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
+        go run tests/test_stellar_rpc_up.go
+    - name: Run stellar rpc healthy test
+      if: ${{ matrix.rpc && matrix.network != 'pubnet' }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
+        go run tests/test_stellar_rpc_healthy.go
+    - name: Prepare Test Logs
+      if: always()
+      run: docker cp stellar:/var/log logs
+    - name: Upload Test Logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs-${{ matrix.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
+        path: logs
+        retention-days: ${{ env.artifact_retention_days_for_logs }}
+
+  push:
+    needs: test
+    if: always() && !failure() && !cancelled() && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
+        arch: ["amd64", "arm64"]
+      fail-fast: false
+    permissions:
+      packages: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.sha  }}
+    - name: Create Tag
+      id: tag
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+    - uses: ./.github/actions/push
+      with:
+        head_sha: ${{ env.sha }}
+        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}
+        artifact_image_file: image
+        arch: ${{ matrix.arch }}
+        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+
+  manifest:
+    needs: push
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
+      fail-fast: false
+    permissions:
+      packages: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Tag
+      id: tag
+      run: |
+        echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}" >> $GITHUB_OUTPUT
+        echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" >> $GITHUB_OUTPUT
+    - uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+    - run: >
+        docker manifest create
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
+    - run: >
+        docker manifest push
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+    - run: >
+        docker buildx imagetools create -t
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+    - uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ env.sha }}',
+            state: 'success',
+            context: `${{ env.image_repo }}:${{ steps.tag.outputs.tag }}`,
+            description: 'Available',
+          });

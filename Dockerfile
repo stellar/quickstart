@@ -1,15 +1,15 @@
-ARG STELLAR_XDR_IMAGE_REF
-ARG STELLAR_CORE_IMAGE_REF
+ARG XDR_IMAGE_REF
+ARG CORE_IMAGE_REF
 ARG HORIZON_IMAGE_REF
 ARG FRIENDBOT_IMAGE_REF
-ARG STELLAR_RPC_IMAGE_REF
+ARG RPC_IMAGE_REF
 ARG LAB_IMAGE_REF
 
-FROM $STELLAR_XDR_IMAGE_REF AS stellar-xdr
-FROM $STELLAR_CORE_IMAGE_REF AS stellar-core
+FROM $XDR_IMAGE_REF AS xdr
+FROM $CORE_IMAGE_REF AS core
 FROM $HORIZON_IMAGE_REF AS horizon
 FROM $FRIENDBOT_IMAGE_REF AS friendbot
-FROM $STELLAR_RPC_IMAGE_REF AS stellar-rpc
+FROM $RPC_IMAGE_REF AS rpc
 FROM $LAB_IMAGE_REF AS lab
 
 FROM ubuntu:22.04
@@ -29,11 +29,11 @@ EXPOSE 11626
 ADD dependencies /
 RUN /dependencies
 
-COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
-COPY --from=stellar-core /stellar-core /usr/bin/stellar-core
+COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=core /stellar-core /usr/bin/stellar-core
 COPY --from=horizon /horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
-COPY --from=stellar-rpc /stellar-rpc /usr/bin/stellar-rpc
+COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
 COPY --from=lab /node /usr/bin/
 

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+# Accepts as stdin a JSON object in the format of images.json. Outputs an array
+# of all dependencies that need to be built across all the images.
+# Usage: < images.json ./.scripts/images-deps
+
+jq -c '[ .[] | .deps[] ] | unique'
