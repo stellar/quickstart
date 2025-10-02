@@ -63,7 +63,7 @@ jobs:
       xdr_ref: v23.0.0
       core_ref: v23.0.1
       horizon_ref: horizon-v23.0.0
-      stellar_rpc_ref: v23.0.1
+      stellar_rpc_ref: v23.0.4
       friendbot_ref: horizon-v23.0.0
       lab_ref: main
       test_matrix: |
