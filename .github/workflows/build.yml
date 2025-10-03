@@ -198,7 +198,7 @@ jobs:
     name: build quickstart ${{ matrix.image.tag }} ${{ matrix.arch }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
-      image_json: ${{ matrix.image }}
+      image_json: ${{ toJSON(matrix.image) }}
     steps:
     - uses: actions/checkout@v3
       with:
