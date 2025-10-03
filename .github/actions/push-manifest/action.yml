@@ -25,12 +25,14 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
     - 
+      shell: bash
       run: >
         docker manifest create
         ${{ inputs.image }}
         ${{ inputs.image }}-amd64
         ${{ inputs.image }}-arm64
     - 
+      shell: bash
       run: >
         docker manifest push
         ${{ inputs.image }}

@@ -25,6 +25,7 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
     -
+      shell: bash
       run: |
         docker buildx imagetools create -t ${{ inputs.image-alias }} ${{ inputs.image }}
     -
