@@ -56,7 +56,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "main", "options": { "configure_flags": "--disable-tests" } },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
       { "name": "horizon", "repo": "stellar/go", "ref": "master" },
       { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
@@ -71,7 +71,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "main", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
       { "name": "horizon", "repo": "stellar/go", "ref": "master" },
       { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
