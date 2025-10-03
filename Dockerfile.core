@@ -31,7 +31,7 @@ RUN sysctl vm.mmap_rnd_bits=28
 RUN ./autogen.sh
 RUN ./install-rust.sh
 ENV PATH "/root/.cargo/bin:$PATH"
-RUN sh -c './configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" $(</tmp/configure_flags)'
+RUN sh -c './configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" $(</tmp/arg_configure_flags)'
 RUN sh -c 'make -j $(nproc)'
 RUN make install
 
