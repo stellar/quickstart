@@ -197,7 +197,7 @@ jobs:
         image: ${{ fromJSON(needs.setup.outputs.images) }}
         arch: ["amd64", "arm64"]
       fail-fast: false
-    name: 5 build quickstart (${{ matrix.image.tag }}, ${{ matrix.arch }})
+    name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
       image_json: ${{ toJSON(matrix.image) }}
