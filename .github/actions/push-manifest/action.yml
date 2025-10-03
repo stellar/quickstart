@@ -2,6 +2,8 @@ name: 'Push Manifest'
 inputs:
   image:
     required: true
+  images:
+    required: true
   registry:
     required: true
     default: ghcr.io
@@ -14,73 +16,24 @@ inputs:
 runs:
   using: "composite"
   steps:
-    -
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.artifact_name }}
-        path: /tmp/
-    -
-      shell: bash
-      run: docker load -i /tmp/${{ inputs.artifact_image_file }}
-    -
-      id: image_parts
-      shell: bash
-      run: |
-        IMAGE_TAGLESS=$(echo ${{ inputs.image }} | cut -d':' -f1)
-        IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)
-        IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)
-        echo "::set-output name=repo::$IMAGE_REPO"
-        echo "::set-output name=tag::$IMAGE_TAG"
-    -
+    - 
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
-    -
-      shell: bash
-      run: echo "IMAGE_URL=https://${{ inputs.image }}" >> $GITHUB_ENV
-    -
-      if: ${{ inputs.registry == 'docker.io' }}
-      shell: bash
-      run: |
-        echo "IMAGE_URL=https://hub.docker.com/r/${{ steps.image_parts.outputs.repo }}/tags?name=${{ steps.image_parts.outputs.tag }}" >> $GITHUB_ENV
-    -
-      shell: bash
-      run: |
-        docker push ${{ inputs.image }}
-    -
-      uses: actions/github-script@v5
-      with:
-        script: |
-          github.rest.repos.createCommitStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            sha: '${{ inputs.head_sha }}',
-            state: 'success',
-            context: `${{ inputs.image }}`,
-            target_url: '${{ env.IMAGE_URL }}',
-            description: 'Available',
-          });
-
-    - uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
-        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
-    - run: >
+    - 
+      run: >
         docker manifest create
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
-    - run: >
+        ${{ inputs.image }}
+        ${{ inputs.image }}-amd64
+        ${{ inputs.image }}-arm64
+    - 
+      run: >
         docker manifest push
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-    - run: >
-        docker buildx imagetools create -t
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-    - uses: actions/github-script@v5
+        ${{ inputs.image }}
+    - 
+      uses: actions/github-script@v5
       with:
         script: |
           github.rest.repos.createCommitStatus({
@@ -88,6 +41,6 @@ runs:
             repo: context.repo.repo,
             sha: '${{ env.sha }}',
             state: 'success',
-            context: `${{ env.image_repo }}:${{ steps.tag.outputs.tag }}`,
+            context: `${{ inputs.image }}`,
             description: 'Available',
           });
