@@ -6,8 +6,6 @@ inputs:
     required: true
   artifact_image_file:
     required: true
-  artifact_image_name:
-    required: true
   arch:
     required: true
   image:
