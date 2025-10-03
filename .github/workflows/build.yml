@@ -406,7 +406,7 @@ jobs:
         retention-days: ${{ env.artifact_retention_days_for_logs }}
 
   push:
-    needs: test
+    needs: [setup, test]
     if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     strategy:
       matrix:
@@ -433,7 +433,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   push-manifest:
-    needs: push
+    needs: [setup, push]
     if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     strategy:
       matrix:
