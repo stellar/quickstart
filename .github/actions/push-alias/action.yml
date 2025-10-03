@@ -1,0 +1,41 @@
+name: 'Push Alias'
+inputs:
+  head_sha:
+    required: true
+  image:
+    required: true
+  image-alias:
+    required: true
+  registry:
+    required: true
+    default: ghcr.io
+  username:
+    required: true
+    default: ${{ github.actor }}
+  password:
+    required: true
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    -
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+    -
+      run: |
+        docker buildx imagetools create -t ${{ inputs.image-alias }} ${{ inputs.image }}
+    -
+      uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ inputs.head_sha }}',
+            state: 'success',
+            context: `${{ inputs.image-alias }}`,
+            description: 'Available',
+          });

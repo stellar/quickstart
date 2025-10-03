@@ -1,18 +1,7 @@
-name: 'Manifest'
+name: 'Push Manifest'
 inputs:
-  head_sha:
-    required: true
-  artifact_name:
-    required: true
-  artifact_image_file:
-    required: true
-  artifact_image_name:
-    required: true
-  arch:
-    required: true
   image:
     required: true
-    default: ghcr.io/${{ github.repository }}:latest
   registry:
     required: true
     default: ghcr.io
@@ -71,5 +60,34 @@ runs:
             state: 'success',
             context: `${{ inputs.image }}`,
             target_url: '${{ env.IMAGE_URL }}',
+            description: 'Available',
+          });
+
+    - uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+    - run: >
+        docker manifest create
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
+    - run: >
+        docker manifest push
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+    - run: >
+        docker buildx imagetools create -t
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
+        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+    - uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ env.sha }}',
+            state: 'success',
+            context: `${{ env.image_repo }}:${{ steps.tag.outputs.tag }}`,
             description: 'Available',
           });

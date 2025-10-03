@@ -40,8 +40,8 @@ runs:
         IMAGE_TAGLESS=$(echo ${{ inputs.image }} | cut -d':' -f1)
         IMAGE_REPO=$(echo $IMAGE_TAGLESS | cut -d'/' -f2,3)
         IMAGE_TAG=$(echo ${{ inputs.image }} | cut -d':' -f2)
-        echo "::set-output name=repo::$IMAGE_REPO"
-        echo "::set-output name=tag::$IMAGE_TAG"
+        echo "repo=$IMAGE_REPO" | tee -a $GITHUB_OUTPUTS
+        echo "tag=$IMAGE_TAG" | tee -a $GITHUB_OUTPUTS
     -
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:

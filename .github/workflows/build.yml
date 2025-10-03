@@ -178,7 +178,7 @@ jobs:
       uses: actions/cache/save@v3
       id: cache
       with:
-        key: ${{ env.cache_id }}-${{env.image_filename }}
+        key: ${{ env.cache_id }}-${{ env.image_filename }}
         path: /tmp/${{ env.image_filename }}
     - name: Upload Image to Artifacts
       uses: actions/upload-artifact@v4
@@ -197,14 +197,50 @@ jobs:
       fail-fast: false
     name: build quickstart ${{ matrix.image.tag }} ${{ matrix.arch }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    env:
+      image_json: ${{ matrix.image }}
     steps:
     - uses: actions/checkout@v3
       with:
         ref: ${{ env.sha }}
-    - name: Download Images
+    - name: Collect Dep IDs
+      id: ids
+      run:
+        echo "$(<<< $image_json jq -r '.deps[] | "\(.name)=\(.id)"')" | tee -a $GITHUB_OUTPUT
+    - name: Download Image XDR
       uses: actions/download-artifact@v4
       with:
-        pattern: image-*-${{ matrix.arch }}.*
+        pattern: image-xdr-${{ steps.ids.outputs.xdr }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Download Image Core
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-core-${{ steps.ids.outputs.core }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Download Image RPC
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-rpc-${{ steps.ids.outputs.rpc }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Download Image Horizon
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-horizon-${{ steps.ids.outputs.horizon }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Download Image Friendbot
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-friendbot-${{ steps.ids.outputs.friendbot }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
+    - name: Download Image Lab
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-lab-${{ steps.ids.outputs.lab }}-${{ matrix.arch }}.*
         merge-multiple: true
         path: /tmp/images
     - name: Load Image into Docker
@@ -217,7 +253,7 @@ jobs:
         done
     - name: Create Tag
       id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     # Docker buildx cannot be used to build the dev quickstart image because
@@ -288,7 +324,7 @@ jobs:
       run: docker load -i /tmp/image
     - name: Create Tag
       id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Prepare Logs Directory
       run: mkdir -p logs
     - name: Run Quickstart Image
@@ -382,12 +418,9 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ inputs.sha  }}
     - name: Create Tag
       id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push
       with:
         head_sha: ${{ env.sha }}
@@ -399,9 +432,9 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
-  manifest:
+  push-manifest:
     needs: push
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
@@ -414,40 +447,28 @@ jobs:
     - name: Create Tag
       id: tag
       run: |
-        echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}" >> $GITHUB_OUTPUT
-        echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" >> $GITHUB_OUTPUT
-    - uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+    - uses: ./.github/actions/push-manifest
       with:
-        registry: ${{ env.REGISTRY }}
+        head_sha: ${{ env.sha }}
+        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        images: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64 ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
-    - run: >
-        docker manifest create
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
-    - run: >
-        docker manifest push
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-    - run: >
-        docker buildx imagetools create -t
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-    - uses: actions/github-script@v5
+    - uses: ./.github/actions/push-alias
       with:
-        script: |
-          github.rest.repos.createCommitStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            sha: '${{ env.sha }}',
-            state: 'success',
-            context: `${{ env.image_repo }}:${{ steps.tag.outputs.tag }}`,
-            description: 'Available',
-          });
-          
+        head_sha: ${{ env.sha }}
+        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        image-alias: ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
+        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+
   action:
-    needs: [setup, manifest]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.pull_request.head.repo.full_name == github.repository
+    needs: [setup, push-manifest]
+    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
