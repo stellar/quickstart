@@ -427,7 +427,7 @@ jobs:
     - uses: ./.github/actions/push
       with:
         head_sha: ${{ env.sha }}
-        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}
+        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
         artifact_image_file: image
         arch: ${{ matrix.arch }}
         image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
