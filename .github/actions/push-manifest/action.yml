@@ -1,5 +1,7 @@
 name: 'Push Manifest'
 inputs:
+  head_sha:
+    required: true
   image:
     required: true
   images:
@@ -39,7 +41,7 @@ runs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ env.sha }}',
+            sha: '${{ inputs.head_sha }}',
             state: 'success',
             context: `${{ inputs.image }}`,
             description: 'Available',
