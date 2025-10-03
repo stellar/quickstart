@@ -86,7 +86,7 @@ jobs:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
         arch: ["amd64", "arm64"]
       fail-fast: false
-    name: load ${{ matrix.dep.name }} ${{ matrix.dep.repo }} ${{ matrix.dep.ref }} ${{ matrix.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    name: load ${{ matrix.dep.name }} ${{ matrix.dep.ref }} ${{ matrix.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
     runs-on: ubuntu-latest
     env:
       dep_json: ${{ toJSON(matrix.dep) }}
@@ -152,8 +152,8 @@ jobs:
       matrix:
         dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
       fail-fast: false
-    name: build ${{ matrix.dep.name }} ${{ matrix.dep.repo }} ${{ matrix.dep.ref }} ${{ matrix.dep.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
-    runs-on: ${{ matrix.dep.name == 'core' && (matrix.dep.arch == 'arm64' && 'ubuntu-jammy-16-cores-amd64' || 'ubuntu-latest-16-cores') || (matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest') }}
+    name: build ${{ matrix.dep.name }} ${{ matrix.dep.ref }} ${{ matrix.dep.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
       image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
     steps:
