@@ -418,6 +418,9 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
@@ -444,6 +447,9 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ env.sha }}
     - name: Create Tag
       id: tag
       run: |
