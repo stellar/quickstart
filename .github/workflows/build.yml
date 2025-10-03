@@ -29,6 +29,7 @@ jobs:
 
   complete:
     if: always()
+    name: 10 complete
     needs: [setup, load, build, test, push, push-manifest, action]
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +37,7 @@ jobs:
       run: exit 1
 
   setup:
+    name: 1 setup
     runs-on: ubuntu-latest
     outputs:
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
@@ -86,7 +88,7 @@ jobs:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
         arch: ["amd64", "arm64"]
       fail-fast: false
-    name: load ${{ matrix.dep.name }} ${{ matrix.dep.ref }} ${{ matrix.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ubuntu-latest
     env:
       dep_json: ${{ toJSON(matrix.dep) }}
@@ -128,7 +130,7 @@ jobs:
 
   prepare:
     needs: [load]
-    name: prepare
+    name: 3 prepare
     runs-on: ubuntu-latest
     outputs:
       deps-to-build: ${{ steps.deps-to-build.outputs.deps }}
@@ -152,7 +154,7 @@ jobs:
       matrix:
         dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
       fail-fast: false
-    name: build ${{ matrix.dep.name }} ${{ matrix.dep.ref }} ${{ matrix.dep.arch }} ${{ matrix.dep.options && toJSON(matrix.dep.options) }}
+    name: 4 build (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.dep.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
       image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
@@ -195,7 +197,7 @@ jobs:
         image: ${{ fromJSON(needs.setup.outputs.images) }}
         arch: ["amd64", "arm64"]
       fail-fast: false
-    name: build quickstart ${{ matrix.image.tag }} ${{ matrix.arch }}
+    name: 5 build quickstart (${{ matrix.image.tag }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
       image_json: ${{ toJSON(matrix.image) }}
@@ -301,7 +303,7 @@ jobs:
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
-    name: test ${{ matrix.tag }} ${{ matrix.arch }} ${{ matrix.network }} ${{ matrix.core && 'core' || '' }} ${{ matrix.rpc && 'rpc' || '' }} ${{ matrix.horizon && 'horizon' || '' }} ${{ matrix.options || '' }}
+    name: 6 test (${{ matrix.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.core && 'core' || '' }} ${{ matrix.rpc && 'rpc' || '' }} ${{ matrix.horizon && 'horizon' || '' }} ${{ matrix.options || '' }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - name: Free up disk space
@@ -413,6 +415,7 @@ jobs:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
         arch: ["amd64", "arm64"]
       fail-fast: false
+    name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
       packages: write
       statuses: write
@@ -442,6 +445,7 @@ jobs:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
       fail-fast: false
+    name: 8 push manifest (${{ matrix.tag }})
     permissions:
       packages: write
       statuses: write
@@ -479,6 +483,7 @@ jobs:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
       fail-fast: false
+    name: 9 test action (${{ matrix.tag }})
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}
