@@ -29,7 +29,7 @@ jobs:
 
   complete:
     if: always()
-    needs: [setup, load, build, test, push, manifest, action]
+    needs: [setup, load, build, test, push, push-manifest, action]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
