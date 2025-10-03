@@ -371,7 +371,7 @@ jobs:
 
   push:
     needs: test
-    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)))
+    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
