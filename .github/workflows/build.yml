@@ -190,7 +190,7 @@ jobs:
         retention-days: ${{ env.artifact_retention_days_for_image }}
 
   build:
-    needs: [setup, build-dep]
+    needs: [setup, load, build-dep]
     if: always() && !failure() && !cancelled()
     strategy:
       matrix:
