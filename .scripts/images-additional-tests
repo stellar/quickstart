@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+
+images = json.load(sys.stdin)
+tests = []
+for image in images:
+    tag = image['tag']
+    for test in image['additional-tests']:
+        tests.append({'tag': tag, **test})
+
+print(json.dumps(tests))

@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+import json
+import sys
+import subprocess
+
+# Accepts as stdin a JSON object in the format of images.json.
+# Resolves any 'ref' values in the JSON to a commit sha.
+# Outputs the original JSON modified with the shas.
+# Usage: < images.json ./.scripts/images-with-dep-shas
+
+images = json.load(sys.stdin)
+
+cache = {}
+
+for image in images:
+    tag = image["tag"]
+    for dep in image["deps"]:
+        name = dep["name"]
+        repo = dep["repo"]
+        ref = dep["ref"]
+        print(f"{tag} {name} {repo} {ref} ...", end=" ", flush=True, file=sys.stderr)
+        key = (name, repo, ref)
+        if key in cache:
+            sha = cache[key]
+        else:
+            sha = subprocess.run(
+                ["gh", "api", f"repos/{repo}/commits/{ref}", "--jq", ".sha"],
+                capture_output=True,
+                text=True,
+                check=True
+            ).stdout.strip()
+            cache[key] = sha
+        print(sha, file=sys.stderr)
+        dep["sha"] = sha
+
+print(json.dumps(images, separators=(',', ':')))

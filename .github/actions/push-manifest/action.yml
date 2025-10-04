@@ -1,16 +1,11 @@
-name: 'Push'
+name: 'Push Manifest'
 inputs:
   head_sha:
     required: true
-  artifact_name:
-    required: true
-  artifact_image_file:
-    required: true
-  arch:
-    required: true
   image:
     required: true
-    default: ghcr.io/${{ github.repository }}:latest
+  images:
+    required: true
   registry:
     required: true
     default: ghcr.io
@@ -23,25 +18,25 @@ inputs:
 runs:
   using: "composite"
   steps:
-    -
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.artifact_name }}
-        path: /tmp/
-    -
-      shell: bash
-      run: docker load -i /tmp/${{ inputs.artifact_image_file }}
-    -
+    - 
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
-    -
+    - 
       shell: bash
-      run: |
-        docker push ${{ inputs.image }}
-    -
+      run: >
+        docker manifest create
+        ${{ inputs.image }}
+        ${{ inputs.image }}-amd64
+        ${{ inputs.image }}-arm64
+    - 
+      shell: bash
+      run: >
+        docker manifest push
+        ${{ inputs.image }}
+    - 
       uses: actions/github-script@v5
       with:
         script: |
