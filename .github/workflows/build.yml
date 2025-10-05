@@ -63,8 +63,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         images="$(<images.json)"
-        images="$(<<< $images ./.scripts/images-with-dep-shas)"
-        images="$(<<< $images ./.scripts/images-with-dep-ids)"
+        images="$(<<< $images ./.scripts/images-with-extras)"
         <<< $images jq
         echo "images=$images" >> $GITHUB_OUTPUT
         echo "images=$images" >> $GITHUB_ENV

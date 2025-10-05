@@ -3,11 +3,18 @@
 import json
 import sys
 import subprocess
+import hashlib
 
 # Accepts as stdin a JSON object in the format of images.json.
-# Resolves any 'ref' values in the JSON to a commit sha.
-# Outputs the original JSON modified with the shas.
-# Usage: < images.json ./.scripts/images-with-dep-shas
+# And adds some calculatble elements used during the build.
+#
+# 1. Resolves any 'ref' values in the JSON to a revision sha. 
+# 2. Hashes the entire dep details and injects the hash as an id into the deps
+#    details. The id can be used to uniquely identify a dep configuration.
+#
+# Outputs the original JSON modified.
+#
+# Usage: < images.json ./.scripts/images-with-extras
 
 images = json.load(sys.stdin)
 
@@ -19,7 +26,7 @@ for image in images:
         name = dep["name"]
         repo = dep["repo"]
         ref = dep["ref"]
-        print(f"{tag} {name} {repo} {ref} ...", end=" ", flush=True, file=sys.stderr)
+        print(f"{tag} {name} {repo} {ref} ...", file=sys.stderr)
         key = (name, repo, ref)
         if key in cache:
             sha = cache[key]
@@ -31,7 +38,13 @@ for image in images:
                 check=True
             ).stdout.strip()
             cache[key] = sha
-        print(sha, file=sys.stderr)
+        print(f" • revision sha = {sha}", file=sys.stderr)
         dep["sha"] = sha
+
+        dep_str = json.dumps(dep, separators=(',', ':'))
+        id = hashlib.sha256(dep_str.encode()).hexdigest()
+        dep["id"] = id
+        dep["id_short"] = id[:5]
+        print(f" • id = {id}", file=sys.stderr)
 
 print(json.dumps(images, separators=(',', ':')))
