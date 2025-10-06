@@ -62,7 +62,7 @@ jobs:
     - name: Images
       run: |
         images="$(<images.json)"
-        images="$(<<< $images jq --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
+        images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
         <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
