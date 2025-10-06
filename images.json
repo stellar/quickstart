@@ -1,6 +1,7 @@
 [
   {
     "tag": "latest",
+    "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 23
     },
@@ -18,6 +19,7 @@
   },
   {
     "tag": "testing",
+    "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 23
     },
@@ -36,6 +38,7 @@
   },
   {
     "tag": "future",
+    "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 23
     },
@@ -51,6 +54,7 @@
   },
   {
     "tag": "nightly",
+    "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 23
     },

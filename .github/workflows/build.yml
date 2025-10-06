@@ -5,6 +5,8 @@ on:
     branches:
     - main
   pull_request:
+  schedule:
+    - cron: '0 0 * * *'
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -58,11 +60,16 @@ jobs:
         echo "tag-prefix=${pr_prefix}v${count}-" | tee -a $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
     - name: Images
+      run: |
+        images="$(<images.json)"
+        images="$(<<< $images jq --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
+        <<< $images jq
+        echo "images=$images" >> $GITHUB_ENV
+    - name: Images with Extras
       id: images
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        images="$(<images.json)"
         images="$(<<< $images ./.scripts/images-with-extras)"
         <<< $images jq
         echo "images=$images" >> $GITHUB_OUTPUT
