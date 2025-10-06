@@ -31,7 +31,7 @@ jobs:
 
   complete:
     if: always()
-    name: 10 complete
+    name: complete
     needs: [setup, load, build, test, push, push-manifest, action]
     runs-on: ubuntu-latest
     steps:
