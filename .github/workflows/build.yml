@@ -330,7 +330,7 @@ jobs:
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ${{ github.event_name == 'workflow_call' && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
+        arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
         network: ["local"]
         enable: ["core", "rpc", "core,rpc,horizon"]
         options: [""]
