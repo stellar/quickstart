@@ -72,20 +72,20 @@ jobs:
     - name: Tag Prefix
       id: tag-prefix
       run: |
-        pr_prefix="${{ github.event_name == 'workflow_call' && 'custom-' || (github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '') }}"
+        pr_prefix="${{ inputs.image_json && 'custom-' || (github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '') }}"
         commit_count="$(git rev-list HEAD --count --first-parent)"
         build_number="${{ github.run_number }}.${{ github.run_attempt }}"
         echo "tag-prefix=${pr_prefix}v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
     - name: Images
-      if: github.event_name != 'workflow_call'
+      if: '!inputs.image_json'
       run: |
         images="$(<images.json)"
         images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
         <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
     - name: Images (for workflow_call)
-      if: github.event_name == 'workflow_call'
+      if: inputs.image_json
       run: |
         images="${{ inputs.image_json }}"
         images="$(<<< $images jq -c '[ . ]')"
@@ -118,7 +118,7 @@ jobs:
     strategy:
       matrix:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ${{ github.event_name == 'workflow_call' && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
+        arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
       fail-fast: false
     name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ubuntu-latest
