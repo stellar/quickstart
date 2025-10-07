@@ -3,6 +3,10 @@
 import json
 import sys
 
+# Accepts as stdin a JSON object in the format of images.json. Outputs an array
+# of all the additional test cases defined in the images merged together.
+# Usage: < images.json ./.scripts/images-additional-tests
+
 images = json.load(sys.stdin)
 tests = []
 for image in images:

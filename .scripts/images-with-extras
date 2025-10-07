@@ -44,7 +44,6 @@ for image in images:
         dep_str = json.dumps(dep, separators=(',', ':'))
         id = hashlib.sha256(dep_str.encode()).hexdigest()
         dep["id"] = id
-        dep["id_short"] = id[:5]
         print(f" • id = {id}", file=sys.stderr)
 
 print(json.dumps(images, separators=(',', ':')))
