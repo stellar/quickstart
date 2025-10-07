@@ -96,6 +96,7 @@ jobs:
         echo 4 ${{ env.sha }}
         echo 5 ${{ github.action_repository }}
         echo 6 ${{ github.action_ref }}
+        echo 7 ${{ toJSON(github.event) }}
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0 # Get all history for the sha count below.
