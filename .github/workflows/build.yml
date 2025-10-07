@@ -56,8 +56,9 @@ jobs:
       id: tag-prefix
       run: |
         pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '' }}"
-        count="$(git rev-list HEAD --count --first-parent)"
-        echo "tag-prefix=${pr_prefix}v${count}-" | tee -a $GITHUB_OUTPUT
+        commit_count="$(git rev-list HEAD --count --first-parent)"
+        build_number="${{ github.run_number }}.${{ github.run_attempt }}"
+        echo "tag-prefix=${pr_prefix}-v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
     - name: Images
       run: |
