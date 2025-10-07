@@ -42,7 +42,7 @@ RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
 
-ADD image.json /image.json
+ADD .image.json /image.json
 
 RUN ["rm", "-fr", "/etc/supervisor"]
 RUN ["ln", "-sT", "/opt/stellar/supervisor/etc", "/etc/supervisor"]

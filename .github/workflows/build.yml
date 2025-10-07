@@ -245,7 +245,7 @@ jobs:
         echo "$(<<< $image_json jq -r '.deps[] | "\(.name)=\(.id)"')" | tee -a $GITHUB_OUTPUT
     - name: Write Image Config
       run: |
-        echo "$image_json" > image.json
+        echo "$image_json" > .image.json
     - name: Download Image XDR
       uses: actions/download-artifact@v4
       with:
