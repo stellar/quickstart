@@ -39,9 +39,11 @@ jobs:
     - run: >
         docker run
         --platform linux/amd64
-        -i
+        -d
         -p
         "8000:8000"
         --name stellar
         quickstart
         --local
+    - run: sleep 10
+    - run: curl http://localhost:8000
