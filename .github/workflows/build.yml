@@ -264,7 +264,7 @@ jobs:
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Write Image Config
       run: |
-        echo "[${{ toJSON(matrix.image) }}]" > image.json
+        echo "${{ toJSON(matrix.image) }}" > image.json
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     # Docker buildx cannot be used to build the dev quickstart image because
