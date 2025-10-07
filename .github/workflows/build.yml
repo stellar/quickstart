@@ -10,9 +10,9 @@ on:
   workflow_call:
     inputs:
       sha:
-        description: "Quickstart sha/ref to build (use main for latest)"
+        description: "Quickstart sha to build"
         type: "string"
-        default: "main"
+        required: true
       image_json:
         description: "A custom image.json (a single image from the same format as images.json)"
         type: "string"
@@ -35,7 +35,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  sha: ${{ github.event.pull_request.head.sha || github.sha }}
+  sha: ${{ inputs.sha || github.event.pull_request.head.sha || github.sha }}
   image_repo: ${{ format('{0}/{1}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository) }}
   # Cache ID is a value inserted into cache keys. Whenever changing the build
   # in a way that needs to use entirely new fresh builds, increment the number
