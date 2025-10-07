@@ -86,9 +86,10 @@ jobs:
         echo "images=$images" >> $GITHUB_ENV
     - name: Images (for workflow_call)
       if: inputs.image_json
+      env:
+        image: ${{ inputs.image_json }}
       run: |
-        images="${{ inputs.image_json }}"
-        images="$(<<< $images jq -c '[ . ]')"
+        images="$(<<< $image jq -c '[ . ]')"
         <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
