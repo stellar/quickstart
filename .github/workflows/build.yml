@@ -24,7 +24,6 @@ env:
   # by one so that all the keys become new.
   cache_id: 6
   artifact_retention_days_for_image: 7
-  artifact_retention_days_for_tombstone: 7
   artifact_retention_days_for_logs: 60
 
 jobs:
@@ -113,14 +112,14 @@ jobs:
       with:
         name: ${{ env.json_filename }}
         path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_tombstone }}
+        retention-days: ${{ env.artifact_retention_days_for_image }}
     - name: Find Image in Cache
       id: cache
       uses: actions/cache/restore@v3
       with:
         key: ${{ env.cache_id }}-${{ env.image_filename }}
         path: /tmp/${{ env.image_filename }}
-    - name: Upload Image
+    - name: Upload Image to Artifacts
       if: steps.cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
@@ -133,7 +132,7 @@ jobs:
       with:
         name: ${{ env.missing_filename }}
         path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_tombstone }}
+        retention-days: ${{ env.artifact_retention_days_for_image }}
 
   prepare:
     needs: [load]
@@ -292,12 +291,12 @@ jobs:
         .
     - name: Save Quickstart Image
       run: docker save ${{ env.image_repo }}:${{ steps.tag.outputs.tag }} -o /tmp/image
-    - name: Upload Quickstart Image
+    - name: Upload Quickstart Image to Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
         path: /tmp/image
-        retention-days: ${{ env.ARTIFACT_RETENTION_DAYS_FOR_IMAGE }}
+        retention-days: ${{ env.artifact_retention_days_for_image }}
 
   test:
     needs: [setup, build]
