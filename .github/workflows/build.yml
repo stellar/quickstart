@@ -24,7 +24,7 @@ on:
     outputs:
       image_artifact:
         description: "Name of the artifact containing the image built"
-        type: "string"
+        value: ${{ jobs.build.outputs.artifact }}
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -118,7 +118,7 @@ jobs:
     strategy:
       matrix:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ["amd64", "arm64"]
+        arch: ${{ github.event_name == 'workflow_call' && ["amd64"] || ["amd64", "arm64"] }}
       fail-fast: false
     name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ubuntu-latest
@@ -227,10 +227,12 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJSON(needs.setup.outputs.images) }}
-        arch: ["amd64", "arm64"]
+        arch: ${{ github.event_name == 'workflow_call' && ["amd64"] || ["amd64", "arm64"] }}
       fail-fast: false
     name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    outputs:
+      artifact: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
     env:
       image_json: ${{ toJSON(matrix.image) }}
     steps:
