@@ -90,7 +90,7 @@ jobs:
       additional-tests: ${{ steps.tests.outputs.additional-tests }}
     steps:
     - run: |
-        echo 1 ${{ github.workflow_repository }}
+        echo 1 ${{ github.workflow_ref }}
         echo 2 ${{ github.repository }}
         echo 3 ${{ github.workflow_sha }}
         echo 4 ${{ env.sha }}
