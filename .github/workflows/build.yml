@@ -311,7 +311,7 @@ jobs:
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
-    name: 6 test (${{ matrix.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.core && 'core' || '' }} ${{ matrix.rpc && 'rpc' || '' }} ${{ matrix.horizon && 'horizon' || '' }} ${{ matrix.options || '' }})
+    name: 6 test (${{ matrix.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     steps:
     - name: Free up disk space
