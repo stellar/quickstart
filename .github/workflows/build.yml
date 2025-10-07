@@ -332,7 +332,7 @@ jobs:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
         arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
         network: ["local"]
-        enable: ["core", "rpc", "core,rpc,horizon"]
+        enable: ${{ inputs.image_json && fromJSON('["core,rpc,horizon"]') || fromJSON('["core","rpc","core,rpc,horizon"]') }}
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
