@@ -46,7 +46,7 @@ runs:
     -
       shell: bash
       run: |
-        docker push ${{ inputs.image }}
+        docker push ${{ inputs.name }}
     -
       uses: actions/github-script@v5
       with:
@@ -56,6 +56,6 @@ runs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: `${{ inputs.image }}`,
+            context: `${{ inputs.name }}`,
             description: 'Available',
           });
