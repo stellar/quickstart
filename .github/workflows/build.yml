@@ -215,6 +215,9 @@ jobs:
       id: ids
       run:
         echo "$(<<< $image_json jq -r '.deps[] | "\(.name)=\(.id)"')" | tee -a $GITHUB_OUTPUT
+    - name: Write Image Config
+      run: |
+        echo "$image_json" > image.json
     - name: Download Image XDR
       uses: actions/download-artifact@v4
       with:
@@ -262,9 +265,6 @@ jobs:
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
-    - name: Write Image Config
-      run: |
-        echo "${{ toJSON(matrix.image) }}" > image.json
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     # Docker buildx cannot be used to build the dev quickstart image because
