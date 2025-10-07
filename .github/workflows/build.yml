@@ -325,7 +325,7 @@ jobs:
 
   test:
     needs: [setup, build]
-    if: always() && !failure() && !cancelled() && inputs.test !== false
+    if: always() && !failure() && !cancelled() && inputs.test != false
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
