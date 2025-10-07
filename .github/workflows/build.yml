@@ -471,8 +471,8 @@ jobs:
       fail-fast: false
     name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
-      packages: ${{ inputs.image_json && 'read' || 'write' }}
-      statuses: ${{ inputs.image_json && 'none' || 'write' }}
+      packages: read
+      statuses: none
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -502,8 +502,8 @@ jobs:
       fail-fast: false
     name: 8 push manifest (${{ matrix.tag }})
     permissions:
-      packages: ${{ inputs.image_json && 'read' || 'write' }}
-      statuses: ${{ inputs.image_json && 'none' || 'write' }}
+      packages: read
+      statuses: none
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
