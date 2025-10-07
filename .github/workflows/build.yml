@@ -1,5 +1,29 @@
 name: Build
 
+# This workflow builds multiple quickstart images as defined in the images.json
+# file.
+#
+# The dependencies (xdr, core, rpc, horizon, friendbot, lab) are first
+# deduplicated across all images, and then built. Dependencies are cached and
+# so only rebuilt when needed. Dependencies are defined by a tag or branch, but
+# when building those git refs are resolved to a sha to ensure stability of the
+# sha throughout the full build process. For all dependencies and the final
+# image, amd64 and arm64 variants are built and the final image is a
+# multiplatform image.
+#
+# The images defined in the images.json file can specify what events the images
+# are built on. Most of the images will be built on push and pull requests, but
+# this workflow also runs on a schedule an so images that need updating on a
+# schedule, such as a nightly-like image, can specify running additionally or
+# only on the schedule.
+#
+# This workflow is also triggerable via a workflow call from another workflow.
+# When used that way, the image only builds a single amd64 image and it is not
+# pushed. The workflow returns an output which is an artifact name that can be
+# downloaded and loaded into docker for use in another job. The workflow can be
+# improved to support multiple images in the workflow call case, it just
+# requires more work to do so.
+
 on:
   push:
     branches:

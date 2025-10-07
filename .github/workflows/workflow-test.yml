@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: ${{ needs.build-custom.outputs.image_artifact }}
+        name: ${{ needs.build-custom.outputs.image_artifact
         path: /tmp/
     - run: docker load -i /tmp/image
     - run: >
