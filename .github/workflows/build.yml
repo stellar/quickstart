@@ -325,7 +325,7 @@ jobs:
 
   test:
     needs: [setup, build]
-    if: always() && !failure() && !cancelled() && inputs.test != false
+    if: always() && !failure() && !cancelled() && (github.event_name != 'workflow_call' || inputs.test == true)
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
