@@ -80,6 +80,7 @@ jobs:
     name: 1 setup
     runs-on: ubuntu-latest
     outputs:
+      sha: ${{ steps.sha.outputs.sha }}
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
@@ -92,8 +93,9 @@ jobs:
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
     - name: Sha
+      id: sha
       run: |
-        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_ENV
+        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -220,7 +222,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ env.sha }}
+        ref: ${{ needs.setup.outputs.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Image
       env:
@@ -266,7 +268,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ env.sha }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Collect Dep IDs
       id: ids
       run:
@@ -332,8 +334,8 @@ jobs:
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
         -t quickstart
-        --label org.opencontainers.image.revision="${{ env.sha }}"
-        --build-arg REVISION="${{ env.sha }}"
+        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
+        --build-arg REVISION="${{ needs.setup.outputs.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
         --build-arg XDR_IMAGE_REF=stellar-xdr:${{ matrix.arch }}
         --build-arg CORE_IMAGE_REF=stellar-core:${{ matrix.arch }}
@@ -377,7 +379,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ env.sha }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v4
       with:
@@ -482,13 +484,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ env.sha }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push
       with:
-        head_sha: ${{ env.sha }}
+        head_sha: ${{ needs.setup.outputs.sha }}
         artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
         artifact_image_file: image
         image: quickstart
@@ -514,7 +516,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ env.sha }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: |
@@ -522,7 +524,7 @@ jobs:
         echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push-manifest
       with:
-        head_sha: ${{ env.sha }}
+        head_sha: ${{ needs.setup.outputs.sha }}
         image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
         images: >
           ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
@@ -532,7 +534,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
     - uses: ./.github/actions/push-alias
       with:
-        head_sha: ${{ env.sha }}
+        head_sha: ${{ needs.setup.outputs.sha }}
         image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
         image-alias: ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
