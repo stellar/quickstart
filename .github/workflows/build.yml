@@ -15,9 +15,11 @@ on:
         default: "main"
       image_json:
         description: "A custom image.json (a single image from the same format as images.json)"
+        type: "string"
         required: true
       test:
         description: "Whether the general image tests should run"
+        type: "boolean"
         default: false
     outputs:
       image_artifact:
