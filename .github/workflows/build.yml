@@ -31,10 +31,10 @@ on:
         description: "Quickstart repo where quickstart is hosted"
         type: "string"
         default: "stellar/quickstart"
-      sha:
-        description: "Quickstart sha to build"
+      ref:
+        description: "Quickstart ref to build (sha, branch, tag)"
         type: "string"
-        required: true
+        default: "main"
       image_json:
         description: "A custom image.json (a single image from the same format as images.json)"
         type: "string"
@@ -57,8 +57,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  sha: ${{ inputs.sha || github.event.pull_request.head.sha || github.sha }}
-  image_repo: ${{ format('{0}/{1}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', github.repository) }}
+  image_repo: ${{ format('{0}/{1}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', inputs.repo) }}
   # Cache ID is a value inserted into cache keys. Whenever changing the build
   # in a way that needs to use entirely new fresh builds, increment the number
   # by one so that all the keys become new.
@@ -90,8 +89,11 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0 # Get all history for the sha count below.
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ inputs.ref }}
+    - name: Sha
+      run: |
+        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_ENV
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -217,8 +219,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ env.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Image
       env:
@@ -263,8 +265,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ env.sha }}
     - name: Collect Dep IDs
       id: ids
       run:
@@ -374,8 +376,8 @@ jobs:
         df -h
     - uses: actions/checkout@v2
       with:
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ env.sha }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v4
       with:
@@ -479,8 +481,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ env.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
@@ -511,8 +513,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ inputs.repo || github.repository }}
-        ref: ${{ inputs.sha || env.sha }}
+        repository: ${{ inputs.repo }}
+        ref: ${{ env.sha }}
     - name: Create Tag
       id: tag
       run: |
