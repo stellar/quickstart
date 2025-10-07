@@ -89,10 +89,16 @@ jobs:
       deps: ${{ steps.deps.outputs.deps }}
       additional-tests: ${{ steps.tests.outputs.additional-tests }}
     steps:
+    - run: |
+        echo 1 ${{ github.workflow_repository }}
+        echo 2 ${{ github.repository }}
+        echo 3 ${{ github.workflow_sha }}
+        echo 4 ${{ env.sha }}
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0 # Get all history for the sha count below.
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -218,7 +224,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Image
       env:
@@ -263,7 +270,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - name: Collect Dep IDs
       id: ids
       run:
@@ -373,7 +381,8 @@ jobs:
         df -h
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v4
       with:
@@ -477,7 +486,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
@@ -508,7 +518,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{ env.sha }}
+        repository: ${{ github.workflow_repository || github.repository }}
+        ref: ${{ github.workflow_sha || env.sha }}
     - name: Create Tag
       id: tag
       run: |
