@@ -357,28 +357,28 @@ jobs:
     - name: Sleep until supervisor is up
       run: sleep 10
     - name: Run core test
-      if: ${{ matrix.core }}
+      if: ${{ contains(matrix.enable, 'core') }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
         go run tests/test_core.go
         curl http://localhost:11626/info
     - name: Run horizon up test
-      if: ${{ matrix.horizon }}
+      if: ${{ contains(matrix.enable, 'horizon') }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run tests/test_horizon_up.go
         curl http://localhost:8000
     - name: Run horizon core up test
-      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run tests/test_horizon_core_up.go
         curl http://localhost:8000
     - name: Run horizon ingesting test
-      if: ${{ matrix.horizon && matrix.network != 'pubnet' }}
+      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
@@ -386,20 +386,20 @@ jobs:
         go run tests/test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ matrix.horizon && matrix.network == 'local' }}
+      if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run tests/test_friendbot.go
     - name: Run stellar rpc up test
-      if: ${{ matrix.rpc }}
+      if: ${{ contains(matrix.enable, 'rpc') }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
         go run tests/test_stellar_rpc_up.go
     - name: Run stellar rpc healthy test
-      if: ${{ matrix.rpc && matrix.network != 'pubnet' }}
+      if: ${{ contains(matrix.enable, 'rpc') && matrix.network != 'pubnet' }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
