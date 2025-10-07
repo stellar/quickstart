@@ -470,7 +470,9 @@ jobs:
       with:
         head_sha: ${{ env.sha }}
         image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        images: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64 ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
+        images: >
+          ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
+          ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
