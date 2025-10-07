@@ -26,3 +26,22 @@ jobs:
           ],
           "additional-tests": []
         }
+
+  use-custom:
+    needs: build-custom
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build-custom.outputs.image_artifact }}
+        path: /tmp/
+    - run: docker load -i /tmp/image
+    - run: >
+        docker run
+        --platform linux/amd64
+        -i
+        -p
+        "8000:8000"
+        --name stellar
+        quickstart
+        --local
