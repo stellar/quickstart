@@ -33,8 +33,10 @@ COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=core /stellar-core /usr/bin/stellar-core
 COPY --from=horizon /horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
+COPY --from=friendbot /friendbot.json /usr/local/bin/friendbot.json
 COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
+COPY --from=lab /lab.json /opt/stellar/lab.json
 COPY --from=lab /node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;

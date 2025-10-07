@@ -9,7 +9,9 @@ RUN git checkout ${REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${REF}-(built-from-source)"
 RUN go install github.com/stellar/go/services/friendbot
+RUN go version -json -m /go/bin/friendbot > /go/bin/friendbot.json
 
 FROM scratch AS artifacts
 
 COPY --from=builder /go/bin/friendbot /friendbot
+COPY --from=builder /go/bin/friendbot.json /friendbot.json
