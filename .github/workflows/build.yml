@@ -307,9 +307,7 @@ jobs:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
         arch: ["amd64", "arm64"]
         network: ["local"]
-        core: [true, false]
-        horizon: [true, false]
-        rpc: [true, false]
+        enable: ["core", "rpc", "core,rpc,horizon"]
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
@@ -350,7 +348,7 @@ jobs:
         --name stellar
         ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
         --${{ matrix.network }}
-        --enable ${{ matrix.core && 'core' }},${{ matrix.rpc && 'rpc' }},${{ matrix.horizon && 'horizon' }}
+        --enable ${{ matrix.enable }}
         ${{ matrix.options }}
     - name: Set up Go
       uses: actions/setup-go@v2

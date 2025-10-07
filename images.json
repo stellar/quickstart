@@ -14,7 +14,7 @@
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "additional-tests": [
-      { "arch": "amd64", "network": "pubnet", "core": true, "horizon": true, "rpc": true }
+      { "arch": "amd64", "network": "pubnet", "enable": ["core,rpc,horizon"] }
     ]
   },
   {
@@ -32,8 +32,8 @@
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "additional-tests": [
-      { "arch": "amd64", "network": "testnet", "core": true, "horizon": true, "rpc": true },
-      { "arch": "amd64", "network": "pubnet", "core": true, "horizon": true, "rpc": true }
+      { "arch": "amd64", "network": "testnet", "enable": ["core,rpc,horizon"] },
+      { "arch": "amd64", "network": "pubnet", "enable": ["core,rpc,horizon"] }
     ]
   },
   {
