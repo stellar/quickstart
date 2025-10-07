@@ -6,9 +6,12 @@ inputs:
     required: true
   artifact_image_file:
     required: true
+  image:
+    required: true
+    default: quickstart
   arch:
     required: true
-  image:
+  name:
     required: true
     default: ghcr.io/${{ github.repository }}:latest
   registry:
@@ -31,6 +34,9 @@ runs:
     -
       shell: bash
       run: docker load -i /tmp/${{ inputs.artifact_image_file }}
+    -
+      shell: bash
+      run: docker tag ${{ inputs.image }} ${{ inputs.name }}
     -
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:

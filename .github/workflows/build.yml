@@ -286,9 +286,6 @@ jobs:
           < "${image/%.tar/.json}" jq
           docker load -i $image
         done
-    - name: Create Tag
-      id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.image.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     # Docker buildx cannot be used to build the dev quickstart image because
@@ -302,7 +299,7 @@ jobs:
         docker build
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
-        -t ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        -t quickstart
         --label org.opencontainers.image.revision="${{ env.sha }}"
         --build-arg REVISION="${{ env.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
@@ -314,7 +311,7 @@ jobs:
         --build-arg LAB_IMAGE_REF=stellar-lab:${{ matrix.arch }}
         .
     - name: Save Quickstart Image
-      run: docker save ${{ env.image_repo }}:${{ steps.tag.outputs.tag }} -o /tmp/image
+      run: docker save quickstart -o /tmp/image
     - name: Upload Quickstart Image to Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -355,9 +352,6 @@ jobs:
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
-    - name: Create Tag
-      id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Prepare Logs Directory
       run: mkdir -p logs
     - name: Run Quickstart Image
@@ -369,7 +363,7 @@ jobs:
         "8000:8000"
         -p "11626:11626"
         --name stellar
-        ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        quickstart
         --${{ matrix.network }}
         --enable ${{ matrix.enable }}
         ${{ matrix.options }}
@@ -463,8 +457,9 @@ jobs:
         head_sha: ${{ env.sha }}
         artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
         artifact_image_file: image
+        image: quickstart
         arch: ${{ matrix.arch }}
-        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
+        name: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
         registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
         username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
         password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
