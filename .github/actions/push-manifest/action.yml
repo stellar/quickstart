@@ -19,7 +19,7 @@ runs:
   using: "composite"
   steps:
     - 
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.username }}
