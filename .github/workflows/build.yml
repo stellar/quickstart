@@ -118,7 +118,7 @@ jobs:
     strategy:
       matrix:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ${{ github.event_name == 'workflow_call' && ["amd64"] || ["amd64", "arm64"] }}
+        arch: ${{ github.event_name == 'workflow_call' && ['amd64'] || ['amd64', 'arm64'] }}
       fail-fast: false
     name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ubuntu-latest
@@ -227,7 +227,7 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJSON(needs.setup.outputs.images) }}
-        arch: ${{ github.event_name == 'workflow_call' && ["amd64"] || ["amd64", "arm64"] }}
+        arch: ${{ github.event_name == 'workflow_call' && ['amd64'] || ['amd64', 'arm64'] }}
       fail-fast: false
     name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
@@ -329,7 +329,7 @@ jobs:
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ["amd64", "arm64"]
+        arch: ${{ github.event_name == 'workflow_call' && ['amd64'] || ['amd64', 'arm64'] }}
         network: ["local"]
         enable: ["core", "rpc", "core,rpc,horizon"]
         options: [""]
