@@ -7,6 +7,22 @@ on:
   pull_request:
   schedule:
     - cron: '0 0 * * *'
+  workflow_call:
+    inputs:
+      sha:
+        description: "Quickstart sha/ref to build (use main for latest)"
+        type: "string"
+        default: "main"
+      image_json:
+        description: "A custom image.json (a single image from the same format as images.json)"
+        required: true
+      test:
+        description: "Whether the general image tests should run"
+        default: false
+    outputs:
+      image_artifact:
+        description: "Name of the artifact containing the image built"
+        type: "string"
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -54,15 +70,23 @@ jobs:
     - name: Tag Prefix
       id: tag-prefix
       run: |
-        pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '' }}"
+        pr_prefix="${{ github.event_name == 'workflow_call' && 'custom-' || (github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '') }}"
         commit_count="$(git rev-list HEAD --count --first-parent)"
         build_number="${{ github.run_number }}.${{ github.run_attempt }}"
         echo "tag-prefix=${pr_prefix}v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
     - name: Images
+      if: github.event_name != 'workflow_call'
       run: |
         images="$(<images.json)"
         images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
+        <<< $images jq
+        echo "images=$images" >> $GITHUB_ENV
+    - name: Images (for workflow_call)
+      if: github.event_name == 'workflow_call'
+      run: |
+        images="${{ inputs.image_json }}"
+        images="$(<<< $images jq -c '[ . ]')"
         <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
@@ -300,7 +324,7 @@ jobs:
 
   test:
     needs: [setup, build]
-    if: always() && !failure() && !cancelled()
+    if: always() && !failure() && !cancelled() && inputs.test !== false
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
