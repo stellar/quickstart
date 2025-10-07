@@ -42,6 +42,8 @@ RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password
 RUN ["mkdir", "-p", "/opt/stellar"]
 RUN ["touch", "/opt/stellar/.docker-ephemeral"]
 
+ADD image.json /opt/stellar/image.json
+
 RUN ["rm", "-fr", "/etc/supervisor"]
 RUN ["ln", "-sT", "/opt/stellar/supervisor/etc", "/etc/supervisor"]
 
@@ -56,6 +58,7 @@ ADD futurenet /opt/stellar-default/futurenet
 
 ADD start /
 RUN ["chmod", "+x", "start"]
+
 
 ARG PROTOCOL_VERSION_DEFAULT
 RUN test -n "$PROTOCOL_VERSION_DEFAULT" || (echo "Image build arg PROTOCOL_VERSION_DEFAULT required and not set" && false)
