@@ -25,14 +25,12 @@ name: Build
 # requires more work to do so.
 
 on:
-  push:
-    branches:
-    - main
-  pull_request:
-  schedule:
-    - cron: '0 0 * * *'
   workflow_call:
     inputs:
+      repo:
+        description: "Quickstart repo where quickstart is hosted"
+        type: "string"
+        default: "stellar/quickstart"
       sha:
         description: "Quickstart sha to build"
         type: "string"
@@ -42,7 +40,7 @@ on:
         type: "string"
         required: true
       test:
-        description: "Whether the general image tests should run"
+        description: "Whether the image tests should run"
         type: "boolean"
         default: false
     outputs:
@@ -89,19 +87,11 @@ jobs:
       deps: ${{ steps.deps.outputs.deps }}
       additional-tests: ${{ steps.tests.outputs.additional-tests }}
     steps:
-    - run: |
-        echo 1 ${{ github.workflow_ref }}
-        echo 2 ${{ github.repository }}
-        echo 3 ${{ github.workflow_sha }}
-        echo 4 ${{ env.sha }}
-        echo 5 ${{ github.action_repository }}
-        echo 6 ${{ github.action_ref }}
-        echo 7 "${{ toJSON(github.event) }}"
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0 # Get all history for the sha count below.
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -227,8 +217,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
     - name: Build Image
       env:
@@ -273,8 +263,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - name: Collect Dep IDs
       id: ids
       run:
@@ -384,8 +374,8 @@ jobs:
         df -h
     - uses: actions/checkout@v2
       with:
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - name: Download Quickstart Image
       uses: actions/download-artifact@v4
       with:
@@ -489,8 +479,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
@@ -521,8 +511,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: ${{ github.workflow_repository || github.repository }}
-        ref: ${{ github.workflow_sha || env.sha }}
+        repository: ${{ inputs.repo || github.repository }}
+        ref: ${{ inputs.sha || env.sha }}
     - name: Create Tag
       id: tag
       run: |
