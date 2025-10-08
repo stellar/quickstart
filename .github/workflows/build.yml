@@ -40,9 +40,9 @@ on:
         type: "string"
         required: true
       archs:
-        description: "Architectures to build for as an array (amd64, arm64)"
+        description: 'Architectures to build for as an array (e.g. ["amd64", "arm64"])'
         type: "string"
-        default: '["amd64"]'
+        required: true
       tag-prefix:
         description: "Tag prefix for the image when pushed"
         type: "string"
@@ -474,6 +474,10 @@ jobs:
       statuses: none
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
@@ -502,6 +506,10 @@ jobs:
       statuses: none
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
+        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: |
