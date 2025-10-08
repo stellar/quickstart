@@ -73,8 +73,8 @@ jobs:
       fail-fast: false
     name: 1 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
-      packages: read
-      statuses: none
+      packages: write
+      statuses: write
     runs-on: ubuntu-latest
     steps:
     - name: Create Tag
@@ -121,8 +121,8 @@ jobs:
       fail-fast: false
     name: 2 push manifest (${{ matrix.tag }})
     permissions:
-      packages: read
-      statuses: none
+      packages: write
+      statuses: write
     runs-on: ubuntu-latest
     steps:
     - name: Create Tag
@@ -170,8 +170,8 @@ jobs:
       fail-fast: false
     name: 3 push alias (${{ matrix.tag }})
     permissions:
-      packages: read
-      statuses: none
+      packages: write
+      statuses: write
     runs-on: ubuntu-latest
     steps:
     - name: Create Tag
