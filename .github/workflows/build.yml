@@ -35,18 +35,38 @@ on:
         description: "Quickstart ref to build (sha, branch, tag)"
         type: "string"
         default: "main"
-      image_json:
-        description: "A custom image.json (a single image from the same format as images.json)"
+      images:
+        description: "A custom image.json (a single image from the same format as images.json), if not provided the full images.json is run"
         type: "string"
         required: true
+      archs:
+        description: "Architectures to build for as an array (amd64, arm64)"
+        type: "string"
+        default: '["amd64"]'
       test:
         description: "Whether the image tests should run"
         type: "boolean"
+        default: true
+      push:
+        description: "Whether the image should be pushed to the registry"
+        type: "boolean"
         default: false
-    outputs:
-      image_artifact:
-        description: "Name of the artifact containing the image built"
-        value: ${{ jobs.build.outputs.artifact }}
+      cache_id:
+        description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
+        type: "string"
+        default: 6
+      registry:
+        description: "Registry to push to"
+        type: "string"
+      registry_repo:
+        description: "Repo at the registry to push to"
+        type: "string"
+      registry_username:
+        description: "Username to auth with the registry"
+        type: "string"
+      registry_password:
+        description: "Password to auth with the registry"
+        type: "string"
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -57,11 +77,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  image_repo: ${{ format('{0}/{1}', secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io', inputs.repo) }}
-  # Cache ID is a value inserted into cache keys. Whenever changing the build
-  # in a way that needs to use entirely new fresh builds, increment the number
-  # by one so that all the keys become new.
-  cache_id: 6
   artifact_retention_days_for_image: 7
   artifact_retention_days_for_logs: 60
 
@@ -81,48 +96,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
-      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
-      tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
       deps: ${{ steps.deps.outputs.deps }}
       additional-tests: ${{ steps.tests.outputs.additional-tests }}
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0 # Get all history for the sha count below.
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
     - name: Sha
       id: sha
       run: |
         echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
-    - name: Tag Prefix
-      id: tag-prefix
-      run: |
-        pr_prefix="${{ inputs.image_json && 'custom-' || (github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '') }}"
-        commit_count="$(git rev-list HEAD --count --first-parent)"
-        build_number="${{ github.run_number }}.${{ github.run_attempt }}"
-        echo "tag-prefix=${pr_prefix}v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
-        echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
-    - name: Images
-      if: '!inputs.image_json'
-      run: |
-        images="$(<images.json)"
-        images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
-        <<< $images jq
-        echo "images=$images" >> $GITHUB_ENV
-    - name: Images (for workflow_call)
-      if: inputs.image_json
-      env:
-        image: ${{ inputs.image_json }}
-      run: |
-        images="$(<<< $image jq -c '[ . ]')"
-        <<< $images jq
-        echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
       id: images
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        images: ${{ inputs.images }}
       run: |
         images="$(<<< $images ./.scripts/images-with-extras)"
         <<< $images jq
@@ -146,7 +136,7 @@ jobs:
     strategy:
       matrix:
         dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
+        arch: ${{ fromJSON(inputs.archs) }}
       fail-fast: false
     name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
     runs-on: ubuntu-latest
@@ -171,7 +161,7 @@ jobs:
       id: cache
       uses: actions/cache/restore@v3
       with:
-        key: ${{ env.cache_id }}-${{ env.image_filename }}
+        key: ${{ inputs.cache_id }}-${{ env.image_filename }}
         path: /tmp/${{ env.image_filename }}
     - name: Upload Image to Artifacts
       if: steps.cache.outputs.cache-hit == 'true'
@@ -241,7 +231,7 @@ jobs:
       uses: actions/cache/save@v3
       id: cache
       with:
-        key: ${{ env.cache_id }}-${{ env.image_filename }}
+        key: ${{ inputs.cache_id }}-${{ env.image_filename }}
         path: /tmp/${{ env.image_filename }}
     - name: Upload Image to Artifacts
       uses: actions/upload-artifact@v4
@@ -256,12 +246,10 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJSON(needs.setup.outputs.images) }}
-        arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
+        arch: ${{ fromJSON(inputs.archs) }}
       fail-fast: false
     name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    outputs:
-      artifact: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
     env:
       image_json: ${{ toJSON(matrix.image) }}
     steps:
@@ -359,7 +347,7 @@ jobs:
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ${{ inputs.image_json && fromJSON('["amd64"]') || fromJSON('["amd64", "arm64"]') }}
+        arch: ${{ fromJSON(inputs.archs) }}
         network: ["local"]
         enable: ${{ inputs.image_json && fromJSON('["core,rpc,horizon"]') || fromJSON('["core","rpc","core,rpc,horizon"]') }}
         options: [""]
@@ -469,11 +457,11 @@ jobs:
 
   push:
     needs: [setup, build, test]
-    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+    if: always() && !failure() && !cancelled() && inputs.push
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ["amd64", "arm64"]
+        arch: ${{ fromJSON(inputs.archs) }}
       fail-fast: false
     name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
@@ -481,28 +469,24 @@ jobs:
       statuses: none
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push
       with:
-        head_sha: ${{ needs.setup.outputs.sha }}
+        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
         artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
         artifact_image_file: image
         image: quickstart
         arch: ${{ matrix.arch }}
-        name: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
-        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
-        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+        name: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.registry_username }}
+        password: ${{ inputs.registry_password }}
 
   push-manifest:
     needs: [setup, push]
-    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+    if: always() && !failure() && !cancelled() && inputs.push
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
@@ -513,37 +497,38 @@ jobs:
       statuses: none
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
     - name: Create Tag
       id: tag
       run: |
         echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
         echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+    - name: Prepare Image List
+      id: images
+      env:
+        archs: ${{ inputs.archs }}
+      run: |
+        images="$(<<< $archs jq 'map("${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
+        echo "images=$images" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push-manifest
       with:
-        head_sha: ${{ needs.setup.outputs.sha }}
-        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        images: >
-          ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-amd64
-          ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}-arm64
-        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
-        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
-        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+        image: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        images: ${{ steps.images.outputs.images }}
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.registry_username }}
+        password: ${{ inputs.registry_password }}
     - uses: ./.github/actions/push-alias
       with:
         head_sha: ${{ needs.setup.outputs.sha }}
-        image: ${{ env.image_repo }}:${{ steps.tag.outputs.tag }}
-        image-alias: ${{ env.image_repo }}:${{ steps.tag.outputs.tag-alias }}
-        registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
-        username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
-        password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+        image: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        alias: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.registry_username }}
+        password: ${{ inputs.registry_password }}
 
   action:
     needs: [setup, push-manifest]
-    if: always() && !failure() && !cancelled() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
+    if: always() && !failure() && !cancelled() && inputs.push
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}

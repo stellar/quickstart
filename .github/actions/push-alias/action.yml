@@ -4,7 +4,7 @@ inputs:
     required: true
   image:
     required: true
-  image-alias:
+  alias:
     required: true
   registry:
     required: true
@@ -27,7 +27,7 @@ runs:
     -
       shell: bash
       run: |
-        docker buildx imagetools create -t ${{ inputs.image-alias }} ${{ inputs.image }}
+        docker buildx imagetools create -t ${{ inputs.alias }} ${{ inputs.image }}
     -
       uses: actions/github-script@v5
       with:
@@ -37,6 +37,6 @@ runs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: `${{ inputs.image-alias }}`,
+            context: `${{ inputs.alias }}`,
             description: 'Available',
           });
