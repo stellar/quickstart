@@ -5,10 +5,16 @@ inputs:
     description: "Image tag of quickstart image to use"
     required: true
     default: "latest"
-  image:
-    description: "Image for the quickstart image to use"
+  arch:
+    description: "Image architecture to use (default uses a multiplatform image)"
     required: true
-    default: "docker.io/stellar/quickstart"
+    default: "latest"
+  artifact:
+    description: "Artifact to collect image from (mutually exclusive with image)"
+    default: ""
+  image:
+    description: "Image for the quickstart image to use (mutually exclusive with artifact)"
+    default: ""
   enable:
     description: "Services to enable"
     default: "core,horizon,rpc"
@@ -35,6 +41,17 @@ runs:
   steps:
     - name: Set up Docker
       uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4
+
+    - if: inputs.artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact }}
+        path: /tmp/
+
+    - if: inputs.artifact
+      run: docker load -i /tmp/image
+      shell: bash
+
     - run: >
         docker run -d --name stellar 
         -p 8000:8000 
@@ -53,8 +70,9 @@ runs:
         --health-interval ${{ inputs.health_interval }}s 
         --health-timeout ${{ inputs.health_timeout }}s 
         --health-retries ${{ inputs.health_retries }} 
-        ${{ inputs.image }}:${{ inputs.tag }}
+        ${{ inputs.image || (inputs.artifact && 'quickstart' || 'docker.io/stellar/quickstart') }}:${{ inputs.tag }}
       shell: bash
+
     - name: "Wait for container to be healthy"
       run: |
         i=0
