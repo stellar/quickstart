@@ -27,6 +27,7 @@ jobs:
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
       tags: ${{ steps.tags.outputs.tags }}
+      archs: ${{ steps.archs.outputs.archs }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -54,6 +55,12 @@ jobs:
         tags="$(<<< $images jq -c '[.[].tag]')"
         <<< $tags jq
         echo "tags=$tags" >> $GITHUB_OUTPUT
+    - name: Architectures
+      id: archs
+      run: |
+        archs=["amd64","arm64"]
+        <<< $archs jq
+        echo "archs=$archs" >> $GITHUB_OUTPUT
 
   build:
     name: 2 build
@@ -62,7 +69,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
       images: ${{ needs.setup.outputs.images }}
-      archs: '["amd64","arm64"]'
+      archs: ${{ needs.setup.outputs.archs }}
 
   push:
     name: 3 push
@@ -71,7 +78,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
       tags: ${{ needs.setup.outputs.tags }}
-      archs: '["amd64","arm64"]'
+      archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
     secrets:
