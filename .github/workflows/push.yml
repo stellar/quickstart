@@ -45,8 +45,10 @@ on:
         default: ''
       registry:
         description: "Registry to push to"
+        type: "string"
       registry_repo:
         description: "Repo at the registry to push to"
+        type: "string"
     secrets:
       registry_username:
         description: "Username to auth with the registry"
