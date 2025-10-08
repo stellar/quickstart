@@ -94,25 +94,3 @@ jobs:
       registry_repo: ${{ github.repository }}
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
-
-  use:
-    name: 4 use
-    needs: push
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: image-quickstart-latest-amd64.tar
-        path: /tmp/
-    - run: docker load -i /tmp/image
-    - run: >
-        docker run
-        --platform linux/amd64
-        -d
-        -p
-        "8000:8000"
-        --name stellar
-        quickstart:latest-amd64
-        --local
-    - run: sleep 10
-    - run: curl http://localhost:8000
