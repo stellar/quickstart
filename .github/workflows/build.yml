@@ -480,10 +480,10 @@ jobs:
         artifact_image_file: image
         image: quickstart
         arch: ${{ matrix.arch }}
-        name: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.registry_username }}
-        password: ${{ inputs.registry_password }}
+        name: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
 
   push-manifest:
     needs: [setup, push]
@@ -508,24 +508,24 @@ jobs:
       env:
         archs: ${{ inputs.archs }}
       run: |
-        images="$(<<< $archs jq 'map("${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
+        images="$(<<< $archs jq 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
         echo "images=$images" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push-manifest
       with:
         head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-        image: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
         images: ${{ steps.images.outputs.images }}
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.registry_username }}
-        password: ${{ inputs.registry_password }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
     - uses: ./.github/actions/push-alias
       with:
         head_sha: ${{ needs.setup.outputs.sha }}
-        image: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
-        alias: ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.registry_username }}
-        password: ${{ inputs.registry_password }}
+        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
+        alias: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
 
   action:
     needs: [setup, push-manifest]
