@@ -7,6 +7,10 @@ on:
         description: 'Tag to use'
         type: 'string'
         default: ''
+      artifact:
+        description: 'Artifact to use'
+        type: 'string'
+        default: ''
 
 jobs:
   action-setup:
@@ -50,6 +54,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: ./
       with:
+        artifact: ${{ inputs.artifact }}
         tag: ${{ inputs.tag }}
     - name: "Run basic test making sure RPC and Horizon are available"
       run: >
