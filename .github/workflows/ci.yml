@@ -55,12 +55,13 @@ jobs:
       images: ${{ needs.setup.outputs.images }}
       archs: '["amd64","arm64"]'
       push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
+    secrets:
       registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
       registry_repo: ${{ github.repository) }}
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
-      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
-      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
 
   use:
     name: 3 use

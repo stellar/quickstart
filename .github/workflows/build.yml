@@ -55,6 +55,7 @@ on:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
         default: 6
+    secrets:
       registry:
         description: "Registry to push to"
         type: "string"
