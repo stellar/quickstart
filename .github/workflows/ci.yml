@@ -48,7 +48,7 @@ jobs:
 
   build:
     name: 2 build
-    needs: images
+    needs: setup
     uses: ./.github/workflows/build.yml
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
