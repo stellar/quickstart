@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+env:
+  archs: '["amd64","arm64"]'
+
 jobs:
 
   complete:
@@ -26,6 +29,7 @@ jobs:
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
+      tags: ${{ steps.tags.outputs.tags }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -45,7 +49,14 @@ jobs:
         images="$(<images.json)"
         images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
         <<< $images jq
+        echo "images=$images" >> $GITHUB_ENV
         echo "images=$images" >> $GITHUB_OUTPUT
+    - name: Tags
+      id: tags
+      run: |
+        tags="$(<<< $images jq -c '[.[].tag]')"
+        <<< $tags jq
+        echo "tags=$tags" >> $GITHUB_OUTPUT
 
   build:
     name: 2 build
@@ -54,8 +65,16 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
       images: ${{ needs.setup.outputs.images }}
-      archs: '["amd64","arm64"]'
-      push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+      archs: ${{ env.archs }}
+
+  push:
+    name: 3 push
+    needs: [setup, build]
+    uses: ./.github/workflows/push.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      tags: ${{ needs.setup.outputs.tags }}
+      archs: ${{ env.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
     secrets:
@@ -65,8 +84,8 @@ jobs:
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   use:
-    name: 3 use
-    needs: build
+    name: 4 use
+    needs: push
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4

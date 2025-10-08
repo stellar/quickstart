@@ -1,0 +1,160 @@
+name: Push
+
+# This workflow builds multiple quickstart images as defined in the images.json
+# file.
+#
+# The dependencies (xdr, core, rpc, horizon, friendbot, lab) are first
+# deduplicated across all images, and then built. Dependencies are cached and
+# so only rebuilt when needed. Dependencies are defined by a tag or branch, but
+# when building those git refs are resolved to a sha to ensure stability of the
+# sha throughout the full build process. For all dependencies and the final
+# image, amd64 and arm64 variants are built and the final image is a
+# multiplatform image.
+#
+# The images defined in the images.json file can specify what events the images
+# are built on. Most of the images will be built on push and pull requests, but
+# this workflow also runs on a schedule an so images that need updating on a
+# schedule, such as a nightly-like image, can specify running additionally or
+# only on the schedule.
+#
+# This workflow is also triggerable via a workflow call from another workflow.
+# When used that way, the image only builds a single amd64 image and it is not
+# pushed. The workflow returns an output which is an artifact name that can be
+# downloaded and loaded into docker for use in another job. The workflow can be
+# improved to support multiple images in the workflow call case, it just
+# requires more work to do so.
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "Quickstart repo where quickstart is hosted"
+        type: "string"
+        default: "stellar/quickstart"
+      ref:
+        description: "Quickstart ref to use for actions should match workflow (sha, branch, tag)"
+        type: "string"
+        default: "main"
+      tags:
+        description: 'Tags to push (e.g. ["latest", "testing", ...])'
+        type: "string"
+        required: true
+      archs:
+        description: 'Architectures to push for as an array (e.g. ["amd64", "arm64"])'
+        type: "string"
+        required: true
+      tag-prefix:
+        description: "Tag prefix for the image when pushed (e.g. pr877-v21-)"
+        type: "string"
+        default: ''
+      tag-alias-prefix:
+        description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias (e.g. pr877-)"
+        type: "string"
+        default: ''
+    secrets:
+      registry:
+        description: "Registry to push to"
+      registry_repo:
+        description: "Repo at the registry to push to"
+      registry_username:
+        description: "Username to auth with the registry"
+      registry_password:
+        description: "Password to auth with the registry"
+
+jobs:
+
+  complete:
+    if: always()
+    name: complete
+    needs: [push, push-manifest, action]
+    runs-on: ubuntu-latest
+    steps:
+    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
+
+  push:
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(inputs.tags) }}
+        arch: ${{ fromJSON(inputs.archs) }}
+      fail-fast: false
+    name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
+    permissions:
+      packages: read
+      statuses: none
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
+        ref: ${{ inputs.ref }}
+    - name: Create Tag
+      id: tag
+      run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
+    - uses: ./.github/actions/push
+      with:
+        head_sha: ${{ inputs.ref }}
+        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
+        artifact_image_file: image
+        image: quickstart
+        arch: ${{ matrix.arch }}
+        name: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
+
+  push-manifest:
+    needs: [setup, push]
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(inputs.tags) }}
+      fail-fast: false
+    name: 8 push manifest (${{ matrix.tag }})
+    permissions:
+      packages: read
+      statuses: none
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
+        ref: ${{ inputs.ref }}
+    - name: Create Tag
+      id: tag
+      run: |
+        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+    - name: Prepare Image List
+      id: images
+      env:
+        archs: ${{ inputs.archs }}
+      run: |
+        images="$(<<< $archs jq 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
+        echo "images=$images" | tee -a $GITHUB_OUTPUT
+    - uses: ./.github/actions/push-manifest
+      with:
+        head_sha: ${{ inputs.ref }}
+        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
+        images: ${{ steps.images.outputs.images }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
+    - uses: ./.github/actions/push-alias
+      with:
+        head_sha: ${{ inputs.ref }}
+        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
+        alias: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
+        registry: ${{ secrets.registry }}
+        username: ${{ secrets.registry_username }}
+        password: ${{ secrets.registry_password }}
+
+  action:
+    needs: [setup, push-manifest]
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(inputs.tags) }}
+      fail-fast: false
+    name: 9 test action (${{ matrix.tag }})
+    uses: ./.github/workflows/action-test.yml
+    with:
+      tag: ${{ inputs.tag-prefix }}${{ matrix.tag }}

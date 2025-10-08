@@ -32,7 +32,7 @@ on:
         type: "string"
         default: "stellar/quickstart"
       ref:
-        description: "Quickstart ref to build (sha, branch, tag)"
+        description: "Quickstart ref to build should match workflow (sha, branch, tag)"
         type: "string"
         default: "main"
       images:
@@ -43,35 +43,14 @@ on:
         description: 'Architectures to build for as an array (e.g. ["amd64", "arm64"])'
         type: "string"
         required: true
-      tag-prefix:
-        description: "Tag prefix for the image when pushed"
-        type: "string"
-        default: ''
-      tag-alias-prefix:
-        description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias"
-        type: "string"
-        default: ''
       test:
         description: "Whether the image tests should run"
         type: "boolean"
         default: true
-      push:
-        description: "Whether the image should be pushed to the registry"
-        type: "boolean"
-        default: false
       cache_id:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
         default: 6
-    secrets:
-      registry:
-        description: "Registry to push to"
-      registry_repo:
-        description: "Repo at the registry to push to"
-      registry_username:
-        description: "Username to auth with the registry"
-      registry_password:
-        description: "Password to auth with the registry"
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
@@ -90,7 +69,7 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [setup, load, build, test, push, push-manifest, action]
+    needs: [setup, load, build, test]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -326,7 +305,7 @@ jobs:
         docker build
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
-        -t quickstart
+        -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
         --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
         --build-arg REVISION="${{ needs.setup.outputs.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
@@ -391,7 +370,7 @@ jobs:
         "8000:8000"
         -p "11626:11626"
         --name stellar
-        quickstart
+        quickstart:${{ matrix.tag }}-${{ matrix.arch }}
         --${{ matrix.network }}
         --enable ${{ matrix.enable }}
         ${{ matrix.options }}
@@ -459,94 +438,3 @@ jobs:
         name: logs-${{ matrix.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
         path: logs
         retention-days: ${{ env.artifact_retention_days_for_logs }}
-
-  push:
-    needs: [setup, build, test]
-    if: always() && !failure() && !cancelled() && inputs.push
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ${{ fromJSON(inputs.archs) }}
-      fail-fast: false
-    name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
-    permissions:
-      packages: read
-      statuses: none
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Create Tag
-      id: tag
-      run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
-    - uses: ./.github/actions/push
-      with:
-        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
-        artifact_image_file: image
-        image: quickstart
-        arch: ${{ matrix.arch }}
-        name: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
-
-  push-manifest:
-    needs: [setup, push]
-    if: always() && !failure() && !cancelled() && inputs.push
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-      fail-fast: false
-    name: 8 push manifest (${{ matrix.tag }})
-    permissions:
-      packages: read
-      statuses: none
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Create Tag
-      id: tag
-      run: |
-        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
-        echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
-    - name: Prepare Image List
-      id: images
-      env:
-        archs: ${{ inputs.archs }}
-      run: |
-        images="$(<<< $archs jq 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
-        echo "images=$images" | tee -a $GITHUB_OUTPUT
-    - uses: ./.github/actions/push-manifest
-      with:
-        head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        images: ${{ steps.images.outputs.images }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
-    - uses: ./.github/actions/push-alias
-      with:
-        head_sha: ${{ needs.setup.outputs.sha }}
-        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        alias: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
-
-  action:
-    needs: [setup, push-manifest]
-    if: always() && !failure() && !cancelled() && inputs.push
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-      fail-fast: false
-    name: 9 test action (${{ matrix.tag }})
-    uses: ./.github/workflows/action-test.yml
-    with:
-      tag: ${{ inputs.tag-prefix }}${{ matrix.tag }}
