@@ -94,14 +94,14 @@ jobs:
 
   action-using-artifact:
     needs: [setup, build]
-    name: 4 test action artifact
+    name: 3 test action artifact
     uses: ./.github/workflows/action-test.yml
     with:
       artifact: image-quickstart-latest-amd64.tar
       tag: latest-amd64
 
   push:
-    name: 3 push
+    name: 4 push
     needs: [setup, build]
     uses: ./.github/workflows/push.yml
     with:
@@ -118,7 +118,7 @@ jobs:
 
   action-using-registry:
     needs: [setup, push]
-    name: 4 test action registry
+    name: 5 test action registry
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}latest
