@@ -8,9 +8,6 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-env:
-  archs: '["amd64","arm64"]'
-
 jobs:
 
   complete:
@@ -65,7 +62,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
       images: ${{ needs.setup.outputs.images }}
-      archs: ${{ env.archs }}
+      archs: '["amd64","arm64"]'
 
   push:
     name: 3 push
@@ -74,7 +71,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha || github.sha }}
       tags: ${{ needs.setup.outputs.tags }}
-      archs: ${{ env.archs }}
+      archs: '["amd64","arm64"]'
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
     secrets:
