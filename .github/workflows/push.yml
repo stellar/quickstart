@@ -144,7 +144,7 @@ jobs:
       env:
         archs: ${{ inputs.archs }}
       run: |
-        images="$(<<< $archs jq 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
+        images="$(<<< $archs jq -r 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)") | join(" ")')"
         echo "images=$images" | tee -a $GITHUB_OUTPUT
     - name: Create Manifest
       run: >
