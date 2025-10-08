@@ -1,0 +1,124 @@
+name: CI
+
+# This workflow builds all the images defined in images.json with the specified
+# dependencies, and runs a set of locally defined tests.
+#
+# Each image defined in images.json specifies the events the image should be
+# rebuilt and pushed. Most images will do so for push and pull_request, but can
+# also be specified to build on a schedule.
+#
+# The tests in this repo are designed to make sure that when quickstart starts
+# up it is able to either sync with an existing network, or start a new network
+# that is progressing.
+#
+# This workflow also tests that the quickstart action functions.
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+# Prevent more than one build of this workflow for a branch to be running at the
+# same time, and if multiple are queued, only run the latest, cancelling any
+# already running build. The exception being any protected branch, such as
+# main, where a build for every commit will run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  complete:
+    if: always()
+    name: complete
+    needs: [build, action-using-artifact, push, action-using-registry]
+    runs-on: ubuntu-latest
+    steps:
+    - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
+
+  setup:
+    name: 1 setup
+    runs-on: ubuntu-latest
+    outputs:
+      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
+      images: ${{ steps.images.outputs.images }}
+      tags: ${{ steps.tags.outputs.tags }}
+      archs: ${{ steps.archs.outputs.archs }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Get all history for the sha count below.
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Tag Prefix
+      id: tag-prefix
+      run: |
+        pr_prefix="${{ github.event_name == 'pull_request' && format('pr{0}-', github.event.pull_request.number) || '' }}"
+        commit_count="$(git rev-list HEAD --count --first-parent)"
+        build_number="${{ github.run_number }}.${{ github.run_attempt }}"
+        echo "tag-prefix=${pr_prefix}v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
+    - name: Images
+      id: images
+      run: |
+        images="$(<images.json)"
+        images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
+        <<< $images jq
+        echo "images=$images" >> $GITHUB_ENV
+        echo "images=$images" >> $GITHUB_OUTPUT
+    - name: Tags
+      id: tags
+      run: |
+        tags="$(<<< $images jq -c '[.[].tag]')"
+        <<< $tags jq
+        echo "tags=$tags" >> $GITHUB_OUTPUT
+    - name: Architectures
+      id: archs
+      run: |
+        archs='["amd64","arm64"]'
+        <<< $archs jq
+        echo "archs=$archs" >> $GITHUB_OUTPUT
+
+  build:
+    name: 2 build
+    needs: setup
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      images: ${{ needs.setup.outputs.images }}
+      archs: ${{ needs.setup.outputs.archs }}
+
+  action-using-artifact:
+    needs: [setup, build]
+    name: 3 test action artifact
+    uses: ./.github/workflows/action-test.yml
+    with:
+      artifact: image-quickstart-latest-amd64.tar
+      tag: latest-amd64
+
+  push:
+    name: 4 push
+    needs: [setup, build]
+    uses: ./.github/workflows/push.yml
+    with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      tags: ${{ needs.setup.outputs.tags }}
+      archs: ${{ needs.setup.outputs.archs }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
+      registry_repo: ${{ github.repository }}
+    secrets:
+      registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
+      registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
+      registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
+
+  action-using-registry:
+    needs: [setup, push]
+    name: 5 test action registry
+    uses: ./.github/workflows/action-test.yml
+    with:
+      tag: ${{ needs.setup.outputs.tag-prefix }}latest

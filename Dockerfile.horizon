@@ -1,8 +1,9 @@
 FROM golang:1.23 AS builder
 
+ARG REPO
 ARG REF
 WORKDIR /go/src/github.com/stellar/go
-RUN git clone https://github.com/stellar/go /go/src/github.com/stellar/go
+RUN git clone https://github.com/${REPO} /go/src/github.com/stellar/go
 RUN git fetch origin ${REF}
 RUN git checkout ${REF}
 ENV CGO_ENABLED=0
