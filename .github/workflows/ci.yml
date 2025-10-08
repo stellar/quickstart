@@ -40,6 +40,7 @@ jobs:
         echo "tag-prefix=${pr_prefix}v${commit_count}-b${build_number}-" | tee -a $GITHUB_OUTPUT
         echo "tag-alias-prefix=${pr_prefix}" | tee -a $GITHUB_OUTPUT
     - name: Images
+      id: images
       run: |
         images="$(<images.json)"
         images="$(<<< $images jq -c --arg event "${{ github.event_name }}" '[.[] | select(.events | contains([$event]))]')"
