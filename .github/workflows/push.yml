@@ -149,7 +149,7 @@ jobs:
         password: ${{ secrets.registry_password }}
 
   action:
-    needs: [setup, push-manifest]
+    needs: push-manifest
     strategy:
       matrix:
         tag: ${{ fromJSON(inputs.tags) }}
