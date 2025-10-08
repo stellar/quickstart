@@ -5,15 +5,12 @@ inputs:
     description: "Image tag of quickstart image to use"
     required: true
     default: "latest"
-  arch:
-    description: "Image architecture to use (default uses a multiplatform image)"
-    required: true
-    default: "latest"
   artifact:
-    description: "Artifact to collect image from (mutually exclusive with image)"
-    default: ""
+    description: "Artifact to collect image from"
+    type: boolean
+    default: false
   image:
-    description: "Image for the quickstart image to use (mutually exclusive with artifact)"
+    description: "Image for the quickstart image to use"
     default: ""
   enable:
     description: "Services to enable"

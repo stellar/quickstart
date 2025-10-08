@@ -79,6 +79,18 @@ jobs:
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
 
+  action-using-artifact:
+    needs: [setup, build]
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(needs.setup.outputs.tags) }}
+      fail-fast: false
+    name: 4 test action artifact (${{ matrix.tag }})
+    uses: ./.github/workflows/action-test.yml
+    with:
+      artifact: image-quickstart-${{ matrix.tag }}-amd64
+      tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-amd64
+
   push:
     name: 3 push
     needs: [setup, build]
@@ -94,13 +106,13 @@ jobs:
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
-  action:
+  action-using-registry:
     needs: [setup, push]
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.tags) }}
       fail-fast: false
-    name: 4 test action (${{ matrix.tag }})
+    name: 4 test action registry (${{ matrix.tag }})
     uses: ./.github/workflows/action-test.yml
     with:
-      tag: ${{ inputs.tag-prefix }}${{ matrix.tag }}
+      tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}
