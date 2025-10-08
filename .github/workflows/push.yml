@@ -147,14 +147,3 @@ jobs:
         registry: ${{ secrets.registry }}
         username: ${{ secrets.registry_username }}
         password: ${{ secrets.registry_password }}
-
-  action:
-    needs: push-manifest
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(inputs.tags) }}
-      fail-fast: false
-    name: 9 test action (${{ matrix.tag }})
-    uses: ./.github/workflows/action-test.yml
-    with:
-      tag: ${{ inputs.tag-prefix }}${{ matrix.tag }}
