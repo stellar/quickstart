@@ -160,6 +160,39 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
+### Health Endpoint
+
+The quickstart image provides a `/health` endpoint that indicates when all services are fully ready for use. This endpoint reports HTTP 200 when the image is ready and HTTP 503 when services are still starting up or experiencing issues.
+
+The health endpoint is served by a custom readiness service that runs internally on port 8004 and is proxied through nginx on port 8000.
+
+Example usage:
+
+```bash
+$ curl http://localhost:8000/health
+```
+
+Example response when ready:
+```json
+{
+  "status": "ready",
+  "services": {
+    "stellar-core": "ready",
+    "horizon": "ready",
+    "horizon_health": {
+      "database_connected": true,
+      "core_up": true,
+      "core_synced": true
+    },
+    "stellar-rpc": "ready"
+  }
+}
+```
+
+The endpoint automatically detects which services are running and only reports "ready" when all detected services are functioning properly. This eliminates the need to write custom scripts to test multiple service endpoints individually.
+
+_Note: The `/health` endpoint provides comprehensive readiness status for all detected services through the custom readiness service, which runs internally and is accessible only through the nginx proxy on port 8000._
+
 ### Using in GitHub Actions
 
 The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
@@ -315,9 +348,9 @@ Managing UIDs between a docker container and a host volume can be complicated. A
 
 The image exposes one main port through which services provide their APIs:
 
-| Port | Service                         | Description    |
-| ---- | ------------------------------- | -------------- |
-| 8000 | lab, horizon, stellar-rpc, friendbot | main http port |
+| Port | Service                                    | Description    |
+| ---- | ------------------------------------------ | -------------- |
+| 8000 | lab, horizon, stellar-rpc, friendbot, health | main http port |
 
 The image also exposes a few other ports that most developers do not need, but area available:
 
@@ -326,6 +359,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
+| 8004  | readiness service          | internal health port (not exposed to host) |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |

@@ -16,6 +16,7 @@ export FBHOME="$STELLAR_HOME/friendbot"
 export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
+export READINESS_HOME="$STELLAR_HOME/readiness"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -362,6 +363,12 @@ function copy_defaults() {
     if [ -d /opt/stellar-default/$NETWORK/nginx/ ]; then
       $CP /opt/stellar-default/$NETWORK/nginx/ $NXHOME
     fi
+  fi
+
+  if [ -d $READINESS_HOME/etc ]; then
+    echo "readiness: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/readiness/ $READINESS_HOME
   fi
 }
 

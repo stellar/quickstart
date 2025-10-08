@@ -559,6 +559,16 @@ jobs:
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
         go run tests/test_horizon_ingesting.go
         curl http://localhost:8000
+    # Test the /health endpoint through nginx
+    - name: Run health endpoint test
+      if: ${{ matrix.horizon }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
+        echo "supervisorctl tail -f readiness" | docker exec -i stellar sh &
+        # Ensure readiness service is running
+        docker exec stellar supervisorctl status readiness || docker exec stellar supervisorctl start readiness
+        go run tests/test_health_endpoint.go
     - name: Run friendbot test
       if: ${{ matrix.horizon && matrix.network == 'local' }}
       run: |
