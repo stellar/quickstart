@@ -227,26 +227,26 @@ on: [push, pull_request]
 jobs:
   build-custom:
     uses: stellar/quickstart/.github/workflows/build.yml@main
-      with:
-    images: |
-      [
-        {
-          "tag": "custom",
-          "config": {
-            "protocol_version_default": 23
-          },
-          "deps": [
-            { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
-            { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
-            { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.1" },
-            { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
-            { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
-            { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
-          ],
-          "additional-tests": []
-        }
-      ]
-    archs: '["amd64"]'
+    with:
+      images: |
+        [
+          {
+            "tag": "custom",
+            "config": {
+              "protocol_version_default": 23
+            },
+            "deps": [
+              { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
+              { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
+              { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.1" },
+              { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+              { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+              { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
+            ],
+            "additional-tests": []
+          }
+        ]
+      archs: '["amd64"]'
   use-custom:
     needs: build-custom
     runs-on: ubuntu-latest
