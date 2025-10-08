@@ -7,8 +7,8 @@ inputs:
     default: "latest"
   artifact:
     description: "Artifact to collect image from"
-    type: boolean
-    default: false
+    type: string
+    default: ""
   image:
     description: "Image for the quickstart image to use"
     default: ""
