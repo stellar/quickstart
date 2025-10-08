@@ -95,7 +95,7 @@ jobs:
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   action:
-    needs: push
+    needs: [setup, push]
     strategy:
       matrix:
         tag: ${{ fromJSON(needs.setup.outputs.tags) }}
