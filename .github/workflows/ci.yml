@@ -112,7 +112,7 @@ jobs:
         -p
         "8000:8000"
         --name stellar
-        quickstart
+        quickstart:latest-amd64
         --local
     - run: sleep 10
     - run: curl http://localhost:8000
