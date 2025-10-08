@@ -52,14 +52,6 @@ on:
         type: "string"
         default: 6
 
-# Prevent more than one build of this workflow for a branch to be running at the
-# same time, and if multiple are queued, only run the latest, cancelling any
-# already running build. The exception being any protected branch, such as
-# main, where a build for every commit will run.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
-  cancel-in-progress: true
-
 env:
   artifact_retention_days_for_image: 7
   artifact_retention_days_for_logs: 60
