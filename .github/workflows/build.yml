@@ -319,7 +319,7 @@ jobs:
         tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
         arch: ${{ fromJSON(inputs.archs) }}
         network: ["local"]
-        enable: ${{ inputs.image_json && fromJSON('["core,rpc,horizon"]') || fromJSON('["core","rpc","core,rpc,horizon"]') }}
+        enable: ["core","rpc","core,rpc,horizon"]
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
