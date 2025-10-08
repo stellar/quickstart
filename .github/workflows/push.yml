@@ -112,7 +112,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ inputs.head_sha }}',
+            sha: '${{ inputs.sha }}',
             state: 'success',
             context: `${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}`,
             description: 'Available',
@@ -161,7 +161,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ github.event.pull_request.head.sha || github.sha }}',
+            sha: '${{ inputs.sha }}',
             state: 'success',
             context: '${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}',
             description: 'Available',
@@ -200,7 +200,7 @@ jobs:
           github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ github.event.pull_request.head.sha || github.sha }}',
+            sha: '${{ inputs.sha }}',
             state: 'success',
             context: '${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}',
             description: 'Available',
