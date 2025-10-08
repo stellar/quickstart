@@ -27,14 +27,6 @@ name: Push
 on:
   workflow_call:
     inputs:
-      repo:
-        description: "Quickstart repo where quickstart is hosted"
-        type: "string"
-        default: "stellar/quickstart"
-      ref:
-        description: "Quickstart ref to use for actions should match workflow (sha, branch, tag)"
-        type: "string"
-        default: "main"
       tags:
         description: 'Tags to push (e.g. ["latest", "testing", ...])'
         type: "string"
@@ -51,11 +43,11 @@ on:
         description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias (e.g. pr877-)"
         type: "string"
         default: ''
-    secrets:
       registry:
         description: "Registry to push to"
       registry_repo:
         description: "Repo at the registry to push to"
+    secrets:
       registry_username:
         description: "Username to auth with the registry"
       registry_password:
@@ -66,7 +58,7 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [push, push-manifest, action]
+    needs: [push, push-manifest, push-alias]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -78,30 +70,47 @@ jobs:
         tag: ${{ fromJSON(inputs.tags) }}
         arch: ${{ fromJSON(inputs.archs) }}
       fail-fast: false
-    name: 7 push (${{ matrix.tag }}, ${{ matrix.arch }})
+    name: 1 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
       packages: read
       statuses: none
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ inputs.ref }}
     - name: Create Tag
       id: tag
       run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
-    - uses: ./.github/actions/push
+    - name: Download Image from Artifacts
+      uses: actions/download-artifact@v4
       with:
-        head_sha: ${{ inputs.ref }}
-        artifact_name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
-        artifact_image_file: image
-        image: quickstart
-        arch: ${{ matrix.arch }}
-        name: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
+        name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
+        path: /tmp/
+    - name: Load Image
+      run: docker load -i /tmp/image
+    - name: Tag Image
+      run: >
+        docker tag
+        quickstart:${{ matrix.tag }}-${{ matrix.arch }}
+        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ secrets.username }}
+        password: ${{ secrets.password }}
+    - name: Push Image
+      run: |
+        docker push ${{ inputs.name }}
+    - name: Post Status with Image Name
+      uses: actions/github-script@v5
+      with:
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ inputs.head_sha }}',
+            state: 'success',
+            context: `${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}`,
+            description: 'Available',
+          });
 
   push-manifest:
     needs: push
@@ -109,21 +118,16 @@ jobs:
       matrix:
         tag: ${{ fromJSON(inputs.tags) }}
       fail-fast: false
-    name: 8 push manifest (${{ matrix.tag }})
+    name: 2 push manifest (${{ matrix.tag }})
     permissions:
       packages: read
       statuses: none
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ inputs.ref }}
     - name: Create Tag
       id: tag
       run: |
         echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
-        echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
     - name: Prepare Image List
       id: images
       env:
@@ -131,19 +135,57 @@ jobs:
       run: |
         images="$(<<< $archs jq 'map("${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}-\(.)")')"
         echo "images=$images" | tee -a $GITHUB_OUTPUT
-    - uses: ./.github/actions/push-manifest
+    - name: Create Manifest
+      run: >
+        docker manifest create
+        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ steps.images.outputs.images }}
+    - name: Push Manifest
+      run: >
+        docker manifest push
+        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - uses: actions/github-script@v5
       with:
-        head_sha: ${{ inputs.ref }}
-        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        images: ${{ steps.images.outputs.images }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
-    - uses: ./.github/actions/push-alias
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ github.event.pull_request.head.sha || github.sha }}',
+            state: 'success',
+            context: '${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}',
+            description: 'Available',
+          });
+
+  push-alias:
+    needs: push-manifest
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(inputs.tags) }}
+      fail-fast: false
+    name: 3 push alias (${{ matrix.tag }})
+    permissions:
+      packages: read
+      statuses: none
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Tag
+      id: tag
+      run: |
+        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+    - name: Push Alias
+      run: >
+        docker buildx imagetools create -t
+        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
+        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - uses: actions/github-script@v5
       with:
-        head_sha: ${{ inputs.ref }}
-        image: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag }}
-        alias: ${{ secrets.registry }}/${{ secrets.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
-        registry: ${{ secrets.registry }}
-        username: ${{ secrets.registry_username }}
-        password: ${{ secrets.registry_password }}
+        script: |
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: '${{ github.event.pull_request.head.sha || github.sha }}',
+            state: 'success',
+            context: '${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}',
+            description: 'Available',
+          });
