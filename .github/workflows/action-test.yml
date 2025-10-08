@@ -36,11 +36,11 @@ jobs:
       with:
         script: |
           const os = ['ubuntu-latest'];
-          # Only run the additional builds if the action has changed, and this
-          # is not a test with an artifact image. The additional runs are time
-          # consuming so only do them if necessary. Don't run them for artifact
-          # action tests because the test won't be multiplatform since the
-          # artifact images contain only a single platform.
+          // Only run the additional builds if the action has changed, and this
+          // is not a test with an artifact image. The additional runs are time
+          // consuming so only do them if necessary. Don't run them for artifact
+          // action tests because the test won't be multiplatform since the
+          // artifact images contain only a single platform.
           if (process.env.ACTION_CHANGED === 'true' && '${{ inputs.artifact }}' === '') {
             os.push('ubuntu-24.04-arm');
             os.push('macos-13');
