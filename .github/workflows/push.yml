@@ -27,6 +27,10 @@ name: Push
 on:
   workflow_call:
     inputs:
+      sha:
+        description: 'Sha to connect push status notifications to'
+        type: "string"
+        required: true
       tags:
         description: 'Tags to push (e.g. ["latest", "testing", ...])'
         type: "string"

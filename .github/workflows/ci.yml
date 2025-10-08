@@ -96,6 +96,7 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/push.yml
     with:
+      sha: ${{ github.event.pull_request.head.sha || github.sha }}
       tags: ${{ needs.setup.outputs.tags }}
       archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
