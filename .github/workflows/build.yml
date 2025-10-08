@@ -58,16 +58,12 @@ on:
     secrets:
       registry:
         description: "Registry to push to"
-        type: "string"
       registry_repo:
         description: "Repo at the registry to push to"
-        type: "string"
       registry_username:
         description: "Username to auth with the registry"
-        type: "string"
       registry_password:
         description: "Password to auth with the registry"
-        type: "string"
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
