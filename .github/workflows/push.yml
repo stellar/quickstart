@@ -43,13 +43,13 @@ on:
         description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias (e.g. pr877-)"
         type: "string"
         default: ''
-      registry:
-        description: "Registry to push to"
-        type: "string"
       registry_repo:
         description: "Repo at the registry to push to"
         type: "string"
     secrets:
+      registry:
+        description: "Registry to push to"
+        type: "string"
       registry_username:
         description: "Username to auth with the registry"
       registry_password:
@@ -92,10 +92,10 @@ jobs:
       run: >
         docker tag
         quickstart:${{ matrix.tag }}-${{ matrix.arch }}
-        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
     - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
-        registry: ${{ inputs.registry }}
+        registry: ${{ secrets.registry }}
         username: ${{ secrets.username }}
         password: ${{ secrets.password }}
     - name: Push Image
@@ -110,7 +110,7 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ inputs.head_sha }}',
             state: 'success',
-            context: `${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}`,
+            context: `${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}`,
             description: 'Available',
           });
 
@@ -140,12 +140,12 @@ jobs:
     - name: Create Manifest
       run: >
         docker manifest create
-        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
         ${{ steps.images.outputs.images }}
     - name: Push Manifest
       run: >
         docker manifest push
-        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
     - uses: actions/github-script@v5
       with:
         script: |
@@ -154,7 +154,7 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ github.event.pull_request.head.sha || github.sha }}',
             state: 'success',
-            context: '${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}',
+            context: '${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}',
             description: 'Available',
           });
 
@@ -178,8 +178,8 @@ jobs:
     - name: Push Alias
       run: >
         docker buildx imagetools create -t
-        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
-        ${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
     - uses: actions/github-script@v5
       with:
         script: |
@@ -188,6 +188,6 @@ jobs:
             repo: context.repo.repo,
             sha: '${{ github.event.pull_request.head.sha || github.sha }}',
             state: 'success',
-            context: '${{ inputs.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}',
+            context: '${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}',
             description: 'Available',
           });

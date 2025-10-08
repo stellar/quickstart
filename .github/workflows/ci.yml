@@ -88,9 +88,9 @@ jobs:
       archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
       tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
-      registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
       registry_repo: ${{ github.repository }}
     secrets:
+      registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
