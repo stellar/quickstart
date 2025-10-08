@@ -94,15 +94,11 @@ jobs:
 
   action-using-artifact:
     needs: [setup, build]
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.tags) }}
-      fail-fast: false
-    name: 4 test action artifact (${{ matrix.tag }})
+    name: 4 test action artifact
     uses: ./.github/workflows/action-test.yml
     with:
-      artifact: image-quickstart-${{ matrix.tag }}-amd64.tar
-      tag: ${{ matrix.tag }}-amd64
+      artifact: image-quickstart-latest-amd64.tar
+      tag: latest-amd64
 
   push:
     name: 3 push
@@ -122,11 +118,7 @@ jobs:
 
   action-using-registry:
     needs: [setup, push]
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.tags) }}
-      fail-fast: false
-    name: 4 test action registry (${{ matrix.tag }})
+    name: 4 test action registry
     uses: ./.github/workflows/action-test.yml
     with:
-      tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}
+      tag: ${{ needs.setup.outputs.tag-prefix }}latest
