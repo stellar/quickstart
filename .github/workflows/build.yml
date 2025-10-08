@@ -1,28 +1,22 @@
 name: Build
 
-# This workflow builds multiple quickstart images as defined in the images.json
-# file.
+# This workflow builds multiple quickstart images as defined in the images json
+# passed to the workflow across the architectures defined in the archs input.
 #
-# The dependencies (xdr, core, rpc, horizon, friendbot, lab) are first
-# deduplicated across all images, and then built. Dependencies are cached and
-# so only rebuilt when needed. Dependencies are defined by a tag or branch, but
-# when building those git refs are resolved to a sha to ensure stability of the
-# sha throughout the full build process. For all dependencies and the final
-# image, amd64 and arm64 variants are built and the final image is a
-# multiplatform image.
+# See the images.json file in the repo for how to define the JSON for a set of
+# images.
 #
-# The images defined in the images.json file can specify what events the images
-# are built on. Most of the images will be built on push and pull requests, but
-# this workflow also runs on a schedule an so images that need updating on a
-# schedule, such as a nightly-like image, can specify running additionally or
-# only on the schedule.
+# This workflow is intended to be called by third parties to build custom
+# quickstart images. See the repository README for an example.
 #
-# This workflow is also triggerable via a workflow call from another workflow.
-# When used that way, the image only builds a single amd64 image and it is not
-# pushed. The workflow returns an output which is an artifact name that can be
-# downloaded and loaded into docker for use in another job. The workflow can be
-# improved to support multiple images in the workflow call case, it just
-# requires more work to do so.
+# The build process first builds the dependencies (xdr, core, rpc, horizon,
+# friendbot, lab). When doing so the dependencies needed as specified by the
+# images json are deduplicated so that any software shared by the images is
+# only built once. Dependencies are cached and so only rebuilt when needed.
+# Dependencies are defined by a tag or branch, but when building those git refs
+# are resolved to a sha to ensure stability of the sha throughout the full
+# build process. For all dependencies and the final image, amd64 and arm64
+# variants may be built.
 
 on:
   workflow_call:

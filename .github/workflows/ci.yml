@@ -1,5 +1,18 @@
 name: CI
 
+# This workflow builds all the images defined in images.json with the specified
+# dependencies, and runs a set of locally defined tests.
+#
+# Each image defined in images.json specifies the events the image should be
+# rebuilt and pushed. Most images will do so for push and pull_request, but can
+# also be specified to build on a schedule.
+#
+# The tests in this repo are designed to make sure that when quickstart starts
+# up it is able to either sync with an existing network, or start a new network
+# that is progressing.
+#
+# This workflow also tests that the quickstart action functions.
+
 on:
   push:
     branches:
