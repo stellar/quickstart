@@ -43,6 +43,14 @@ on:
         description: "Architectures to build for as an array (amd64, arm64)"
         type: "string"
         default: '["amd64"]'
+      tag-prefix:
+        description: "Tag prefix for the image when pushed"
+        type: "string"
+        default: ''
+      tag-alias-prefix:
+        description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias"
+        type: "string"
+        default: ''
       test:
         description: "Whether the image tests should run"
         type: "boolean"
