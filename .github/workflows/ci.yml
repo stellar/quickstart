@@ -89,7 +89,7 @@ jobs:
     uses: ./.github/workflows/action-test.yml
     with:
       artifact: image-quickstart-${{ matrix.tag }}-amd64.tar
-      tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-amd64
+      tag: ${{ matrix.tag }}-amd64
 
   push:
     name: 3 push
