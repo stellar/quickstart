@@ -20,7 +20,7 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 >   uses: stellar/quickstart@main
 > ```
 >
-> See [Using in GitHub Actions] for more configuration options.
+> See [Using in GitHub Actions] for more configuration options and how to build and run a custom configuration of quickstart.
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
@@ -215,6 +215,46 @@ jobs:
           # - Horizon: http://localhost:8000
           # - RPC: http://localhost:8000/rpc  
           # - Friendbot: http://localhost:8000/friendbot
+```
+
+#### Custom Builds
+
+The quickstart image can also be built with custom software, such as custom versions of core, rpc, horizon, and so on. Use a workflow as follows to build a custom quickstart image and then run it using the action.
+
+```yaml
+on: [push, pull_request]
+   
+jobs:
+  build-custom:
+    uses: stellar/quickstart/.github/workflows/build.yml@main
+      with:
+    images: |
+      [
+        {
+          "tag": "custom",
+          "config": {
+            "protocol_version_default": 23
+          },
+          "deps": [
+            { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
+            { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
+            { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.1" },
+            { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+            { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+            { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
+          ],
+          "additional-tests": []
+        }
+      ]
+    archs: '["amd64"]'
+  use-custom:
+    needs: build-custom
+    runs-on: ubuntu-latest
+    steps:
+    - uses: stellar/quickstart@main
+      with:
+        artifact: image-quickstart-custom-amd64.tar
+        tag: custom-amd64
 ```
 
 

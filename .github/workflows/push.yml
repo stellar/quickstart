@@ -98,8 +98,9 @@ jobs:
         username: ${{ secrets.registry_username }}
         password: ${{ secrets.registry_password }}
     - name: Push Image
-      run: |
-        docker push ${{ inputs.name }}
+      run: >
+        docker push
+        ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
     - name: Post Status with Image Name
       uses: actions/github-script@v5
       with:
