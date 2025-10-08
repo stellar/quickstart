@@ -476,7 +476,7 @@ jobs:
     steps:
     - name: Create Tag
       id: tag
-      run: echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
+      run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - uses: ./.github/actions/push
       with:
         head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -505,8 +505,8 @@ jobs:
     - name: Create Tag
       id: tag
       run: |
-        echo "tag=${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
-        echo "tag-alias=${{ needs.setup.outputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
     - name: Prepare Image List
       id: images
       env:
@@ -541,4 +541,4 @@ jobs:
     name: 9 test action (${{ matrix.tag }})
     uses: ./.github/workflows/action-test.yml
     with:
-      tag: ${{ needs.setup.outputs.tag-prefix }}${{ matrix.tag }}
+      tag: ${{ inputs.tag-prefix }}${{ matrix.tag }}
