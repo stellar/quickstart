@@ -49,7 +49,6 @@ on:
     secrets:
       registry:
         description: "Registry to push to"
-        type: "string"
       registry_username:
         description: "Username to auth with the registry"
       registry_password:
