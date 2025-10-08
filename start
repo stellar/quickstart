@@ -89,11 +89,9 @@ function start() {
   echo "  horizon:"
   echo "$(stellar-horizon version | sed 's/^/    /')"
   echo "  friendbot:"
-  echo "$(< image.json jq -r '.deps[] | select(.name == "friendbot") | .ref' | sed 's/^/    /')"
-  echo "$(< image.json jq -r '.deps[] | select(.name == "friendbot") | .sha' | sed 's/^/    /')"
+  echo "    $(< image.json jq -r '.deps[] | select(.name == "friendbot") | "\(.ref) (\(.sha))"')"
   echo "  lab:"
-  echo "$(< image.json jq -r '.deps[] | select(.name == "lab") | .ref' | sed 's/^/    /')"
-  echo "$(< image.json jq -r '.deps[] | select(.name == "lab") | .sha' | sed 's/^/    /')"
+  echo "    $(< image.json jq -r '.deps[] | select(.name == "lab") | "\(.ref) (\(.sha))"')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
