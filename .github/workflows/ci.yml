@@ -26,7 +26,7 @@ on:
 # already running build. The exception being any protected branch, such as
 # main, where a build for every commit will run.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == 'true' && github.sha || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:
