@@ -20,7 +20,7 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 >   uses: stellar/quickstart@main
 > ```
 >
-> See [Using in GitHub Actions] for more configuration options.
+> See [Using in GitHub Actions] for more configuration options and how to build and run a custom configuration of quickstart.
 
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
@@ -138,6 +138,14 @@ Lab is also deployed at:
 
 https://lab.stellar.org
 
+### Stellar Lab Block/Transactions Explorer
+
+When running Lab in Quickstart, a block explorer is also made available at the following URL:
+
+```
+http://localhost:8000/lab/transactions-explorer
+```
+
 ### Faucet (Friendbot)
 
 Stellar development/test networks use Friendbot as a faucet for the native asset.
@@ -209,6 +217,46 @@ jobs:
           # - Friendbot: http://localhost:8000/friendbot
 ```
 
+#### Custom Builds
+
+The quickstart image can also be built with custom software, such as custom versions of core, rpc, horizon, and so on. Use a workflow as follows to build a custom quickstart image and then run it using the action.
+
+```yaml
+on: [push, pull_request]
+   
+jobs:
+  build-custom:
+    uses: stellar/quickstart/.github/workflows/build.yml@main
+    with:
+      images: |
+        [
+          {
+            "tag": "custom",
+            "config": {
+              "protocol_version_default": 23
+            },
+            "deps": [
+              { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
+              { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
+              { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.1" },
+              { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+              { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+              { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
+            ],
+            "additional-tests": []
+          }
+        ]
+      archs: '["amd64"]'
+  use-custom:
+    needs: build-custom
+    runs-on: ubuntu-latest
+    steps:
+    - uses: stellar/quickstart@main
+      with:
+        artifact: image-quickstart-custom-amd64.tar
+        tag: custom-amd64
+```
+
 
 ### Deploy to Digital Ocean
 
@@ -235,30 +283,11 @@ _Disclaimer_: The DigitalOcean server is publicly accessible on the Internet. Do
 ### Building Custom Images
 
 To build a quickstart image with custom or specific versions of stellar-core,
-horizon, etc, use the `Makefile`. The following parameters can be specified to
-customize the version of each component, and for stellar-core the features it is
-built with.
-
-- `TAG`: The docker tag to assign to the build. Default `dev`.
-- `CORE_REF`: The git reference of stellar-core to build.
-- `CORE_CONFIGURE_FLAGS`: The `CONFIGURE_FLAGS` to configure the stellar-core
-  build with. Typically include `--disable-tests`, and to enable the next protocol
-  version that is still in development, add
-  `--enable-next-protocol-version-unsafe-for-production`.
-- `HORIZON_REF`: The git reference of stellar-horizon to build.
-- `FRIENDBOT_REF`: The git reference of stellar-friendbot to build.
-- `STELLAR_RPC_REF`: The git reference of stellar-rpc to build.
-
-For example:
+horizon, etc, use the `Makefile`. Edit the `images.json` file, adding a new
+image then build that image specifying its tag name:
 
 ```
-make build \
-  TAG=future \
-  CORE_REF=... \
-  CORE_CONFIGURE_FLAGS=... \
-  HORIZON_REF=... \
-  FRIENDBOT_REF=... \
-  STELLAR_RPC_REF=...
+make build TAG=mytag
 ```
 
 ### Background vs. Interactive containers
