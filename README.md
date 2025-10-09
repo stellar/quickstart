@@ -32,15 +32,15 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 
 This image provides a default, non-validating, ephemeral configuration that should work for most developers. By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
-The image uses the following software:
+The image runs the following software:
 
-- [PostgreSQL](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
-- [stellar-core](https://github.com/stellar/stellar-core)
-- [horizon](https://github.com/stellar/go/tree/master/services/horizon)
-- [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
-- [lab](https://github.com/stellar/laboratory)
-- [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
-- [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
+- [stellar-core](https://github.com/stellar/stellar-core) - Node server
+- [stellar-rpc](https://github.com/stellar/stellar-rpc) - RPC server
+- [stellar-horizon](https://github.com/stellar/go/tree/master/services/horizon) - API server
+- [stellar-friendbot](https://github.com/stellar/go/tree/master/services/friendbot) - Faucet
+- [stellar-lab](https://github.com/stellar/laboratory) - Web UI
+- [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
+- [supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
 HTTP APIs and Tools are available at the following port and paths:
 
