@@ -49,6 +49,38 @@ HTTP APIs and Tools are available at the following port and paths:
 - Lab: `http://localhost:8000/lab`
 - Friendbot: `http://localhost:8000/friendbot`
 
+## Tags
+
+The following image tags are available on DockerHub:
+
+- [`latest`](https://hub.docker.com/layers/stellar/quickstart/latest) - stable software, compatible with [mainnet][networks]
+- [`testing`](https://hub.docker.com/layers/stellar/quickstart/testing) - release candidates and stable software, compatible with [mainnet][networks] and [testnet][networks]
+- [`futurenet`](https://hub.docker.com/layers/stellar/quickstart/futurenet) - unstable software, generally compatible with [futurenet][networks]
+- [`nightly`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches, do not use
+- [`nightly-next`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches for the next protocol, do not use
+
+In addition, each commit to the Quickstart repository builds a unique tag that is not updated, that the above tags point to, in the format:
+
+```
+v<version>-b<build>.<attempt>-<tag>
+```
+
+Where:
+
+- `version` = a version number, incremented with each commit
+- `build` = a build number, additionally incremented for repeat builds of an existing commit
+- `attempt` = an attempt number, additionally incremented for retried repeat builds of an existing commit
+- `tag` = `latest`, `testing`, `futurenet`, `nightly`
+
+[networks]: https://developers.stellar.org/docs/networks
+
+## Architectures
+
+All tags are published as multiplatform images supporting architectures:
+
+- `linux/amd46`
+- `linux/arm64`
+
 ## Usage
 
 To use this project successfully, you should first decide a few things:
