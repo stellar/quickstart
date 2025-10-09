@@ -97,8 +97,8 @@ jobs:
     name: 3 test action artifact
     uses: ./.github/workflows/action-test.yml
     with:
-      artifact: image-quickstart-latest-amd64.tar
-      tag: latest-amd64
+      artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
+      tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
   push:
     name: 4 push
@@ -121,4 +121,4 @@ jobs:
     name: 5 test action registry
     uses: ./.github/workflows/action-test.yml
     with:
-      tag: ${{ needs.setup.outputs.tag-prefix }}latest
+      tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
