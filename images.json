@@ -40,7 +40,7 @@
     "tag": "future",
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 23
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
