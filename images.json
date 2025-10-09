@@ -67,5 +67,21 @@
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "additional-tests": []
+  },
+  {
+    "tag": "nightly-next",
+    "events": ["push", "schedule"],
+    "config": {
+      "protocol_version_default": 24
+    },
+    "deps": [
+      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
+      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
+      { "name": "horizon", "repo": "stellar/go", "ref": "master" },
+      { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
+      { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
+    ],
+    "additional-tests": []
   }
 ]
