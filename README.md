@@ -51,13 +51,15 @@ HTTP APIs and Tools are available at the following port and paths:
 
 ## Tags
 
+The following image tags are available on DockerHub:
+
 - [`latest`](https://hub.docker.com/layers/stellar/quickstart/latest) - stable software, compatible with [mainnet][networks]
 - [`testing`](https://hub.docker.com/layers/stellar/quickstart/testing) - release candidates and stable software, compatible with [mainnet][networks] and [testnet][networks]
 - [`futurenet`](https://hub.docker.com/layers/stellar/quickstart/futurenet) - unstable software, generally compatible with [futurenet][networks]
 - [`nightly`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches, do not use
 - [`nightly-next`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches for the next protocol, do not use
 
-Each commit to the Quickstart repository builds a new unique tag that the above tags point to, in the format:
+In addition, each commit to the Quickstart repository builds a unique tag that is not updated, that the above tags point to, in the format:
 
 ```
 v<version>-b<build>.<attempt>-<tag>
