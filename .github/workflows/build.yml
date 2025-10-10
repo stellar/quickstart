@@ -44,7 +44,7 @@ on:
       cache_id:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
-        default: 6
+        default: 7
 
 env:
   artifact_retention_days_for_image: 7
@@ -178,24 +178,32 @@ jobs:
     runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     env:
       image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
+      dep_json: ${{ toJSON(matrix.dep) }}
     steps:
     - uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
         ref: ${{ needs.setup.outputs.sha }}
     - uses: docker/setup-buildx-action@5146db6c4d81fbfd508899f851bbb3883a96ff9f
+    - name: Dep Args
+      id: dep_args
+      run: |
+        args="$(<<< $dep_json jq -c -r '[
+        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
+        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
+        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
+        ] | join(" ")')"
+        echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image
-      env:
-        options_json: ${{ toJSON(matrix.dep.options) }}
       run: >
         docker buildx build
         --platform linux/${{ matrix.dep.arch }}
-        -f Dockerfile.${{ matrix.dep.name }}
-        -t stellar-${{ matrix.dep.name }}:${{ matrix.dep.arch }}
+        -f Dockerfile
+        --target stellar-${{ matrix.dep.name }}
+        -t stellar-${{ matrix.dep.name }}
         -o type=docker,dest=/tmp/${image_filename}
-        --build-arg REPO="${{ matrix.dep.repo }}"
-        --build-arg REF="${{ matrix.dep.sha }}"
-        --build-arg OPTIONS="${options_json}"
+        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
+        ${{ steps.dep_args.outputs.args }}
         .
     - name: Upload Image to Cache
       uses: actions/cache/save@v3
@@ -286,6 +294,16 @@ jobs:
     # preferred because it can output a smaller image file faster than docker
     # save can.  Once buildx supports it we can update.
     # https://github.com/docker/buildx/issues/847
+    - name: Build Args for Deps
+      id: dep_args
+      run: |
+        args="$(<<< $image_json jq -c -r '[ .deps[] | [
+        "--cache-from stellar-\(.name)",
+        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
+        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
+        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
+        ] ] | flatten | join(" ")')"
+        echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image
       run: >
         docker build
@@ -295,12 +313,7 @@ jobs:
         --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
         --build-arg REVISION="${{ needs.setup.outputs.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
-        --build-arg XDR_IMAGE_REF=stellar-xdr:${{ matrix.arch }}
-        --build-arg CORE_IMAGE_REF=stellar-core:${{ matrix.arch }}
-        --build-arg RPC_IMAGE_REF=stellar-rpc:${{ matrix.arch }}
-        --build-arg HORIZON_IMAGE_REF=stellar-horizon:${{ matrix.arch }}
-        --build-arg FRIENDBOT_IMAGE_REF=stellar-friendbot:${{ matrix.arch }}
-        --build-arg LAB_IMAGE_REF=stellar-lab:${{ matrix.arch }}
+        ${{ steps.dep_args.outputs.args }}
         .
     - name: Save Quickstart Image
       run: docker save quickstart -o /tmp/image
