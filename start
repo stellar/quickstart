@@ -332,6 +332,26 @@ function copy_defaults() {
   else
     $CP /opt/stellar-default/common/core/ $COREHOME
     $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
+    if [ "$NETWORK" = "local" ]; then
+      # If there are no config settings for the current network, use the config
+      # settings from the most recent protocol.
+      local config_dir_base="$COREHOME/etc/config-settings"
+      local config_dir="$config_dir_base/p$PROTOCOL_VERSION"
+      if [ ! -d "$config_dir" ]; then
+        # Symlink the config-dir from the most recent protocol version.
+        # For example, if $PROTOCOL_VERSION is 25, and there is no config
+        # settings for p25, look for config settings for p24, p23, so on until
+        # the directory exists. Once the directory exists, create a symlink for
+        # p25 -> p23.
+        for ((v=PROTOCOL_VERSION-1; v>=0; v--)); do
+          local fallback_dir="$config_dir_base/p$v"
+          if [ -d "$fallback_dir" ]; then
+            ln -s "$fallback_dir" "$config_dir"
+            break
+          fi
+        done
+      fi
+    fi
   fi
 
   if [ -d $HZHOME/etc ]; then
