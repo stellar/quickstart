@@ -344,9 +344,10 @@ function copy_defaults() {
         # the directory exists. Once the directory exists, create a symlink for
         # p25 -> p23.
         for ((v=PROTOCOL_VERSION-1; v>=0; v--)); do
-          local fallback_dir="$config_dir_base/p$v"
+          local v_dir="p$v"
+          local fallback_dir="$config_dir_base/$v_dir"
           if [ -d "$fallback_dir" ]; then
-            ln -s "$fallback_dir" "$config_dir"
+            ln -fs "$v_dir" "$config_dir"
             break
           fi
         done
