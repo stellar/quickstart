@@ -23,14 +23,15 @@ on:
       tag-prefix:
         description: "Tag prefix for the image when pushed (e.g. pr877-v21-)"
         type: "string"
-        default: ''
+        required: true
       tag-alias-prefix:
         description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias (e.g. pr877-)"
         type: "string"
-        default: ''
+        required: true
       registry_repo:
         description: "Repo at the registry to push to"
         type: "string"
+        required: true
     secrets:
       registry:
         description: "Registry to push to"

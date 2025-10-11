@@ -32,15 +32,15 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 
 This image provides a default, non-validating, ephemeral configuration that should work for most developers. By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
-The image uses the following software:
+The image runs the following software:
 
-- [PostgreSQL](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
-- [stellar-core](https://github.com/stellar/stellar-core)
-- [horizon](https://github.com/stellar/go/tree/master/services/horizon)
-- [friendbot](https://github.com/stellar/go/tree/master/services/friendbot)
-- [lab](https://github.com/stellar/laboratory)
-- [stellar-rpc](https://github.com/stellar/stellar-rpc/tree/main/cmd/stellar-rpc)
-- [Supervisord](http://supervisord.org) is used from managing the processes of the above services.
+- [stellar-core](https://github.com/stellar/stellar-core) - Node server
+- [stellar-rpc](https://github.com/stellar/stellar-rpc) - RPC server
+- [stellar-horizon](https://github.com/stellar/go/tree/master/services/horizon) - API server
+- [stellar-friendbot](https://github.com/stellar/go/tree/master/services/friendbot) - Faucet
+- [stellar-lab](https://github.com/stellar/laboratory) - Web UI
+- [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
+- [supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
 HTTP APIs and Tools are available at the following port and paths:
 
@@ -48,6 +48,38 @@ HTTP APIs and Tools are available at the following port and paths:
 - RPC: `http://localhost:8000/rpc`
 - Lab: `http://localhost:8000/lab`
 - Friendbot: `http://localhost:8000/friendbot`
+
+## Tags
+
+The following image tags are available on DockerHub:
+
+- [`latest`](https://hub.docker.com/layers/stellar/quickstart/latest) - stable software, compatible with [mainnet][networks]
+- [`testing`](https://hub.docker.com/layers/stellar/quickstart/testing) - release candidates and stable software, compatible with [mainnet][networks] and [testnet][networks]
+- [`futurenet`](https://hub.docker.com/layers/stellar/quickstart/futurenet) - unstable software, generally compatible with [futurenet][networks]
+- [`nightly`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches, do not use
+- [`nightly-next`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches for the next protocol, do not use
+
+In addition, each commit to the Quickstart repository builds a unique tag that is not updated, that the above tags point to, in the format:
+
+```
+v<version>-b<build>.<attempt>-<tag>
+```
+
+Where:
+
+- `version` = a version number, incremented with each commit
+- `build` = a build number, additionally incremented for repeat builds of an existing commit
+- `attempt` = an attempt number, additionally incremented for retried repeat builds of an existing commit
+- `tag` = `latest`, `testing`, `futurenet`, `nightly`
+
+[networks]: https://developers.stellar.org/docs/networks
+
+## Architectures
+
+All tags are published as multiplatform images supporting architectures:
+
+- `linux/amd46`
+- `linux/arm64`
 
 ## Usage
 
