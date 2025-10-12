@@ -12,8 +12,8 @@ tests = []
 for image in images:
     tag = image['tag']
     for test in image.get('additional-tests', []):
-        tests.append({'image': {'tag': tag}, **test})
+        tests.append({'image': image, **test})
     for test in image.get('tests', {}).get('additional-tests', []):
-        tests.append({'image': {'tag': tag}, **test})
+        tests.append({'image': image, **test})
 
 print(json.dumps(tests))
