@@ -82,7 +82,7 @@
   },
   {
     "tag": "nightly-next",
-    "events": ["push", "schedule"],
+    "events": ["push", "schedule", "pull_request"],
     "config": {
       "protocol_version_default": 24
     },
