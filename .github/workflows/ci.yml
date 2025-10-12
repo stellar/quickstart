@@ -44,6 +44,7 @@ jobs:
     name: 1 setup
     runs-on: ubuntu-latest
     outputs:
+      sha: ${{ steps.sha.outputs.sha }}
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
@@ -54,6 +55,10 @@ jobs:
       with:
         fetch-depth: 0 # Get all history for the sha count below.
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Sha
+      id: sha
+      run: |
+        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -88,9 +93,10 @@ jobs:
     needs: setup
     uses: ./.github/workflows/build.yml
     with:
-      ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      ref: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
+      test: false # do not run tests as part of build, run tests separately after push
 
   action-using-artifact:
     needs: [setup, build]
@@ -105,7 +111,7 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/push.yml
     with:
-      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      sha: ${{ needs.setup.outputs.sha }}
       tags: ${{ needs.setup.outputs.tags }}
       archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
@@ -116,9 +122,19 @@ jobs:
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
+  test:
+    name: 5 test
+    needs: [setup, build]
+    uses: ./.github/workflows/test.yml
+    with:
+      repo: ${{ inputs.repo }}
+      ref: ${{ needs.setup.outputs.sha }}
+      images: ${{ inputs.images }}
+      archs: ${{ inputs.archs }}
+
   action-using-registry:
     needs: [setup, push]
-    name: 5 test action registry
+    name: 6 test action registry
     uses: ./.github/workflows/action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
