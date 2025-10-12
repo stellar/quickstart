@@ -115,10 +115,10 @@ jobs:
       run: sleep 10
     - name: Calculate timeout
       id: timeout
-      run: echo "minutes=$((${{ github.run_number }} * 2))" >> $GITHUB_OUTPUT
+      run: echo "minutes=$((${{ github.run_attempt }} * 2))" >> $GITHUB_OUTPUT
     - name: Run core test
       if: ${{ contains(matrix.enable, 'core') }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
@@ -126,7 +126,7 @@ jobs:
         curl http://localhost:11626/info
     - name: Run horizon up test
       if: ${{ contains(matrix.enable, 'horizon') }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
@@ -134,7 +134,7 @@ jobs:
         curl http://localhost:8000
     - name: Run horizon core up test
       if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
@@ -142,7 +142,7 @@ jobs:
         curl http://localhost:8000
     - name: Run horizon ingesting test
       if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
@@ -151,7 +151,7 @@ jobs:
         curl http://localhost:8000
     - name: Run friendbot test
       if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
@@ -159,14 +159,14 @@ jobs:
         go run tests/test_friendbot.go
     - name: Run stellar rpc up test
       if: ${{ contains(matrix.enable, 'rpc') }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
         go run tests/test_stellar_rpc_up.go
     - name: Run stellar rpc healthy test
       if: ${{ contains(matrix.enable, 'rpc') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ steps.timeout.outputs.minutes }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
