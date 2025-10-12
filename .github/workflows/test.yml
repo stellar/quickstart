@@ -57,7 +57,7 @@ jobs:
         echo "additional-tests=$tests" >> $GITHUB_OUTPUT
 
   test:
-    needs: [setup, build]
+    needs: setup
     strategy:
       matrix:
         image: ${{ fromJSON(inputs.images) }}
