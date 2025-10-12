@@ -51,6 +51,8 @@ jobs:
         ref: ${{ inputs.ref }}
     - name: Additional Tests
       id: tests
+      env:
+        images: ${{ inputs.images }}
       run: |
         tests="$(<<< $images ./.scripts/images-additional-tests)"
         <<< $tests jq
