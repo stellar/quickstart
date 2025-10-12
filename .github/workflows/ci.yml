@@ -96,18 +96,28 @@ jobs:
       ref: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
-      test: false # do not run tests as part of build, run tests separately after push
+      test: false # do not run tests as part of build, tests run in parallel with push
+
+  test:
+    name: 3 test
+    needs: [setup, build]
+    uses: ./.github/workflows/test.yml
+    with:
+      repo: ${{ inputs.repo }}
+      ref: ${{ needs.setup.outputs.sha }}
+      images: ${{ inputs.images }}
+      archs: ${{ inputs.archs }}
 
   action-using-artifact:
     needs: [setup, build]
-    name: 3 test action artifact
+    name: 4 test action artifact
     uses: ./.github/workflows/action-test.yml
     with:
       artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
   push:
-    name: 4 push
+    name: 5 push
     needs: [setup, build]
     uses: ./.github/workflows/push.yml
     with:
@@ -121,16 +131,6 @@ jobs:
       registry: ${{ secrets.DOCKERHUB_TOKEN && 'docker.io' || 'ghcr.io' }}
       registry_username: ${{ secrets.DOCKERHUB_USERNAME || github.actor }}
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
-
-  test:
-    name: 5 test
-    needs: [setup, build]
-    uses: ./.github/workflows/test.yml
-    with:
-      repo: ${{ inputs.repo }}
-      ref: ${{ needs.setup.outputs.sha }}
-      images: ${{ inputs.images }}
-      archs: ${{ inputs.archs }}
 
   action-using-registry:
     needs: [setup, push]
