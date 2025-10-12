@@ -275,7 +275,10 @@ jobs:
               { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
               { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
             ],
-            "additional-tests": []
+            "tests": {
+              "continue-on-error": false,
+              "additional-tests": []
+            }
           }
         ]
       archs: '["amd64"]'

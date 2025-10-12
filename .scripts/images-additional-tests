@@ -11,7 +11,9 @@ images = json.load(sys.stdin)
 tests = []
 for image in images:
     tag = image['tag']
-    for test in image['additional-tests']:
+    for test in image.get('additional-tests', []):
+        tests.append({'tag': tag, **test})
+    for test in image.get('tests', {}).get('additional-tests', []):
         tests.append({'tag': tag, **test})
 
 print(json.dumps(tests))

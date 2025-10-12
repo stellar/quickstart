@@ -316,15 +316,16 @@ jobs:
     if: always() && !failure() && !cancelled() && (github.event_name != 'workflow_call' || inputs.test == true)
     strategy:
       matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
+        image: ${{ fromJSON(needs.setup.outputs.images) }}
         arch: ${{ fromJSON(inputs.archs) }}
         network: ["local"]
         enable: ["core","rpc","core,rpc,horizon"]
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
-    name: 6 test (${{ matrix.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }})
+    name: 6 test (${{ matrix.image.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    continue-on-error: ${{ matrix.image.tests.continue-on-error }}
     steps:
     - name: Free up disk space
       if: matrix.network == 'pubnet'
@@ -341,7 +342,7 @@ jobs:
     - name: Download Quickstart Image
       uses: actions/download-artifact@v4
       with:
-        name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
+        name: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
         path: /tmp/
     - name: Load Quickstart Image
       run: docker load -i /tmp/image
@@ -356,7 +357,7 @@ jobs:
         "8000:8000"
         -p "11626:11626"
         --name stellar
-        quickstart:${{ matrix.tag }}-${{ matrix.arch }}
+        quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
         --${{ matrix.network }}
         --enable ${{ matrix.enable }}
         ${{ matrix.options }}
@@ -421,6 +422,6 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: logs-${{ matrix.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
+        name: logs-${{ matrix.image.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
         path: logs
         retention-days: ${{ env.artifact_retention_days_for_logs }}
