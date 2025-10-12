@@ -34,7 +34,7 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [build, action-using-artifact, push, action-using-registry]
+    needs: [build, test, action-using-artifact, push, action-using-registry]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
