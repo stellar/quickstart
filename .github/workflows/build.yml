@@ -323,7 +323,7 @@ jobs:
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false
-    name: 6 test (${{ matrix.image.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }}, ${{ matrix.image.tests.continue-on-error && 'continue-on-error'}})
+    name: 6 test (${{ matrix.image.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }}, ${{ matrix.image.tests.continue-on-error && 'continue-on-error' || ''}})
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     continue-on-error: ${{ matrix.image.tests.continue-on-error || false }}
     steps:
