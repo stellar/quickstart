@@ -91,26 +91,25 @@ jobs:
   build:
     name: 2 build
     needs: setup
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/internal-build.yml
     with:
-      ref: ${{ needs.setup.outputs.sha }}
+      sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
-      test: false # do not run tests as part of build, tests run in parallel with push
 
   test:
     name: 3 test
     needs: [setup, build]
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/internal-test.yml
     with:
-      ref: ${{ needs.setup.outputs.sha }}
+      sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
 
   action-using-artifact:
     needs: [setup, build]
     name: 4 test action artifact
-    uses: ./.github/workflows/action-test.yml
+    uses: ./.github/workflows/internal-action-test.yml
     with:
       artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
@@ -118,7 +117,7 @@ jobs:
   push:
     name: 5 push
     needs: [setup, build]
-    uses: ./.github/workflows/push.yml
+    uses: ./.github/workflows/internal-push.yml
     with:
       sha: ${{ needs.setup.outputs.sha }}
       tags: ${{ needs.setup.outputs.tags }}
@@ -134,6 +133,6 @@ jobs:
   action-using-registry:
     needs: [setup, push]
     name: 6 test action registry
-    uses: ./.github/workflows/action-test.yml
+    uses: ./.github/workflows/internal-action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
