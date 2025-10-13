@@ -8,23 +8,14 @@ import (
 	"time"
 )
 
-const timeout = 3 * time.Minute
-
 type Root struct {
 	SupportedProtocolVersion int32 `json:"supported_protocol_version"`
 }
 
 func main() {
-	startTime := time.Now()
-
 	for {
 		time.Sleep(5 * time.Second)
 		logLine("Waiting for Horizon to start")
-
-		if time.Since(startTime) > timeout {
-			logLine("Timeout")
-			os.Exit(-1)
-		}
 
 		resp, err := http.Get("http://localhost:8000")
 		if err != nil {

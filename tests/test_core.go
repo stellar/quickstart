@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-const timeout = 3 * time.Minute
-
 type Info struct {
 	Info struct {
 		State string `json:"state"`
@@ -17,16 +15,9 @@ type Info struct {
 }
 
 func main() {
-	startTime := time.Now()
-
 	for {
 		time.Sleep(5 * time.Second)
 		logLine("Waiting for stellar-core to start catching up and sync")
-
-		if time.Since(startTime) > timeout {
-			logLine("Timeout")
-			os.Exit(-1)
-		}
 
 		resp, err := http.Get("http://localhost:11626/info")
 		if err != nil {

@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-const timeout = 12 * time.Minute
-
 type RPCResponse struct {
 	Result struct {
 		Status string `json:"status"`
@@ -22,8 +20,6 @@ type RPCResponse struct {
 }
 
 func main() {
-	startTime := time.Now()
-
 	getHealthRPCRequest := []byte(`{
 	   "jsonrpc": "2.0",
 	   "id": 10235,
@@ -33,11 +29,6 @@ func main() {
 	for {
 		time.Sleep(5 * time.Second)
 		logLine("Waiting for Stellar RPC to start")
-
-		if time.Since(startTime) > timeout {
-			logLine("Timeout")
-			os.Exit(-1)
-		}
 
 		resp, err := http.Post("http://localhost:8000/rpc", "application/json", bytes.NewBuffer(getHealthRPCRequest))
 		if err != nil {

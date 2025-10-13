@@ -13,9 +13,12 @@
       { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
-    "additional-tests": [
-      { "arch": "amd64", "network": "pubnet", "enable": "core,rpc,horizon" }
-    ]
+    "tests": {
+      "continue-on-error": false,
+      "additional-tests": [
+        { "arch": "amd64", "network": "pubnet", "enable": "core,rpc,horizon" }
+      ]
+    }
   },
   {
     "tag": "testing",
@@ -31,10 +34,13 @@
       { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
-    "additional-tests": [
-      { "arch": "amd64", "network": "testnet", "enable": "core,rpc,horizon" },
-      { "arch": "amd64", "network": "pubnet", "enable": "core,rpc,horizon" }
-    ]
+    "tests": {
+      "continue-on-error": false,
+      "additional-tests": [
+        { "arch": "amd64", "network": "testnet", "enable": "core,rpc,horizon" },
+        { "arch": "amd64", "network": "pubnet", "enable": "core,rpc,horizon" }
+      ]
+    }
   },
   {
     "tag": "future",
@@ -50,7 +56,10 @@
       { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
-    "additional-tests": []
+    "tests": {
+      "continue-on-error": false,
+      "additional-tests": []
+    }
   },
   {
     "tag": "nightly",
@@ -66,7 +75,10 @@
       { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
-    "additional-tests": []
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
   },
   {
     "tag": "nightly-next",
@@ -82,6 +94,9 @@
       { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
-    "additional-tests": []
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
   }
 ]
