@@ -48,7 +48,6 @@ on:
 
 env:
   artifact_retention_days_for_image: 7
-  artifact_retention_days_for_logs: 60
 
 jobs:
 
@@ -94,12 +93,6 @@ jobs:
         deps="$(<<< $images ./.scripts/images-deps)"
         <<< $deps jq
         echo "deps=$deps" >> $GITHUB_OUTPUT
-    - name: Additional Tests
-      id: tests
-      run: |
-        tests="$(<<< $images ./.scripts/images-additional-tests)"
-        <<< $tests jq
-        echo "additional-tests=$tests" >> $GITHUB_OUTPUT
 
   load:
     needs: [setup]
@@ -312,126 +305,12 @@ jobs:
         retention-days: ${{ env.artifact_retention_days_for_image }}
 
   test:
+    if: inputs.test
+    name: 6 test
     needs: [setup, build]
-    if: always() && !failure() && !cancelled() && (github.event_name != 'workflow_call' || inputs.test == true)
-    strategy:
-      matrix:
-        image: ${{ fromJSON(needs.setup.outputs.images) }}
-        arch: ${{ fromJSON(inputs.archs) }}
-        network: ["local"]
-        enable: ["core","rpc","core,rpc,horizon"]
-        options: [""]
-        include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
-      fail-fast: false
-    name: 6 test (${{ matrix.image.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }}, ${{ matrix.image.tests.continue-on-error && 'continue-on-error' || ''}})
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    continue-on-error: ${{ matrix.image.tests.continue-on-error || false }}
-    steps:
-    - name: Free up disk space
-      if: matrix.network == 'pubnet'
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        df -h
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Download Quickstart Image
-      uses: actions/download-artifact@v4
-      with:
-        name: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
-        path: /tmp/
-    - name: Load Quickstart Image
-      run: docker load -i /tmp/image
-    - name: Prepare Logs Directory
-      run: mkdir -p logs
-    - name: Run Quickstart Image
-      run: >
-        docker run
-        --platform linux/${{ matrix.arch }}
-        -d
-        -p
-        "8000:8000"
-        -p "11626:11626"
-        --name stellar
-        quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
-        --${{ matrix.network }}
-        --enable ${{ matrix.enable }}
-        ${{ matrix.options }}
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1
-    - name: Sleep until supervisor is up
-      run: sleep 10
-    - name: Calculate timeout
-      id: timeout
-      run: echo "minutes=$((${{ github.run_attempt }} * 2))" >> $GITHUB_OUTPUT
-    - name: Run core test
-      if: ${{ contains(matrix.enable, 'core') }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
-        go run tests/test_core.go
-        curl http://localhost:11626/info
-    - name: Run horizon up test
-      if: ${{ contains(matrix.enable, 'horizon') }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_up.go
-        curl http://localhost:8000
-    - name: Run horizon core up test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_core_up.go
-        curl http://localhost:8000
-    - name: Run horizon ingesting test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_ingesting.go
-        curl http://localhost:8000
-    - name: Run friendbot test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_friendbot.go
-    - name: Run stellar rpc up test
-      if: ${{ contains(matrix.enable, 'rpc') }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
-        go run tests/test_stellar_rpc_up.go
-    - name: Run stellar rpc healthy test
-      if: ${{ contains(matrix.enable, 'rpc') && matrix.network != 'pubnet' }}
-      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
-        go run tests/test_stellar_rpc_healthy.go
-    - name: Prepare Test Logs
-      if: always()
-      run: docker cp stellar:/var/log logs
-    - name: Upload Test Logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: logs-${{ matrix.image.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
-        path: logs
-        retention-days: ${{ env.artifact_retention_days_for_logs }}
+    uses: ./.github/workflows/test.yml
+    with:
+      repo: ${{ inputs.repo }}
+      ref: ${{ needs.setup.outputs.sha }}
+      images: ${{ inputs.images }}
+      archs: ${{ inputs.archs }}
