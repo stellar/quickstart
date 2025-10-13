@@ -48,7 +48,6 @@ on:
 
 env:
   artifact_retention_days_for_image: 7
-  artifact_retention_days_for_logs: 60
 
 jobs:
 
