@@ -93,6 +93,7 @@ jobs:
     needs: setup
     uses: ./.github/workflows/internal-build.yml
     with:
+      repo: ${{ github.repository }}
       sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
@@ -102,6 +103,7 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/internal-test.yml
     with:
+      repo: ${{ github.repository }}
       sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
