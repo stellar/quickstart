@@ -33,7 +33,7 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [build, action-using-artifact, push, action-using-registry]
+    needs: [build, test, action-using-artifact, push, action-using-registry]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -43,6 +43,7 @@ jobs:
     name: 1 setup
     runs-on: ubuntu-latest
     outputs:
+      sha: ${{ steps.sha.outputs.sha }}
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
@@ -53,6 +54,10 @@ jobs:
       with:
         fetch-depth: 0 # Get all history for the sha count below.
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Sha
+      id: sha
+      run: |
+        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
     - name: Tag Prefix
       id: tag-prefix
       run: |
@@ -85,26 +90,37 @@ jobs:
   build:
     name: 2 build
     needs: setup
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/internal-build.yml
     with:
-      ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      repo: ${{ github.repository }}
+      sha: ${{ needs.setup.outputs.sha }}
+      images: ${{ needs.setup.outputs.images }}
+      archs: ${{ needs.setup.outputs.archs }}
+
+  test:
+    name: 3 test
+    needs: [setup, build]
+    uses: ./.github/workflows/internal-test.yml
+    with:
+      repo: ${{ github.repository }}
+      sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
 
   action-using-artifact:
     needs: [setup, build]
-    name: 3 test action artifact
-    uses: ./.github/workflows/action-test.yml
+    name: 4 test action artifact
+    uses: ./.github/workflows/internal-action-test.yml
     with:
       artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
   push:
-    name: 4 push
+    name: 5 push
     needs: [setup, build]
-    uses: ./.github/workflows/push.yml
+    uses: ./.github/workflows/internal-push.yml
     with:
-      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      sha: ${{ needs.setup.outputs.sha }}
       tags: ${{ needs.setup.outputs.tags }}
       archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
@@ -117,7 +133,7 @@ jobs:
 
   action-using-registry:
     needs: [setup, push]
-    name: 5 test action registry
-    uses: ./.github/workflows/action-test.yml
+    name: 6 test action registry
+    uses: ./.github/workflows/internal-action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}

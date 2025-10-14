@@ -523,6 +523,7 @@ function init_horizon() {
   cat << EOF >> etc/horizon.env
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
 export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
+export STELLAR_CORE_VERSION="$(stellar-core version 2>/dev/null | head -1)"
 EOF
 
   run_silent "chown-horizon" chown -R stellar:stellar .

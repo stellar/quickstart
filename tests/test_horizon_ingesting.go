@@ -8,24 +8,15 @@ import (
 	"time"
 )
 
-const timeout = 2 * time.Hour
-
 type Root struct {
 	HorizonSequence int32 `json:"history_latest_ledger"`
 	CoreSequence    int32 `json:"core_latest_ledger"`
 }
 
 func main() {
-	startTime := time.Now()
-
 	for {
 		time.Sleep(10 * time.Second)
 		logLine("Waiting for Horizon to start ingesting")
-
-		if time.Since(startTime) > timeout {
-			logLine("Timeout")
-			os.Exit(-1)
-		}
 
 		resp, err := http.Get("http://localhost:8000")
 		if err != nil {

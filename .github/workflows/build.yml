@@ -8,15 +8,6 @@ name: Build
 #
 # This workflow is intended to be called by third parties to build custom
 # quickstart images. See the repository README for an example.
-#
-# The build process first builds the dependencies (xdr, core, rpc, horizon,
-# friendbot, lab). When doing so the dependencies needed as specified by the
-# images json are deduplicated so that any software shared by the images is
-# only built once. Dependencies are cached and so only rebuilt when needed.
-# Dependencies are defined by a tag or branch, but when building those git refs
-# are resolved to a sha to ensure stability of the sha throughout the full
-# build process. For all dependencies and the final image, amd64 and arm64
-# variants may be built.
 
 on:
   workflow_call:
@@ -48,14 +39,13 @@ on:
 
 env:
   artifact_retention_days_for_image: 7
-  artifact_retention_days_for_logs: 60
 
 jobs:
 
   complete:
     if: always()
     name: complete
-    needs: [setup, load, build, test]
+    needs: [build, test, action-using-artifact, push, action-using-registry]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -66,9 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
-      images: ${{ steps.images.outputs.images }}
-      deps: ${{ steps.deps.outputs.deps }}
-      additional-tests: ${{ steps.tests.outputs.additional-tests }}
+      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -78,355 +66,24 @@ jobs:
       id: sha
       run: |
         echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
-    - name: Images with Extras
-      id: images
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        images: ${{ inputs.images }}
-      run: |
-        images="$(<<< $images ./.scripts/images-with-extras)"
-        <<< $images jq
-        echo "images=$images" >> $GITHUB_OUTPUT
-        echo "images=$images" >> $GITHUB_ENV
-    - name: Deps
-      id: deps
-      run: |
-        deps="$(<<< $images ./.scripts/images-deps)"
-        <<< $deps jq
-        echo "deps=$deps" >> $GITHUB_OUTPUT
-    - name: Additional Tests
-      id: tests
-      run: |
-        tests="$(<<< $images ./.scripts/images-additional-tests)"
-        <<< $tests jq
-        echo "additional-tests=$tests" >> $GITHUB_OUTPUT
-
-  load:
-    needs: [setup]
-    strategy:
-      matrix:
-        dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ${{ fromJSON(inputs.archs) }}
-      fail-fast: false
-    name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
-    runs-on: ubuntu-latest
-    env:
-      dep_json: ${{ toJSON(matrix.dep) }}
-      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.tar
-      json_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
-      missing_filename: missing-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
-    steps:
-    - name: Create Dep Details JSON (with arch)
-      run: >
-        echo "${dep_json}"
-        | jq --arg arch ${{ matrix.arch }} '.arch = $arch'
-        | tee /tmp/${{ env.json_filename }}
-    - name: Upload Dep Details JSON
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.json_filename }}
-        path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-    - name: Find Image in Cache
-      id: cache
-      uses: actions/cache/restore@v3
-      with:
-        key: ${{ inputs.cache_id }}-${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-    - name: Upload Image to Artifacts
-      if: steps.cache.outputs.cache-hit == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-    - name: Upload Dep Details as Missing Marker Due to Cache Miss
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.missing_filename }}
-        path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-
-  prepare:
-    needs: [load]
-    name: 3 prepare
-    runs-on: ubuntu-latest
-    outputs:
-      deps-to-build: ${{ steps.deps-to-build.outputs.deps }}
-    steps:
-    - name: Download Missing Markers
-      uses: actions/download-artifact@v4
-      with:
-        pattern: missing-*
-        merge-multiple: true
-        path: /tmp/missing
-    - name: Collect Deps-to-Build from Missing Markers
-      id: deps-to-build
-      run: |
-        deps="$(find /tmp/missing -name "*.json" -exec cat {} \; | jq -c -s '.')"
-        echo "deps=$deps" | tee -a $GITHUB_OUTPUT
-
-  build-dep:
-    needs: [setup, prepare]
-    if: needs.prepare.outputs.deps-to-build != '[]'
-    strategy:
-      matrix:
-        dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
-      fail-fast: false
-    name: 4 build (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.dep.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
-    runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    env:
-      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
-      dep_json: ${{ toJSON(matrix.dep) }}
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Dep Args
-      id: dep_args
-      run: |
-        args="$(<<< $dep_json jq -c -r '[
-        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
-        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
-        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
-        ] | join(" ")')"
-        echo "args=${args}" | tee -a $GITHUB_OUTPUT
-    - name: Build Image
-      run: >
-        docker build
-        --platform linux/${{ matrix.dep.arch }}
-        -f Dockerfile
-        --target stellar-${{ matrix.dep.name }}
-        -t stellar-${{ matrix.dep.name }}
-        -o type=docker,dest=/tmp/${image_filename}
-        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
-        ${{ steps.dep_args.outputs.args }}
-        .
-    - name: Upload Image to Cache
-      uses: actions/cache/save@v3
-      id: cache
-      with:
-        key: ${{ inputs.cache_id }}-${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-    - name: Upload Image to Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
 
   build:
-    needs: [setup, load, build-dep]
-    if: always() && !failure() && !cancelled()
-    strategy:
-      matrix:
-        image: ${{ fromJSON(needs.setup.outputs.images) }}
-        arch: ${{ fromJSON(inputs.archs) }}
-      fail-fast: false
-    name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    env:
-      image_json: ${{ toJSON(matrix.image) }}
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Collect Dep IDs
-      id: ids
-      run:
-        echo "$(<<< $image_json jq -r '.deps[] | "\(.name)=\(.id)"')" | tee -a $GITHUB_OUTPUT
-    - name: Write Image Config
-      run: |
-        echo "$image_json" > .image.json
-    - name: Download Image XDR
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-xdr-${{ steps.ids.outputs.xdr }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Core
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-core-${{ steps.ids.outputs.core }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image RPC
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-rpc-${{ steps.ids.outputs.rpc }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Horizon
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-horizon-${{ steps.ids.outputs.horizon }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Friendbot
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-friendbot-${{ steps.ids.outputs.friendbot }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Lab
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-lab-${{ steps.ids.outputs.lab }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Load Image into Docker
-      run: |
-        ls -lah /tmp/images/
-        for image in /tmp/images/*.tar; do
-          echo Loading image $image
-          < "${image/%.tar/.json}" jq
-          docker load -i $image
-        done
-    - name: Pull Base Image
-      run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
-    - name: Build Args for Deps
-      id: dep_args
-      run: |
-        args="$(<<< $image_json jq -c -r '[ .deps[] | [
-        "--cache-from stellar-\(.name)",
-        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
-        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
-        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
-        ] ] | flatten | join(" ")')"
-        echo "args=${args}" | tee -a $GITHUB_OUTPUT
-    - name: Build Image
-      run: >
-        docker build
-        --platform linux/${{ matrix.arch }}
-        -f Dockerfile
-        -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
-        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
-        --build-arg REVISION="${{ needs.setup.outputs.sha }}"
-        --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
-        ${{ steps.dep_args.outputs.args }}
-        .
-    - name: Save Quickstart Image
-      run: docker save quickstart -o /tmp/image
-    - name: Upload Quickstart Image to Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: image-quickstart-${{ matrix.image.tag }}-${{ matrix.arch }}.tar
-        path: /tmp/image
-        retention-days: ${{ env.artifact_retention_days_for_image }}
+    name: 2 build
+    needs: setup
+    uses: ./.github/workflows/internal-build.yml
+    with:
+      repo: ${{ inputs.repo }}
+      sha: ${{ needs.setup.outputs.sha }}
+      images: ${{ inputs.images }}
+      archs: ${{ inputs.archs }}
 
   test:
+    if: inputs.test
+    name: 3 test
     needs: [setup, build]
-    if: always() && !failure() && !cancelled() && (github.event_name != 'workflow_call' || inputs.test == true)
-    strategy:
-      matrix:
-        tag: ${{ fromJSON(needs.setup.outputs.images).*.tag }}
-        arch: ${{ fromJSON(inputs.archs) }}
-        network: ["local"]
-        enable: ["core","rpc","core,rpc,horizon"]
-        options: [""]
-        include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
-      fail-fast: false
-    name: 6 test (${{ matrix.tag }}, ${{ matrix.arch }}, ${{ matrix.network }}, ${{ matrix.enable }} ${{ matrix.options || '' }})
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    steps:
-    - name: Free up disk space
-      if: matrix.network == 'pubnet'
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        df -h
-    - uses: actions/checkout@v2
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
-    - name: Download Quickstart Image
-      uses: actions/download-artifact@v4
-      with:
-        name: image-quickstart-${{ matrix.tag }}-${{ matrix.arch }}.tar
-        path: /tmp/
-    - name: Load Quickstart Image
-      run: docker load -i /tmp/image
-    - name: Prepare Logs Directory
-      run: mkdir -p logs
-    - name: Run Quickstart Image
-      run: >
-        docker run
-        --platform linux/${{ matrix.arch }}
-        -d
-        -p
-        "8000:8000"
-        -p "11626:11626"
-        --name stellar
-        quickstart:${{ matrix.tag }}-${{ matrix.arch }}
-        --${{ matrix.network }}
-        --enable ${{ matrix.enable }}
-        ${{ matrix.options }}
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1
-    - name: Sleep until supervisor is up
-      run: sleep 10
-    - name: Run core test
-      if: ${{ contains(matrix.enable, 'core') }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
-        go run tests/test_core.go
-        curl http://localhost:11626/info
-    - name: Run horizon up test
-      if: ${{ contains(matrix.enable, 'horizon') }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_up.go
-        curl http://localhost:8000
-    - name: Run horizon core up test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_core_up.go
-        curl http://localhost:8000
-    - name: Run horizon ingesting test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network != 'pubnet' }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_horizon_ingesting.go
-        curl http://localhost:8000
-    - name: Run friendbot test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f friendbot" | docker exec -i stellar sh &
-        echo "supervisorctl tail -f horizon" | docker exec -i stellar sh &
-        go run tests/test_friendbot.go
-    - name: Run stellar rpc up test
-      if: ${{ contains(matrix.enable, 'rpc') }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
-        go run tests/test_stellar_rpc_up.go
-    - name: Run stellar rpc healthy test
-      if: ${{ contains(matrix.enable, 'rpc') && matrix.network != 'pubnet' }}
-      run: |
-        docker logs stellar -f &
-        echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
-        go run tests/test_stellar_rpc_healthy.go
-    - name: Prepare Test Logs
-      if: always()
-      run: docker cp stellar:/var/log logs
-    - name: Upload Test Logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: logs-${{ matrix.tag }}-${{ matrix.arch }}-test-${{ strategy.job-index }}
-        path: logs
-        retention-days: ${{ env.artifact_retention_days_for_logs }}
+    uses: ./.github/workflows/internal-test.yml
+    with:
+      repo: ${{ inputs.repo }}
+      sha: ${{ needs.setup.outputs.sha }}
+      images: ${{ inputs.images }}
+      archs: ${{ inputs.archs }}
