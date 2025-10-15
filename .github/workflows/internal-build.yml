@@ -280,7 +280,7 @@ jobs:
       id: dep_args
       run: |
         args="$(<<< $image_json jq -c -r '[ .deps[] | [
-        "--cache-from stellar-\(.name)-builder",
+        "--cache-from stellar-\(.name)",
         "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
         "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
         "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
