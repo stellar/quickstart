@@ -275,12 +275,6 @@ jobs:
         done
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
-      # Docker buildx cannot be used to build the dev quickstart image because
-      # buildx does not yet support importing existing images, like the core and
-      # horizon images above, into a buildx builder's cache. Buildx would be
-      # preferred because it can output a smaller image file faster than docker
-      # save can.  Once buildx supports it we can update.
-      # https://github.com/docker/buildx/issues/847
     - name: Build Args for Deps
       id: dep_args
       run: |
