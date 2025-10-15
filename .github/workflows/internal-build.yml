@@ -288,6 +288,7 @@ jobs:
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
+        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
         --build-arg REVISION="${{ needs.setup.outputs.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
         ${{ steps.dep_args.outputs.args }}
