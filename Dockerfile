@@ -13,6 +13,8 @@ RUN cargo install stellar-xdr --features cli --path . --locked
 FROM scratch AS stellar-xdr
 COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 
+FROM 
+
 # core
 
 FROM ubuntu:focal AS stellar-core-builder
@@ -168,13 +170,20 @@ EXPOSE 11626
 ADD dependencies /
 RUN /dependencies
 
-COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
-COPY --from=stellar-core /stellar-core /usr/bin/stellar-core
-COPY --from=stellar-horizon /horizon /usr/bin/stellar-horizon
-COPY --from=stellar-friendbot /friendbot /usr/local/bin/friendbot
-COPY --from=stellar-rpc /stellar-rpc /usr/bin/stellar-rpc
-COPY --from=stellar-lab /lab /opt/stellar/lab
-COPY --from=stellar-lab /node /usr/bin/
+ARG XDR_IMAGE=stellar-xdr
+ARG CORE_IMAGE=stellar-core
+ARG HORIZON_IMAGE=stellar-horizon
+ARG FRIENDBOT_IMAGE=stellar-friendbot
+ARG RPC_IMAGE=stellar-rpc
+ARG LAB_IMAGE=stellar-lab
+
+COPY --from=$XDR_IMAGE /stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=$CORE_IMAGE /stellar-core /usr/bin/stellar-core
+COPY --from=$HORIZON_IMAGE /horizon /usr/bin/stellar-horizon
+COPY --from=$FRIENDBOT_IMAGE /friendbot /usr/local/bin/friendbot
+COPY --from=$RPC_IMAGE /stellar-rpc /usr/bin/stellar-rpc
+COPY --from=$LAB_IMAGE /lab /opt/stellar/lab
+COPY --from=$LAB_IMAGE /node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
