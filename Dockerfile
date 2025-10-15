@@ -159,12 +159,12 @@ COPY --from=stellar-lab-builder /usr/local/bin/node /node
 
 # quickstart
 
-FROM $XDR_IMAGE AS stellar-xdr
-FROM $CORE_IMAGE AS stellar-core
-FROM $HORIZON_IMAGE AS stellar-horizon
-FROM $FRIENDBOT_IMAGE AS stellar-friendbot
-FROM $RPC_IMAGE AS stellar-rpc
-FROM $LAB_IMAGE AS stellar-lab
+FROM $XDR_IMAGE AS xdr
+FROM $CORE_IMAGE AS core
+FROM $HORIZON_IMAGE AS horizon
+FROM $FRIENDBOT_IMAGE AS friendbot
+FROM $RPC_IMAGE AS rpc
+FROM $LAB_IMAGE AS lab
 
 FROM ubuntu:22.04
 
@@ -183,13 +183,13 @@ EXPOSE 11626
 ADD dependencies /
 RUN /dependencies
 
-COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
-COPY --from=stellar-core /stellar-core /usr/bin/stellar-core
-COPY --from=stellar-horizon /horizon /usr/bin/stellar-horizon
-COPY --from=stellar-friendbot /friendbot /usr/local/bin/friendbot
-COPY --from=stellar-rpc /stellar-rpc /usr/bin/stellar-rpc
-COPY --from=stellar-lab /lab /opt/stellar/lab
-COPY --from=stellar-lab /node /usr/bin/
+COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=core /stellar-core /usr/bin/stellar-core
+COPY --from=horizon /horizon /usr/bin/stellar-horizon
+COPY --from=friendbot /friendbot /usr/local/bin/friendbot
+COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
+COPY --from=lab /lab /opt/stellar/lab
+COPY --from=lab /node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
