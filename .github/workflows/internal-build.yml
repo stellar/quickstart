@@ -191,7 +191,7 @@ jobs:
         ${{ steps.dep_args.outputs.args }}
         .
     - name: Save Image
-      run: docker save stellar-${{ matrix.dep.name }} -o /tmp/${{ env.image_filename }}
+      run: docker save stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}-${{ matrix.dep.arch }} -o /tmp/${{ env.image_filename }}
     - name: Upload Image to Cache
       uses: actions/cache/save@v3
       id: cache
