@@ -186,7 +186,7 @@ jobs:
         docker build
         --platform linux/${{ matrix.dep.arch }}
         -f Dockerfile
-        --target stellar-${{ matrix.dep.name }}
+        --target stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}
         -t stellar-${{ matrix.dep.name }}
         ${{ steps.dep_args.outputs.args }}
         .
@@ -279,7 +279,7 @@ jobs:
       id: dep_args
       run: |
         args="$(<<< $image_json jq -c -r '[ .deps[] | [
-        "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):latest
+        "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)
         ] ] | flatten | join(" ")')"
         echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image

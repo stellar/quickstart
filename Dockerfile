@@ -1,3 +1,10 @@
+ARG XDR_IMAGE=stellar-xdr-stage
+ARG CORE_IMAGE=stellar-core-stage
+ARG HORIZON_IMAGE=stellar-horizon-stage
+ARG FRIENDBOT_IMAGE=stellar-friendbot-stage
+ARG RPC_IMAGE=stellar-rpc-stage
+ARG LAB_IMAGE=stellar-lab-stage
+
 # xdr
 
 FROM rust AS stellar-xdr-builder
@@ -10,10 +17,9 @@ RUN git checkout ${XDR_REF}
 RUN rustup show active-toolchain || rustup toolchain install
 RUN cargo install stellar-xdr --features cli --path . --locked
 
-FROM scratch AS stellar-xdr
-COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
+FROM scratch AS stellar-xdr-stage
 
-FROM 
+COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 
 # core
 
@@ -54,7 +60,7 @@ RUN sh -c './configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CX
 RUN sh -c 'make -j $(nproc)'
 RUN make install
 
-FROM scratch AS stellar-core
+FROM scratch AS stellar-core-stage
 
 COPY --from=stellar-core-builder /usr/local/bin/stellar-core /stellar-core
 
@@ -81,7 +87,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLC
 
 RUN make build-stellar-rpc
 
-FROM scratch AS stellar-rpc
+FROM scratch AS stellar-rpc-stage
 
 COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-rpc /stellar-rpc
 
@@ -99,7 +105,7 @@ ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
 RUN go install github.com/stellar/go/services/horizon
 
-FROM scratch AS stellar-horizon
+FROM scratch AS stellar-horizon-stage
 
 COPY --from=stellar-horizon-builder /go/bin/horizon /horizon
 
@@ -117,7 +123,7 @@ ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
 RUN go install github.com/stellar/go/services/friendbot
 
-FROM scratch AS stellar-friendbot
+FROM scratch AS stellar-friendbot-stage
 
 COPY --from=stellar-friendbot-builder /go/bin/friendbot /friendbot
 
@@ -144,7 +150,7 @@ ENV NEXT_PUBLIC_RESOURCE_PATH=/lab
 ENV NEXT_BASE_PATH=/lab
 RUN pnpm build
 
-FROM scratch AS stellar-lab
+FROM scratch AS stellar-lab-stage
 
 COPY --from=stellar-lab-builder /lab/build/standalone /lab
 COPY --from=stellar-lab-builder /lab/public /lab/public
@@ -152,6 +158,13 @@ COPY --from=stellar-lab-builder /lab/build/static /lab/public/_next/static
 COPY --from=stellar-lab-builder /usr/local/bin/node /node
 
 # quickstart
+
+FROM $XDR_IMAGE AS stellar-xdr
+FROM $CORE_IMAGE AS stellar-core
+FROM $HORIZON_IMAGE AS stellar-horizon
+FROM $FRIENDBOT_IMAGE AS stellar-friendbot
+FROM $RPC_IMAGE AS stellar-rpc
+FROM $LAB_IMAGE AS stellar-lab
 
 FROM ubuntu:22.04
 
@@ -170,20 +183,13 @@ EXPOSE 11626
 ADD dependencies /
 RUN /dependencies
 
-ARG XDR_IMAGE=stellar-xdr
-ARG CORE_IMAGE=stellar-core
-ARG HORIZON_IMAGE=stellar-horizon
-ARG FRIENDBOT_IMAGE=stellar-friendbot
-ARG RPC_IMAGE=stellar-rpc
-ARG LAB_IMAGE=stellar-lab
-
-COPY --from=$XDR_IMAGE /stellar-xdr /usr/local/bin/stellar-xdr
-COPY --from=$CORE_IMAGE /stellar-core /usr/bin/stellar-core
-COPY --from=$HORIZON_IMAGE /horizon /usr/bin/stellar-horizon
-COPY --from=$FRIENDBOT_IMAGE /friendbot /usr/local/bin/friendbot
-COPY --from=$RPC_IMAGE /stellar-rpc /usr/bin/stellar-rpc
-COPY --from=$LAB_IMAGE /lab /opt/stellar/lab
-COPY --from=$LAB_IMAGE /node /usr/bin/
+COPY --from=stellar-xdr /stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=stellar-core /stellar-core /usr/bin/stellar-core
+COPY --from=stellar-horizon /horizon /usr/bin/stellar-horizon
+COPY --from=stellar-friendbot /friendbot /usr/local/bin/friendbot
+COPY --from=stellar-rpc /stellar-rpc /usr/bin/stellar-rpc
+COPY --from=stellar-lab /lab /opt/stellar/lab
+COPY --from=stellar-lab /node /usr/bin/
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 
