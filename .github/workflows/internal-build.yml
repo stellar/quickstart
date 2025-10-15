@@ -163,7 +163,7 @@ jobs:
         dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
       fail-fast: false
     name: 4 build (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.dep.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
-    runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-jammy-16-cores-arm64' || 'ubuntu-latest-16-cores' }}
     env:
       image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
       dep_json: ${{ toJSON(matrix.dep) }}
@@ -214,7 +214,7 @@ jobs:
         arch: ${{ fromJSON(inputs.archs) }}
       fail-fast: false
     name: 5 build (quickstart, ${{ matrix.image.tag }}, ${{ matrix.arch }})
-    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-jammy-16-cores-arm64' || 'ubuntu-latest-16-cores' }}
     env:
       image_json: ${{ toJSON(matrix.image) }}
     steps:
