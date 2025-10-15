@@ -39,7 +39,7 @@ on:
       cache_id:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
-        default: 9
+        default: 10
 
 env:
   artifact_retention_days_for_image: 7
