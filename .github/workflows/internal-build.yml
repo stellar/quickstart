@@ -186,8 +186,8 @@ jobs:
         docker build
         --platform linux/${{ matrix.dep.arch }}
         -f Dockerfile
-        --target stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}
-        -t stellar-${{ matrix.dep.name }}
+        --target stellar-${{ matrix.dep.name }}
+        -t stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}
         ${{ steps.dep_args.outputs.args }}
         .
     - name: Save Image
