@@ -39,7 +39,7 @@ on:
       cache_id:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
-        default: 10
+        default: 11
 
 env:
   artifact_retention_days_for_image: 7
@@ -186,7 +186,7 @@ jobs:
         docker build
         --platform linux/${{ matrix.dep.arch }}
         -f Dockerfile
-        --target stellar-${{ matrix.dep.name }}-builder
+        --target stellar-${{ matrix.dep.name }}
         -t stellar-${{ matrix.dep.name }}
         ${{ steps.dep_args.outputs.args }}
         .
