@@ -279,7 +279,7 @@ jobs:
       id: dep_args
       run: |
         args="$(<<< $image_json jq -c -r '[ .deps[] | [
-        "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)-${{ matrix.arch }}
+        "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)-${{ matrix.arch }}"
         ] ] | flatten | join(" ")')"
         echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image
