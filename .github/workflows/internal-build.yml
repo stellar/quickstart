@@ -39,7 +39,7 @@ on:
       cache_id:
         description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
         type: "string"
-        default: 14
+        default: 15
 
 env:
   artifact_retention_days_for_image: 7
@@ -59,7 +59,6 @@ jobs:
     name: 1 setup
     runs-on: ubuntu-latest
     outputs:
-      sha: ${{ steps.sha.outputs.sha }}
       images: ${{ steps.images.outputs.images }}
       deps: ${{ steps.deps.outputs.deps }}
       additional-tests: ${{ steps.tests.outputs.additional-tests }}
@@ -67,11 +66,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ inputs.ref }}
-    - name: Sha
-      id: sha
-      run: |
-        echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
+        ref: ${{ inputs.sha }}
     - name: Images with Extras
       id: images
       env:
@@ -171,7 +166,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
+        ref: ${{ inputs.sha }}
     - name: Dep Args
       id: dep_args
       run: |
@@ -221,7 +216,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
-        ref: ${{ needs.setup.outputs.sha }}
+        ref: ${{ inputs.sha }}
     - name: Collect Dep IDs
       id: ids
       run:
@@ -288,8 +283,8 @@ jobs:
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
-        --label org.opencontainers.image.revision="${{ needs.setup.outputs.sha }}"
-        --build-arg REVISION="${{ needs.setup.outputs.sha }}"
+        --label org.opencontainers.image.revision="${{ inputs.sha }}"
+        --build-arg REVISION="${{ inputs.sha }}"
         --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
         ${{ steps.dep_args.outputs.args }}
         .
