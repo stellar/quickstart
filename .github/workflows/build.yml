@@ -32,10 +32,6 @@ on:
         description: "Whether the image tests should run"
         type: "boolean"
         default: true
-      cache_id:
-        description: "A value insert into cache keys to namespace cache usage, or invalidate it by incrementing"
-        type: "string"
-        default: 6
 
 env:
   artifact_retention_days_for_image: 7
