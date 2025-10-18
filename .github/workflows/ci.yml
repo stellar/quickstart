@@ -19,7 +19,7 @@ on:
     - main
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 * * * *'
 
 # Prevent more than one build of this workflow for a branch to be running at the
 # same time, and if multiple are queued, only run the latest, cancelling any
