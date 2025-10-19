@@ -90,8 +90,8 @@
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "release/v24.0.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "protocol-24" },
-      { "name": "horizon", "repo": "stellar/go", "ref": "release/v24.0.0" },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "release/v24.0.0" },
+      { "name": "horizon", "repo": "stellar/go", "ref": "release-horizon-v24.0.0" },
+      { "name": "friendbot", "repo": "stellar/go", "ref": "release-horizon-v24.0.0" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
