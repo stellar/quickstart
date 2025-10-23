@@ -6,11 +6,11 @@
       "protocol_version_default": 23
     },
     "deps": [
-      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
-      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.4" },
-      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
+      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.0.0", "options": { "configure_flags": "--disable-tests" } },
+      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
+      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0" },
+      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
