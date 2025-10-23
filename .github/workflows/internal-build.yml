@@ -289,7 +289,6 @@ jobs:
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
         --label org.opencontainers.image.revision="${{ inputs.sha }}"
         --build-arg REVISION="${{ inputs.sha }}"
-        --build-arg PROTOCOL_VERSION_DEFAULT="${{ matrix.image.config.protocol_version_default }}"
         ${{ steps.dep_args.outputs.args }}
         .
     - name: Save Quickstart Image

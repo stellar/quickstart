@@ -24,6 +24,8 @@ export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432
 
+export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version_default')"
+
 : "${PROTOCOL_VERSION:=$PROTOCOL_VERSION_DEFAULT}"
 : "${ENABLE:=core,horizon,rpc}"
 : "${ENABLE_LOGS:=false}"
