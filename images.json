@@ -91,7 +91,7 @@
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
-      { "name": "horizon", "repo": "stellar/go", "ref": "a412884c3c09efad8dfbd0178d721a392d03c292" },
+      { "name": "horizon", "repo": "stellar/go", "ref": "master" },
       { "name": "friendbot", "repo": "stellar/go", "ref": "master" },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
