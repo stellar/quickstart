@@ -98,5 +98,24 @@
       "continue-on-error": true,
       "additional-tests": []
     }
+  },
+  {
+    "tag": "exp-zk",
+    "events": ["push", "pull_request"],
+    "config": {
+      "protocol_version_default": 24
+    },
+    "deps": [
+      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "e38f79a203eaa9d82cc02134fd72f57242350c14", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
+      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "f6a584ab8a409fb43f81a60dbef7854fdb06231e" },
+      { "name": "horizon", "repo": "stellar/go", "ref": "144e7bd56d6eab2b8b503c75aced7385209932f9" },
+      { "name": "friendbot", "repo": "stellar/go", "ref": "144e7bd56d6eab2b8b503c75aced7385209932f9" },
+      { "name": "lab", "repo": "stellar/laboratory", "ref": "ecaf0d4663b7b242ec39545aab2c12019bae8ab5" }
+    ],
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
   }
 ]
