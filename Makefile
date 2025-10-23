@@ -9,7 +9,6 @@ IMAGE_JSON=.image.json
 	< images.json .scripts/images-with-extras | jq '.[] | select(.tag == "$(TAG)")' > $@
 
 # Extract configuration from selected image
-PROTOCOL_VERSION_DEFAULT = $(shell < $(IMAGE_JSON) jq -r '.config.protocol_version_default')
 XDR_REPO =       $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
 XDR_SHA =        $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .sha')
 CORE_REPO =      $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "core") | .repo')
@@ -36,7 +35,6 @@ console:
 build: $(IMAGE_JSON)
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 		--build-arg REVISION=$(REVISION) \
-		--build-arg PROTOCOL_VERSION_DEFAULT=$(PROTOCOL_VERSION_DEFAULT) \
 		--build-arg XDR_REPO=$(XDR_REPO) --build-arg XDR_REF=$(XDR_SHA) \
 		--build-arg CORE_REPO="$(CORE_REPO)" --build-arg CORE_REF="$(CORE_SHA)" --build-arg CORE_OPTIONS='$(CORE_OPTIONS)' \
 		--build-arg RPC_REPO="$(RPC_REPO)" --build-arg RPC_REF="$(RPC_SHA)" \
