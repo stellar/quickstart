@@ -524,6 +524,7 @@ function init_horizon() {
 export CAPTIVE_CORE_CONFIG_PATH=$HORIZON_CAPTIVE_CORE_CFG
 export CAPTIVE_CORE_STORAGE_PATH=$HZHOME/captive-core
 export STELLAR_CORE_VERSION="$(stellar-core version 2>/dev/null | head -1)"
+export INGEST_SKIP_PROTOCOL_VERSION_CHECK="$(< /image.json jq -r '.config.horizon_skip_protocol_version_check')"
 EOF
 
   run_silent "chown-horizon" chown -R stellar:stellar .
