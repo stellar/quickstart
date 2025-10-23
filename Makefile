@@ -6,7 +6,7 @@ TAG?=latest
 # Process images.json through the images-with-extras script
 IMAGE_JSON=.image.json
 .image.json: images.json .scripts/images-with-extras
-	< images.json .scripts/images-with-extras | jq '.[] | select(.tag == "$(TAG)")' > $@
+	< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
 
 # Extract configuration from selected image
 PROTOCOL_VERSION_DEFAULT = $(shell < $(IMAGE_JSON) jq -r '.config.protocol_version_default')
