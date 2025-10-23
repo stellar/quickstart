@@ -84,7 +84,8 @@
     "tag": "nightly-next",
     "events": ["push", "schedule"],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 24,
+      "horizon_skip_protocol_version_check": true
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
