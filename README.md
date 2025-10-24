@@ -22,6 +22,15 @@ Stellar Quickstart is the fastest way to spin up a complete Stellar blockchain d
 >
 > See [Using in GitHub Actions] for more configuration options and how to build and run a custom configuration of quickstart.
 
+> [!TIP]  
+> Run the image with Docker:
+>
+> ```
+> docker run -i -p 8000:8000 stellar/quickstart --local
+> ```
+>
+> See [Tags] and [Usage] for available tags and options.
+
 [`stellar-cli`]: https://github.com/stellar/stellar-cli
 
 > [!IMPORTANT]  
