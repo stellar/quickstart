@@ -112,6 +112,7 @@ jobs:
     - name: Write Image Config
       run: |
         echo "$image_json" > .image.json
+    - uses: crazy-max/ghaction-github-runtime@3cb05d89e1f492524af3d41a1c98c83bc3025124
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     - name: Build Args for Deps
