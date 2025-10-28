@@ -53,7 +53,7 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [setup, load, build]
+    needs: [setup, build]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
