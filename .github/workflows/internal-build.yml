@@ -88,124 +88,8 @@ jobs:
         <<< $deps jq
         echo "deps=$deps" >> $GITHUB_OUTPUT
 
-  load:
-    needs: [setup]
-    strategy:
-      matrix:
-        dep: ${{ fromJSON(needs.setup.outputs.deps) }}
-        arch: ${{ fromJSON(inputs.archs) }}
-      fail-fast: false
-    name: 2 load (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
-    runs-on: ubuntu-latest
-    env:
-      dep_json: ${{ toJSON(matrix.dep) }}
-      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.tar
-      json_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
-      missing_filename: missing-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.arch }}.json
-    steps:
-    - name: Create Dep Details JSON (with arch)
-      run: >
-        echo "${dep_json}"
-        | jq --arg arch ${{ matrix.arch }} '.arch = $arch'
-        | tee /tmp/${{ env.json_filename }}
-    - name: Upload Dep Details JSON
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.json_filename }}
-        path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-    - name: Find Image in Cache
-      id: cache
-      uses: actions/cache/restore@v3
-      with:
-        key: ${{ inputs.cache_prefix }}${{ inputs.cache_id }}-${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-    - name: Upload Image to Artifacts
-      if: steps.cache.outputs.cache-hit == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-    - name: Upload Dep Details as Missing Marker Due to Cache Miss
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.missing_filename }}
-        path: /tmp/${{ env.json_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-
-  prepare:
-    needs: [load]
-    name: 3 prepare
-    runs-on: ubuntu-latest
-    outputs:
-      deps-to-build: ${{ steps.deps-to-build.outputs.deps }}
-    steps:
-    - name: Download Missing Markers
-      uses: actions/download-artifact@v4
-      with:
-        pattern: missing-*
-        merge-multiple: true
-        path: /tmp/missing
-    - name: Collect Deps-to-Build from Missing Markers
-      id: deps-to-build
-      run: |
-        deps="$(find /tmp/missing -name "*.json" -exec cat {} \; | jq -c -s '.')"
-        echo "deps=$deps" | tee -a $GITHUB_OUTPUT
-
-  build-dep:
-    needs: [setup, prepare]
-    if: needs.prepare.outputs.deps-to-build != '[]'
-    strategy:
-      matrix:
-        dep: ${{ fromJSON(needs.prepare.outputs.deps-to-build) }}
-      fail-fast: false
-    name: 4 build (${{ matrix.dep.name }}, ${{ matrix.dep.ref }}, ${{ matrix.dep.arch }}, ${{ matrix.dep.options && toJSON(matrix.dep.options) || '-' }})
-    runs-on: ${{ matrix.dep.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    env:
-      image_filename: image-${{ matrix.dep.name }}-${{ matrix.dep.id }}-${{ matrix.dep.arch }}.tar
-      dep_json: ${{ toJSON(matrix.dep) }}
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.repo }}
-        ref: ${{ inputs.sha }}
-    - name: Dep Args
-      id: dep_args
-      run: |
-        args="$(<<< $dep_json jq -c -r '[
-        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
-        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
-        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
-        ] | join(" ")')"
-        echo "args=${args}" | tee -a $GITHUB_OUTPUT
-    - name: Build Image
-      run: >
-        docker build
-        --platform linux/${{ matrix.dep.arch }}
-        -f Dockerfile
-        --target stellar-${{ matrix.dep.name }}-stage
-        -t stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}-${{ matrix.dep.arch }}
-        ${{ steps.dep_args.outputs.args }}
-        .
-    - name: Save Image
-      run: docker save stellar-${{ matrix.dep.name }}:${{ matrix.dep.sha }}-${{ matrix.dep.arch }} -o /tmp/${{ env.image_filename }}
-    - name: Upload Image to Cache
-      uses: actions/cache/save@v3
-      id: cache
-      with:
-        key: ${{ inputs.cache_prefix }}${{ inputs.cache_id }}-${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-    - name: Upload Image to Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ env.image_filename }}
-        path: /tmp/${{ env.image_filename }}
-        retention-days: ${{ env.artifact_retention_days_for_image }}
-
   build:
-    needs: [setup, load, build-dep]
+    needs: [setup]
     if: always() && !failure() && !cancelled()
     strategy:
       matrix:
@@ -228,63 +112,22 @@ jobs:
     - name: Write Image Config
       run: |
         echo "$image_json" > .image.json
-    - name: Download Image XDR
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-xdr-${{ steps.ids.outputs.xdr }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Core
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-core-${{ steps.ids.outputs.core }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image RPC
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-rpc-${{ steps.ids.outputs.rpc }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Horizon
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-horizon-${{ steps.ids.outputs.horizon }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Friendbot
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-friendbot-${{ steps.ids.outputs.friendbot }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Download Image Lab
-      uses: actions/download-artifact@v4
-      with:
-        pattern: image-lab-${{ steps.ids.outputs.lab }}-${{ matrix.arch }}.*
-        merge-multiple: true
-        path: /tmp/images
-    - name: Load Image into Docker
-      run: |
-        ls -lah /tmp/images/
-        for image in /tmp/images/*.tar; do
-          echo Loading image $image
-          < "${image/%.tar/.json}" jq
-          docker load -i $image
-        done
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
     - name: Build Args for Deps
       id: dep_args
       run: |
         args="$(<<< $image_json jq -c -r '[ .deps[] | [
-        "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)-${{ matrix.arch }}"
+        "--build-arg \(.name | ascii_upcase)_REPO=\(.repo)",
+        "--build-arg \(.name | ascii_upcase)_REF=\(.sha)",
+        "--build-arg \(.name | ascii_upcase)_OPTIONS='"'"'\(.options)'"'"'"
         ] ] | flatten | join(" ")')"
         echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image
       run: >
         docker build
         --platform linux/${{ matrix.arch }}
+        --cache-from=type=gha --cache-to=type=gha,mode=max,compression=zstd
         -f Dockerfile
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
         --label org.opencontainers.image.revision="${{ inputs.sha }}"
