@@ -181,7 +181,7 @@ jobs:
           --arg short_sha "$short_sha" \
           --arg commit_url "$commit_url" \
           --arg run_url "$run_url" \
-          '{text: ":thinkeyesr: ci failed | build \($build) test \($test) push \($push) | <\($commit_url)|\($short_sha)> | <\($run_url)|run> | \($event)"}')"
+          '{text: ":red_circle: • build \($build) • test \($test) • push \($push) • <\($commit_url)|\($short_sha)> • <\($run_url)|run> • \($event)"}')"
         
         curl -X POST "$slack_webhook_url" \
           -H 'Content-Type: application/json' \
