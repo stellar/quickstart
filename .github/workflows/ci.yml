@@ -141,7 +141,7 @@ jobs:
 
   notify:
     name: 7 slack notify on failure
-    if: always() # && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule') && contains(needs.*.result, 'failure')
+    if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule') && contains(needs.*.result, 'failure')
     needs: [setup, build, test, push]
     runs-on: ubuntu-latest
     continue-on-error: true
