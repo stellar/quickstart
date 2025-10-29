@@ -142,10 +142,9 @@ jobs:
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
         --label org.opencontainers.image.revision="${{ inputs.sha }}"
         --build-arg REVISION="${{ inputs.sha }}"
+        --output type=docker,dest=/tmp/image
         ${{ steps.dep_args.outputs.args }}
         .
-    - name: Save Quickstart Image
-      run: docker save quickstart -o /tmp/image
     - name: Upload Quickstart Image to Artifacts
       uses: actions/upload-artifact@v4
       with:
