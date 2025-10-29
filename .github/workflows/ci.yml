@@ -138,3 +138,62 @@ jobs:
     uses: ./.github/workflows/internal-action-test.yml
     with:
       tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
+
+  notify:
+    name: 7 slack notify on failure
+    if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'schedule') && contains(needs.*.result, 'failure')
+    needs: [setup, build, test, push]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+    - name: Generate cache key from images config
+      id: cache_key
+      env:
+        images: ${{ needs.setup.outputs.images }}
+      run: |
+        cache_key=$(<<< $images jq -cS '.' | sha256sum | awk '{print $1}')
+        echo "key=notify-$cache_key" >> $GITHUB_OUTPUT
+    - name: Restore notification cache
+      id: cache_restore
+      uses: actions/cache/restore@v4
+      with:
+        path: .notify_cache
+        key: ${{ steps.cache_key.outputs.key }}
+    - name: Send Slack notification
+      if: steps.cache_restore.outputs.cache-hit != 'true'
+      env:
+        slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        event: ${{ github.event_name }}
+        sha: ${{ github.sha }}
+        build_emoji: ${{ needs.build.result == 'success' && '✅' || needs.build.result == 'failure' && '❌' || '❓' }}
+        test_emoji: ${{ needs.test.result == 'success' && '✅' || needs.test.result == 'failure' && '❌' || '❓' }}
+        push_emoji: ${{ needs.push.result == 'success' && '✅' || needs.push.result == 'failure' && '❌' || '❓' }}
+        commit_url: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+        run_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        short_sha="${sha:0:7}"
+        
+        payload="$(jq -n \
+          --arg build "$build_emoji" \
+          --arg test "$test_emoji" \
+          --arg push "$push_emoji" \
+          --arg event "$event" \
+          --arg short_sha "$short_sha" \
+          --arg commit_url "$commit_url" \
+          --arg run_url "$run_url" \
+          '{text: ":red_circle: • build \($build) • test \($test) • push \($push) • <\($commit_url)|\($short_sha)> • <\($run_url)|run> • \($event)"}')"
+        
+        curl -X POST "$slack_webhook_url" \
+          -H 'Content-Type: application/json' \
+          -d "$payload"
+    - name: Create cache file
+      if: steps.cache_restore.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p .notify_cache
+        echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" > .notify_cache/timestamp
+    - name: Save notification cache
+      if: steps.cache_restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: .notify_cache
+        key: ${{ steps.cache_key.outputs.key }}
