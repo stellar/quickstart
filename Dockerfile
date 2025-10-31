@@ -183,9 +183,6 @@ EXPOSE 8100
 EXPOSE 11625
 EXPOSE 11626
 
-ADD dependencies /
-RUN /dependencies
-
 COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=core /stellar-core /usr/bin/stellar-core
 COPY --from=horizon /horizon /usr/bin/stellar-horizon
