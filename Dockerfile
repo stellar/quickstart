@@ -168,6 +168,9 @@ FROM $LAB_IMAGE AS lab
 
 FROM ubuntu:22.04
 
+ADD dependencies /
+RUN /dependencies
+
 ARG REVISION
 ENV REVISION=$REVISION
 
@@ -179,9 +182,6 @@ EXPOSE 8002
 EXPOSE 8100
 EXPOSE 11625
 EXPOSE 11626
-
-ADD dependencies /
-RUN /dependencies
 
 COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=core /stellar-core /usr/bin/stellar-core
