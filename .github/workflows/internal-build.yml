@@ -274,6 +274,9 @@ jobs:
         done
     - name: Pull Base Image
       run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
+    - name: Pull Quickstart Base Image
+      continue-on-error: true
+      run: docker pull stellar/quickstart:pr818-${{ matrix.image.tag }}-${{ matrix.arch }}
     - name: Build Args for Deps
       id: dep_args
       run: |
