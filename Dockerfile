@@ -157,6 +157,13 @@ COPY --from=stellar-lab-builder /lab/public /lab/public
 COPY --from=stellar-lab-builder /lab/build/static /lab/public/_next/static
 COPY --from=stellar-lab-builder /usr/local/bin/node /node
 
+# quickstart base
+
+FROM ubuntu:22.04 AS quickstart-base
+
+ADD dependencies /
+RUN /dependencies
+
 # quickstart
 
 FROM $XDR_IMAGE AS xdr
@@ -166,7 +173,7 @@ FROM $FRIENDBOT_IMAGE AS friendbot
 FROM $RPC_IMAGE AS rpc
 FROM $LAB_IMAGE AS lab
 
-FROM ubuntu:22.04
+FROM quickstart-base
 
 ARG REVISION
 ENV REVISION=$REVISION
