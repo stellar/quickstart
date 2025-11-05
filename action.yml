@@ -38,13 +38,10 @@ runs:
   steps:
     - name: Set up Colima for macOS
       if: runner.os == 'macOS'
-      run: |
-          brew install colima
-          export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
-          echo "DOCKER_HOST=unix://$HOME/.colima/default/docker.sock" >> $GITHUB_ENV
-      shell: bash
+      uses: douglascamata/setup-docker-macos-action@de9dc31504356970f7ab9b785d6afee99b994692 # v1.0.1
 
     - name: Set up Docker
+      if: runner.os != 'macOS'
       uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
 
     - if: inputs.artifact
