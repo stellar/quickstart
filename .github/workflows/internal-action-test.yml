@@ -28,7 +28,6 @@ jobs:
           action:
           - 'action.yml'
           - '.github/workflows/action-test.yml'
-          # TODO: Remove this once the action test is updated to run on macos-latest and macos-15-intel
           - '.github/workflows/internal-action-test.yml'
         list-files: shell
     - uses: actions/github-script@v8
@@ -45,7 +44,6 @@ jobs:
           // artifact images contain only a single platform.
           if (process.env.ACTION_CHANGED === 'true' && '${{ inputs.artifact }}' === '') {
             os.push('ubuntu-24.04-arm');
-            os.push('macos-latest');
             os.push('macos-15-intel');
           }
           core.setOutput('os', JSON.stringify(os));
@@ -59,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: ./
       with:
         artifact: ${{ inputs.artifact }}
