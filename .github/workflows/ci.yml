@@ -117,6 +117,7 @@ jobs:
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
   push:
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     name: 5 push
     needs: [setup, build]
     uses: ./.github/workflows/internal-push.yml
@@ -133,6 +134,7 @@ jobs:
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   action-using-registry:
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     needs: [setup, push]
     name: 6 test action registry
     uses: ./.github/workflows/internal-action-test.yml
