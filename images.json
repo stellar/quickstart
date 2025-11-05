@@ -1,7 +1,7 @@
 [
   {
     "tag": "latest",
-    "events": ["pull_request", "push"],
+    "events": ["push"],
     "config": {
       "protocol_version_default": 24
     },
@@ -44,7 +44,7 @@
   },
   {
     "tag": "future",
-    "events": ["pull_request", "push"],
+    "events": ["push"],
     "config": {
       "protocol_version_default": 24
     },
