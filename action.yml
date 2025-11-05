@@ -40,7 +40,21 @@ runs:
       if: runner.os == 'macOS'
       run: |
           brew install colima docker
-          colima start
+          # Get available resources (GitHub Actions macOS runners typically have 4-6 CPUs, 14GB RAM)
+          CPU_COUNT=$(sysctl -n hw.ncpu)
+          MEMORY_GB=$(sysctl hw.memsize | awk '{printf "%.0f", $2/1024/1024/1024}')
+          # Use 75% of available memory to leave some headroom for the host
+          MEMORY_LIMIT=$((MEMORY_GB * 3 / 4))
+          echo "Available CPUs: $CPU_COUNT, Memory: ${MEMORY_GB}GB, Allocating: ${MEMORY_LIMIT}GB to Colima"
+          # Start Colima with explicit resource limits
+          colima start --cpu $CPU_COUNT --memory $MEMORY_LIMIT --vm-type=vz --mount-type=virtiofs || {
+            echo "Colima start failed, checking status..."
+            colima status || true
+            exit 1
+          }
+          # Monitor Colima resource usage
+          echo "Colima VM status:"
+          colima status
           echo "DOCKER_HOST=unix://$HOME/.colima/default/docker.sock" >> $GITHUB_ENV
       shell: bash
 
