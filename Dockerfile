@@ -95,48 +95,37 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 FROM golang:1.24 AS stellar-horizon-builder
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install jq
-
 ARG HORIZON_REPO
 ARG HORIZON_REF
-ARG HORIZON_OPTIONS
-RUN echo "$HORIZON_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
-
-RUN git clone https://github.com/${HORIZON_REPO} /go/src/$(cat /tmp/arg_pkg)
-RUN cd /go/src/$(cat /tmp/arg_pkg) && git fetch origin ${HORIZON_REF}
-RUN cd /go/src/$(cat /tmp/arg_pkg) && git checkout ${HORIZON_REF}
+WORKDIR /src
+RUN git clone https://github.com/${HORIZON_REPO} /src
+RUN git fetch origin ${HORIZON_REF}
+RUN git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
-RUN cd /go/src/$(cat /tmp/arg_pkg) && go build -o $(go env GOBIN)/stellar-horizon
-RUN cd /go/bin/ && ls  -la
+RUN go build -o /stellar-horizon
 
 FROM scratch AS stellar-horizon-stage
 
-COPY --from=stellar-horizon-builder /go/bin/stellar-horizon /stellar-horizon
+COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 # friendbot
 
 FROM golang:1.24 AS stellar-friendbot-builder
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install jq
-
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
-ARG FRIENDBOT_OPTIONS
-RUN echo "$FRIENDBOT_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
-
-RUN git clone https://github.com/${FRIENDBOT_REPO} /go/src/$(cat /tmp/arg_pkg)
-RUN cd /go/src/$(cat /tmp/arg_pkg) && git fetch origin ${FRIENDBOT_REF}
-RUN cd /go/src/$(cat /tmp/arg_pkg) && git checkout ${FRIENDBOT_REF}
+WORKDIR /src
+RUN git clone https://github.com/${FRIENDBOT_REPO} /src
+RUN git fetch origin ${FRIENDBOT_REF}
+RUN git checkout ${FRIENDBOT_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
-RUN cd /go/src/$(cat /tmp/arg_pkg) && go install $(cat /tmp/arg_pkg)
+RUN go build -o /friendbot
 
 FROM scratch AS stellar-friendbot-stage
 
-COPY --from=stellar-friendbot-builder /go/bin/friendbot /friendbot
+COPY --from=stellar-friendbot-builder /friendbot /friendbot
 
 # lab
 
