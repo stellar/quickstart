@@ -36,10 +36,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up Docker
-      uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
-      env:
-        LIMA_START_ARGS: --cpus 4 --memory 8
+    - name: Setup Colima and Docker (macOS only)
+      if: runner.os == 'macos'
+      shell: bash
+      run: |
+        brew update
+        brew install colima docker
+        CPU_COUNT=$(sysctl -n hw.ncpu)
+        TOTAL_MEMORY=$(sysctl hw.memsize | awk '{print $2/1024/1024/1024}')
+        MEMORY=$(awk "BEGIN {printf \"%.0f\", $TOTAL_MEMORY * 0.75}")
+        colima start --arch x86_64 --vm-type=vz --mount-type=virtiofs --cpu $CPU_COUNT --memory $MEMORY --network-address
+        export DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock
+        echo "DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock" >> $GITHUB_ENV
 
     - if: inputs.artifact
       uses: actions/download-artifact@v4
