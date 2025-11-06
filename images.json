@@ -3,7 +3,7 @@
     "tag": "latest",
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 23
+      "protocol_version_default": 24
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
@@ -46,14 +46,14 @@
     "tag": "future",
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 23
+      "protocol_version_default": 24
     },
     "deps": [
-      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
-      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.4" },
-      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
+      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.0.0", "options": { "configure_flags": "--disable-tests" } },
+      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" }, 
+      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
+      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
@@ -65,7 +65,7 @@
     "tag": "nightly",
     "events": ["push", "schedule", "pull_request"],
     "config": {
-      "protocol_version_default": 23
+      "protocol_version_default": 24
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
@@ -84,7 +84,7 @@
     "tag": "nightly-next",
     "events": ["push", "schedule", "pull_request"],
     "config": {
-      "protocol_version_default": 24,
+      "protocol_version_default": 25,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
