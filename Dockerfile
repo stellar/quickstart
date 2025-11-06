@@ -95,15 +95,21 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 FROM golang:1.24 AS stellar-horizon-builder
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install jq
+
 ARG HORIZON_REPO
 ARG HORIZON_REF
+ARG HORIZON_OPTIONS
+RUN echo "$HORIZON_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
+
 WORKDIR /src
 RUN git clone https://github.com/${HORIZON_REPO} /src
 RUN git fetch origin ${HORIZON_REF}
 RUN git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
-RUN go build -o /stellar-horizon
+RUN go build -o /stellar-horizon $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-horizon-stage
 
@@ -113,15 +119,21 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 FROM golang:1.24 AS stellar-friendbot-builder
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install jq
+
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
+ARG FRIENDBOT_OPTIONS
+RUN echo "$FRIENDBOT_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
+
 WORKDIR /src
 RUN git clone https://github.com/${FRIENDBOT_REPO} /src
 RUN git fetch origin ${FRIENDBOT_REF}
 RUN git checkout ${FRIENDBOT_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
-RUN go build -o /friendbot
+RUN go build -o /friendbot $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-friendbot-stage
 
