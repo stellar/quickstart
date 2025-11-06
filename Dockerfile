@@ -109,7 +109,7 @@ RUN cd /go/src/$(cat /tmp/arg_pkg) && git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
 RUN cd /go/src/$(cat /tmp/arg_pkg) && go install $(cat /tmp/arg_pkg)
-RUN cd /go/src/$(cat /tmp/arg_pkg) && ls -la
+RUN cd /go/bin/ && ls  -la
 
 FROM scratch AS stellar-horizon-stage
 
