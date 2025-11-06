@@ -56,7 +56,7 @@ RUN sysctl vm.mmap_rnd_bits=28
 RUN ./autogen.sh
 RUN ./install-rust.sh
 ENV PATH "/root/.cargo/bin:$PATH"
-RUN sh -c './configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" $(</tmp/arg_configure_flags)'
+RUN sh -c './configure CC="${CC}" CXX="${CXX}" CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" $(cat /tmp/arg_configure_flags)'
 RUN sh -c 'make -j $(nproc)'
 RUN make install
 
@@ -93,39 +93,51 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 # horizon
 
-FROM golang:1.23 AS stellar-horizon-builder
+FROM golang:1.24 AS stellar-horizon-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install jq
 
 ARG HORIZON_REPO
 ARG HORIZON_REF
-WORKDIR /go/src/github.com/stellar/go
-RUN git clone https://github.com/${HORIZON_REPO} /go/src/github.com/stellar/go
+ARG HORIZON_OPTIONS
+RUN echo "$HORIZON_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
+
+WORKDIR /src
+RUN git clone https://github.com/${HORIZON_REPO} /src
 RUN git fetch origin ${HORIZON_REF}
 RUN git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
-RUN go install github.com/stellar/go/services/horizon
+RUN go build -o /stellar-horizon $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-horizon-stage
 
-COPY --from=stellar-horizon-builder /go/bin/horizon /horizon
+COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 # friendbot
 
-FROM golang:1.23 AS stellar-friendbot-builder
+FROM golang:1.24 AS stellar-friendbot-builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install jq
 
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
-WORKDIR /go/src/github.com/stellar/go
-RUN git clone https://github.com/${FRIENDBOT_REPO} /go/src/github.com/stellar/go
+ARG FRIENDBOT_OPTIONS
+RUN echo "$FRIENDBOT_OPTIONS" | jq -r '.pkg // ""' > /tmp/arg_pkg
+
+WORKDIR /src
+RUN git clone https://github.com/${FRIENDBOT_REPO} /src
 RUN git fetch origin ${FRIENDBOT_REF}
 RUN git checkout ${FRIENDBOT_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
-RUN go install github.com/stellar/go/services/friendbot
+RUN go build -o /friendbot $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-friendbot-stage
 
-COPY --from=stellar-friendbot-builder /go/bin/friendbot /friendbot
+COPY --from=stellar-friendbot-builder /friendbot /friendbot
 
 # lab
 
@@ -185,7 +197,7 @@ RUN /dependencies
 
 COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=core /stellar-core /usr/bin/stellar-core
-COPY --from=horizon /horizon /usr/bin/stellar-horizon
+COPY --from=horizon /stellar-horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
 COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
