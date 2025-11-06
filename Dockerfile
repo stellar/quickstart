@@ -112,7 +112,7 @@ RUN cd /go/src/$(cat /tmp/arg_pkg) && go install $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-horizon-stage
 
-COPY --from=stellar-horizon-builder /go/bin/horizon /horizon
+COPY --from=stellar-horizon-builder /go/bin/stellar-horizon /stellar-horizon
 
 # friendbot
 
@@ -195,7 +195,7 @@ RUN /dependencies
 
 COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
 COPY --from=core /stellar-core /usr/bin/stellar-core
-COPY --from=horizon /horizon /usr/bin/stellar-horizon
+COPY --from=horizon /stellar-horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
 COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
