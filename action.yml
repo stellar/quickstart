@@ -38,6 +38,8 @@ runs:
   steps:
     - name: Set up Docker
       uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
+      env:
+        LIMA_START_ARGS: --cpus 4 --memory 8
 
     - if: inputs.artifact
       uses: actions/download-artifact@v4
