@@ -93,7 +93,7 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 # horizon
 
-FROM golang:1.23 AS stellar-horizon-builder
+FROM golang:1.24 AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
@@ -116,7 +116,7 @@ COPY --from=stellar-horizon-builder /go/bin/horizon /horizon
 
 # friendbot
 
-FROM golang:1.23 AS stellar-friendbot-builder
+FROM golang:1.24 AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
