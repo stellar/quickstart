@@ -46,14 +46,14 @@
     "tag": "future",
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 25
     },
     "deps": [
-      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.0.0", "options": { "configure_flags": "--disable-tests" } },
-      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" }, 
-      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
+      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
+      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "3b92ac8dfa97ac8dafc58b99bbd2d9cbe138f28b" },
+      { "name": "horizon", "repo": "stellar/stellar-horizon", "ref": "main", "options": { "pkg": "github.com/stellar/stellar-horizon" } },
+      { "name": "friendbot", "repo": "stellar/friendbot", "ref": "main", "options": { "pkg": "github.com/stellar/friendbot" } },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
