@@ -50,7 +50,7 @@ runs:
       shell: bash
       run: |
         echo "::group::Installing Lima version 2.0.1"
-        curl -fsSL "https://github.com/lima-vm/lima/releases/download/v2.0.1/lima-2.0.1-Darwin-x86_64.tar.gz" | tar Cxzvm /usr/local
+        curl -fsSL "https://github.com/lima-vm/lima/releases/download/v2.0.1/lima-2.0.1-Darwin-x86_64.tar.gz" | sudo tar Cxzvm /usr/local
         echo "::endgroup::"
 
     - name: Install Colima
