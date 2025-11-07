@@ -46,7 +46,8 @@
     "tag": "future",
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 25
+      "protocol_version_default": 25,
+      "horizon_skip_protocol_version_check": true
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "89cc1cbadf1b9a16843826954dede7fec514d8e7" },
