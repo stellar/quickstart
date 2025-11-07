@@ -7,7 +7,6 @@ inputs:
     default: "latest"
   artifact:
     description: "Artifact to collect image from"
-    type: string
     default: ""
   image:
     description: "Image for the quickstart image to use"
@@ -36,8 +35,64 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up Docker
-      uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4
+    - name: Update Homebrew
+      if: runner.os == 'macos'
+      shell: bash
+      run: |
+        echo "::group::Updating Homebrew"
+        brew update
+        echo "::endgroup::"
+
+    - name: Install Lima
+      if: runner.os == 'macos'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        echo "::group::Installing Lima version 2.0.1"
+        curl -fsSL "https://github.com/lima-vm/lima/releases/download/v2.0.1/lima-2.0.1-Darwin-x86_64.tar.gz" | sudo tar Cxzvm /usr/local
+        echo "::endgroup::"
+
+    - name: Install Colima
+      if: runner.os == 'macos'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        echo "::group::Installing Colima version 0.9.1"
+        curl -LO https://github.com/abiosoft/colima/releases/download/v0.9.1/colima-Darwin-x86_64
+
+        # install in $PATH
+        install colima-Darwin-x86_64 /usr/local/bin/colima
+        echo "::endgroup::"
+
+    - name: Install Docker client
+      if: runner.os == 'macos'
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: "1"
+        HOMEBREW_NO_INSTALL_UPGRADE: "1"
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1"
+      shell: bash
+      run: |
+        echo "::group::Installing Docker client"
+        brew install docker
+        echo "::endgroup::"
+
+    - name: Start Colima
+      if: runner.os == 'macos'
+      shell: bash
+      run: |
+        echo "::group::Starting Colima"
+        CPU_COUNT=$(sysctl -n hw.ncpu)
+        TOTAL_MEMORY=$(sysctl hw.memsize | awk '{print $2/1024/1024/1024}')
+        MEMORY=$(awk "BEGIN {printf \"%.0f\", $TOTAL_MEMORY * 0.75}")
+        echo "CPU_COUNT: $CPU_COUNT"
+        echo "TOTAL_MEMORY: $TOTAL_MEMORY"
+        echo "MEMORY: $MEMORY"
+        colima start --arch x86_64 --vm-type=vz --mount-type=virtiofs --cpu $CPU_COUNT --memory $TOTAL_MEMORY
+        export DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock
+        echo "DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock" >> $GITHUB_ENV
+        echo "::endgroup::"
 
     - if: inputs.artifact
       uses: actions/download-artifact@v4
