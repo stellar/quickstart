@@ -36,18 +36,64 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup Colima and Docker (macOS only)
+    - name: Update Homebrew
       if: runner.os == 'macos'
       shell: bash
       run: |
+        echo "::group::Updating Homebrew"
         brew update
-        brew install colima docker
+        echo "::endgroup::"
+
+    - name: Install Lima
+      if: runner.os == 'macos'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        echo "::group::Installing Lima version 2.0.1"
+        curl -fsSL "https://github.com/lima-vm/lima/releases/download/v2.0.1/lima-2.0.1-Darwin-x86_64.tar.gz" | tar Cxzvm /usr/local
+        echo "::endgroup::"
+
+    - name: Install Colima
+      if: runner.os == 'macos'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        echo "::group::Installing Colima version 0.9.1"
+        curl -LO https://github.com/abiosoft/colima/releases/download/v0.9.1/colima-Darwin-x86_64
+
+        # install in $PATH
+        install colima-Darwin-x86_64 /usr/local/bin/colima
+        echo "::endgroup::"
+
+    - name: Install Docker client
+      if: runner.os == 'macos'
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: "1"
+        HOMEBREW_NO_INSTALL_UPGRADE: "1"
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1"
+      shell: bash
+      run: |
+        echo "::group::Installing Docker client"
+        brew install docker
+        echo "::endgroup::"
+
+    - name: Start Colima
+      if: runner.os == 'macos'
+      shell: bash
+      run: |
+        echo "::group::Starting Colima"
         CPU_COUNT=$(sysctl -n hw.ncpu)
         TOTAL_MEMORY=$(sysctl hw.memsize | awk '{print $2/1024/1024/1024}')
         MEMORY=$(awk "BEGIN {printf \"%.0f\", $TOTAL_MEMORY * 0.75}")
-        colima start --arch x86_64 --vm-type=vz --mount-type=virtiofs --cpu $CPU_COUNT --memory $TOTAL_MEMORY --network-address
+        echo "CPU_COUNT: $CPU_COUNT"
+        echo "TOTAL_MEMORY: $TOTAL_MEMORY"
+        echo "MEMORY: $MEMORY"
+        colima start --arch x86_64 --vm-type=vz --mount-type=virtiofs --cpu $CPU_COUNT --memory $TOTAL_MEMORY
         export DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock
         echo "DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock" >> $GITHUB_ENV
+        echo "::endgroup::"
 
     - if: inputs.artifact
       uses: actions/download-artifact@v4
@@ -88,6 +134,13 @@ runs:
           echo "stellar image status: $status"
           if [ "$status" == "healthy" ]; then
             break
+          else
+            echo "Health check response:"
+            curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d \
+            '{"jsonrpc": "2.0", "id": 1, "method": "getHealth"}' 'http://localhost:8000/rpc'
+
+            echo "Docker resource usage:"
+            docker stats --no-stream || true
           fi
           sleep 1;
           i=$((i + 1))
