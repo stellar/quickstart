@@ -7,7 +7,6 @@ inputs:
     default: "latest"
   artifact:
     description: "Artifact to collect image from"
-    type: string
     default: ""
   image:
     description: "Image for the quickstart image to use"
@@ -136,8 +135,7 @@ runs:
             break
           else
             echo "Health check response:"
-            curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d \
-            '{"jsonrpc": "2.0", "id": 1, "method": "getHealth"}' 'http://localhost:8000/rpc'
+            docker exec stellar sh -c "curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"getHealth\"}' 'http://localhost:8000/rpc'"
 
             echo "Docker resource usage:"
             docker stats --no-stream || true
