@@ -64,7 +64,7 @@ runs:
         echo "CPU_COUNT: $CPU_COUNT"
         echo "TOTAL_MEMORY: $TOTAL_MEMORY"
         echo "MEMORY: $MEMORY"
-        colima start --arch x86_64 --vm-type=vz --mount-type=virtiofs --cpu $CPU_COUNT --memory $TOTAL_MEMORY
+        colima start --arch x86_64 --vm-type=vz --mount-type=9p --cpu $CPU_COUNT --memory $TOTAL_MEMORY
         export DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock
         echo "DOCKER_HOST=unix:///Users/runner/.colima/default/docker.sock" >> $GITHUB_ENV
         echo "::endgroup::"
