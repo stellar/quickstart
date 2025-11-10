@@ -28,6 +28,7 @@ jobs:
           action:
           - 'action.yml'
           - '.github/workflows/action-test.yml'
+          - '.github/workflows/internal-action-test.yml'
         list-files: shell
     - uses: actions/github-script@v8
       id: os
@@ -43,7 +44,7 @@ jobs:
           // artifact images contain only a single platform.
           if (process.env.ACTION_CHANGED === 'true' && '${{ inputs.artifact }}' === '') {
             os.push('ubuntu-24.04-arm');
-            os.push('macos-13');
+            os.push('macos-15-large');
           }
           core.setOutput('os', JSON.stringify(os));
 
@@ -56,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: ./
       with:
         artifact: ${{ inputs.artifact }}
