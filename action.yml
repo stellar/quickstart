@@ -118,8 +118,3 @@ runs:
           fi
         done;
       shell: bash
-
-    - name: Inspect history archive
-      if: failure()
-      run: docker exec stellar sh -lc 'ls -R /opt/stellar/history/history | head'
-      shell: bash
