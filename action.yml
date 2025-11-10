@@ -43,39 +43,14 @@ runs:
         brew update
         echo "::endgroup::"
 
-    - name: Install Lima
+    - name: Install Colima & Docker
       if: runner.os == 'macos'
       env:
         GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |
-        echo "::group::Installing Lima version 2.0.1"
-        curl -fsSL "https://github.com/lima-vm/lima/releases/download/v2.0.1/lima-2.0.1-Darwin-x86_64.tar.gz" | sudo tar Cxzvm /usr/local
-        echo "::endgroup::"
-
-    - name: Install Colima
-      if: runner.os == 'macos'
-      env:
-        GH_TOKEN: ${{ github.token }}
-      shell: bash
-      run: |
-        echo "::group::Installing Colima version 0.9.1"
-        curl -LO https://github.com/abiosoft/colima/releases/download/v0.9.1/colima-Darwin-x86_64
-
-        # install in $PATH
-        install colima-Darwin-x86_64 /usr/local/bin/colima
-        echo "::endgroup::"
-
-    - name: Install Docker client
-      if: runner.os == 'macos'
-      env:
-        HOMEBREW_NO_AUTO_UPDATE: "1"
-        HOMEBREW_NO_INSTALL_UPGRADE: "1"
-        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1"
-      shell: bash
-      run: |
-        echo "::group::Installing Docker client"
-        brew install docker
+        echo "::group::Installing Colima & Docker"
+        brew install colima docker
         echo "::endgroup::"
 
     - name: Start Colima
