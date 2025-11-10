@@ -44,7 +44,7 @@ jobs:
           // artifact images contain only a single platform.
           if (process.env.ACTION_CHANGED === 'true' && '${{ inputs.artifact }}' === '') {
             os.push('ubuntu-24.04-arm');
-            os.push('macos-15-intel');
+            os.push('macos-15-large');
           }
           core.setOutput('os', JSON.stringify(os));
 
