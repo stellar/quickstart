@@ -55,7 +55,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.action-setup.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 40
     steps:
     - uses: actions/checkout@v5
     - uses: ./
