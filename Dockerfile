@@ -1,9 +1,7 @@
 # The base images in this Dockerfile attempt to align on the same underlying
 # version of Debian. This is not strictly required but it is a simple narrative
-# for keeping images updated. Updated to the underlying OS are primarily driven
-# by the versions of Ubuntu that stellar-core is supported and tested on. For
-# all other software components it rarely matters what version they have been
-# built on.
+# for keeping images updated. Updates to the underlying OS are primarily driven
+# by the versions of Ubuntu that stellar-core is supported and tested on.
 #
 # The base images used in this image are:
 #
