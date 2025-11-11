@@ -64,7 +64,7 @@
   },
   {
     "tag": "nightly",
-    "events": ["push", "schedule", "pull_request"],
+    "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 24
     },
@@ -83,7 +83,7 @@
   },
   {
     "tag": "nightly-next",
-    "events": ["push", "schedule", "pull_request"],
+    "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 25,
       "horizon_skip_protocol_version_check": true

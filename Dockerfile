@@ -1,3 +1,17 @@
+# The base images in this Dockerfile attempt to align on the same underlying
+# version of Debian. This is not strictly required but it is a simple narrative
+# for keeping images updated. Updates to the underlying OS are primarily driven
+# by the versions of Ubuntu that stellar-core is supported and tested on.
+#
+# The base images used in this image are:
+#
+# | Base Image             | Debian Version |
+# |------------------------|----------------|
+# | ubuntu:22.04           | 12 (bookworm)  |
+# | rust:1-bookworm        | 12 (bookworm)  |
+# | golang:1.24-bookworm   | 12 (bookworm)  |
+# | node:22-bookworm       | 12 (bookworm)  |
+
 ARG XDR_IMAGE=stellar-xdr-stage
 ARG CORE_IMAGE=stellar-core-stage
 ARG HORIZON_IMAGE=stellar-horizon-stage
@@ -7,7 +21,7 @@ ARG LAB_IMAGE=stellar-lab-stage
 
 # xdr
 
-FROM rust AS stellar-xdr-builder
+FROM rust:1-bookworm AS stellar-xdr-builder
 ARG XDR_REPO
 ARG XDR_REF
 WORKDIR /wd
@@ -23,7 +37,7 @@ COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 
 # core
 
-FROM ubuntu:focal AS stellar-core-builder
+FROM ubuntu:22.04 AS stellar-core-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
@@ -66,7 +80,7 @@ COPY --from=stellar-core-builder /usr/local/bin/stellar-core /stellar-core
 
 # rpc
 
-FROM golang:1.24-bullseye AS stellar-rpc-builder
+FROM golang:1.24-bookworm AS stellar-rpc-builder
 
 ARG RPC_REPO
 ARG RPC_REF
@@ -93,7 +107,7 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 # horizon
 
-FROM golang:1.24 AS stellar-horizon-builder
+FROM golang:1.24-bookworm AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
@@ -117,7 +131,7 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 # friendbot
 
-FROM golang:1.24 AS stellar-friendbot-builder
+FROM golang:1.24-bookworm AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
@@ -141,7 +155,7 @@ COPY --from=stellar-friendbot-builder /friendbot /friendbot
 
 # lab
 
-FROM node:22 AS stellar-lab-builder
+FROM node:22-bookworm AS stellar-lab-builder
 
 ARG LAB_REPO
 ARG LAB_REF
