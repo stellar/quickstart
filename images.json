@@ -7,7 +7,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.0.0", "options": { "configure_flags": "--disable-tests" } },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
       { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
@@ -28,7 +28,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0rc1", "options": { "configure_flags": "--disable-tests" } },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
       { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
