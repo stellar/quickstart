@@ -51,7 +51,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "89cc1cbadf1b9a16843826954dede7fec514d8e7" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "3c6146baa94cd2c41a8b49d1b94915e3c5ba8ee9", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
+      { "name": "core", "repo": "stellar/stellar-core", "ref": "71e3603f78565857b856a011ffe31ba30e4a06b8", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "3b92ac8dfa97ac8dafc58b99bbd2d9cbe138f28b" },
       { "name": "horizon", "repo": "stellar/stellar-horizon", "ref": "88d8ba74bee93f274559d4cc67172538267ee3f2", "options": { "pkg": "github.com/stellar/stellar-horizon" } },
       { "name": "friendbot", "repo": "stellar/friendbot", "ref": "0d2f8fff778900f1b27b77e08b231d70f584fcdf", "options": { "pkg": "github.com/stellar/friendbot" } },
