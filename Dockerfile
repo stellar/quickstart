@@ -44,7 +44,7 @@ RUN apt-get update && \
     apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
                        bison flex sed perl libpq-dev parallel \
-                        clang-20 libc++abi-20-dev libc++-20-dev \
+                       clang-20 libc++abi-20-dev libc++-20-dev \
                        postgresql curl jq
 
 ARG CORE_REPO
