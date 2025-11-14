@@ -19,7 +19,7 @@ export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 
 export CORELOG="/var/log/stellar-core"
 
-export PGBIN="/usr/lib/postgresql/14/bin/"
+export PGBIN="/usr/lib/postgresql/16/bin/"
 export PGDATA="$PGHOME/data"
 export PGUSER="stellar"
 export PGPORT=5432

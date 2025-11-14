@@ -7,8 +7,8 @@ apt-get update
 apt-get install -y curl apt-transport-https \
                    postgresql-client postgresql postgresql-contrib \
                    sudo supervisor psmisc \
-                   nginx rsync jq netcat \
-                   libunwind8 sqlite libc++abi1-12 libc++1-12
+                   nginx rsync jq netcat-openbsd \
+                   libunwind8 sqlite3 libc++abi1-20 libc++1-20
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
