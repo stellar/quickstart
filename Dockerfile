@@ -7,10 +7,10 @@
 #
 # | Base Image             | Debian Version |
 # |------------------------|----------------|
-# | ubuntu:22.04           | 12 (bookworm)  |
-# | rust:1-bookworm        | 12 (bookworm)  |
-# | golang:1.24-bookworm   | 12 (bookworm)  |
-# | node:22-bookworm       | 12 (bookworm)  |
+# | ubuntu:24.04           | 13 (trixie)    |
+# | rust:1-trixie          | 13 (trixie)    |
+# | golang:1.24-trixie     | 13 (trixie)    |
+# | node:22-trixie         | 13 (trixie)    |
 
 ARG XDR_IMAGE=stellar-xdr-stage
 ARG CORE_IMAGE=stellar-core-stage
@@ -21,7 +21,7 @@ ARG LAB_IMAGE=stellar-lab-stage
 
 # xdr
 
-FROM rust:1-bookworm AS stellar-xdr-builder
+FROM rust:1-trixie AS stellar-xdr-builder
 ARG XDR_REPO
 ARG XDR_REF
 WORKDIR /wd
@@ -37,14 +37,14 @@ COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 
 # core
 
-FROM ubuntu:22.04 AS stellar-core-builder
+FROM ubuntu:24.04 AS stellar-core-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
-                       bison flex sed perl libpq-dev parallel libunwind-dev \
-                       clang-12 libc++abi-12-dev libc++-12-dev \
+                       bison flex sed perl libpq-dev parallel \
+                        clang-20 libc++abi-20-dev libc++-20-dev \
                        postgresql curl jq
 
 ARG CORE_REPO
@@ -60,8 +60,8 @@ RUN git checkout ${CORE_REF}
 RUN git clean -dXf
 RUN git submodule foreach --recursive git clean -dXf
 
-ARG CC=clang-12
-ARG CXX=clang++-12
+ARG CC=clang-20
+ARG CXX=clang++-20
 ARG CFLAGS='-O3 -g1 -fno-omit-frame-pointer'
 ARG CXXFLAGS='-O3 -g1 -fno-omit-frame-pointer -stdlib=libc++'
 
@@ -80,7 +80,7 @@ COPY --from=stellar-core-builder /usr/local/bin/stellar-core /stellar-core
 
 # rpc
 
-FROM golang:1.24-bookworm AS stellar-rpc-builder
+FROM golang:1.24-trixie AS stellar-rpc-builder
 
 ARG RPC_REPO
 ARG RPC_REF
@@ -107,7 +107,7 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 # horizon
 
-FROM golang:1.24-bookworm AS stellar-horizon-builder
+FROM golang:1.24-trixie AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
@@ -131,7 +131,7 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 # friendbot
 
-FROM golang:1.24-bookworm AS stellar-friendbot-builder
+FROM golang:1.24-trixie AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install jq
@@ -155,7 +155,7 @@ COPY --from=stellar-friendbot-builder /friendbot /friendbot
 
 # lab
 
-FROM node:22-bookworm AS stellar-lab-builder
+FROM node:22-trixie AS stellar-lab-builder
 
 ARG LAB_REPO
 ARG LAB_REF
@@ -192,7 +192,7 @@ FROM $FRIENDBOT_IMAGE AS friendbot
 FROM $RPC_IMAGE AS rpc
 FROM $LAB_IMAGE AS lab
 
-FROM ubuntu:22.04 AS quickstart
+FROM ubuntu:24.04 AS quickstart
 
 ARG REVISION
 ENV REVISION=$REVISION
