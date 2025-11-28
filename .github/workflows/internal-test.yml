@@ -173,7 +173,11 @@ jobs:
         go run tests/test_stellar_rpc_healthy.go
     - name: Prepare Test Logs
       if: always()
-      run: docker cp stellar:/var/log logs
+      run: |
+        # Remove broken symlink that causes 'docker cp' to fail
+        # In Debian 13 (Trixie), /var/log/README symlinks to systemd docs that aren't installed
+        docker exec stellar rm -f /var/log/README
+        docker cp stellar:/var/log logs
     - name: Upload Test Logs
       if: always()
       uses: actions/upload-artifact@v4
