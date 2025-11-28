@@ -21,6 +21,10 @@ apt-get install -y curl apt-transport-https \
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
+# Remove broken symlink that causes issues with 'docker cp'
+# In Debian 13 (Trixie), /var/log/README symlinks to systemd docs that aren't installed
+rm -f /var/log/README
+
 chown -R www-data:www-data /var/lib/nginx
 
 echo "\nDone installing dependencies...\n"
