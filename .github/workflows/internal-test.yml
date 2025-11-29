@@ -27,6 +27,7 @@ on:
 
 env:
   artifact_retention_days_for_logs: 60
+  timeout_multiplier: 4
 
 jobs:
 
@@ -115,7 +116,7 @@ jobs:
       run: sleep 10
     - name: Calculate timeout
       id: timeout
-      run: echo "minutes=$((${{ github.run_attempt }} * 2))" >> $GITHUB_OUTPUT
+      run: echo "minutes=$((${{ github.run_attempt }} * ${{ env.timeout_multiplier }}))" >> $GITHUB_OUTPUT
     - name: Run core test
       if: ${{ contains(matrix.enable, 'core') }}
       timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
