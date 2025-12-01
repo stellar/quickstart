@@ -7,6 +7,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
+      { "name": "strkey", "repo": "stellar/rs-stellar-strkey", "ref": "v0.0.14" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
@@ -28,6 +29,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
+      { "name": "strkey", "repo": "stellar/rs-stellar-strkey", "ref": "v0.0.14" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
@@ -51,6 +53,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "89cc1cbadf1b9a16843826954dede7fec514d8e7" },
+      { "name": "strkey", "repo": "stellar/rs-stellar-strkey", "ref": "v0.0.14" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "bc46d6004548ed52b0f8b7552e2351c0aa190a45", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "1695c9c53a4cfc52ffb53c10da7fef60076e7bba" },
       { "name": "horizon", "repo": "stellar/stellar-horizon", "ref": "88d8ba74bee93f274559d4cc67172538267ee3f2", "options": { "pkg": "github.com/stellar/stellar-horizon" } },
@@ -70,6 +73,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
+      { "name": "strkey", "repo": "stellar/rs-stellar-strkey", "ref": "main" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
       { "name": "horizon", "repo": "stellar/stellar-horizon", "ref": "main", "options": { "pkg": "github.com/stellar/stellar-horizon" } },
@@ -90,6 +94,7 @@
     },
     "deps": [
       { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "main" },
+      { "name": "strkey", "repo": "stellar/rs-stellar-strkey", "ref": "main" },
       { "name": "core", "repo": "stellar/stellar-core", "ref": "master", "options": { "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "main" },
       { "name": "horizon", "repo": "stellar/stellar-horizon", "ref": "main", "options": { "pkg": "github.com/stellar/stellar-horizon" } },

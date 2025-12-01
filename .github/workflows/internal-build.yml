@@ -234,6 +234,12 @@ jobs:
         pattern: image-xdr-${{ steps.ids.outputs.xdr }}-${{ matrix.arch }}.*
         merge-multiple: true
         path: /tmp/images
+    - name: Download Image Strkey
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-strkey-${{ steps.ids.outputs.strkey }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
     - name: Download Image Core
       uses: actions/download-artifact@v4
       with:

@@ -11,6 +11,8 @@ IMAGE_JSON=.image.json
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
 XDR_SHA =           $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .sha')
+STRKEY_REPO =       $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "strkey") | .repo')
+STRKEY_SHA =        $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "strkey") | .sha')
 CORE_REPO =         $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "core") | .repo')
 CORE_SHA =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "core") | .sha')
 CORE_OPTIONS =      $(shell < $(IMAGE_JSON) jq -c '.deps[] | select(.name == "core") | .options // {}')
@@ -38,6 +40,7 @@ build: $(IMAGE_JSON)
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 		--build-arg REVISION=$(REVISION) \
 		--build-arg XDR_REPO=$(XDR_REPO) --build-arg XDR_REF=$(XDR_SHA) \
+		--build-arg STRKEY_REPO=$(STRKEY_REPO) --build-arg STRKEY_REF=$(STRKEY_SHA) \
 		--build-arg CORE_REPO="$(CORE_REPO)" --build-arg CORE_REF="$(CORE_SHA)" --build-arg CORE_OPTIONS='$(CORE_OPTIONS)' \
 		--build-arg RPC_REPO="$(RPC_REPO)" --build-arg RPC_REF="$(RPC_SHA)" \
 		--build-arg HORIZON_REPO="$(HORIZON_REPO)" --build-arg HORIZON_REF="$(HORIZON_SHA)" --build-arg HORIZON_OPTIONS='$(HORIZON_OPTIONS)' \

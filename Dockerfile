@@ -13,6 +13,7 @@
 # | node:22-bookworm       | 12 (bookworm)  |
 
 ARG XDR_IMAGE=stellar-xdr-stage
+ARG STRKEY_IMAGE=stellar-strkey-stage
 ARG CORE_IMAGE=stellar-core-stage
 ARG HORIZON_IMAGE=stellar-horizon-stage
 ARG FRIENDBOT_IMAGE=stellar-friendbot-stage
@@ -34,6 +35,22 @@ RUN cargo install stellar-xdr --features cli --path . --locked
 FROM scratch AS stellar-xdr-stage
 
 COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
+
+# strkey
+
+FROM rust:1-trixie AS stellar-strkey-builder
+ARG STRKEY_REPO
+ARG STRKEY_REF
+WORKDIR /wd
+RUN git clone https://github.com/${STRKEY_REPO} /wd
+RUN git fetch origin ${STRKEY_REF}
+RUN git checkout ${STRKEY_REF}
+RUN rustup show active-toolchain || rustup toolchain install
+RUN cargo install stellar-strkey --features cli --path . --locked
+
+FROM scratch AS stellar-strkey-stage
+
+COPY --from=stellar-strkey-builder /usr/local/cargo/bin/stellar-strkey /stellar-strkey
 
 # core
 
@@ -186,6 +203,7 @@ COPY --from=stellar-lab-builder /usr/local/bin/node /node
 # quickstart
 
 FROM $XDR_IMAGE AS xdr
+FROM $STRKEY_IMAGE AS strkey
 FROM $CORE_IMAGE AS core
 FROM $HORIZON_IMAGE AS horizon
 FROM $FRIENDBOT_IMAGE AS friendbot
@@ -210,6 +228,7 @@ ADD dependencies /
 RUN /dependencies
 
 COPY --from=xdr /stellar-xdr /usr/local/bin/stellar-xdr
+COPY --from=strkey /stellar-strkey /usr/local/bin/stellar-strkey
 COPY --from=core /stellar-core /usr/bin/stellar-core
 COPY --from=horizon /stellar-horizon /usr/bin/stellar-horizon
 COPY --from=friendbot /friendbot /usr/local/bin/friendbot
