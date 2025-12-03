@@ -84,6 +84,8 @@ function start() {
   echo "  quickstart: $REVISION"
   echo "  xdr:"
   echo "$(stellar-xdr version | sed 's/^/    /')"
+  echo "  strkey:"
+  echo "$(stellar-strkey version | sed 's/^/    /')"
   echo "  core:"
   echo "$(stellar-core version 2>/dev/null | sed 's/^/    /')"
   echo "  rpc:"
@@ -101,6 +103,7 @@ function start() {
   echo "network id: $NETWORK_ID"
   echo "network root secret key: $NETWORK_ROOT_SECRET_KEY"
   echo "network root account id: $NETWORK_ROOT_ACCOUNT_ID"
+  echo "native asset contract address: $NATIVE_ASSET_CONTRACT_ADDRESS"
   echo "protocol version default: $PROTOCOL_VERSION_DEFAULT"
   echo "protocol version set: $PROTOCOL_VERSION"
 
@@ -256,6 +259,7 @@ function process_args() {
   local network_id_keys=$(stellar-core convert-id $NETWORK_ID | awk -F': ' '/strKey: /{print $2}' | tail -2)
   export NETWORK_ROOT_SECRET_KEY=$(printf "$network_id_keys" | head -1)
   export NETWORK_ROOT_ACCOUNT_ID=$(printf "$network_id_keys" | tail -1)
+  export NATIVE_ASSET_CONTRACT_ADDRESS=$(native_asset_contract_address $NETWORK_ID)
 
   # Are we ephemeral or persistent?
   if [ -z "$STELLAR_MODE" ]; then
@@ -866,6 +870,21 @@ function horizon_status() {
     sleep 5
   done
   echo "horizon: ingestion caught up"
+}
+
+function native_asset_contract_address() {
+  local network_id=$1
+  local contract_hash=$(
+    jq -nc --arg network_id "$network_id" '{"contract_id":{"network_id":$network_id,"contract_id_preimage":{"asset":"native"}}}' |
+    stellar-xdr encode --type HashIdPreimage --output single |
+    sha256sum |
+    cut -f 1 -d " "
+  )
+  local contract_address=$(
+    stellar-strkey encode \
+      $(jq -nc --arg contract_hash "$contract_hash" '{"contract":$contract_hash}')
+  )
+  printf '%s' "$contract_address"
 }
 
 main $@
