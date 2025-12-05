@@ -1,24 +1,5 @@
 [
   {
-    "tag": "friendbot-with-rpc",
-    "events": ["pull_request", "push"],
-    "config": {
-      "protocol_version_default": 24
-    },
-    "deps": [
-      { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v24.0.0" },
-      { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
-      { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
-      { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
-      { "name": "friendbot", "repo": "stellar/friendbot", "ref": "a8617fd3b7ec3e764e766998996c2b8a00b33610", "options": { "pkg": "github.com/stellar/friendbot" } },
-      { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
-    ],
-    "tests": {
-      "continue-on-error": false,
-      "additional-tests": []
-    }
-  },
-  {
     "tag": "latest",
     "events": ["pull_request", "push"],
     "config": {
@@ -29,7 +10,7 @@
       { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
+      { "name": "friendbot", "repo": "stellar/friendbot", "ref": "main", "options": { "pkg": "github.com/stellar/friendbot" } },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
@@ -50,7 +31,7 @@
       { "name": "core", "repo": "stellar/stellar-core", "ref": "v24.1.0", "options": { "configure_flags": "--disable-tests" } },
       { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v24.0.0" },
       { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/horizon" } },
-      { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v24.0.0", "options": { "pkg": "github.com/stellar/go/services/friendbot" } },
+      { "name": "friendbot", "repo": "stellar/friendbot", "ref": "main", "options": { "pkg": "github.com/stellar/friendbot" } },
       { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
     ],
     "tests": {
