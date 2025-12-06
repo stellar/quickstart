@@ -96,7 +96,7 @@ ENV RUSTUP_HOME=/rust/.rust
 ENV PATH="/usr/local/go/bin:$CARGO_HOME/bin:${PATH}"
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y build-essential && apt-get clean
+RUN apt-get update && apt-get install -y build-essential jq && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
 RUN make build-stellar-rpc
