@@ -3,10 +3,25 @@
 set -e
 set -o pipefail
 
-while ! (curl -sf http://localhost:8001/ | jq --exit-status '.ingest_latest_ledger > 1'); do
+CONF=/opt/stellar/friendbot/etc/friendbot.cfg
+
+# Wait for rpc to be ready if friendbot is configured to use it.
+RPC_URL=$(tomljson "$CONF" | jq -r '.rpc_url // empty')
+if [ -n "$RPC_URL" ]; then
+  echo "Waiting for rpc to be available..."
+  while ! (curl -sf -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' "$RPC_URL" | jq --exit-status '.result.status == "healthy"' >/dev/null); do
+    sleep 1
+  done
+fi
+
+# Wait for horizon to be ready if friendbot is configured to use it.
+HORIZON_URL=$(tomljson "$CONF" | jq -r '.horizon_url // empty')
+if [ -n "$HORIZON_URL" ]; then
   echo "Waiting for horizon to be available..."
-  sleep 1
-done
+  while ! (curl -sf "$HORIZON_URL" | jq --exit-status '.ingest_latest_ledger > 1' >/dev/null); do
+    sleep 1
+  done
+fi
 
 echo "starting friendbot..."
-exec /usr/local/bin/friendbot --conf /opt/stellar/friendbot/etc/friendbot.cfg
+exec /usr/local/bin/friendbot --conf "$CONF"

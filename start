@@ -235,9 +235,6 @@ function process_args() {
     # h1570ry - we'll start a webserver connected to history directory later on
     export HISTORY_ARCHIVE_URLS="http://localhost:1570"
     ENABLE_CORE=true
-    if [[ "$ENABLE_RPC" = "true" ]]; then
-      ENABLE_HORIZON=true
-    fi
     ;;
   futurenet)
     export NETWORK_PASSPHRASE="Test SDF Future Network ; October 2022"
@@ -498,6 +495,12 @@ function init_friendbot() {
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/friendbot.cfg
   perl -pi -e "s/__NETWORK_ROOT_SECRET_KEY__/$NETWORK_ROOT_SECRET_KEY/g" etc/friendbot.cfg
 
+  if [ "$ENABLE_RPC" = "true" ]; then
+    echo 'rpc_url = "http://localhost:8003"' >> etc/friendbot.cfg
+  elif [ "$ENABLE_HORIZON" = "true" ]; then
+    echo 'horizon_url = "http://localhost:8001"' >> etc/friendbot.cfg
+  fi
+
   popd
 }
 
@@ -673,9 +676,9 @@ function upgrade_local() {
   # account to submit txs. while friend it is not dependent on the config
   # upgrade txs, it must not be started until the config upgrades are
   # complete otherwise the txs sequence numbers will conflict.
-  if [ "$ENABLE_HORIZON" == "true" ]; then
+  if [ "$ENABLE_HORIZON" == "true" ] || [ "$ENABLE_RPC" == "true" ]; then
       supervisorctl start friendbot
-  fi    
+  fi
 }
 
 function start_optional_services() {
