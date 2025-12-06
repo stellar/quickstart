@@ -23,4 +23,9 @@ rm -rf /var/lib/apt/lists/*
 
 chown -R www-data:www-data /var/lib/nginx
 
+# Remove broken symlink in Debian 13 (Trixie) where /var/log/README points to
+# systemd docs that aren't installed. The symlink is relative, which causes
+# commands like docker cp to fail when copying /var/log.
+rm -f /var/log/README
+
 echo "\nDone installing dependencies...\n"

@@ -175,9 +175,6 @@ jobs:
     - name: Prepare Test Logs
       if: always()
       run: |
-        # Remove broken symlink that causes 'docker cp' to fail
-        # In Debian 13 (Trixie), /var/log/README symlinks to systemd docs that aren't installed
-        docker exec stellar rm -f /var/log/README
         docker cp stellar:/var/log logs
     - name: Upload Test Logs
       if: always()
