@@ -3,6 +3,7 @@ set -e
 
 clear=$(echo -e "\e[0m")
 green=$(echo -e "\e[32m")
+yellow=$(echo -e "\e[33m")
 blue=$(echo -e "\e[34m")
 purple=$(echo -e "\e[35m")
 cyan=$(echo -e "\e[36m")
@@ -501,6 +502,9 @@ function init_friendbot() {
     echo 'horizon_url = "http://localhost:8001"' >> etc/friendbot.cfg
   fi
 
+  # Write root account ID to temp file for debugging in friendbot start script
+  echo "$NETWORK_ROOT_ACCOUNT_ID" > /tmp/network_root_account_id
+
   popd
 }
 
@@ -678,6 +682,11 @@ function upgrade_local() {
   # complete otherwise the txs sequence numbers will conflict.
   if [ "$ENABLE_HORIZON" == "true" ] || [ "$ENABLE_RPC" == "true" ]; then
       supervisorctl start friendbot
+      # Start tailing friendbot logs after it starts (if logs are enabled)
+      if [ "$ENABLE_LOGS" = "true" ]; then
+        supervisorctl tail -f friendbot stdout > >(sed -u "s/^/${yellow}friendbot    | $clear/") &
+        supervisorctl tail -f friendbot stderr > >(sed -u "s/^/${yellow}friendbot    | $clear/" >&2) &
+      fi
   fi
 }
 
@@ -735,6 +744,7 @@ function print_service_logs() {
   if [ "$ENABLE_RPC" = "true" ]; then
     supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
   fi
+  # Note: friendbot logs are started in upgrade_local() after friendbot starts
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
