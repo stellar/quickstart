@@ -48,25 +48,25 @@ def main():
         json.dump(images, f, indent=2)
         f.write('\n')
 
-def get_releases(repo):
-    """Get all releases from a repo."""
-    result = subprocess.run(
-        ['gh', 'api', f'repos/{repo}/releases', '--jq', '.[] | {tag: .tag_name, prerelease: .prerelease}'],
-        capture_output=True, text=True
-    )
-    releases = []
-    if result.returncode == 0 and result.stdout.strip():
-        for line in result.stdout.strip().split('\n'):
-            if line:
-                releases.append(json.loads(line))
-    return releases
-
 def get_latest_release(repo, include_prerelease=False):
     """Get the latest release. If include_prerelease is False, skip prereleases."""
     for rel in get_releases(repo):
-        if include_prerelease or not rel['prerelease']:
+        if include_prerelease and 'rc' in rel['tag']:
+            return rel['tag']
+        if not rel['prerelease']:
             return rel['tag']
     return None
+
+def get_releases(repo):
+    """Get all releases from a repo."""
+    result = subprocess.run(
+        ['gh', 'api', f'repos/{repo}/releases', '--jq', '[.[] | {tag: .tag_name, prerelease: .prerelease}]'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to get releases for {repo}: {result.stderr}", file=sys.stderr)
+        sys.exit(1)
+    return json.loads(result.stdout)
 
 if __name__ == '__main__':
     main()

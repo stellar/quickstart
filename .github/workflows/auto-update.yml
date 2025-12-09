@@ -41,7 +41,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        hash=$(sha256sum images.json | cut -c1-8)
+        hash=$(sha256sum images.json | cut -c1-16)
         branch="auto-update/${{ matrix.image }}-${hash}"
 
         # Check if PR already exists for this exact update
