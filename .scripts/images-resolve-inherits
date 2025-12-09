@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+
+# Accepts as stdin a JSON object in the format of images.json.
+# Resolves any 'inherit' fields by copying deps from the referenced image.
+#
+# An image can specify "inherit": "<tag>" to inherit all deps from another image.
+# Inherited deps are merged with explicitly defined deps (explicit deps override
+# inherited ones with the same name).
+#
+# Nested inherits are supported (image A inherits from B, B inherits from C).
+#
+# Outputs the original JSON with inherits resolved and removed.
+#
+# Usage: < images.json ./.scripts/images-resolve-inherits
+
+import json
+import sys
+
+def main():
+    """Read images from stdin, resolve all inherits, and output to stdout."""
+    images = json.load(sys.stdin)
+    while has_inherits(images):
+        images = resolve_inherits(images)
+    print(json.dumps(images, separators=(',', ':')))
+
+def has_inherits(images):
+    """Return True if any image has an 'inherit' field."""
+    return any("inherit" in img for img in images)
+
+def resolve_inherits(images):
+    """Resolve one level of inheritance for all images.
+
+    For each image with an 'inherit' field:
+    - Copy deps from the parent that aren't already defined in the child
+    - If the parent also has an 'inherit' field, copy it (for nested resolution)
+    - Remove the child's 'inherit' field once resolved
+
+    Exits with error if an image inherits from an unknown tag.
+    """
+    lookup = build_lookup(images)
+    for image in images:
+        if "inherit" in image:
+            parent_tag = image["inherit"]
+            parent = lookup.get(parent_tag)
+            if parent is None:
+                print(f"Error: image '{image['tag']}' inherits from unknown image '{parent_tag}'", file=sys.stderr)
+                sys.exit(1)
+
+            # Get existing dep names in child
+            child_dep_names = {dep["name"] for dep in image.get("deps", [])}
+
+            # Copy deps from parent that aren't in child
+            inherited_deps = [dep for dep in parent.get("deps", []) if dep["name"] not in child_dep_names]
+            image["deps"] = inherited_deps + image.get("deps", [])
+
+            # Remove child's inherit since it has been resolved
+            del image["inherit"]
+
+            # Copy parent's inherit if present (for nested resolution)
+            if "inherit" in parent:
+                image["inherit"] = parent["inherit"]
+
+    return images
+
+def build_lookup(images):
+    """Return a dict mapping image tags to their image objects."""
+    return {img["tag"]: img for img in images}
+
+if __name__ == "__main__":
+    main()
