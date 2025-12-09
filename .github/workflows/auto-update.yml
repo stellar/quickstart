@@ -2,7 +2,8 @@ name: Auto Update
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # Every 4 hours
+  - cron: '0 20 * * *'  # 12 PM Pacific
+  - cron: '0 1 * * *'   # 5 PM Pacific
   workflow_dispatch:
 
 permissions:
