@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+
+import json
+import subprocess
+import sys
+
+# Auto-update script for images.json
+#
+# Usage: ./.scripts/auto-update <image-tag> <stable|rc>
+#
+# For 'stable': uses GitHub's latest stable release
+# For 'rc': uses the newest release (prerelease or stable)
+
+def main():
+    if len(sys.argv) != 3 or sys.argv[2] not in ('stable', 'rc'):
+        print("Usage: auto-update <image-tag> <stable|rc>", file=sys.stderr)
+        sys.exit(1)
+
+    image_tag, mode = sys.argv[1], sys.argv[2]
+
+    with open('images.json', 'r') as f:
+        images = json.load(f)
+
+    # Find target image
+    target = next((img for img in images if img['tag'] == image_tag), None)
+    if not target:
+        print(f"Error: image '{image_tag}' not found", file=sys.stderr)
+        sys.exit(1)
+
+    for dep in target['deps']:
+        name, repo, current = dep['name'], dep['repo'], dep['ref']
+
+        # Skip non-release refs (branches, SHAs)
+        if not current.startswith('v'):
+            print(f"{name}: skipping, ref is not a version")
+            continue
+
+        latest = get_latest_release(repo, include_prerelease=(mode == 'rc'))
+        if not latest:
+            print(f"{name}: skipping, no release found")
+        elif latest != current:
+            print(f"{name}: {current} -> {latest}")
+            dep['ref'] = latest
+        else:
+            print(f"{name}: matches latest release")
+
+    with open('images.json', 'w') as f:
+        json.dump(images, f, indent=2)
+        f.write('\n')
+
+def get_releases(repo):
+    """Get all releases from a repo."""
+    result = subprocess.run(
+        ['gh', 'api', f'repos/{repo}/releases', '--jq', '.[] | {tag: .tag_name, prerelease: .prerelease}'],
+        capture_output=True, text=True
+    )
+    releases = []
+    if result.returncode == 0 and result.stdout.strip():
+        for line in result.stdout.strip().split('\n'):
+            if line:
+                releases.append(json.loads(line))
+    return releases
+
+def get_latest_release(repo, include_prerelease=False):
+    """Get the latest release. If include_prerelease is False, skip prereleases."""
+    for rel in get_releases(repo):
+        if include_prerelease or not rel['prerelease']:
+            return rel['tag']
+    return None
+
+if __name__ == '__main__':
+    main()
