@@ -27,6 +27,7 @@ def main():
         print(f"Error: image '{image_tag}' not found", file=sys.stderr)
         sys.exit(1)
 
+    updated = False
     for dep in target['deps']:
         name, repo, current = dep['name'], dep['repo'], dep['ref']
 
@@ -41,12 +42,14 @@ def main():
         elif latest != current:
             print(f"{name}: {current} -> {latest}")
             dep['ref'] = latest
+            updated = True
         else:
             print(f"{name}: matches latest release")
 
-    with open('images.json', 'w') as f:
-        json.dump(images, f, indent=2)
-        f.write('\n')
+    if updated:
+        with open('images.json', 'w') as f:
+            json.dump(images, f, indent=2)
+            f.write('\n')
 
 def get_latest_release(repo, include_prerelease=False):
     """Get the latest release. If include_prerelease is False, skip prereleases."""
