@@ -34,12 +34,12 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v24.0.0"
+        "ref": "v25.0.0"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v24.1.0",
+        "ref": "v25.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -100,7 +100,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0rc2",
+        "ref": "v25.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -167,7 +167,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0rc2",
+        "ref": "v25.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
