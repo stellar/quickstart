@@ -70,6 +70,8 @@ jobs:
       run: |
         echo "Input:"
         <<< $images jq -C
+        echo "Parent:"
+        < images.json jq -C
         images_before="$images"
         images="$(<<< $images ./.scripts/images-resolve-inherits images.json)"
         echo "Diff:"
