@@ -79,16 +79,20 @@ jobs:
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Inherits Resolved
       run: |
+        images_before="$images"
         images="$(<<< $images ./.scripts/images-resolve-inherits)"
         <<< $images jq
+        diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
       id: images
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        images_before="$images"
         images="$(<<< $images ./.scripts/images-with-extras)"
         <<< $images jq
+        diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
         echo "images=$images" >> $GITHUB_OUTPUT
         echo "images=$images" >> $GITHUB_ENV
     - name: Deps
