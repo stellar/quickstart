@@ -1,5 +1,26 @@
 [
   {
+    "tag": "test-inheritance",
+    "events": [
+      "pull_request",
+      "push"
+    ],
+    "config": {
+      "protocol_version_default": 24
+    },
+    "deps": [
+      {
+        "name": "xdr",
+        "repo": "stellar/rs-stellar-xdr",
+        "ref": "v25.0.0"
+      }
+    ],
+    "tests": {
+      "continue-on-error": false,
+      "additional-tests": []
+    }
+  },
+  {
     "tag": "latest",
     "events": [
       "pull_request",
