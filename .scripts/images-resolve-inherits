@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 # Accepts as stdin a JSON object in the format of images.json.
-# Resolves any 'inherit' fields by copying deps from the referenced image.
+# Resolves any 'inherit' fields by copying deps and config from the referenced image.
 #
-# An image can specify "inherit": "<tag>" to inherit all deps from another image.
+# An image can specify "inherit": "<tag>" to inherit all deps and config from another image.
 # Inherited deps are merged with explicitly defined deps (explicit deps override
-# inherited ones with the same name).
+# inherited ones with the same name). Config fields are also merged (child overrides parent).
 #
 # Nested inherits are supported (image A inherits from B, B inherits from C).
 #
@@ -32,6 +32,7 @@ def resolve_inherits(images):
 
     For each image with an 'inherit' field:
     - Copy deps from the parent that aren't already defined in the child
+    - Merge config from the parent (child values override parent values)
     - If the parent also has an 'inherit' field, copy it (for nested resolution)
     - Remove the child's 'inherit' field once resolved
 
@@ -52,6 +53,13 @@ def resolve_inherits(images):
             # Copy deps from parent that aren't in child
             inherited_deps = [dep for dep in parent.get("deps", []) if dep["name"] not in child_dep_names]
             image["deps"] = inherited_deps + image.get("deps", [])
+
+            # Merge config from parent (child values override parent)
+            parent_config = parent.get("config", {})
+            child_config = image.get("config", {})
+            if parent_config or child_config:
+                merged_config = {**parent_config, **child_config}
+                image["config"] = merged_config
 
             # Remove child's inherit since it has been resolved
             del image["inherit"]
