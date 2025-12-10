@@ -83,7 +83,7 @@ jobs:
         images_before="$images"
         images="$(<<< $images ./.scripts/images-resolve-inherits)"
         echo "Diff:"
-        diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
+        diff -u --color=always <(<<< $images_before jq) <(<<< $images jq) || true
         echo "Output:"
         <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
@@ -95,7 +95,7 @@ jobs:
         images_before="$images"
         images="$(<<< $images ./.scripts/images-with-extras)"
         echo "Diff:"
-        diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
+        diff -u --color=always <(<<< $images_before jq) <(<<< $images jq) || true
         echo "Output:"
         <<< $images jq
         echo "images=$images" >> $GITHUB_OUTPUT
