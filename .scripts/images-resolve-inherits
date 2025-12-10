@@ -9,9 +9,16 @@
 #
 # Nested inherits are supported (image A inherits from B, B inherits from C).
 #
+# Optionally accepts a parent file path as an argument. When provided, the parent file
+# is used as an additional source for looking up inherited images. This allows input
+# images to inherit from images defined in the parent file without including them in
+# the output. Input images take precedence over parent images with the same tag.
+#
 # Outputs the original JSON with inherits resolved and removed.
 #
-# Usage: < images.json ./.scripts/images-resolve-inherits
+# Usage:
+#   < images.json ./.scripts/images-resolve-inherits
+#   < images.json ./.scripts/images-resolve-inherits parents.json
 
 import json
 import sys
@@ -19,15 +26,22 @@ import sys
 def main():
     """Read images from stdin, resolve all inherits, and output to stdout."""
     images = json.load(sys.stdin)
+
+    # Load parent images from file if provided
+    parents = []
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as f:
+            parents = json.load(f)
+
     while has_inherits(images):
-        images = resolve_inherits(images)
+        images = resolve_inherits(images, parents)
     print(json.dumps(images, separators=(',', ':')))
 
 def has_inherits(images):
     """Return True if any image has an 'inherit' field."""
     return any("inherit" in img for img in images)
 
-def resolve_inherits(images):
+def resolve_inherits(images, parents=None):
     """Resolve one level of inheritance for all images.
 
     For each image with an 'inherit' field:
@@ -36,13 +50,20 @@ def resolve_inherits(images):
     - If the parent also has an 'inherit' field, copy it (for nested resolution)
     - Remove the child's 'inherit' field once resolved
 
+    Parents can be looked up from either the input images or the optional parents list.
+    Input images take precedence over parents with the same tag.
+
     Exits with error if an image inherits from an unknown tag.
     """
+    if parents is None:
+        parents = []
     lookup = build_lookup(images)
+    parent_lookup = build_lookup(parents)
     for image in images:
         if "inherit" in image:
             parent_tag = image["inherit"]
-            parent = lookup.get(parent_tag)
+            # Look up in input images first, then fall back to parents
+            parent = lookup.get(parent_tag) or parent_lookup.get(parent_tag)
             if parent is None:
                 print(f"Error: image '{image['tag']}' inherits from unknown image '{parent_tag}'", file=sys.stderr)
                 sys.exit(1)
