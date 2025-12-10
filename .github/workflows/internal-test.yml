@@ -56,7 +56,7 @@ jobs:
         images: ${{ inputs.images }}
       run: |
         tests="$(<<< $images ./.scripts/images-additional-tests)"
-        <<< $tests jq
+        <<< $tests jq -C
         echo "additional-tests=$tests" >> $GITHUB_OUTPUT
 
   test:
