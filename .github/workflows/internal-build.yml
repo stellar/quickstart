@@ -71,9 +71,13 @@ jobs:
       with:
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.sha }}
-    - name: Images with Inherits Resolved
+    - name: Images Input
       env:
         images: ${{ inputs.images }}
+      run: |
+        <<< $images jq
+        echo "images=$images" >> $GITHUB_ENV
+    - name: Images with Inherits Resolved
       run: |
         images="$(<<< $images ./.scripts/images-resolve-inherits)"
         <<< $images jq
