@@ -75,8 +75,9 @@ jobs:
       env:
         images: ${{ inputs.images }}
       run: |
-        <<< $images jq -C
         echo "Input:"
+        <<< $images jq -C
+        images="$(<<< $images jq -c)"
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Inherits Resolved
       run: |
