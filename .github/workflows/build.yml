@@ -55,7 +55,7 @@ jobs:
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       images: ${{ steps.images.outputs.images }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
