@@ -1,0 +1,26 @@
+name: Auto Update Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - { image: latest, mode: stable }
+        - { image: testing, mode: rc }
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run auto-update
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: ./.scripts/auto-update ${{ matrix.image }} ${{ matrix.mode }}
+
+    - name: Validate images.json
+      run: jq empty images.json
