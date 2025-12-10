@@ -262,7 +262,7 @@ jobs:
 
 The quickstart image can be built with custom software, such as custom versions of core, rpc, horizon, and so on.
 
-Use the `inherit` field to inherit deps from an existing image tag (such as `latest`, `testing`, `future`, or `nightly`), then override only the specific deps you need to customize. To build an entirely custom with no inheritance, omit the `inherit` field.
+Use the `inherit` field to inherit deps from an existing image tag (such as `latest`, `testing`, `future`, or `nightly`), then override only the specific deps you need to customize.
 
 For example, to build an image based on `latest` but with a custom version of `stellar-rpc`:
 
@@ -293,6 +293,8 @@ jobs:
         artifact: image-quickstart-custom-amd64.tar
         tag: custom-amd64
 ```
+
+For an example of a full image definition without inheritance, see the [images.json](./images.json) file in this repository.
 
 
 ### Deploy to Digital Ocean
