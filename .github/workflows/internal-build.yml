@@ -76,13 +76,16 @@ jobs:
         images: ${{ inputs.images }}
       run: |
         <<< $images jq
+        echo "Input:"
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Inherits Resolved
       run: |
         images_before="$images"
         images="$(<<< $images ./.scripts/images-resolve-inherits)"
-        <<< $images jq
+        echo "Diff:"
         diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
+        echo "Output:"
+        <<< $images jq
         echo "images=$images" >> $GITHUB_ENV
     - name: Images with Extras
       id: images
@@ -91,8 +94,10 @@ jobs:
       run: |
         images_before="$images"
         images="$(<<< $images ./.scripts/images-with-extras)"
-        <<< $images jq
+        echo "Diff:"
         diff --color=always <(<<< $images_before jq) <(<<< $images jq) || true
+        echo "Output:"
+        <<< $images jq
         echo "images=$images" >> $GITHUB_OUTPUT
         echo "images=$images" >> $GITHUB_ENV
     - name: Deps
