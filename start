@@ -682,11 +682,6 @@ function upgrade_local() {
   # complete otherwise the txs sequence numbers will conflict.
   if [ "$ENABLE_HORIZON" == "true" ] || [ "$ENABLE_RPC" == "true" ]; then
       supervisorctl start friendbot
-      # Start tailing friendbot logs after it starts (if logs are enabled)
-      if [ "$ENABLE_LOGS" = "true" ]; then
-        supervisorctl tail -f friendbot stdout > >(sed -u "s/^/${yellow}friendbot    | $clear/") &
-        supervisorctl tail -f friendbot stderr > >(sed -u "s/^/${yellow}friendbot    | $clear/" >&2) &
-      fi
   fi
 }
 
