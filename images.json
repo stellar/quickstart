@@ -1,6 +1,7 @@
 [
   {
     "tag": "test-inheritance",
+    "inherit": "latest",
     "events": [
       "pull_request",
       "push"
