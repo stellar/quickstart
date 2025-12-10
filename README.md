@@ -260,11 +260,15 @@ jobs:
 
 #### Custom Builds
 
-The quickstart image can also be built with custom software, such as custom versions of core, rpc, horizon, and so on. Use a workflow as follows to build a custom quickstart image and then run it using the action.
+The quickstart image can be built with custom software, such as custom versions of core, rpc, horizon, and so on.
+
+Use the `inherit` field to inherit deps from an existing image tag (such as `latest`, `testing`, `future`, or `nightly`), then override only the specific deps you need to customize.
+
+For example, to build an image based on `latest` but with a custom version of `stellar-rpc`:
 
 ```yaml
 on: [push, pull_request]
-   
+
 jobs:
   build-custom:
     uses: stellar/quickstart/.github/workflows/build.yml@main
@@ -273,21 +277,10 @@ jobs:
         [
           {
             "tag": "custom",
-            "config": {
-              "protocol_version_default": 23
-            },
+            "inherit": "latest",
             "deps": [
-              { "name": "xdr", "repo": "stellar/rs-stellar-xdr", "ref": "v23.0.0" },
-              { "name": "core", "repo": "stellar/stellar-core", "ref": "v23.0.1", "options": { "configure_flags": "--disable-tests" } },
-              { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "v23.0.1" },
-              { "name": "horizon", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
-              { "name": "friendbot", "repo": "stellar/go", "ref": "horizon-v23.0.0" },
-              { "name": "lab", "repo": "stellar/laboratory", "ref": "main" }
-            ],
-            "tests": {
-              "continue-on-error": false,
-              "additional-tests": []
-            }
+              { "name": "rpc", "repo": "stellar/stellar-rpc", "ref": "my-branch" }
+            ]
           }
         ]
       archs: '["amd64"]'
@@ -300,6 +293,8 @@ jobs:
         artifact: image-quickstart-custom-amd64.tar
         tag: custom-amd64
 ```
+
+For an example of a full image definition without inheritance, see the [images.json](./images.json) file in this repository.
 
 
 ### Deploy to Digital Ocean
