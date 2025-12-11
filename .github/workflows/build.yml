@@ -53,8 +53,9 @@ jobs:
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
       tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
+      images: ${{ steps.images.outputs.images }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
@@ -62,6 +63,22 @@ jobs:
       id: sha
       run: |
         echo "sha=$(git rev-parse HEAD)" | tee -a $GITHUB_OUTPUT
+    - name: Resolve Inherits from Repo images.json
+      id: images
+      env:
+        images: ${{ inputs.images }}
+      run: |
+        echo "Input:"
+        <<< $images jq -C
+        echo "Parent:"
+        < images.json jq -C
+        images_before="$images"
+        images="$(<<< $images ./.scripts/images-resolve-inherits images.json)"
+        echo "Diff:"
+        diff -u --color=always <(<<< $images_before jq) <(<<< $images jq) || true
+        echo "Output:"
+        <<< $images jq -C
+        echo "images=$images" >> $GITHUB_OUTPUT
 
   build:
     name: 2 build
@@ -70,7 +87,7 @@ jobs:
     with:
       repo: ${{ inputs.repo }}
       sha: ${{ needs.setup.outputs.sha }}
-      images: ${{ inputs.images }}
+      images: ${{ needs.setup.outputs.images }}
       archs: ${{ inputs.archs }}
 
   test:
@@ -81,5 +98,5 @@ jobs:
     with:
       repo: ${{ inputs.repo }}
       sha: ${{ needs.setup.outputs.sha }}
-      images: ${{ inputs.images }}
+      images: ${{ needs.setup.outputs.images }}
       archs: ${{ inputs.archs }}
