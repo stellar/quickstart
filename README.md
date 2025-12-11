@@ -46,7 +46,7 @@ The image runs the following software:
 - [stellar-core](https://github.com/stellar/stellar-core) - Node server
 - [stellar-rpc](https://github.com/stellar/stellar-rpc) - RPC server
 - [stellar-horizon](https://github.com/stellar/stellar-horizon) - API server
-- [stellar-friendbot](https://github.com/stellar/go/friendbot) - Faucet
+- [stellar-friendbot](https://github.com/stellar/friendbot) - Faucet
 - [stellar-lab](https://github.com/stellar/laboratory) - Web UI
 - [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
 - [supervisord](http://supervisord.org) is used from managing the processes of the above services.
