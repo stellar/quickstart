@@ -25,7 +25,7 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v24.0.0"
+        "ref": "v25.0.0"
       },
       {
         "name": "horizon",
@@ -86,7 +86,7 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v24.0.0"
+        "ref": "v25.0.0"
       },
       {
         "name": "horizon",
