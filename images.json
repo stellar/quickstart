@@ -99,7 +99,7 @@
       {
         "name": "friendbot",
         "repo": "stellar/friendbot",
-        "ref": "ea410dfe76a56c395b13c3c72eac34de0ada8ffc",
+        "ref": "friendbot-rpc-contracts",
         "options": {
           "pkg": "github.com/stellar/friendbot"
         }
