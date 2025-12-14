@@ -498,6 +498,7 @@ function init_friendbot() {
 
   if [ "$ENABLE_RPC" = "true" ]; then
     echo 'rpc_url = "http://localhost:8003"' >> etc/friendbot.cfg
+    echo 'funding_contract_addresses = true' >> etc/friendbot.cfg
   elif [ "$ENABLE_HORIZON" = "true" ]; then
     echo 'horizon_url = "http://localhost:8001"' >> etc/friendbot.cfg
   fi
