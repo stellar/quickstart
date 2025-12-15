@@ -37,10 +37,10 @@
       },
       {
         "name": "friendbot",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/friendbot",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
-          "pkg": "github.com/stellar/go/services/friendbot"
+          "pkg": "github.com/stellar/friendbot"
         }
       },
       {
@@ -98,10 +98,10 @@
       },
       {
         "name": "friendbot",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/friendbot",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
-          "pkg": "github.com/stellar/go/services/friendbot"
+          "pkg": "github.com/stellar/friendbot"
         }
       },
       {
@@ -166,7 +166,7 @@
       {
         "name": "friendbot",
         "repo": "stellar/friendbot",
-        "ref": "0d2f8fff778900f1b27b77e08b231d70f584fcdf",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
           "pkg": "github.com/stellar/friendbot"
         }

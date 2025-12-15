@@ -151,7 +151,7 @@ jobs:
         go run tests/test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
+      if: ${{ (contains(matrix.enable, 'horizon') || contains(matrix.enable, 'rpc')) && matrix.network == 'local' }}
       timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
