@@ -26,7 +26,7 @@ LAB_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "la
 LAB_SHA =           $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "lab") | .sha')
 
 run:
-	docker run --rm -i --name stellar -p 8000:8000 -p 11626:11626 stellar/quickstart:$(TAG) --local --logs
+	docker run --rm -i --name stellar -p 8000:8000 -p 11626:11626 stellar/quickstart:$(TAG) --local
 
 logs:
 	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
