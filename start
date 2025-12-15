@@ -736,7 +736,6 @@ function print_service_logs() {
   if [ "$ENABLE_RPC" = "true" ]; then
     supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
   fi
-  # Note: friendbot logs are started in upgrade_local() after friendbot starts
 }
 
 # run_silent is a utility function that runs a command with an abbreviated
