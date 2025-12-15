@@ -3,7 +3,6 @@ set -e
 
 clear=$(echo -e "\e[0m")
 green=$(echo -e "\e[32m")
-yellow=$(echo -e "\e[33m")
 blue=$(echo -e "\e[34m")
 purple=$(echo -e "\e[35m")
 cyan=$(echo -e "\e[36m")
