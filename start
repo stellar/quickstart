@@ -502,9 +502,6 @@ function init_friendbot() {
     echo 'horizon_url = "http://localhost:8001"' >> etc/friendbot.cfg
   fi
 
-  # Write root account ID to temp file for debugging in friendbot start script
-  echo "$NETWORK_ROOT_ACCOUNT_ID" > /tmp/network_root_account_id
-
   popd
 }
 

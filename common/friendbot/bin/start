@@ -5,32 +5,13 @@ set -o pipefail
 
 CONF=/opt/stellar/friendbot/etc/friendbot.cfg
 
-# Read root account ID from temp file (written by main start script)
-NETWORK_ROOT_ACCOUNT_ID=$(cat /tmp/network_root_account_id 2>/dev/null || echo "")
-
-# Helper function to print debug info about network state
-print_debug_info() {
-  local prefix="$1"
-  echo "$prefix RPC getHealth:"
-  curl -s -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' "$RPC_URL" 2>&1 || echo "  (RPC not responding)"
-}
-
 # Wait for rpc to be ready if friendbot is configured to use it.
 RPC_URL=$(tomljson "$CONF" | jq -r '.rpc_url // empty')
 if [ -n "$RPC_URL" ]; then
   echo "Waiting for rpc to be available..."
-
-  # Print debug info before starting the loop
-  print_debug_info "[before loop]"
-
   while ! (curl -sf -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' "$RPC_URL" | jq --exit-status '.result.status == "healthy"' >/dev/null); do
-    # Print debug info on each iteration
-    print_debug_info "[waiting]"
     sleep 1
   done
-
-  # Print debug info after the loop exits (RPC is now healthy)
-  print_debug_info "[after loop - RPC healthy]"
 fi
 
 # Wait for horizon to be ready if friendbot is configured to use it.
