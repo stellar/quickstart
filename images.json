@@ -38,7 +38,7 @@
       {
         "name": "friendbot",
         "repo": "stellar/friendbot",
-        "ref": "d075991bca9365a9c87ab39f891dd3583e78c5c6",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
           "pkg": "github.com/stellar/friendbot"
         }
@@ -99,7 +99,7 @@
       {
         "name": "friendbot",
         "repo": "stellar/friendbot",
-        "ref": "d075991bca9365a9c87ab39f891dd3583e78c5c6",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
           "pkg": "github.com/stellar/friendbot"
         }
@@ -166,7 +166,7 @@
       {
         "name": "friendbot",
         "repo": "stellar/friendbot",
-        "ref": "d075991bca9365a9c87ab39f891dd3583e78c5c6",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
         "options": {
           "pkg": "github.com/stellar/friendbot"
         }
