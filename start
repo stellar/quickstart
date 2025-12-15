@@ -627,11 +627,12 @@ function upgrade_soroban_config() {
       echo "upgrades: soroban config: set config with key: $key";
       OUTPUT="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
       echo "$OUTPUT"; \
-
       if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
         echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
         kill_supervisor
       fi
+      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
+      TX_COUNT=$((TX_COUNT+1)); \
     }
   echo "upgrades: soroban config done"
 }
