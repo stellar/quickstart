@@ -241,7 +241,8 @@
     "tag": "nightly-tracy",
     "events": [
       "push",
-      "schedule"
+      "schedule",
+      "pull_request"
     ],
     "config": {
       "protocol_version_default": 24
