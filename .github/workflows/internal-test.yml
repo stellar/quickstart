@@ -56,7 +56,7 @@ jobs:
         images: ${{ inputs.images }}
       run: |
         tests="$(<<< $images ./.scripts/images-additional-tests)"
-        <<< $tests jq
+        <<< $tests jq -C
         echo "additional-tests=$tests" >> $GITHUB_OUTPUT
 
   test:
@@ -151,7 +151,7 @@ jobs:
         go run tests/test_horizon_ingesting.go
         curl http://localhost:8000
     - name: Run friendbot test
-      if: ${{ contains(matrix.enable, 'horizon') && matrix.network == 'local' }}
+      if: ${{ (contains(matrix.enable, 'horizon') || contains(matrix.enable, 'rpc')) && matrix.network == 'local' }}
       timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
       run: |
         docker logs stellar -f &
@@ -175,9 +175,6 @@ jobs:
     - name: Prepare Test Logs
       if: always()
       run: |
-        # Remove broken symlink that causes 'docker cp' to fail
-        # In Debian 13 (Trixie), /var/log/README symlinks to systemd docs that aren't installed
-        docker exec stellar rm -f /var/log/README
         docker cp stellar:/var/log logs
     - name: Upload Test Logs
       if: always()

@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+
+# Accepts as stdin a JSON object in the format of images.json.
+# Resolves any 'inherit' fields by copying deps and config from the referenced image.
+#
+# An image can specify "inherit": "<tag>" to inherit all deps and config from another image.
+# Inherited deps are merged with explicitly defined deps (explicit deps override
+# inherited ones with the same name). Config fields are also merged (child overrides parent).
+#
+# Nested inherits are supported (image A inherits from B, B inherits from C).
+#
+# Optionally accepts a parent file path as an argument. When provided, the parent file
+# is used as an additional source for looking up inherited images. This allows input
+# images to inherit from images defined in the parent file without including them in
+# the output. Input images take precedence over parent images with the same tag.
+#
+# Outputs the original JSON with inherits resolved and removed.
+#
+# Usage:
+#   < images.json ./.scripts/images-resolve-inherits
+#   < images.json ./.scripts/images-resolve-inherits parents.json
+
+import json
+import sys
+
+def main():
+    """Read images from stdin, resolve all inherits, and output to stdout."""
+    images = json.load(sys.stdin)
+
+    # Load parent images from file if provided
+    parents = []
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as f:
+            parents = json.load(f)
+        # Resolve any inherits within the parent images first
+        while has_inherits(parents):
+            parents = resolve_inherits(parents)
+
+    while has_inherits(images):
+        images = resolve_inherits(images, parents)
+    print(json.dumps(images, separators=(',', ':')))
+
+def has_inherits(images):
+    """Return True if any image has an 'inherit' field."""
+    return any("inherit" in img for img in images)
+
+def resolve_inherits(images, parents=None):
+    """Resolve one level of inheritance for all images.
+
+    For each image with an 'inherit' field:
+    - Copy deps from the parent that aren't already defined in the child
+    - Merge config from the parent (child values override parent values)
+    - If the parent also has an 'inherit' field, copy it (for nested resolution)
+    - Remove the child's 'inherit' field once resolved
+
+    Parents can be looked up from either the input images or the optional parents list.
+    Input images take precedence over parents with the same tag.
+
+    Exits with error if an image inherits from an unknown tag.
+    """
+    if parents is None:
+        parents = []
+    lookup = build_lookup(images)
+    parent_lookup = build_lookup(parents)
+    for image in images:
+        if "inherit" in image:
+            parent_tag = image["inherit"]
+            # Look up in input images first, then fall back to parents
+            parent = lookup.get(parent_tag) or parent_lookup.get(parent_tag)
+            if parent is None:
+                print(f"Error: image '{image['tag']}' inherits from unknown image '{parent_tag}'", file=sys.stderr)
+                sys.exit(1)
+
+            # Get existing dep names in child
+            child_dep_names = {dep["name"] for dep in image.get("deps", [])}
+
+            # Copy deps from parent that aren't in child
+            inherited_deps = [dep for dep in parent.get("deps", []) if dep["name"] not in child_dep_names]
+            image["deps"] = inherited_deps + image.get("deps", [])
+
+            # Merge config from parent (child values override parent)
+            parent_config = parent.get("config", {})
+            child_config = image.get("config", {})
+            if parent_config or child_config:
+                merged_config = {**parent_config, **child_config}
+                image["config"] = merged_config
+
+            # Remove child's inherit since it has been resolved
+            del image["inherit"]
+
+            # Copy parent's inherit if present (for nested resolution)
+            if "inherit" in parent:
+                image["inherit"] = parent["inherit"]
+
+    return images
+
+def build_lookup(images):
+    """Return a dict mapping image tags to their image objects."""
+    return {img["tag"]: img for img in images}
+
+if __name__ == "__main__":
+    main()
