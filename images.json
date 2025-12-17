@@ -238,6 +238,61 @@
     }
   },
   {
+    "tag": "nightly-tracy",
+    "events": [
+      "push",
+      "schedule"
+    ],
+    "config": {
+      "protocol_version_default": 24
+    },
+    "deps": [
+      {
+        "name": "xdr",
+        "repo": "stellar/rs-stellar-xdr",
+        "ref": "main"
+      },
+      {
+        "name": "core",
+        "repo": "stellar/stellar-core",
+        "ref": "master",
+        "options": {
+          "configure_flags": "--enable-tracy --enable-tracy-capture --enable-tracy-csvexport"
+        }
+      },
+      {
+        "name": "rpc",
+        "repo": "stellar/stellar-rpc",
+        "ref": "main"
+      },
+      {
+        "name": "horizon",
+        "repo": "stellar/stellar-horizon",
+        "ref": "main",
+        "options": {
+          "pkg": "github.com/stellar/stellar-horizon"
+        }
+      },
+      {
+        "name": "friendbot",
+        "repo": "stellar/friendbot",
+        "ref": "main",
+        "options": {
+          "pkg": "github.com/stellar/friendbot"
+        }
+      },
+      {
+        "name": "lab",
+        "repo": "stellar/laboratory",
+        "ref": "main"
+      }
+    ],
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
+  },
+  {
     "tag": "nightly-next",
     "events": [
       "push",
