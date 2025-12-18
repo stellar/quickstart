@@ -52,6 +52,11 @@ ARG CORE_REF
 ARG CORE_OPTIONS
 RUN echo "$CORE_OPTIONS" | jq -r '.configure_flags // ""' > /tmp/arg_configure_flags
 
+# Install Tracy dependencies if Tracy is enabled
+RUN if grep -q "enable-tracy" /tmp/arg_configure_flags; then \
+        apt-get update && apt-get -y install libcapstone-dev libfreetype6-dev libglfw3-dev libgtk2.0-dev; \
+    fi
+
 WORKDIR /wd
 RUN git clone https://github.com/${CORE_REPO} /wd
 RUN git fetch origin ${CORE_REF}
