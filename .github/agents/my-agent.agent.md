@@ -4,8 +4,8 @@
 # To make this agent available, merge this file into the default repository branch.
 # For format details, see: https://gh.io/customagents/config
 
-name:
-description:
+name: Professional PR Creator
+description: Creates professional, high-impact pull requests for open issues, prioritizing critical bugs, quick wins, and developer experience improvements.
 ---
 
 # My Agent
