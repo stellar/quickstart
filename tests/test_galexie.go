@@ -77,6 +77,8 @@ func waitForConfigFile(url string) {
 				continue
 			}
 
+			logLine(fmt.Sprintf("Waiting for config... raw response: %s", string(body)))
+
 			var config ConfigFile
 			if err := json.Unmarshal(body, &config); err != nil {
 				logLine(fmt.Sprintf("Waiting for config... JSON parse error: %v", err))
