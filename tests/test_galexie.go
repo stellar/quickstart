@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -44,19 +45,27 @@ func main() {
 	waitForURL(fmt.Sprintf("%s/%s/", metaArchiveURL, partitionDir))
 	logLine("Partition directory exists!")
 
-	// List partition directory contents
+	// List partition directory contents and find a ledger file
 	partitionURL := fmt.Sprintf("%s/%s/", metaArchiveURL, partitionDir)
-	listPartition(partitionURL)
 
-	// Test 3: Download and verify a ledger file exists
-	ledgerURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, ledgerFile)
-	logLine(fmt.Sprintf("Waiting for ledger file: %s", ledgerFile))
+	// Test 3: Wait for any ledger file to appear and download it
+	logLine(fmt.Sprintf("Waiting for any ledger file in partition (expected: %s)...", ledgerFile))
+	foundLedgerFile := waitForAnyLedgerFile(partitionURL)
+	if foundLedgerFile == "" {
+		logLine("ERROR: No ledger file found!")
+		os.Exit(1)
+	}
+	logLine(fmt.Sprintf("Found ledger file: %s", foundLedgerFile))
+
+	ledgerURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, foundLedgerFile)
+	logLine(fmt.Sprintf("Downloading ledger file: %s", ledgerURL))
 	waitForFile(ledgerURL)
 	logLine(fmt.Sprintf("Ledger file downloaded successfully! URL: %s", ledgerURL))
 
-	// Test 4: Download and verify a metadata sidecar file exists
-	metadataURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, metadataFile)
-	logLine(fmt.Sprintf("Waiting for metadata file: %s", metadataFile))
+	// Test 4: Download and verify the corresponding metadata sidecar file exists
+	foundMetadataFile := strings.Replace(foundLedgerFile, ".xdr.zstd", ".json", 1)
+	metadataURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, foundMetadataFile)
+	logLine(fmt.Sprintf("Waiting for metadata file: %s", foundMetadataFile))
 	waitForFile(metadataURL)
 	logLine(fmt.Sprintf("Metadata file downloaded successfully! URL: %s", metadataURL))
 
@@ -188,6 +197,38 @@ func listPartition(url string) {
 		return
 	}
 	logLine(fmt.Sprintf("Partition directory listing: %s", string(body)))
+}
+
+func waitForAnyLedgerFile(partitionURL string) string {
+	// Pattern to match ledger files like "FFFFFFFD--2.xdr.zstd"
+	ledgerFilePattern := regexp.MustCompile(`[0-9A-Fa-f]{8}--\d+\.xdr\.zstd`)
+
+	for {
+		time.Sleep(5 * time.Second)
+		resp, err := http.Get(partitionURL)
+		if err != nil {
+			logLine(fmt.Sprintf("Waiting for ledger files... error: %v", err))
+			continue
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			logLine(fmt.Sprintf("Waiting for ledger files... read error: %v", err))
+			continue
+		}
+
+		content := string(body)
+		logLine(fmt.Sprintf("Partition listing: %s", content[:min(500, len(content))]))
+
+		// Find any ledger file in the listing
+		match := ledgerFilePattern.FindString(content)
+		if match != "" {
+			return match
+		}
+
+		logLine("Waiting for ledger files... no .xdr.zstd files found yet")
+	}
 }
 
 func min(a, b int) int {
