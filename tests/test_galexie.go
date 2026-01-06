@@ -44,6 +44,10 @@ func main() {
 	waitForURL(fmt.Sprintf("%s/%s/", metaArchiveURL, partitionDir))
 	logLine("Partition directory exists!")
 
+	// List partition directory contents
+	partitionURL := fmt.Sprintf("%s/%s/", metaArchiveURL, partitionDir)
+	listPartition(partitionURL)
+
 	// Test 3: Download and verify a ledger file exists
 	ledgerURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, ledgerFile)
 	logLine(fmt.Sprintf("Waiting for ledger file: %s", ledgerFile))
@@ -169,6 +173,21 @@ func waitForFile(url string) {
 		resp.Body.Close()
 		logLine(fmt.Sprintf("Waiting for %s... status: %d", url, resp.StatusCode))
 	}
+}
+
+func listPartition(url string) {
+	resp, err := http.Get(url)
+	if err != nil {
+		logLine(fmt.Sprintf("Error listing partition: %v", err))
+		return
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logLine(fmt.Sprintf("Error reading partition listing: %v", err))
+		return
+	}
+	logLine(fmt.Sprintf("Partition directory listing: %s", string(body)))
 }
 
 func min(a, b int) int {
