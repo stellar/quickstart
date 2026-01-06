@@ -107,9 +107,18 @@ func waitForConfigFile(url string) {
 func waitForURL(url string) {
 	for {
 		time.Sleep(5 * time.Second)
+
+		// Try to list the root directory to see what's there
+		listResp, listErr := http.Get(metaArchiveURL + "/")
+		if listErr == nil {
+			body, _ := io.ReadAll(listResp.Body)
+			listResp.Body.Close()
+			logLine(fmt.Sprintf("Meta archive root listing: %s", string(body)[:min(500, len(body))]))
+		}
+
 		resp, err := http.Get(url)
 		if err != nil {
-			logLine(fmt.Sprintf("Waiting... error: %v", err))
+			logLine(fmt.Sprintf("Waiting for %s... error: %v", url, err))
 			continue
 		}
 		resp.Body.Close()
@@ -117,7 +126,7 @@ func waitForURL(url string) {
 		if resp.StatusCode == http.StatusOK {
 			return
 		}
-		logLine(fmt.Sprintf("Waiting... status: %d", resp.StatusCode))
+		logLine(fmt.Sprintf("Waiting for %s... status: %d", url, resp.StatusCode))
 	}
 }
 
@@ -126,7 +135,7 @@ func waitForFile(url string) {
 		time.Sleep(5 * time.Second)
 		resp, err := http.Get(url)
 		if err != nil {
-			logLine(fmt.Sprintf("Waiting... error: %v", err))
+			logLine(fmt.Sprintf("Waiting for %s... error: %v", url, err))
 			continue
 		}
 
@@ -158,7 +167,7 @@ func waitForFile(url string) {
 			return
 		}
 		resp.Body.Close()
-		logLine(fmt.Sprintf("Waiting... status: %d", resp.StatusCode))
+		logLine(fmt.Sprintf("Waiting for %s... status: %d", url, resp.StatusCode))
 	}
 }
 
