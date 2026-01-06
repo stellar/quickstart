@@ -62,7 +62,8 @@ func main() {
 	logLine(fmt.Sprintf("Ledger file downloaded successfully! URL: %s", ledgerURL))
 
 	// Test 4: Download and verify the corresponding metadata sidecar file exists
-	foundMetadataFile := strings.Replace(foundLedgerFile, ".xdr.zst", ".json", 1)
+	// Filesystem datastore writes metadata as <filename>.metadata.json
+	foundMetadataFile := foundLedgerFile + ".metadata.json"
 	metadataURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, foundMetadataFile)
 	logLine(fmt.Sprintf("Waiting for metadata file: %s", foundMetadataFile))
 	waitForFile(metadataURL)
@@ -226,7 +227,7 @@ func waitForAnyLedgerFile(partitionURL string) string {
 			return match
 		}
 
-		logLine("Waiting for ledger files... no .xdr.zstd files found yet")
+		logLine("Waiting for ledger files... no .xdr.zst files found yet")
 	}
 }
 
