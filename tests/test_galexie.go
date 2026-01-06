@@ -15,11 +15,11 @@ const metaArchiveURL = "http://localhost:8000/meta-archive"
 
 // ConfigFile represents the SEP-54 .config.json structure
 type ConfigFile struct {
-	NetworkPassphrase   string `json:"network_passphrase"`
+	NetworkPassphrase   string `json:"networkPassphrase"`
 	Version             string `json:"version"`
 	Compression         string `json:"compression"`
-	LedgersPerBatch     int    `json:"ledgers_per_file"`
-	BatchesPerPartition int    `json:"files_per_partition"`
+	LedgersPerBatch     int    `json:"ledgersPerBatch"`
+	BatchesPerPartition int    `json:"batchesPerPartition"`
 }
 
 func main() {
