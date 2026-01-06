@@ -172,6 +172,13 @@ jobs:
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-rpc" | docker exec -i stellar sh &
         go run tests/test_stellar_rpc_healthy.go
+    - name: Run galexie test
+      if: ${{ contains(matrix.enable, 'galexie') }}
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
+      run: |
+        docker logs stellar -f &
+        echo "supervisorctl tail -f galexie" | docker exec -i stellar sh &
+        go run tests/test_galexie.go
     - name: Prepare Test Logs
       if: always()
       run: |
