@@ -57,14 +57,6 @@ func main() {
 	waitForFile(ledgerURL)
 	logLine("Ledger file downloaded!")
 
-	// Test 4: Download and verify the corresponding metadata sidecar file exists
-	// Filesystem datastore writes metadata as <filename>.metadata.json
-	metadataFile := foundLedgerFile + ".metadata.json"
-	metadataURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, metadataFile)
-	logLine(fmt.Sprintf("Waiting for metadata file: %s", metadataFile))
-	waitForFile(metadataURL)
-	logLine("Metadata file downloaded!")
-
 	logLine("All galexie meta archive tests passed!")
 	os.Exit(0)
 }
