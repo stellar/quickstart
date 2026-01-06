@@ -335,10 +335,8 @@ function copy_defaults() {
     if [ "$ENABLE_RPC" = "true" ]; then
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
-    if [ "$ENABLE_GALEXIE" = "true" ]; then
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/meta-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
-    fi
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/meta-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
