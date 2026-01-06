@@ -17,7 +17,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -88,7 +88,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "configure_flags": "--disable-tests"
         }
