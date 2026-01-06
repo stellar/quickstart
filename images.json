@@ -47,6 +47,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "add-filesystem-datastore-support"
       }
     ],
     "tests": {
@@ -108,6 +113,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "add-filesystem-datastore-support"
       }
     ],
     "tests": {
@@ -175,6 +185,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "21cc0d0b9080e664b9dbfae5713d9c7615613729"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "add-filesystem-datastore-support"
       }
     ],
     "tests": {
@@ -229,6 +244,11 @@
       {
         "name": "lab",
         "repo": "stellar/laboratory",
+        "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
         "ref": "main"
       }
     ],
@@ -285,6 +305,11 @@
       {
         "name": "lab",
         "repo": "stellar/laboratory",
+        "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
         "ref": "main"
       }
     ],

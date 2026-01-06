@@ -1,0 +1,7 @@
+#! /bin/bash
+
+set -e
+set -o pipefail
+
+echo "starting galexie..."
+exec /usr/bin/galexie append --start 2 --config-file /opt/stellar/galexie/etc/galexie.toml

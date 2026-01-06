@@ -1,0 +1,21 @@
+# Galexie Configuration for Local Network
+
+# Admin port configuration
+admin_port = 6062
+
+# Datastore Configuration
+[datastore_config]
+type = "Filesystem"
+
+[datastore_config.params]
+destination_path = "/tmp/stellar-core/meta-archive"
+
+[datastore_config.schema]
+ledgers_per_file = 1
+files_per_partition = 64000
+
+# Stellar-core Configuration
+[stellar_core_config]
+network_passphrase = "__NETWORK__"
+history_archive_urls = ["http://localhost:1570"]
+stellar_core_binary_path = "/usr/bin/stellar-core"
