@@ -31,8 +31,7 @@ func main() {
 	// The file format is: %08X--%d.xdr.zstd (MaxUint32-fileStart, fileStart)
 
 	partitionDir := "FFFFFFFF--0-63999"
-	ledgerFile := "FFFFFFFD--2.xdr.zstd"
-	metadataFile := "FFFFFFFD--2.json"
+	ledgerFile := "FFFFFFFD--2.xdr.zstd" // Expected file for ledger 2
 
 	// Test 1: Download and verify the SEP-54 .config.json file exists at the root
 	configURL := fmt.Sprintf("%s/.config.json", metaArchiveURL)
