@@ -101,7 +101,7 @@ function start() {
   echo "  lab:"
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "lab") | "\(.ref) (\(.sha))"')"
   echo "  galexie:"
-  echo "$(galexie version | sed 's/^/    /')"
+  echo "    $(< /image.json jq -r '.deps[] | select(.name == "galexie") | "\(.ref) (\(.sha))"')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
