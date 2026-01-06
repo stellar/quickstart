@@ -26,12 +26,12 @@ type ConfigFile struct {
 func main() {
 	// Wait for galexie to export some ledgers
 	// With ledgers_per_file=1 and files_per_partition=64000, ledger 2 would be at:
-	// FFFFFFFF--0-63999/FFFFFFFD--2.xdr.zstd
+	// FFFFFFFF--0-63999/FFFFFFFD--2.xdr.zst
 	// The partition directory format is: %08X--%d-%d (MaxUint32-partitionStart, partitionStart, partitionEnd)
-	// The file format is: %08X--%d.xdr.zstd (MaxUint32-fileStart, fileStart)
+	// The file format is: %08X--%d.xdr.zst (MaxUint32-fileStart, fileStart)
 
 	partitionDir := "FFFFFFFF--0-63999"
-	ledgerFile := "FFFFFFFD--2.xdr.zstd" // Expected file for ledger 2
+	ledgerFile := "FFFFFFFD--2.xdr.zst" // Expected file for ledger 2
 
 	// Test 1: Download and verify the SEP-54 .config.json file exists at the root
 	configURL := fmt.Sprintf("%s/.config.json", metaArchiveURL)
@@ -62,7 +62,7 @@ func main() {
 	logLine(fmt.Sprintf("Ledger file downloaded successfully! URL: %s", ledgerURL))
 
 	// Test 4: Download and verify the corresponding metadata sidecar file exists
-	foundMetadataFile := strings.Replace(foundLedgerFile, ".xdr.zstd", ".json", 1)
+	foundMetadataFile := strings.Replace(foundLedgerFile, ".xdr.zst", ".json", 1)
 	metadataURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, foundMetadataFile)
 	logLine(fmt.Sprintf("Waiting for metadata file: %s", foundMetadataFile))
 	waitForFile(metadataURL)
@@ -199,8 +199,8 @@ func listPartition(url string) {
 }
 
 func waitForAnyLedgerFile(partitionURL string) string {
-	// Pattern to match ledger files like "FFFFFFFD--2.xdr.zstd"
-	ledgerFilePattern := regexp.MustCompile(`[0-9A-Fa-f]{8}--\d+\.xdr\.zstd`)
+	// Pattern to match ledger files like "FFFFFFFD--2.xdr.zst"
+	ledgerFilePattern := regexp.MustCompile(`[0-9A-Fa-f]{8}--\d+\.xdr\.zst`)
 
 	for {
 		time.Sleep(5 * time.Second)
