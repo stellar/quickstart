@@ -617,6 +617,7 @@ function init_galexie() {
 
   # Configure galexie
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/galexie.toml
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
 
   run_silent "init-galexie" chown -R stellar:stellar .
   run_silent "init-galexie-meta-archive" chown -R stellar:stellar /tmp/stellar-core/meta-archive

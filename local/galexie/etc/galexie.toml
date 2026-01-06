@@ -19,3 +19,4 @@ files_per_partition = 64000
 network_passphrase = "__NETWORK__"
 history_archive_urls = ["http://localhost:1570"]
 stellar_core_binary_path = "/usr/bin/stellar-core"
+captive_core_toml_path = "/opt/stellar/galexie/etc/stellar-captive-core.cfg"
