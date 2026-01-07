@@ -362,8 +362,13 @@ function copy_defaults() {
   # Write core environment file to lift some env vars set here into the
   # environment of core when it runs. This happens always, to support env vars
   # that are set at runtime for persistent setups.
+  # Default to "debug" for local network to maintain backward compatibility.
+  local core_log_level="$CORE_LOG_LEVEL"
+  if [ -z "$core_log_level" ] && [ "$NETWORK" = "local" ]; then
+    core_log_level="debug"
+  fi
   cat > $COREHOME/etc/env <<EOF
-CORE_LOG_LEVEL="$CORE_LOG_LEVEL"
+CORE_LOG_LEVEL="$core_log_level"
 EOF
 
   if [ -d $HZHOME/etc ]; then
