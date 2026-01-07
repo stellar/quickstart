@@ -57,6 +57,7 @@ HTTP APIs and Tools are available at the following port and paths:
 - RPC: `http://localhost:8000/rpc`
 - Lab: `http://localhost:8000/lab`
 - Friendbot: `http://localhost:8000/friendbot`
+- History Archive: `http://localhost:8000/history-archive` (available with `--local` only)
 
 ## Tags
 
