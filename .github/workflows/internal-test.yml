@@ -66,7 +66,7 @@ jobs:
         image: ${{ fromJSON(inputs.images) }}
         arch: ${{ fromJSON(inputs.archs) }}
         network: ["local"]
-        enable: ["core","rpc","core,rpc,horizon"]
+        enable: ["core","rpc","core,rpc,horizon","galexie"]
         options: [""]
         include: ${{ fromJSON(needs.setup.outputs.additional-tests) }}
       fail-fast: false

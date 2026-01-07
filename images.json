@@ -61,11 +61,6 @@
           "arch": "amd64",
           "network": "pubnet",
           "enable": "core,rpc,horizon"
-        },
-        {
-          "arch": "amd64",
-          "network": "local",
-          "enable": "core,galexie"
         }
       ]
     }
@@ -137,11 +132,6 @@
           "arch": "amd64",
           "network": "pubnet",
           "enable": "core,rpc,horizon"
-        },
-        {
-          "arch": "amd64",
-          "network": "local",
-          "enable": "core,galexie"
         }
       ]
     }
