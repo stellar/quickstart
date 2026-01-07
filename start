@@ -359,6 +359,13 @@ function copy_defaults() {
     fi
   fi
 
+  # Write core environment file to lift some env vars set here into the
+  # environment of core when it runs. This happens always, to support env vars
+  # that are set at runtime for persistent setups.
+  cat > $COREHOME/etc/env <<EOF
+CORE_LOG_LEVEL="$CORE_LOG_LEVEL"
+EOF
+
   if [ -d $HZHOME/etc ]; then
     echo "horizon: config directory exists, skipping copy"
   else
