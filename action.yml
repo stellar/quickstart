@@ -92,7 +92,7 @@ runs:
         -e ENABLE="${{ inputs.enable }}"
         -e NETWORK="${{ inputs.network }}"
         -e PROTOCOL_VERSION="${{ inputs.protocol_version }}"
-        -e CORE_LOG_LEVEL="${{ inputs.core_log_level }}" 
+        -e CORE_LOG_LEVEL="${{ inputs.core_log_level }}"
         --health-cmd "curl --no-progress-meter -X POST -H 'Content-Type: application/json' -d 
         '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"getHealth\"}' 'http://localhost:8000/rpc' 
         | grep 'healthy'
