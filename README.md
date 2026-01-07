@@ -176,8 +176,8 @@ Set Stellar Core's log level at startup. Valid values are (case-sensitive):
 | FATAL | Only log fatal errors |
 | ERROR | Log errors and above |
 | WARNING | Log warnings and above |
-| INFO | Log info and above (default) |
-| DEBUG | Log debug and above |
+| INFO | Log info and above |
+| DEBUG | Log debug and above (default for `--local`) |
 | TRACE | Log everything (very verbose) |
 
 Example:

@@ -359,18 +359,6 @@ function copy_defaults() {
     fi
   fi
 
-  # Write core environment file to lift some env vars set here into the
-  # environment of core when it runs. This happens always, to support env vars
-  # that are set at runtime for persistent setups.
-  # Default to "debug" for local network to maintain backward compatibility.
-  local core_log_level="$CORE_LOG_LEVEL"
-  if [ -z "$core_log_level" ] && [ "$NETWORK" = "local" ]; then
-    core_log_level="debug"
-  fi
-  cat > $COREHOME/etc/env <<EOF
-CORE_LOG_LEVEL="$core_log_level"
-EOF
-
   if [ -d $HZHOME/etc ]; then
     echo "horizon: config directory exists, skipping copy"
   else
@@ -474,6 +462,18 @@ function init_stellar_core() {
 
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
+
+  # Write core environment file for runtime configuration.
+  # This runs on every startup to support changing settings on restart.
+  # Default to "debug" for local network to maintain backward compatibility.
+  local core_log_level="$CORE_LOG_LEVEL"
+  if [ -z "$core_log_level" ] && [ "$NETWORK" = "local" ]; then
+    core_log_level="debug"
+  fi
+  cat > $COREHOME/etc/env <<EOF
+CORE_LOG_LEVEL="$core_log_level"
+EOF
+
   if [ -f $COREHOME/.quickstart-initialized ]; then
     echo "core: already initialized"
 
