@@ -8,7 +8,7 @@ admin_port = 6062
 type = "Filesystem"
 
 [datastore_config.params]
-destination_path = "/tmp/stellar-core/meta-archive"
+destination_path = "/opt/stellar/meta-archive/data"
 
 [datastore_config.schema]
 ledgers_per_file = 1
