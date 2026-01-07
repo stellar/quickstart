@@ -41,6 +41,7 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_RPC_ADMIN_ENDPOINT:=$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${CORE_LOG_LEVEL:=}"
 : "${LIMITS:=testnet}"
 
 QUICKSTART_INITIALIZED=false
@@ -191,6 +192,10 @@ function process_args() {
       ;;
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
+      ;;
+    --core-log-level)
+      CORE_LOG_LEVEL="$1"
+      shift
       ;;
     *)
       echo "Unknown container arg $ARG" >&2
