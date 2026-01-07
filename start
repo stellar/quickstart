@@ -403,7 +403,7 @@ function copy_pgpass() {
 }
 
 function init_db() {
-  if [ "$ENABLE_CORE" != "true" ] && [ "$ENABLE_HORIZON" != "true" ]; then
+  if [ "$ENABLE_HORIZON" != "true" ]; then
     return 0
   fi
   if [ -f $PGHOME/.quickstart-initialized ]; then
@@ -436,11 +436,9 @@ function init_db() {
 
   start_postgres
   run_silent "create-horizon-db" sudo -u postgres createdb horizon
-  run_silent "create-core-db" sudo -u postgres createdb core
   run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
     CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
     GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
-    GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
 SQL
 
   touch .quickstart-initialized
@@ -461,21 +459,15 @@ function init_stellar_core() {
     echo "core: already initialized"
 
     if [ "$NETWORK" = "local" ]; then
-      start_postgres
-
       run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
     fi
 
     return 0
   fi
 
-  run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
-
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
-
-  start_postgres
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
@@ -688,7 +680,6 @@ function start_optional_services() {
   done
 
   if [ "$ENABLE_CORE" == "true" ]; then
-    supervisorctl start postgresql
     supervisorctl start stellar-core
   fi
 

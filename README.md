@@ -48,7 +48,7 @@ The image runs the following software:
 - [stellar-horizon](https://github.com/stellar/stellar-horizon) - API server
 - [stellar-friendbot](https://github.com/stellar/friendbot) - Faucet
 - [stellar-lab](https://github.com/stellar/laboratory) - Web UI
-- [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
+- [postgresql](https://www.postgresql.org) 12 is used for storing horizon data.
 - [supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
 HTTP APIs and Tools are available at the following port and paths:
@@ -450,9 +450,11 @@ Alternatively, to tail all logs into the container's output for all services, ap
 
 ### Accessing databases
 
-The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network. In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database either horizon or stellar-core provide. This allows you to craft your own custom sql queries against the stellar network data.
+The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network. In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database horizon provides. This allows you to craft your own custom sql queries against the stellar network data.
 
-This image manages two postgres databases: `core` for stellar-core's data and `horizon` for horizon's data. The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in: Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
+This image manages a postgres database `horizon` for horizon's data. The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in: Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
+
+Note: In the past, stellar-core also used PostgreSQL with a `core` database. Stellar-core now uses SQLite, so PostgreSQL is only started when Horizon is enabled.
 
 ## Example launch commands
 
