@@ -29,10 +29,10 @@
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v25.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
@@ -90,10 +90,10 @@
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v25.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
