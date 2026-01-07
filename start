@@ -17,6 +17,7 @@ export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 export GALEXIEHOME="$STELLAR_HOME/galexie"
+export METAARCHIVEHOME="$STELLAR_HOME/meta-archive"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -611,14 +612,14 @@ function init_galexie() {
   pushd $GALEXIEHOME
 
   # Create meta archive directory
-  mkdir -p /opt/stellar/meta-archive/data
+  run_silent "mkdir-meta-archive" mkdir -p $METAARCHIVEHOME/data
+  run_silent "chown-meta-archive" chown -R stellar:stellar $METAARCHIVEHOME
 
   # Configure galexie
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/galexie.toml
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
 
   run_silent "init-galexie" chown -R stellar:stellar .
-  run_silent "init-galexie-meta-archive" chown -R stellar:stellar /opt/stellar/meta-archive
 
   touch .quickstart-initialized
   popd
