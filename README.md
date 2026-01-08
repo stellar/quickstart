@@ -48,6 +48,7 @@ The image runs the following software:
 - [stellar-horizon](https://github.com/stellar/stellar-horizon) - API server
 - [stellar-friendbot](https://github.com/stellar/friendbot) - Faucet
 - [stellar-lab](https://github.com/stellar/laboratory) - Web UI
+- [galexie](https://github.com/stellar/galexie) - Ledger meta exporter
 - [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
 - [supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
@@ -242,6 +243,27 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
+### Galexie (Ledger Meta Exporter)
+
+Galexie is a ledger meta exporter that captures ledger close meta, which contains transaction meta, from the network and stores it locally. The exported ledger meta follows the [SEP-54](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0054.md) format and is served via a file server.
+
+The ledger meta is only available in `--local` network mode. To enable it use the `--enable` option to specify all the services you wish to run and include `galexie`.
+
+```
+docker run -it -p 8000:8000 stellar/quickstart --local --enable core,rpc,galexie
+```
+
+
+The ledger meta is available at:
+
+```
+http://localhost:8000/ledger-meta
+```
+
+The ledger meta store includes:
+- `.config.json` - Configuration file describing the data format
+- Partition directories containing compressed XDR files compressed with zstd with one ledger per file (`.xdr.zst`)
+
 ### Using in GitHub Actions
 
 The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
@@ -428,6 +450,7 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
+| 6062  | galexie                    | admin port           |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
