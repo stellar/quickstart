@@ -17,7 +17,7 @@ export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 export GALEXIEHOME="$STELLAR_HOME/galexie"
-export METAARCHIVEHOME="$STELLAR_HOME/meta-archive"
+export LEDGERMETASTOREHOME="$STELLAR_HOME/ledger-meta-store"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -337,7 +337,7 @@ function copy_defaults() {
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
-    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/meta-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/ledger-meta-store.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
@@ -609,8 +609,8 @@ function init_galexie() {
     return 0
   fi
 
-  run_silent "mkdir-meta-archive" mkdir -p $METAARCHIVEHOME/data
-  run_silent "chown-meta-archive" chown -R stellar:stellar $METAARCHIVEHOME
+  run_silent "mkdir-ledger-meta-store" mkdir -p $LEDGERMETASTOREHOME/data
+  run_silent "chown-ledger-meta-store" chown -R stellar:stellar $LEDGERMETASTOREHOME
 
   pushd $GALEXIEHOME
 

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const metaArchiveURL = "http://localhost:8000/meta-archive"
+const ledgerMetaURL = "http://localhost:8000/ledger-meta"
 
 // ConfigFile represents the SEP-54 .config.json structure
 type ConfigFile struct {
@@ -33,13 +33,13 @@ func main() {
 	partitionDir := "FFFFFFFF--0-63999"
 
 	// Test 1: Download and verify the SEP-54 .config.json file exists at the root
-	configURL := fmt.Sprintf("%s/.config.json", metaArchiveURL)
+	configURL := fmt.Sprintf("%s/.config.json", ledgerMetaURL)
 	logLine("Waiting for .config.json file...")
 	waitForConfigFile(configURL)
 	logLine("Config file validated!")
 
 	// Test 2: Wait for and verify the partition directory exists
-	partitionURL := fmt.Sprintf("%s/%s/", metaArchiveURL, partitionDir)
+	partitionURL := fmt.Sprintf("%s/%s/", ledgerMetaURL, partitionDir)
 	logLine("Waiting for partition directory...")
 	waitForURL(partitionURL)
 	logLine("Partition directory exists!")
@@ -53,11 +53,11 @@ func main() {
 	}
 	logLine(fmt.Sprintf("Found ledger file: %s", foundLedgerFile))
 
-	ledgerURL := fmt.Sprintf("%s/%s/%s", metaArchiveURL, partitionDir, foundLedgerFile)
+	ledgerURL := fmt.Sprintf("%s/%s/%s", ledgerMetaURL, partitionDir, foundLedgerFile)
 	waitForFile(ledgerURL)
 	logLine("Ledger file downloaded!")
 
-	logLine("All galexie meta archive tests passed!")
+	logLine("All galexie ledger meta store tests passed!")
 	os.Exit(0)
 }
 
