@@ -51,7 +51,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "add-filesystem-datastore-support"
+        "ref": "2b90d6b065dff98d14999ed30fea095bf040f26b"
       }
     ],
     "tests": {
@@ -117,7 +117,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "add-filesystem-datastore-support"
+        "ref": "2b90d6b065dff98d14999ed30fea095bf040f26b"
       }
     ],
     "tests": {
@@ -189,7 +189,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "add-filesystem-datastore-support"
+        "ref": "2b90d6b065dff98d14999ed30fea095bf040f26b"
       }
     ],
     "tests": {
