@@ -41,12 +41,12 @@ FROM ubuntu:24.04 AS stellar-core-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY apt-retry /usr/local/bin/
-RUN apt-retry apt-get update && \
-    apt-retry apt-get -y install iproute2 procps lsb-release \
+RUN apt-retry sh -c 'apt-get update && \
+    apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
                        bison flex sed perl libpq-dev parallel \
                        clang-20 libc++abi-20-dev libc++-20-dev \
-                       postgresql curl jq
+                       postgresql curl jq'
 
 ARG CORE_REPO
 ARG CORE_REF
@@ -98,7 +98,7 @@ ENV PATH="/usr/local/go/bin:$CARGO_HOME/bin:${PATH}"
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY apt-retry /usr/local/bin/
-RUN apt-retry apt-get update && apt-retry apt-get install -y build-essential jq && apt-get clean
+RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
 RUN make build-stellar-rpc
@@ -113,7 +113,7 @@ FROM golang:1.24-trixie AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY apt-retry /usr/local/bin/
-RUN apt-retry apt-get update && apt-retry apt-get -y install jq
+RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG HORIZON_REPO
 ARG HORIZON_REF
@@ -138,7 +138,7 @@ FROM golang:1.24-trixie AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY apt-retry /usr/local/bin/
-RUN apt-retry apt-get update && apt-retry apt-get -y install jq
+RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
