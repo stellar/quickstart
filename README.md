@@ -168,7 +168,7 @@ To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use th
 
 ### Core Options
 
-#### `--core-log-level`
+#### Log Level
 
 Set Stellar Core's log level at startup. Valid values are (case-sensitive):
 
@@ -205,7 +205,7 @@ curl "http://localhost:11626/ll?level=DEBUG&partition=SCP"
 
 Available partitions: `Fs`, `SCP`, `Bucket`, `Database`, `History`, `Process`, `Ledger`, `Overlay`, `Herder`, `Tx`, `LoadGen`, `Work`, `Invariant`, `Perf`
 
-### Core Database Options
+#### Database
 
 By default, Stellar Core uses SQLite for its database. To use PostgreSQL instead, set the `CORE_USE_POSTGRES` environment variable:
 
