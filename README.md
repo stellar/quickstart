@@ -205,6 +205,22 @@ curl "http://localhost:11626/ll?level=DEBUG&partition=SCP"
 
 Available partitions: `Fs`, `SCP`, `Bucket`, `Database`, `History`, `Process`, `Ledger`, `Overlay`, `Herder`, `Tx`, `LoadGen`, `Work`, `Invariant`, `Perf`
 
+### Core Database Options
+
+By default, Stellar Core uses SQLite for its database. To use PostgreSQL instead, set the `CORE_USE_POSTGRES` environment variable:
+
+```shell
+docker run -e CORE_USE_POSTGRES=true -p "8000:8000" stellar/quickstart --local
+```
+
+When `CORE_USE_POSTGRES=true`:
+- A `core` PostgreSQL database is created alongside the `horizon` database
+- Stellar Core connects to PostgreSQL instead of SQLite
+- PostgreSQL is started before Stellar Core
+
+> [!WARNING]
+> PostgreSQL support for Stellar Core in Quickstart is deprecated and will likely be removed in a future release. It is highly recommended not to use this feature if you are not already using PostgreSQL. If you are currently using PostgreSQL for Stellar Core in Quickstart, please comment on [this issue](https://github.com/stellar/quickstart/issues/875) with information about your use case for which PostgreSQL is necessary.
+
 ### Stellar Lab
 
 Stellar Lab is an interactive toolkit for exploring and interacting with the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the Friendbot, RPC, and Horizon APIs. Lab is also built-in to Quickstart.
@@ -495,7 +511,7 @@ The point of this project is to make running stellar's software within your own 
 
 This image manages a postgres database `horizon` for horizon's data. The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in: Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
 
-Note: In the past, stellar-core also used PostgreSQL with a `core` database. Stellar-core now uses SQLite, so PostgreSQL is only started when Horizon is enabled.
+Note: By default, stellar-core uses SQLite. To use PostgreSQL for stellar-core, set `CORE_USE_POSTGRES=true` (see [Core Database Options](#core-database-options)). When using PostgreSQL, a `core` database is also created.
 
 ## Example launch commands
 
