@@ -451,6 +451,8 @@ The image also exposes a few other ports that most developers do not need, but a
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
 | 6062  | galexie                    | admin port           |
+| 1570  | history-archive            | file server port     |
+| 1571  | ledger-meta-store          | file server port     |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
