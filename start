@@ -16,6 +16,7 @@ export FBHOME="$STELLAR_HOME/friendbot"
 export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
+export HISTORYARCHIVEHOME="$STELLAR_HOME/history-archive"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -499,6 +500,8 @@ EOF
   if [ "$NETWORK" = "local" ]; then
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
+    run_silent "mkdir-history-archive" mkdir -p $HISTORYARCHIVEHOME/data
+    run_silent "chown-history-archive" chown -R stellar:stellar $HISTORYARCHIVEHOME
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
   fi
 
