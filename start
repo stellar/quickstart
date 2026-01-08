@@ -633,7 +633,10 @@ function init_galexie() {
   run_silent "chown-ledger-meta-store" chown -R stellar:stellar $LEDGERMETASTOREHOME
 
   pushd $GALEXIEHOME
+  mkdir ./captive-core
 
+  GALEXIE_CAPTIVE_CORE_CFG=$GALEXIEHOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-galexie-captivecore-db" perl -pi -e "s*__DATABASE__*$GALEXIEHOME/captive-core/galexie.db*g" $GALEXIE_CAPTIVE_CORE_CFG
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/galexie.toml
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
 
