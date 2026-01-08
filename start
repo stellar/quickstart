@@ -18,6 +18,7 @@ export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 export GALEXIEHOME="$STELLAR_HOME/galexie"
 export LEDGERMETASTOREHOME="$STELLAR_HOME/ledger-meta-store"
+export HISTORYARCHIVEHOME="$STELLAR_HOME/history-archive"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -44,6 +45,7 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_RPC_ADMIN_ENDPOINT:=$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${CORE_LOG_LEVEL:=}"
 : "${LIMITS:=testnet}"
 
 QUICKSTART_INITIALIZED=false
@@ -201,6 +203,10 @@ function process_args() {
       ;;
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
+      ;;
+    --core-log-level)
+      CORE_LOG_LEVEL="$1"
+      shift
       ;;
     *)
       echo "Unknown container arg $ARG" >&2
@@ -482,6 +488,18 @@ function init_stellar_core() {
 
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
+
+  # Write core environment file for runtime configuration.
+  # This runs on every startup to support changing settings on restart.
+  # Default to "debug" for local network to maintain backward compatibility.
+  local core_log_level="$CORE_LOG_LEVEL"
+  if [ -z "$core_log_level" ] && [ "$NETWORK" = "local" ]; then
+    core_log_level="debug"
+  fi
+  cat > $COREHOME/etc/env <<EOF
+CORE_LOG_LEVEL="$core_log_level"
+EOF
+
   if [ -f $COREHOME/.quickstart-initialized ]; then
     echo "core: already initialized"
 
@@ -507,6 +525,8 @@ function init_stellar_core() {
   if [ "$NETWORK" = "local" ]; then
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
+    run_silent "mkdir-history-archive" mkdir -p $HISTORYARCHIVEHOME/data
+    run_silent "chown-history-archive" chown -R stellar:stellar $HISTORYARCHIVEHOME
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
   fi
 
