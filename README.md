@@ -166,6 +166,45 @@ To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use th
 
 **Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.**
 
+### Core Options
+
+#### `--core-log-level`
+
+Set Stellar Core's log level at startup. Valid values are (case-sensitive):
+
+| Level | Description |
+| ----- | ----------- |
+| FATAL | Only log fatal errors |
+| ERROR | Log errors and above |
+| WARNING | Log warnings and above |
+| INFO | Log info and above |
+| DEBUG | Log debug and above (default for `--local`) |
+| TRACE | Log everything (very verbose) |
+
+Example:
+
+```shell
+docker run -p "8000:8000" stellar/quickstart --local --core-log-level DEBUG
+```
+
+For more granular control over specific subsystems, you can use Stellar Core's HTTP command interface on port 11626. First, expose the port:
+
+```shell
+docker run -p "8000:8000" -p "11626:11626" stellar/quickstart --local
+```
+
+Then adjust log levels per partition:
+
+```shell
+# Set History partition to TRACE level
+curl "http://localhost:11626/ll?level=TRACE&partition=History"
+
+# Set SCP partition to DEBUG level
+curl "http://localhost:11626/ll?level=DEBUG&partition=SCP"
+```
+
+Available partitions: `Fs`, `SCP`, `Bucket`, `Database`, `History`, `Process`, `Ledger`, `Overlay`, `Herder`, `Tx`, `LoadGen`, `Work`, `Invariant`, `Perf`
+
 ### Stellar Lab
 
 Stellar Lab is an interactive toolkit for exploring and interacting with the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the Friendbot, RPC, and Horizon APIs. Lab is also built-in to Quickstart.
@@ -230,6 +269,7 @@ The action supports several configuration options. None are required and default
     network: "local"                      # Network: local, testnet, futurenet (default: "local")
     enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
     protocol_version: ""                  # Protocol version to run for 'local' network only (leave blank for default for image)"
+    core_log_level: ""                    # Core log level: FATAL, ERROR, WARNING, INFO, DEBUG, TRACE (default: "")
     enable_logs: "true"                   # Enable container logs (default: "true")
     health_interval: "10"                 # Time between health checks in seconds (default: "10")
     health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")
