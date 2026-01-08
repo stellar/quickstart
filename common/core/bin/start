@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Source environment file if it exists
+if [ -f /opt/stellar/core/etc/env ]; then
+  source /opt/stellar/core/etc/env
+fi
+
 echo "starting core..."
 set -e
-exec /usr/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg" run
+exec /usr/bin/stellar-core --conf "/opt/stellar/core/etc/stellar-core.cfg" run ${CORE_LOG_LEVEL:+--ll "$CORE_LOG_LEVEL"}
