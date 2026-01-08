@@ -40,12 +40,13 @@ COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 FROM ubuntu:24.04 AS stellar-core-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
+COPY apt-retry /usr/local/bin/
+RUN apt-retry sh -c 'apt-get update && \
     apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
                        bison flex sed perl libpq-dev parallel \
                        clang-20 libc++abi-20-dev libc++-20-dev \
-                       postgresql curl jq
+                       postgresql curl jq'
 
 ARG CORE_REPO
 ARG CORE_REF
@@ -96,7 +97,8 @@ ENV RUSTUP_HOME=/rust/.rust
 ENV PATH="/usr/local/go/bin:$CARGO_HOME/bin:${PATH}"
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y build-essential jq && apt-get clean
+COPY apt-retry /usr/local/bin/
+RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
 RUN make build-stellar-rpc
@@ -110,7 +112,8 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 FROM golang:1.24-trixie AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install jq
+COPY apt-retry /usr/local/bin/
+RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG HORIZON_REPO
 ARG HORIZON_REF
@@ -134,7 +137,8 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 FROM golang:1.24-trixie AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install jq
+COPY apt-retry /usr/local/bin/
+RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
@@ -206,6 +210,7 @@ EXPOSE 8100
 EXPOSE 11625
 EXPOSE 11626
 
+COPY apt-retry /usr/local/bin/
 ADD dependencies /
 RUN /dependencies
 
