@@ -30,8 +30,10 @@ while [ $attempt -le $max_attempts ]; do
     if "$@"; then
         exit 0
     fi
-    echo -e "${RED}apt command failed (attempt $attempt/$max_attempts), retrying in ${delay}s...${NC}"
-    sleep $delay
+    if [ $attempt -lt $max_attempts ]; then
+        echo -e "${RED}apt command failed (attempt $attempt/$max_attempts), retrying in ${delay}s...${NC}"
+        sleep $delay
+    fi
     attempt=$((attempt + 1))
     delay=$(next_delay $delay)
 done
