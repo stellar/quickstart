@@ -16,6 +16,8 @@ export FBHOME="$STELLAR_HOME/friendbot"
 export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
+export GALEXIEHOME="$STELLAR_HOME/galexie"
+export LEDGERMETASTOREHOME="$STELLAR_HOME/ledger-meta-store"
 export HISTORYARCHIVEHOME="$STELLAR_HOME/history-archive"
 
 export CORELOG="/var/log/stellar-core"
@@ -33,6 +35,7 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
 : "${ENABLE_LAB:=false}"
+: "${ENABLE_GALEXIE:=false}"
 # TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
@@ -62,6 +65,10 @@ function validate_before_start() {
   fi
   if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     echo "--randomize-network-passphrase is only supported in the local network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "local" ] && [ "$ENABLE_GALEXIE" = "true" ]; then
+    echo "--enable galexie is only supported in the local network" >&2
     exit 1
   fi
   if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
@@ -97,6 +104,8 @@ function start() {
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "friendbot") | "\(.ref) (\(.sha))"')"
   echo "  lab:"
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "lab") | "\(.ref) (\(.sha))"')"
+  echo "  galexie:"
+  echo "    $(< /image.json jq -r '.deps[] | select(.name == "galexie") | "\(.ref) (\(.sha))"')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
@@ -115,6 +124,7 @@ function start() {
   init_horizon
   copy_pgpass
   init_stellar_rpc
+  init_galexie
 
   stop_postgres  # this gets started in init_db
 
@@ -226,6 +236,10 @@ function process_args() {
     ENABLE_LAB=true
   fi
 
+  if [[ ",$ENABLE," = *",galexie,"* ]]; then
+    ENABLE_GALEXIE=true
+  fi
+
   case "$NETWORK" in
   testnet)
     export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
@@ -329,6 +343,8 @@ function copy_defaults() {
     if [ "$ENABLE_RPC" = "true" ]; then
       cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     fi
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/ledger-meta-store.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
@@ -394,6 +410,15 @@ function copy_defaults() {
     $CP /opt/stellar-default/common/nginx/ $NXHOME
     if [ -d /opt/stellar-default/$NETWORK/nginx/ ]; then
       $CP /opt/stellar-default/$NETWORK/nginx/ $NXHOME
+    fi
+  fi
+
+  if [ -d $GALEXIEHOME/etc ]; then
+    echo "galexie: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/galexie/ $GALEXIEHOME
+    if [ -d /opt/stellar-default/$NETWORK/galexie/ ]; then
+      $CP /opt/stellar-default/$NETWORK/galexie/ $GALEXIEHOME
     fi
   fi
 }
@@ -604,6 +629,33 @@ function init_stellar_rpc() {
   popd
 }
 
+function init_galexie() {
+  if [ "$ENABLE_GALEXIE" != "true" ]; then
+    return 0
+  fi
+
+  if [ -f $GALEXIEHOME/.quickstart-initialized ]; then
+    echo "galexie: already initialized"
+    return 0
+  fi
+
+  run_silent "mkdir-ledger-meta-store" mkdir -p $LEDGERMETASTOREHOME/data
+  run_silent "chown-ledger-meta-store" chown -R stellar:stellar $LEDGERMETASTOREHOME
+
+  pushd $GALEXIEHOME
+  mkdir ./captive-core
+
+  GALEXIE_CAPTIVE_CORE_CFG=$GALEXIEHOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-galexie-captivecore-db" perl -pi -e "s*__DATABASE__*$GALEXIEHOME/captive-core/galexie.db*g" $GALEXIE_CAPTIVE_CORE_CFG
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/galexie.toml
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
+
+  run_silent "init-galexie" chown -R stellar:stellar .
+
+  touch .quickstart-initialized
+  popd
+}
+
 function kill_supervisor() {
   kill -3 $(cat "/var/run/supervisord.pid")
 }
@@ -735,6 +787,10 @@ function start_optional_services() {
 
   if [ "$ENABLE_LAB" == "true" ]; then
     supervisorctl start stellar-lab
+  fi
+
+  if [ "$ENABLE_GALEXIE" == "true" ]; then
+    supervisorctl start galexie
   fi
 }
 

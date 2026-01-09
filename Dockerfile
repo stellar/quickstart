@@ -18,6 +18,7 @@ ARG HORIZON_IMAGE=stellar-horizon-stage
 ARG FRIENDBOT_IMAGE=stellar-friendbot-stage
 ARG RPC_IMAGE=stellar-rpc-stage
 ARG LAB_IMAGE=stellar-lab-stage
+ARG GALEXIE_IMAGE=stellar-galexie-stage
 
 # xdr
 
@@ -187,6 +188,24 @@ COPY --from=stellar-lab-builder /lab/public /lab/public
 COPY --from=stellar-lab-builder /lab/build/static /lab/public/_next/static
 COPY --from=stellar-lab-builder /usr/local/bin/node /node
 
+# galexie
+
+FROM golang:1.24-trixie AS stellar-galexie-builder
+
+ARG GALEXIE_REPO
+ARG GALEXIE_REF
+
+WORKDIR /src
+RUN git clone https://github.com/${GALEXIE_REPO} /src
+RUN git fetch origin ${GALEXIE_REF}
+RUN git checkout ${GALEXIE_REF}
+ENV CGO_ENABLED=0
+RUN go build -o /galexie .
+
+FROM scratch AS stellar-galexie-stage
+
+COPY --from=stellar-galexie-builder /galexie /galexie
+
 # quickstart
 
 FROM $XDR_IMAGE AS xdr
@@ -195,6 +214,7 @@ FROM $HORIZON_IMAGE AS horizon
 FROM $FRIENDBOT_IMAGE AS friendbot
 FROM $RPC_IMAGE AS rpc
 FROM $LAB_IMAGE AS lab
+FROM $GALEXIE_IMAGE AS galexie
 
 FROM ubuntu:24.04 AS quickstart
 
@@ -221,6 +241,7 @@ COPY --from=friendbot /friendbot /usr/local/bin/friendbot
 COPY --from=rpc /stellar-rpc /usr/bin/stellar-rpc
 COPY --from=lab /lab /opt/stellar/lab
 COPY --from=lab /node /usr/bin/
+COPY --from=galexie /galexie /usr/bin/galexie
 
 RUN adduser --system --group --quiet --home /var/lib/stellar --disabled-password --shell /bin/bash stellar;
 

@@ -284,6 +284,12 @@ jobs:
         pattern: image-lab-${{ steps.ids.outputs.lab }}-${{ matrix.arch }}.*
         merge-multiple: true
         path: /tmp/images
+    - name: Download Image Galexie
+      uses: actions/download-artifact@v4
+      with:
+        pattern: image-galexie-${{ steps.ids.outputs.galexie }}-${{ matrix.arch }}.*
+        merge-multiple: true
+        path: /tmp/images
     - name: Load Image into Docker
       run: |
         ls -lah /tmp/images/
