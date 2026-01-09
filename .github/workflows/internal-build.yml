@@ -299,7 +299,7 @@ jobs:
           docker load -i $image
         done
     - name: Pull Base Image
-      run: docker pull --platform linux/${{ matrix.arch }} ubuntu:22.04
+      run: docker pull --platform linux/${{ matrix.arch }} ubuntu:24.04
     - name: Build Args for Deps
       id: dep_args
       run: |
