@@ -93,8 +93,6 @@ function validate_after_copy_defaults() {
 function start() {
   echo "Starting Stellar Quickstart"
 
-  validate_persistent_volume_version
-
   echo "versions:"
   if [ -n "$IMAGE_NAME" ]; then
     echo "  quickstart: $REVISION ($IMAGE_NAME)"
@@ -117,6 +115,9 @@ function start() {
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "galexie") | "\(.ref) (\(.sha))"')"
 
   echo "mode: $STELLAR_MODE"
+
+  validate_persistent_volume_version
+
   echo "network: $NETWORK"
   echo "network passphrase: $NETWORK_PASSPHRASE"
   echo "network id: $NETWORK_ID"
@@ -354,22 +355,22 @@ function validate_persistent_volume_version() {
       fi
       echo ""
       echo "${red}╔══════════════════════════════════════════════════════════════════════╗${clear}"
-      echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}                     ${red}║${clear}"
-      echo "${red}║${clear}                                                                        ${red}║${clear}"
-      echo "${red}║${clear}  ${yellow}The persistent volume was initialized with a different version.${clear}      ${red}║${clear}"
-      echo "${red}║${clear}                                                                        ${red}║${clear}"
+      echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}"
+      echo "${red}║${clear}"
+      echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized
+      echo "${red}║${clear}  ${yellow}with a different version."
+      echo "${red}║${clear}"
       printf "${red}${w}${clear}    Initialized with: ${bold}%-46s${clear} ${red}${w}${clear}\n" "$init_with"
       printf "${red}${w}${clear}    Running with:     ${bold}%-46s${clear} ${red}${w}${clear}\n" "$run_with"
-      echo "${red}║${clear}                                                                        ${red}║${clear}"
-      echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}    ${red}║${clear}"
-      echo "${red}║${clear}                                                                        ${red}║${clear}"
+      echo "${red}║${clear}"
+      echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
+      echo "${red}║${clear}"
       if [ -n "$init_image" ]; then
-        echo "${red}║${clear}  To run with the original version:                                     ${red}║${clear}"
+        echo "${red}║${clear}  To run with the original version:"
         printf "${red}${w}${clear}    ${cyan}docker run ... %-53s${clear} ${red}${w}${clear}\n" "$init_image"
-        echo "${red}║${clear}                                                                        ${red}║${clear}"
+        echo "${red}║${clear}"
       fi
-      echo "${red}║${clear}  To use the new version, remove the persistent volume and start fresh. ${red}║${clear}"
-      echo "${red}╚══════════════════════════════════════════════════════════════════════╝${clear}"
+      echo "${red}╚══════════════════════════════════════════════════════════════════════${clear}"
       echo ""
     fi
   fi
