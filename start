@@ -337,20 +337,21 @@ function set_pg_password() {
 
 }
 
-function is_initialized_volume() {
-  [ -f "$STELLAR_HOME/.quickstart-version.json" ] || \
-  [ -f "$PGHOME/.quickstart-initialized" ] || \
-  [ -f "$COREHOME/.quickstart-initialized" ] || \
-  [ -f "$HZHOME/.quickstart-initialized" ] || \
-  [ -f "$STELLAR_RPC_HOME/.quickstart-initialized" ] || \
-  [ -f "$GALEXIEHOME/.quickstart-initialized" ]
-}
-
 function persistent_volume_version() {
   local version_file="$STELLAR_HOME/.quickstart-version.json"
 
+  local is_initialized_volume=$( \
+    [ -f "$version_file" ] || \
+    [ -f "$PGHOME/.quickstart-initialized" ] || \
+    [ -f "$COREHOME/.quickstart-initialized" ] || \
+    [ -f "$HZHOME/.quickstart-initialized" ] || \
+    [ -f "$STELLAR_RPC_HOME/.quickstart-initialized" ] || \
+    [ -f "$GALEXIEHOME/.quickstart-initialized" ]; \
+    echo $? \
+  )
+
   # Save version info on first initialization
-  if ! is_initialized_volume; then
+  if [ "$is_initialized_volume" != "0" ]; then
     jq -n --arg revision "$REVISION" --arg image "$IMAGE_NAME" \
       '{revision: $revision, image: $image}' > "$version_file"
     if [ -n "$IMAGE_NAME" ]; then
