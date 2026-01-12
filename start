@@ -6,6 +6,9 @@ green=$(echo -e "\e[32m")
 blue=$(echo -e "\e[34m")
 purple=$(echo -e "\e[35m")
 cyan=$(echo -e "\e[36m")
+yellow=$(echo -e "\e[33m")
+red=$(echo -e "\e[31m")
+bold=$(echo -e "\e[1m")
 
 export STELLAR_HOME="/opt/stellar"
 export PGHOME="$STELLAR_HOME/postgresql"
@@ -344,9 +347,6 @@ function validate_persistent_volume_version() {
     fi
 
     if [ "$mismatch" = "true" ]; then
-      local yellow=$(echo -e "\e[33m")
-      local red=$(echo -e "\e[31m")
-      local bold=$(echo -e "\e[1m")
       echo ""
       echo "${red}${bold}╔══════════════════════════════════════════════════════════════════╗${clear}"
       echo "${red}${bold}║                    ⚠️  VERSION MISMATCH WARNING                   ║${clear}"
