@@ -344,7 +344,7 @@ function validate_persistent_volume_version() {
     local init_image=$(< "$version_file" jq -r '.image')
 
     if [ "$init_revision" != "$REVISION" ]; then
-      local w="║"
+      local w=""
       local init_with="$init_revision"
       local run_with="$REVISION"
       if [ -n "$init_image" ]; then
@@ -360,14 +360,14 @@ function validate_persistent_volume_version() {
       echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized"
       echo "${red}║${clear}  ${yellow}with a different version."
       echo "${red}║${clear}"
-      printf "${red}${w}${clear}    Initialized with: ${bold}%-46s${clear} ${red}${w}${clear}\n" "$init_with"
-      printf "${red}${w}${clear}    Running with:     ${bold}%-46s${clear} ${red}${w}${clear}\n" "$run_with"
+      printf "${red}║${clear}    Initialized with: ${bold}%-46s${clear}\n" "$init_with"
+      printf "${red}║${clear}    Running with:     ${bold}%-46s${clear}\n" "$run_with"
       echo "${red}║${clear}"
       echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
       echo "${red}║${clear}"
       if [ -n "$init_image" ]; then
         echo "${red}║${clear}  To run with the original version:"
-        printf "${red}${w}${clear}    ${cyan}docker run ... %-53s${clear} ${red}${w}${clear}\n" "$init_image"
+        printf "${red}║${clear}    ${cyan}docker run ... %-53s${clear}\n" "$init_image"
         echo "${red}║${clear}"
       fi
       echo "${red}╚══════════════════════════════════════════════════════════════════════${clear}"
