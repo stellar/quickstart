@@ -116,7 +116,7 @@ function start() {
 
   echo "mode: $STELLAR_MODE"
 
-  validate_persistent_volume_version
+  persistent_volume_version
 
   echo "network: $NETWORK"
   echo "network passphrase: $NETWORK_PASSPHRASE"
@@ -346,12 +346,22 @@ function is_initialized_volume() {
   [ -f "$GALEXIEHOME/.quickstart-initialized" ]
 }
 
-function validate_persistent_volume_version() {
+function persistent_volume_version() {
+  local version_file="$STELLAR_HOME/.quickstart-version.json"
+
+  # Save version info on first initialization
   if ! is_initialized_volume; then
+    jq -n --arg revision "$REVISION" --arg image "$IMAGE_NAME" \
+      '{revision: $revision, image: $image}' > "$version_file"
+    if [ -n "$IMAGE_NAME" ]; then
+      echo "version: saved $REVISION ($IMAGE_NAME)"
+    else
+      echo "version: saved $REVISION"
+    fi
     return
   fi
 
-  local version_file="$STELLAR_HOME/.quickstart-version.json"
+  # Check for version mismatch on existing volumes
   local init_revision="unknown"
   local init_image=""
 
@@ -489,17 +499,6 @@ function copy_defaults() {
     fi
   fi
 
-  # Save version info on first initialization
-  if ! is_initialized_volume; then
-    local version_file="$STELLAR_HOME/.quickstart-version.json"
-    jq -n --arg revision "$REVISION" --arg image "$IMAGE_NAME" \
-      '{revision: $revision, image: $image}' > "$version_file"
-    if [ -n "$IMAGE_NAME" ]; then
-      echo "version: saved $REVISION ($IMAGE_NAME)"
-    else
-      echo "version: saved $REVISION"
-    fi
-  fi
 }
 
 function copy_pgpass() {
