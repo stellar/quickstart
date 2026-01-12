@@ -90,6 +90,8 @@ function validate_after_copy_defaults() {
 function start() {
   echo "Starting Stellar Quickstart"
 
+  validate_persistent_volume_version
+
   echo "versions:"
   echo "  quickstart: $REVISION"
   echo "  xdr:"
@@ -327,6 +329,55 @@ function set_pg_password() {
 
 }
 
+function validate_persistent_volume_version() {
+  local version_file="$STELLAR_HOME/.quickstart-version.json"
+  if [ -f "$version_file" ]; then
+    local init_revision=$(< "$version_file" jq -r '.revision')
+    local init_image=$(< "$version_file" jq -r '.image')
+
+    # Check for mismatch: compare revisions, and images if both are set
+    local mismatch=false
+    if [ "$init_revision" != "$REVISION" ]; then
+      mismatch=true
+    elif [ -n "$init_image" ] && [ -n "$IMAGE_NAME" ] && [ "$init_image" != "$IMAGE_NAME" ]; then
+      mismatch=true
+    fi
+
+    if [ "$mismatch" = "true" ]; then
+      local yellow=$(echo -e "\e[33m")
+      local red=$(echo -e "\e[31m")
+      local bold=$(echo -e "\e[1m")
+      echo ""
+      echo "${red}${bold}╔══════════════════════════════════════════════════════════════════╗${clear}"
+      echo "${red}${bold}║                    ⚠️  VERSION MISMATCH WARNING                   ║${clear}"
+      echo "${red}${bold}╚══════════════════════════════════════════════════════════════════╝${clear}"
+      echo ""
+      echo "${yellow}The persistent volume was initialized with a different version.${clear}"
+      echo ""
+      if [ -n "$init_image" ]; then
+        echo "  Initialized with: ${bold}$init_revision ($init_image)${clear}"
+      else
+        echo "  Initialized with: ${bold}$init_revision${clear}"
+      fi
+      if [ -n "$IMAGE_NAME" ]; then
+        echo "  Running with:     ${bold}$REVISION ($IMAGE_NAME)${clear}"
+      else
+        echo "  Running with:     ${bold}$REVISION${clear}"
+      fi
+      echo ""
+      echo "${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
+      echo ""
+      if [ -n "$init_image" ]; then
+        echo "To run with the original version:"
+        echo "  ${cyan}docker run ... $init_image${clear}"
+        echo ""
+      fi
+      echo "To use the new version, remove the persistent volume and start fresh."
+      echo ""
+    fi
+  fi
+}
+
 function copy_defaults() {
   local CP="rsync -a"
 
@@ -419,6 +470,18 @@ function copy_defaults() {
     $CP /opt/stellar-default/common/galexie/ $GALEXIEHOME
     if [ -d /opt/stellar-default/$NETWORK/galexie/ ]; then
       $CP /opt/stellar-default/$NETWORK/galexie/ $GALEXIEHOME
+    fi
+  fi
+
+  # Save version info on first initialization
+  local version_file="$STELLAR_HOME/.quickstart-version.json"
+  if [ ! -f "$version_file" ]; then
+    jq -n --arg revision "$REVISION" --arg image "$IMAGE_NAME" \
+      '{revision: $revision, image: $image}' > "$version_file"
+    if [ -n "$IMAGE_NAME" ]; then
+      echo "version: saved $REVISION ($IMAGE_NAME)"
+    else
+      echo "version: saved $REVISION"
     fi
   fi
 }
@@ -959,5 +1022,4 @@ function horizon_status() {
   done
   echo "horizon: ingestion caught up"
 }
-
 main $@

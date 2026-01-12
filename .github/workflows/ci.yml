@@ -97,6 +97,7 @@ jobs:
       sha: ${{ needs.setup.outputs.sha }}
       images: ${{ needs.setup.outputs.images }}
       archs: ${{ needs.setup.outputs.archs }}
+      tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
 
   test:
     name: 3 test
