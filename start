@@ -96,7 +96,11 @@ function start() {
   validate_persistent_volume_version
 
   echo "versions:"
-  echo "  quickstart: $REVISION"
+  if [ -n "$IMAGE_NAME" ]; then
+    echo "  quickstart: $REVISION ($IMAGE_NAME)"
+  else
+    echo "  quickstart: $REVISION"
+  fi
   echo "  xdr:"
   echo "$(stellar-xdr version | sed 's/^/    /')"
   echo "  core:"
