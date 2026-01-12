@@ -401,7 +401,7 @@ function persistent_volume_version() {
     printf "${red}║${clear}    ${cyan}docker run ... %-53s${clear}\n" "$init_image"
     echo "${red}║${clear}"
   fi
-  echo "${red}╚══════════════════════════════════════════════════════════════════════${clear}"
+  echo "${red}╚══════════════════════════════════════════════════════════════════════╝${clear}"
   echo ""
 }
 
