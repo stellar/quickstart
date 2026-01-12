@@ -490,8 +490,8 @@ function copy_defaults() {
   fi
 
   # Save version info on first initialization
-  local version_file="$STELLAR_HOME/.quickstart-version.json"
-  if [ ! -f "$version_file" ]; then
+  if ! is_initialized_volume; then
+    local version_file="$STELLAR_HOME/.quickstart-version.json"
     jq -n --arg revision "$REVISION" --arg image "$IMAGE_NAME" \
       '{revision: $revision, image: $image}' > "$version_file"
     if [ -n "$IMAGE_NAME" ]; then
