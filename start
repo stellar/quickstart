@@ -357,7 +357,7 @@ function validate_persistent_volume_version() {
       echo "${red}╔══════════════════════════════════════════════════════════════════════╗${clear}"
       echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}"
       echo "${red}║${clear}"
-      echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized
+      echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized"
       echo "${red}║${clear}  ${yellow}with a different version."
       echo "${red}║${clear}"
       printf "${red}${w}${clear}    Initialized with: ${bold}%-46s${clear} ${red}${w}${clear}\n" "$init_with"
