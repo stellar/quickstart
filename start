@@ -342,15 +342,7 @@ function validate_persistent_volume_version() {
     local init_revision=$(< "$version_file" jq -r '.revision')
     local init_image=$(< "$version_file" jq -r '.image')
 
-    # Check for mismatch: compare revisions, and images if both are set
-    local mismatch=false
     if [ "$init_revision" != "$REVISION" ]; then
-      mismatch=true
-    elif [ -n "$init_image" ] && [ -n "$IMAGE_NAME" ] && [ "$init_image" != "$IMAGE_NAME" ]; then
-      mismatch=true
-    fi
-
-    if [ "$mismatch" = "true" ]; then
       echo ""
       echo "${red}${bold}╔══════════════════════════════════════════════════════════════════╗${clear}"
       echo "${red}${bold}║                    ⚠️  VERSION MISMATCH WARNING                   ║${clear}"
