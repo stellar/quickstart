@@ -343,32 +343,33 @@ function validate_persistent_volume_version() {
     local init_image=$(< "$version_file" jq -r '.image')
 
     if [ "$init_revision" != "$REVISION" ]; then
-      echo ""
-      echo "${red}${bold}╔══════════════════════════════════════════════════════════════════╗${clear}"
-      echo "${red}${bold}║                    ⚠️  VERSION MISMATCH WARNING                   ║${clear}"
-      echo "${red}${bold}╚══════════════════════════════════════════════════════════════════╝${clear}"
-      echo ""
-      echo "${yellow}The persistent volume was initialized with a different version.${clear}"
-      echo ""
+      local w="║"
+      local init_with="$init_revision"
+      local run_with="$REVISION"
       if [ -n "$init_image" ]; then
-        echo "  Initialized with: ${bold}$init_revision ($init_image)${clear}"
-      else
-        echo "  Initialized with: ${bold}$init_revision${clear}"
+        init_with="$init_revision ($init_image)"
       fi
       if [ -n "$IMAGE_NAME" ]; then
-        echo "  Running with:     ${bold}$REVISION ($IMAGE_NAME)${clear}"
-      else
-        echo "  Running with:     ${bold}$REVISION${clear}"
+        run_with="$REVISION ($IMAGE_NAME)"
       fi
       echo ""
-      echo "${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
-      echo ""
+      echo "${red}╔══════════════════════════════════════════════════════════════════════╗${clear}"
+      echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}                     ${red}║${clear}"
+      echo "${red}║${clear}                                                                        ${red}║${clear}"
+      echo "${red}║${clear}  ${yellow}The persistent volume was initialized with a different version.${clear}      ${red}║${clear}"
+      echo "${red}║${clear}                                                                        ${red}║${clear}"
+      printf "${red}${w}${clear}    Initialized with: ${bold}%-46s${clear} ${red}${w}${clear}\n" "$init_with"
+      printf "${red}${w}${clear}    Running with:     ${bold}%-46s${clear} ${red}${w}${clear}\n" "$run_with"
+      echo "${red}║${clear}                                                                        ${red}║${clear}"
+      echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}    ${red}║${clear}"
+      echo "${red}║${clear}                                                                        ${red}║${clear}"
       if [ -n "$init_image" ]; then
-        echo "To run with the original version:"
-        echo "  ${cyan}docker run ... $init_image${clear}"
-        echo ""
+        echo "${red}║${clear}  To run with the original version:                                     ${red}║${clear}"
+        printf "${red}${w}${clear}    ${cyan}docker run ... %-53s${clear} ${red}${w}${clear}\n" "$init_image"
+        echo "${red}║${clear}                                                                        ${red}║${clear}"
       fi
-      echo "To use the new version, remove the persistent volume and start fresh."
+      echo "${red}║${clear}  To use the new version, remove the persistent volume and start fresh. ${red}║${clear}"
+      echo "${red}╚══════════════════════════════════════════════════════════════════════╝${clear}"
       echo ""
     fi
   fi
