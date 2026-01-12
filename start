@@ -337,43 +337,61 @@ function set_pg_password() {
 
 }
 
-function validate_persistent_volume_version() {
-  local version_file="$STELLAR_HOME/.quickstart-version.json"
-  if [ -f "$version_file" ]; then
-    local init_revision=$(< "$version_file" jq -r '.revision')
-    local init_image=$(< "$version_file" jq -r '.image')
+function is_initialized_volume() {
+  [ -f "$STELLAR_HOME/.quickstart-version.json" ] || \
+  [ -f "$PGHOME/.quickstart-initialized" ] || \
+  [ -f "$COREHOME/.quickstart-initialized" ] || \
+  [ -f "$HZHOME/.quickstart-initialized" ] || \
+  [ -f "$STELLAR_RPC_HOME/.quickstart-initialized" ] || \
+  [ -f "$GALEXIEHOME/.quickstart-initialized" ]
+}
 
-    if [ "$init_revision" != "$REVISION" ]; then
-      local w=""
-      local init_with="$init_revision"
-      local run_with="$REVISION"
-      if [ -n "$init_image" ]; then
-        init_with="$init_revision ($init_image)"
-      fi
-      if [ -n "$IMAGE_NAME" ]; then
-        run_with="$REVISION ($IMAGE_NAME)"
-      fi
-      echo ""
-      echo "${red}╔══════════════════════════════════════════════════════════════════════╗${clear}"
-      echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}"
-      echo "${red}║${clear}"
-      echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized"
-      echo "${red}║${clear}  ${yellow}with a different version."
-      echo "${red}║${clear}"
-      printf "${red}║${clear}    Initialized with: ${bold}%-46s${clear}\n" "$init_with"
-      printf "${red}║${clear}    Running with:     ${bold}%-46s${clear}\n" "$run_with"
-      echo "${red}║${clear}"
-      echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
-      echo "${red}║${clear}"
-      if [ -n "$init_image" ]; then
-        echo "${red}║${clear}  To run with the original version:"
-        printf "${red}║${clear}    ${cyan}docker run ... %-53s${clear}\n" "$init_image"
-        echo "${red}║${clear}"
-      fi
-      echo "${red}╚══════════════════════════════════════════════════════════════════════${clear}"
-      echo ""
-    fi
+function validate_persistent_volume_version() {
+  if ! is_initialized_volume; then
+    return
   fi
+
+  local version_file="$STELLAR_HOME/.quickstart-version.json"
+  local init_revision="unknown"
+  local init_image=""
+
+  if [ -f "$version_file" ]; then
+    init_revision=$(< "$version_file" jq -r '.revision')
+    init_image=$(< "$version_file" jq -r '.image')
+  fi
+
+  if [ "$init_revision" = "$REVISION" ]; then
+    return
+  fi
+
+  local init_with="$init_revision"
+  if [ -n "$init_image" ]; then
+    init_with="$init_revision ($init_image)"
+  fi
+  local run_with="$REVISION"
+  if [ -n "$IMAGE_NAME" ]; then
+    run_with="$REVISION ($IMAGE_NAME)"
+  fi
+
+  echo ""
+  echo "${red}╔══════════════════════════════════════════════════════════════════════╗${clear}"
+  echo "${red}║${clear}                     ${bold}⚠️  VERSION MISMATCH WARNING${clear}"
+  echo "${red}║${clear}"
+  echo "${red}║${clear}  ${yellow}The persistent volume mounted at /opt/stellar was initialized"
+  echo "${red}║${clear}  ${yellow}with a different version."
+  echo "${red}║${clear}"
+  printf "${red}║${clear}    Initialized with: ${bold}%-46s${clear}\n" "$init_with"
+  printf "${red}║${clear}    Running with:     ${bold}%-46s${clear}\n" "$run_with"
+  echo "${red}║${clear}"
+  echo "${red}║${clear}  ${yellow}Persistent volumes may contain incompatible data across versions.${clear}"
+  echo "${red}║${clear}"
+  if [ -n "$init_image" ]; then
+    echo "${red}║${clear}  To run with the original version:"
+    printf "${red}║${clear}    ${cyan}docker run ... %-53s${clear}\n" "$init_image"
+    echo "${red}║${clear}"
+  fi
+  echo "${red}╚══════════════════════════════════════════════════════════════════════${clear}"
+  echo ""
 }
 
 function copy_defaults() {
