@@ -83,7 +83,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.1",
+        "ref": "v25.1.0rc2",
         "options": {
           "configure_flags": "--disable-tests"
         }
