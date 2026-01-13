@@ -48,7 +48,8 @@ The image runs the following software:
 - [stellar-horizon](https://github.com/stellar/stellar-horizon) - API server
 - [stellar-friendbot](https://github.com/stellar/friendbot) - Faucet
 - [stellar-lab](https://github.com/stellar/laboratory) - Web UI
-- [postgresql](https://www.postgresql.org) 12 is used for storing both stellar-core and horizon data.
+- [galexie](https://github.com/stellar/galexie) - Ledger meta exporter
+- [postgresql](https://www.postgresql.org) 12 is used for storing horizon data.
 - [supervisord](http://supervisord.org) is used from managing the processes of the above services.
 
 HTTP APIs and Tools are available at the following port and paths:
@@ -57,6 +58,8 @@ HTTP APIs and Tools are available at the following port and paths:
 - RPC: `http://localhost:8000/rpc`
 - Lab: `http://localhost:8000/lab`
 - Friendbot: `http://localhost:8000/friendbot`
+- Ledger Meta: `http://localhost:8000/ledger-meta` (available with `--local` and `--enable galexie`)
+- History Archive: `http://localhost:8000/archive` (available with `--local` only)
 
 ## Tags
 
@@ -165,6 +168,61 @@ To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use th
 
 **Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.**
 
+### Core Options
+
+#### Log Level
+
+Set Stellar Core's log level at startup. Valid values are (case-sensitive):
+
+| Level | Description |
+| ----- | ----------- |
+| FATAL | Only log fatal errors |
+| ERROR | Log errors and above |
+| WARNING | Log warnings and above |
+| INFO | Log info and above |
+| DEBUG | Log debug and above (default for `--local`) |
+| TRACE | Log everything (very verbose) |
+
+Example:
+
+```shell
+docker run -p "8000:8000" stellar/quickstart --local --core-log-level DEBUG
+```
+
+For more granular control over specific subsystems, you can use Stellar Core's HTTP command interface on port 11626. First, expose the port:
+
+```shell
+docker run -p "8000:8000" -p "11626:11626" stellar/quickstart --local
+```
+
+Then adjust log levels per partition:
+
+```shell
+# Set History partition to TRACE level
+curl "http://localhost:11626/ll?level=TRACE&partition=History"
+
+# Set SCP partition to DEBUG level
+curl "http://localhost:11626/ll?level=DEBUG&partition=SCP"
+```
+
+Available partitions: `Fs`, `SCP`, `Bucket`, `Database`, `History`, `Process`, `Ledger`, `Overlay`, `Herder`, `Tx`, `LoadGen`, `Work`, `Invariant`, `Perf`
+
+#### Database
+
+By default, Stellar Core uses SQLite for its database. To use PostgreSQL instead, set the `CORE_USE_POSTGRES` environment variable:
+
+```shell
+docker run -e CORE_USE_POSTGRES=true -p "8000:8000" stellar/quickstart --local
+```
+
+When `CORE_USE_POSTGRES=true`:
+- A `core` PostgreSQL database is created alongside the `horizon` database
+- Stellar Core connects to PostgreSQL instead of SQLite
+- PostgreSQL is started before Stellar Core
+
+> [!WARNING]
+> PostgreSQL support for Stellar Core in Quickstart is deprecated and will likely be removed in a future release. It is highly recommended not to use this feature if you are not already using PostgreSQL. If you are currently using PostgreSQL for Stellar Core in Quickstart, please comment on [this issue](https://github.com/stellar/quickstart/issues/875) with information about your use case for which PostgreSQL is necessary.
+
 ### Stellar Lab
 
 Stellar Lab is an interactive toolkit for exploring and interacting with the Stellar network. It allows developers to build, sign, simulate, and submit transactions, and to make requests to both the Friendbot, RPC, and Horizon APIs. Lab is also built-in to Quickstart.
@@ -201,6 +259,27 @@ $ curl http://localhost:8000/friendbot?addr=G...
 
 _Note: In local mode a local friendbot is running. In testnet and futurenet modes requests to the local `:8000/friendbot` endpoint will be proxied to the friendbot deployments for the respective network._
 
+### Galexie (Ledger Meta Exporter)
+
+Galexie is a ledger meta exporter that captures ledger close meta, which contains transaction meta, from the network and stores it locally. The exported ledger meta follows the [SEP-54](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0054.md) format and is served via a file server.
+
+The ledger meta is only available in `--local` network mode. To enable it use the `--enable` option to specify all the services you wish to run and include `galexie`.
+
+```
+docker run -it -p 8000:8000 stellar/quickstart --local --enable core,rpc,galexie
+```
+
+
+The ledger meta is available at:
+
+```
+http://localhost:8000/ledger-meta
+```
+
+The ledger meta store includes:
+- `.config.json` - Configuration file describing the data format
+- Partition directories containing compressed XDR files compressed with zstd with one ledger per file (`.xdr.zst`)
+
 ### Using in GitHub Actions
 
 The quickstart image can be run in GitHub Actions workflows using the provided action. This is useful for testing smart contracts, running integration tests, or any other CI/CD workflows that need a Stellar network.
@@ -229,6 +308,7 @@ The action supports several configuration options. None are required and default
     network: "local"                      # Network: local, testnet, futurenet (default: "local")
     enable: "core,horizon,rpc"            # Services to enable (default: "core,horizon,rpc")
     protocol_version: ""                  # Protocol version to run for 'local' network only (leave blank for default for image)"
+    core_log_level: ""                    # Core log level: FATAL, ERROR, WARNING, INFO, DEBUG, TRACE (default: "")
     enable_logs: "true"                   # Enable container logs (default: "true")
     health_interval: "10"                 # Time between health checks in seconds (default: "10")
     health_timeout: "5"                   # Maximum time for each health check in seconds (default: "5")
@@ -386,6 +466,9 @@ The image also exposes a few other ports that most developers do not need, but a
 | 5432  | postgresql                 | database access port |
 | 6060  | horizon                    | admin port           |
 | 6061  | stellar-rpc                | admin port           |
+| 6062  | galexie                    | admin port           |
+| 1570  | history-archive            | file server port     |
+| 1571  | ledger-meta-store          | file server port     |
 | 11625 | stellar-core               | peer node port       |
 | 11626 | stellar-core               | main http port       |
 | 11725 | stellar-core (horizon)     | peer node port       |
@@ -450,9 +533,11 @@ Alternatively, to tail all logs into the container's output for all services, ap
 
 ### Accessing databases
 
-The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network. In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database either horizon or stellar-core provide. This allows you to craft your own custom sql queries against the stellar network data.
+The point of this project is to make running stellar's software within your own infrastructure easier, so that your software can more easily integrate with the stellar network. In many cases, you can integrate with horizon's REST API, but often times you'll want direct access to the database horizon provides. This allows you to craft your own custom sql queries against the stellar network data.
 
-This image manages two postgres databases: `core` for stellar-core's data and `horizon` for horizon's data. The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in: Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
+This image manages a postgres database `horizon` for horizon's data. The username to use when connecting with your postgresql client or library is `stellar`. The password to use is dependent upon the mode your container is running in: Persistent mode uses a password supplied by you and ephemeral mode generates a password and prints it to the console upon container startup.
+
+Note: By default, stellar-core uses SQLite. To use PostgreSQL for stellar-core, set `CORE_USE_POSTGRES=true` (see [Core Database Options](#core-database-options)). When using PostgreSQL, a `core` database is also created.
 
 ## Example launch commands
 

@@ -17,7 +17,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -29,10 +29,10 @@
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v25.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
@@ -47,6 +47,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "galexie-v25.1.0"
       }
     ],
     "tests": {
@@ -67,7 +72,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 25
     },
     "deps": [
       {
@@ -78,7 +83,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -90,10 +95,10 @@
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v25.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
@@ -108,6 +113,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "galexie-v25.1.0"
       }
     ],
     "tests": {
@@ -175,6 +185,11 @@
         "name": "lab",
         "repo": "stellar/laboratory",
         "ref": "21cc0d0b9080e664b9dbfae5713d9c7615613729"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "galexie-v25.1.0"
       }
     ],
     "tests": {
@@ -229,6 +244,11 @@
       {
         "name": "lab",
         "repo": "stellar/laboratory",
+        "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
         "ref": "main"
       }
     ],
@@ -285,6 +305,11 @@
       {
         "name": "lab",
         "repo": "stellar/laboratory",
+        "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
         "ref": "main"
       }
     ],

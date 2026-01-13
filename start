@@ -16,6 +16,9 @@ export FBHOME="$STELLAR_HOME/friendbot"
 export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
+export GALEXIEHOME="$STELLAR_HOME/galexie"
+export LEDGERMETASTOREHOME="$STELLAR_HOME/ledger-meta-store"
+export HISTORYARCHIVEHOME="$STELLAR_HOME/history-archive"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -32,6 +35,7 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
 : "${ENABLE_LAB:=false}"
+: "${ENABLE_GALEXIE:=false}"
 # TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
@@ -41,6 +45,8 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT:=false}"
 : "${ENABLE_RPC_ADMIN_ENDPOINT:=$ENABLE_SOROBAN_RPC_ADMIN_ENDPOINT}"
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
+: "${CORE_LOG_LEVEL:=}"
+: "${CORE_USE_POSTGRES:=}"
 : "${LIMITS:=testnet}"
 
 QUICKSTART_INITIALIZED=false
@@ -59,6 +65,10 @@ function validate_before_start() {
   fi
   if [ "$NETWORK" != "local" ] && [ "$RANDOMIZE_NETWORK_PASSPHRASE" = "true" ]; then
     echo "--randomize-network-passphrase is only supported in the local network" >&2
+    exit 1
+  fi
+  if [ "$NETWORK" != "local" ] && [ "$ENABLE_GALEXIE" = "true" ]; then
+    echo "--enable galexie is only supported in the local network" >&2
     exit 1
   fi
   if [ "$NETWORK" = "local" ] && [ "$DISABLE_SOROBAN_DIAGNOSTIC_EVENTS" = "false" ]; then
@@ -94,6 +104,8 @@ function start() {
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "friendbot") | "\(.ref) (\(.sha))"')"
   echo "  lab:"
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "lab") | "\(.ref) (\(.sha))"')"
+  echo "  galexie:"
+  echo "    $(< /image.json jq -r '.deps[] | select(.name == "galexie") | "\(.ref) (\(.sha))"')"
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
@@ -112,6 +124,7 @@ function start() {
   init_horizon
   copy_pgpass
   init_stellar_rpc
+  init_galexie
 
   stop_postgres  # this gets started in init_db
 
@@ -192,6 +205,10 @@ function process_args() {
     --randomize-network-passphrase)
       RANDOMIZE_NETWORK_PASSPHRASE=true
       ;;
+    --core-log-level)
+      CORE_LOG_LEVEL="$1"
+      shift
+      ;;
     *)
       echo "Unknown container arg $ARG" >&2
       exit 1
@@ -217,6 +234,10 @@ function process_args() {
 
   if [[ ",$ENABLE," = *",lab,"* ]]; then
     ENABLE_LAB=true
+  fi
+
+  if [[ ",$ENABLE," = *",galexie,"* ]]; then
+    ENABLE_GALEXIE=true
   fi
 
   case "$NETWORK" in
@@ -319,9 +340,9 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    if [ "$ENABLE_RPC" = "true" ]; then
-      cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
-    fi
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/ledger-meta-store.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
   fi
@@ -389,6 +410,15 @@ function copy_defaults() {
       $CP /opt/stellar-default/$NETWORK/nginx/ $NXHOME
     fi
   fi
+
+  if [ -d $GALEXIEHOME/etc ]; then
+    echo "galexie: config directory exists, skipping copy"
+  else
+    $CP /opt/stellar-default/common/galexie/ $GALEXIEHOME
+    if [ -d /opt/stellar-default/$NETWORK/galexie/ ]; then
+      $CP /opt/stellar-default/$NETWORK/galexie/ $GALEXIEHOME
+    fi
+  fi
 }
 
 function copy_pgpass() {
@@ -403,7 +433,8 @@ function copy_pgpass() {
 }
 
 function init_db() {
-  if [ "$ENABLE_CORE" != "true" ] && [ "$ENABLE_HORIZON" != "true" ]; then
+  # Need postgres if horizon is enabled, or if core is enabled and using postgres
+  if [ "$ENABLE_HORIZON" != "true" ] && { [ "$ENABLE_CORE" != "true" ] || [ "$CORE_USE_POSTGRES" != "true" ]; }; then
     return 0
   fi
   if [ -f $PGHOME/.quickstart-initialized ]; then
@@ -435,12 +466,16 @@ function init_db() {
   run_silent "init-postgres" sudo -u postgres $PGBIN/initdb -D $PGDATA
 
   start_postgres
-  run_silent "create-horizon-db" sudo -u postgres createdb horizon
-  run_silent "create-core-db" sudo -u postgres createdb core
+  if [ "$ENABLE_HORIZON" = "true" ]; then
+    run_silent "create-horizon-db" sudo -u postgres createdb horizon
+  fi
+  if [ "$ENABLE_CORE" = "true" ] && [ "$CORE_USE_POSTGRES" = "true" ]; then
+    run_silent "create-core-db" sudo -u postgres createdb core
+  fi
   run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
     CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
-    GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;
-    GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;
+    $([ "$ENABLE_HORIZON" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;")
+    $([ "$ENABLE_CORE" = "true" ] && [ "$CORE_USE_POSTGRES" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;")
 SQL
 
   touch .quickstart-initialized
@@ -457,31 +492,49 @@ function init_stellar_core() {
 
   pushd $COREHOME
   run_silent "chown-core" chown -R stellar:stellar .
+
+  # Write core environment file for runtime configuration.
+  # This runs on every startup to support changing settings on restart.
+  # Default to "debug" for local network to maintain backward compatibility.
+  local core_log_level="$CORE_LOG_LEVEL"
+  if [ -z "$core_log_level" ] && [ "$NETWORK" = "local" ]; then
+    core_log_level="debug"
+  fi
+  cat > $COREHOME/etc/env <<EOF
+CORE_LOG_LEVEL="$core_log_level"
+CORE_USE_POSTGRES="$CORE_USE_POSTGRES"
+EOF
+
   if [ -f $COREHOME/.quickstart-initialized ]; then
     echo "core: already initialized"
 
     if [ "$NETWORK" = "local" ]; then
-      start_postgres
-
       run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf $COREHOME/etc/stellar-core.cfg
     fi
 
     return 0
   fi
 
-  run_silent "finalize-core-config-pgpass" perl -pi -e "s/__PGPASS__/$PGPASS/g" etc/stellar-core.cfg
-
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-core.cfg
 
   run_silent "finalize-core-config-manual-close" perl -pi -e "s/__MANUAL_CLOSE__/$ENABLE_CORE_MANUAL_CLOSE/g" etc/stellar-core.cfg
 
-  start_postgres
+  # Set database based on CORE_USE_POSTGRES environment variable
+  if [ "$CORE_USE_POSTGRES" = "true" ]; then
+    local DATABASE_URL="postgresql://dbname=core host=localhost user=stellar password=$PGPASS"
+    start_postgres
+  else
+    local DATABASE_URL="sqlite3:///opt/stellar/core/stellar.db"
+  fi
+  run_silent "finalize-core-config-database" perl -pi -e "s|__DATABASE__|$DATABASE_URL|g" etc/stellar-core.cfg
 
   run_silent "init-core-db" sudo -u stellar stellar-core new-db --conf etc/stellar-core.cfg
 
   if [ "$NETWORK" = "local" ]; then
     run_silent "init-core-scp" sudo -u stellar stellar-core force-scp --conf etc/stellar-core.cfg
 
+    run_silent "mkdir-history-archive" mkdir -p $HISTORYARCHIVEHOME/data
+    run_silent "chown-history-archive" chown -R stellar:stellar $HISTORYARCHIVEHOME
     run_silent "init-history" sudo -u stellar stellar-core new-hist vs --conf $COREHOME/etc/stellar-core.cfg
   fi
 
@@ -569,6 +622,33 @@ function init_stellar_rpc() {
   perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.cfg
 
   run_silent "init-stellar-rpc" chown -R stellar:stellar .
+
+  touch .quickstart-initialized
+  popd
+}
+
+function init_galexie() {
+  if [ "$ENABLE_GALEXIE" != "true" ]; then
+    return 0
+  fi
+
+  if [ -f $GALEXIEHOME/.quickstart-initialized ]; then
+    echo "galexie: already initialized"
+    return 0
+  fi
+
+  run_silent "mkdir-ledger-meta-store" mkdir -p $LEDGERMETASTOREHOME/data
+  run_silent "chown-ledger-meta-store" chown -R stellar:stellar $LEDGERMETASTOREHOME
+
+  pushd $GALEXIEHOME
+  mkdir ./captive-core
+
+  GALEXIE_CAPTIVE_CORE_CFG=$GALEXIEHOME/etc/stellar-captive-core.cfg
+  run_silent "finalize-galexie-captivecore-db" perl -pi -e "s*__DATABASE__*$GALEXIEHOME/captive-core/galexie.db*g" $GALEXIE_CAPTIVE_CORE_CFG
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/galexie.toml
+  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-captive-core.cfg
+
+  run_silent "init-galexie" chown -R stellar:stellar .
 
   touch .quickstart-initialized
   popd
@@ -688,7 +768,9 @@ function start_optional_services() {
   done
 
   if [ "$ENABLE_CORE" == "true" ]; then
-    supervisorctl start postgresql
+    if [ "$CORE_USE_POSTGRES" == "true" ]; then
+      supervisorctl start postgresql
+    fi
     supervisorctl start stellar-core
   fi
 
@@ -703,6 +785,10 @@ function start_optional_services() {
 
   if [ "$ENABLE_LAB" == "true" ]; then
     supervisorctl start stellar-lab
+  fi
+
+  if [ "$ENABLE_GALEXIE" == "true" ]; then
+    supervisorctl start galexie
   fi
 }
 

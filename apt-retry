@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -e
+
+# Retry wrapper for apt commands to handle transient mirror failures.
+# Uses decorrelated jitter: delay = rand(base, 3 * prev_delay), capped at max_delay
+# Usage: apt-retry apt-get update && apt-retry apt-get install -y <packages>
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+max_attempts=5
+base_delay=2
+max_delay=20
+
+# Decorrelated jitter: random value between base_delay and 3 * previous delay, capped
+next_delay() {
+    local prev=$1
+    local range=$((3 * prev - base_delay + 1))
+    local next=$((base_delay + RANDOM % range))
+    if [ $next -gt $max_delay ]; then
+        next=$max_delay
+    fi
+    echo $next
+}
+
+delay=$base_delay
+attempt=1
+
+while [ $attempt -le $max_attempts ]; do
+    if "$@"; then
+        exit 0
+    fi
+    if [ $attempt -lt $max_attempts ]; then
+        echo -e "${RED}apt command failed (attempt $attempt/$max_attempts), retrying in ${delay}s...${NC}"
+        sleep $delay
+    fi
+    attempt=$((attempt + 1))
+    delay=$(next_delay $delay)
+done
+
+echo -e "${RED}apt command failed after $max_attempts attempts${NC}"
+exit 1
