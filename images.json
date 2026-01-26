@@ -6,7 +6,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 25
     },
     "deps": [
       {
@@ -204,7 +204,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 25
     },
     "deps": [
       {
@@ -264,7 +264,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 25,
+      "protocol_version_default": 26,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
