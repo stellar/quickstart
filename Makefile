@@ -1,5 +1,6 @@
 __PHONY__: run logs console build build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test
 
+CONTAINER_RUNTIME?=docker
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=latest
 
@@ -28,16 +29,16 @@ LAB_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "la
 LAB_SHA =           $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "lab") | .sha')
 
 run:
-	docker run --rm -i --name stellar -p 8000:8000 -p 11626:11626 stellar/quickstart:$(TAG) --local
+	$(CONTAINER_RUNTIME) run --rm -i --name stellar -p 8000:8000 -p 11626:11626 stellar/quickstart:$(TAG) --local
 
 logs:
-	docker exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
+	$(CONTAINER_RUNTIME) exec stellar /bin/sh -c 'tail -F /var/log/supervisor/*'
 
 console:
-	docker exec -it stellar /bin/bash
+	$(CONTAINER_RUNTIME) exec -it stellar /bin/bash
 
 build: $(IMAGE_JSON)
-	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
+	$(CONTAINER_RUNTIME) build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 		--build-arg REVISION=$(REVISION) \
 		--build-arg XDR_REPO=$(XDR_REPO) --build-arg XDR_REF=$(XDR_SHA) \
 		--build-arg CORE_REPO="$(CORE_REPO)" --build-arg CORE_REF="$(CORE_SHA)" --build-arg CORE_OPTIONS='$(CORE_OPTIONS)' \
