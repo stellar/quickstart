@@ -543,6 +543,10 @@ EOF
 }
 
 function init_friendbot() {
+  if [ -f $FBHOME/.quickstart-initialized ]; then
+    echo "friendbot: already initialized"
+    return 0
+  fi
   pushd $FBHOME
 
   perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/friendbot.cfg
@@ -555,6 +559,7 @@ function init_friendbot() {
     echo 'horizon_url = "http://localhost:8001"' >> etc/friendbot.cfg
   fi
 
+  touch .quickstart-initialized
   popd
 }
 
