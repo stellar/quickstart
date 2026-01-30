@@ -788,6 +788,7 @@ function start_optional_services() {
   fi
 
   if [ "$ENABLE_GALEXIE" == "true" ]; then
+    supervisorctl start ledger-meta-store
     supervisorctl start galexie
   fi
 }
