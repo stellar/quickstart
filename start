@@ -757,7 +757,7 @@ function upgrade_local() {
       # Pass the expected sequence number of the root account after the first call to upgrade_soroban_config
       upgrade_soroban_config "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json" 4
 
-      touch .upgrade-config-initialized
+      touch "$COREHOME/.upgrade-config-initialized"
     fi
   fi
 
