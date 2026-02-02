@@ -1,33 +1,24 @@
 #!/usr/bin/env python3
 
 """
-Fetches pre-built dependency images from GitHub Actions artifacts or cache.
+Fetches pre-built dependency images from GitHub Actions artifacts.
 
 This script downloads cached Docker images for quickstart dependencies from
-the GitHub Actions artifacts. If artifacts are not available (expired or cache hit),
-it falls back to downloading from the GitHub Actions cache.
-
-After downloading, it loads the images into Docker with the correct tags
-expected by the Dockerfile.
-
-Primary source: Artifacts from the latest completed CI workflow on main branch
-Fallback source: GitHub Actions cache (requires gh-actions-cache extension)
+the stellar/quickstart CI workflow artifacts, then loads them into Docker
+with the stage tags expected by the Dockerfile.
 
 Usage:
-    .scripts/fetch-cache --tag latest --image-json .image.json
+    .scripts/fetch-cache --tag nightly --image-json .image.json
 
 Requirements:
     - gh CLI authenticated with access to stellar/quickstart
     - docker CLI available
-    - jq available
-    - (optional) gh-actions-cache extension for cache fallback
 """
 
 import argparse
 import json
 import os
 import platform
-import re
 import subprocess
 import sys
 import tempfile
@@ -145,80 +136,6 @@ def download_artifact(repo, run_id, artifact_name, dest_dir):
         return False
 
 
-def find_cache_entry(repo, cache_prefix, dep_name, dep_id, arch):
-    """Find a cache entry for a specific dependency."""
-    try:
-        output = run_cmd([
-            "gh", "api",
-            f"repos/{repo}/actions/caches",
-            "--jq", f'.actions_caches[] | select(.ref == "refs/heads/main") | select(.key | contains("image-{dep_name}-{dep_id}-{arch}"))',
-            "--paginate"
-        ], check=False, verbose=False)
-        
-        if output:
-            # Return the first matching cache entry
-            for line in output.strip().split('\n'):
-                if line:
-                    try:
-                        return json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-    except subprocess.CalledProcessError:
-        pass
-    return None
-
-
-def download_from_cache(repo, cache_key, dest_dir):
-    """
-    Note: GitHub Actions caches cannot be downloaded outside of GitHub Actions.
-    This function exists for documentation purposes and always returns False.
-    The cache API only allows listing and deleting caches, not downloading.
-    """
-    print("  Note: GitHub Actions caches cannot be downloaded outside of Actions workflows", file=sys.stderr)
-    print("  The cache exists but is only accessible within GitHub Actions runners", file=sys.stderr)
-    return False
-
-
-def discover_cache_id(repo, cache_prefix, arch):
-    """
-    Discover the highest cache_id that has cached images.
-    Returns the cache_id as a string, or None if not found.
-    """
-    print("Discovering available cache IDs...", file=sys.stderr)
-    
-    try:
-        output = run_cmd([
-            "gh", "api",
-            f"repos/{repo}/actions/caches",
-            "--jq", '.actions_caches[] | select(.ref == "refs/heads/main") | .key',
-            "--paginate"
-        ], check=False)
-        
-        if not output:
-            return None
-        
-        cache_keys = output.strip().split('\n')
-        
-        # Extract cache_ids from keys matching our pattern
-        # Pattern: quickstart-{cache_id}-image-{name}-{dep_id}-{arch}.tar
-        pattern = re.compile(rf'^{re.escape(cache_prefix)}(\d+)-image-')
-        cache_ids = set()
-        for key in cache_keys:
-            match = pattern.match(key)
-            if match:
-                cache_ids.add(int(match.group(1)))
-        
-        if cache_ids:
-            highest = max(cache_ids)
-            print(f"  Found cache IDs: {sorted(cache_ids)}, using highest: {highest}", file=sys.stderr)
-            return str(highest)
-        
-    except subprocess.CalledProcessError:
-        pass
-    
-    return None
-
-
 def load_image_json(image_json_path):
     """Load the .image.json file and extract deps."""
     with open(image_json_path, 'r') as f:
@@ -226,27 +143,33 @@ def load_image_json(image_json_path):
     return data
 
 
-def docker_load(tar_path, expected_tag):
-    """Load a Docker image from a tar file."""
-    print(f"  Loading Docker image from {tar_path}...", file=sys.stderr)
-    run_cmd(["docker", "load", "-i", tar_path])
+def docker_load_and_tag(tar_path, source_tag, stage_tag):
+    """Load a Docker image from a tar file and tag it with the stage name."""
+    print(f"  Loading Docker image...", file=sys.stderr)
+    run_cmd(["docker", "load", "-i", tar_path], verbose=False)
     
-    # Verify the image was loaded
-    result = run_cmd_quiet(["docker", "images", "-q", expected_tag], check=False)
-    if result.stdout.strip():
-        print(f"  Verified: {expected_tag}", file=sys.stderr)
-        return True
-    else:
-        print(f"  Warning: Image {expected_tag} not found after load", file=sys.stderr)
+    # Verify the image was loaded with its original tag
+    check_result = run_cmd_quiet(["docker", "images", "-q", source_tag], check=False)
+    if not check_result.stdout.strip():
+        print(f"  Warning: Image {source_tag} not found after load", file=sys.stderr)
         return False
+    
+    # Tag the image with the stage name expected by Dockerfile
+    print(f"  Tagging as {stage_tag}...", file=sys.stderr)
+    try:
+        run_cmd(["docker", "tag", source_tag, stage_tag], verbose=False)
+    except subprocess.CalledProcessError:
+        print(f"  Warning: Failed to tag image as {stage_tag}", file=sys.stderr)
+        return False
+    
+    print(f"  Loaded: {stage_tag}", file=sys.stderr)
+    return True
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch pre-built dependency images from GitHub Actions artifacts or cache")
+    parser = argparse.ArgumentParser(description="Fetch pre-built dependency images from GitHub Actions artifacts")
     parser.add_argument("--tag", default="latest", help="Image tag from images.json (default: latest)")
     parser.add_argument("--image-json", default=".image.json", help="Path to processed .image.json file")
-    parser.add_argument("--cache-id", default="", help="Cache ID to use (auto-detected if not provided)")
-    parser.add_argument("--cache-prefix", default="quickstart-", help="Cache key prefix")
     parser.add_argument("--repo", default="stellar/quickstart", help="GitHub repository")
     parser.add_argument("--arch", default="", help="Architecture (auto-detected if not provided)")
     args = parser.parse_args()
@@ -269,17 +192,7 @@ def main():
     
     print(f"Found {len(deps)} dependencies to fetch:", file=sys.stderr)
     for dep in deps:
-        print(f"  - {dep['name']}: {dep['repo']}@{dep.get('sha', dep.get('ref', 'unknown'))[:12]}... (id: {dep.get('id', 'unknown')[:12]}...)", file=sys.stderr)
-    
-    # Determine cache_id for fallback
-    cache_id = args.cache_id
-    if not cache_id:
-        cache_id = discover_cache_id(args.repo, args.cache_prefix, arch)
-        if not cache_id:
-            print("  No cache_id discovered, defaulting to 19", file=sys.stderr)
-            cache_id = "19"
-    
-    print(f"Using cache_id: {cache_id}", file=sys.stderr)
+        print(f"  - {dep['name']}: {dep['repo']}@{dep.get('sha', dep.get('ref', 'unknown'))[:12]}...", file=sys.stderr)
     
     # Find recent CI runs on main branch
     print(f"\nLooking for CI runs on main branch...", file=sys.stderr)
@@ -289,6 +202,7 @@ def main():
         print(f"  Found {len(ci_runs)} recent CI runs", file=sys.stderr)
     else:
         print(f"  No completed CI runs found on main branch", file=sys.stderr)
+        sys.exit(1)
     
     # Build a map of all available artifacts across all recent runs
     print(f"\nBuilding artifact index from recent CI runs...", file=sys.stderr)
@@ -329,15 +243,15 @@ def main():
             
             print(f"\nFetching {dep_name}...", file=sys.stderr)
             
-            # Expected filename and Docker tag
+            # Expected filename and Docker tags
             tar_artifact_name = f"image-{dep_name}-{dep_id}-{arch}.tar"
-            cache_key = f"{args.cache_prefix}{cache_id}-{tar_artifact_name}"
-            expected_tag = f"stellar-{dep_name}:{dep_sha}-{arch}"
+            source_tag = f"stellar-{dep_name}:{dep_sha}-{arch}"
+            stage_tag = f"stellar-{dep_name}-stage"
             
             downloaded = False
             tar_path = tmpdir / tar_artifact_name
             
-            # Strategy 1: Try to download from artifacts (primary source)
+            # Try to download from artifacts
             if tar_artifact_name in artifact_index:
                 run_id, artifact_info = artifact_index[tar_artifact_name]
                 print(f"  Found artifact in CI run {run_id}", file=sys.stderr)
@@ -351,40 +265,14 @@ def main():
                         if f.suffix == '.tar' or f.name.endswith('.tar') or f.name == 'image':
                             tar_path = f
                             downloaded = True
-                            print(f"  Downloaded from artifacts: {tar_artifact_name}", file=sys.stderr)
+                            print(f"  Downloaded: {tar_artifact_name}", file=sys.stderr)
                             break
             else:
                 print(f"  Artifact not found in recent CI runs", file=sys.stderr)
             
-            # Strategy 2: Fall back to GitHub Actions cache
-            if not downloaded:
-                print(f"  Trying GitHub Actions cache fallback...", file=sys.stderr)
-                
-                cache_entry = find_cache_entry(args.repo, args.cache_prefix, dep_name, dep_id, arch)
-                if cache_entry:
-                    cache_key = cache_entry.get('key', cache_key)
-                    print(f"  Found cache entry: {cache_key}", file=sys.stderr)
-                    
-                    cache_dir = tmpdir / f"cache-{dep_name}"
-                    cache_dir.mkdir(exist_ok=True)
-                    
-                    if download_from_cache(args.repo, cache_key, str(cache_dir)):
-                        # Find the downloaded tar file
-                        for root, dirs, files in os.walk(cache_dir):
-                            for f in files:
-                                if f.endswith('.tar'):
-                                    tar_path = Path(root) / f
-                                    downloaded = True
-                                    print(f"  Downloaded from cache: {cache_key}", file=sys.stderr)
-                                    break
-                            if downloaded:
-                                break
-                else:
-                    print(f"  No matching cache entry found", file=sys.stderr)
-            
             # Load the image if downloaded
             if downloaded and tar_path.exists():
-                if docker_load(str(tar_path), expected_tag):
+                if docker_load_and_tag(str(tar_path), source_tag, stage_tag):
                     success_count += 1
                 else:
                     failed_deps.append(dep_name)
@@ -400,16 +288,14 @@ def main():
         print(f"Failed: {', '.join(failed_deps)}", file=sys.stderr)
         print(f"\nNote: Some images could not be fetched. This typically happens when:", file=sys.stderr)
         print(f"  - Artifacts have expired (GitHub retains them for 7 days)", file=sys.stderr)
-        print(f"  - The CI only builds nightly images on schedule, not 'latest' tag images", file=sys.stderr)
-        print(f"  - Images are in GitHub Actions cache (only accessible within Actions runners)", file=sys.stderr)
+        print(f"  - The requested tag wasn't recently built in CI", file=sys.stderr)
         print(f"\nTo get pre-built images, you can:", file=sys.stderr)
-        print(f"  1. Trigger a CI build by pushing to main branch", file=sys.stderr)
-        print(f"  2. Build from source: make build TAG={args.tag}", file=sys.stderr)
-        print(f"  3. Try a different tag that was recently built (e.g., nightly)", file=sys.stderr)
+        print(f"  1. Build from source: make build TAG={args.tag}", file=sys.stderr)
+        print(f"  2. Try a different tag that was recently built (e.g., nightly)", file=sys.stderr)
         sys.exit(1)
     
     print(f"\nAll dependencies loaded successfully! You can now run:", file=sys.stderr)
-    print(f"  make build-with-cache TAG={args.tag}", file=sys.stderr)
+    print(f"  make build TAG={args.tag}", file=sys.stderr)
 
 
 if __name__ == "__main__":

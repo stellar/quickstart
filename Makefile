@@ -1,12 +1,7 @@
-__PHONY__: run logs console build build-with-cache build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test fetch-cache
+__PHONY__: run logs console build build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test fetch-cache
 
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=latest
-
-# Cache settings for fetch-cache target
-CACHE_ID?=
-CACHE_PREFIX?=quickstart-
-CACHE_REPO?=stellar/quickstart
 
 # Detect native architecture for Docker images
 UNAME_M := $(shell uname -m)
@@ -55,6 +50,10 @@ logs:
 console:
 	docker exec -it stellar /bin/bash
 
+# Build using pre-fetched cached images if available.
+# Run 'make fetch-cache TAG=...' first to download the dependency images.
+# If cached images exist, Docker will use them automatically.
+# Otherwise, dependencies will be built from source.
 build: $(IMAGE_JSON)
 	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
 		--build-arg REVISION=$(REVISION) \
@@ -65,20 +64,6 @@ build: $(IMAGE_JSON)
 		--build-arg HORIZON_REPO="$(HORIZON_REPO)" --build-arg HORIZON_REF="$(HORIZON_SHA)" --build-arg HORIZON_OPTIONS='$(HORIZON_OPTIONS)' \
 		--build-arg FRIENDBOT_REPO="$(FRIENDBOT_REPO)" --build-arg FRIENDBOT_REF="$(FRIENDBOT_SHA)" --build-arg FRIENDBOT_OPTIONS='$(FRIENDBOT_OPTIONS)' \
 		--build-arg LAB_REPO="$(LAB_REPO)" --build-arg LAB_REF=$(LAB_SHA)
-
-# Build using pre-fetched cached images.
-# Run 'make fetch-cache TAG=...' first to download the dependency images.
-# This is much faster than 'make build' as it skips compiling dependencies.
-build-with-cache: $(IMAGE_JSON)
-	docker build -t stellar/quickstart:$(TAG) -f Dockerfile . \
-		--build-arg REVISION=$(REVISION) \
-		--build-arg XDR_IMAGE=stellar-xdr:$(XDR_SHA)-$(ARCH) \
-		--build-arg CORE_IMAGE=stellar-core:$(CORE_SHA)-$(ARCH) \
-		--build-arg RPC_IMAGE=stellar-rpc:$(RPC_SHA)-$(ARCH) \
-		--build-arg GALEXIE_IMAGE=stellar-galexie:$(GALEXIE_SHA)-$(ARCH) \
-		--build-arg HORIZON_IMAGE=stellar-horizon:$(HORIZON_SHA)-$(ARCH) \
-		--build-arg FRIENDBOT_IMAGE=stellar-friendbot:$(FRIENDBOT_SHA)-$(ARCH) \
-		--build-arg LAB_IMAGE=stellar-lab:$(LAB_SHA)-$(ARCH)
 
 # Run the same tests that CI runs against a running quickstart container.
 # Build and run the container first with: make build run TAG=...
@@ -92,25 +77,21 @@ test:
 	go run tests/test_stellar_rpc_up.go
 	go run tests/test_stellar_rpc_healthy.go
 
-# Fetch pre-built dependency images from GitHub Actions cache or artifacts.
+# Fetch pre-built dependency images from GitHub Actions artifacts.
 # This downloads cached Docker images from the stellar/quickstart repository's
 # CI workflow, allowing faster local builds by skipping dependency compilation.
 #
-# Primary source: GitHub Actions cache (only accessible in GitHub Actions)
-# Fallback source: Artifacts from latest completed CI workflow on main branch
+# The images are tagged with the stage names expected by the Dockerfile, so
+# running 'make build' after this will automatically use the cached images.
 #
 # Usage:
 #   make fetch-cache                    # Fetch deps for TAG=latest
 #   make fetch-cache TAG=testing        # Fetch deps for a specific tag
-#   make fetch-cache CACHE_ID=19        # Use a specific cache ID
-#   make fetch-cache CACHE_REPO=myorg/quickstart  # Use a different repo
+#   make fetch-cache TAG=nightly        # Fetch nightly build deps
 #
-# After fetching, run: make build-with-cache TAG=...
+# After fetching, run: make build TAG=...
 fetch-cache: $(IMAGE_JSON)
 	.scripts/fetch-cache \
 		--tag "$(TAG)" \
 		--image-json "$(IMAGE_JSON)" \
-		--cache-id "$(CACHE_ID)" \
-		--cache-prefix "$(CACHE_PREFIX)" \
-		--repo "$(CACHE_REPO)" \
 		--arch "$(ARCH)"
