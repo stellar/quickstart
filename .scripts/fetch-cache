@@ -1,0 +1,302 @@
+#!/usr/bin/env python3
+
+"""
+Fetches pre-built dependency images from GitHub Actions artifacts.
+
+This script downloads cached Docker images for quickstart dependencies from
+the stellar/quickstart CI workflow artifacts, then loads them into Docker
+with the stage tags expected by the Dockerfile.
+
+Usage:
+    .scripts/fetch-cache --tag nightly --image-json .image.json
+
+Requirements:
+    - gh CLI authenticated with access to stellar/quickstart
+    - docker CLI available
+"""
+
+import argparse
+import json
+import os
+import platform
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+
+def detect_arch():
+    """Detect the native architecture (amd64 or arm64)."""
+    machine = platform.machine().lower()
+    if machine in ("x86_64", "amd64"):
+        return "amd64"
+    elif machine in ("arm64", "aarch64"):
+        return "arm64"
+    else:
+        print(f"Warning: Unknown architecture '{machine}', defaulting to amd64", file=sys.stderr)
+        return "amd64"
+
+
+def run_cmd(cmd, capture=True, check=True, verbose=True):
+    """Run a command and return output."""
+    if verbose:
+        print(f"  Running: {' '.join(cmd)}", file=sys.stderr)
+    result = subprocess.run(
+        cmd,
+        capture_output=capture,
+        text=True,
+        check=check
+    )
+    return result.stdout.strip() if capture else None
+
+
+def run_cmd_quiet(cmd, check=True):
+    """Run a command quietly, only showing output on failure."""
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        check=False
+    )
+    if check and result.returncode != 0:
+        print(f"Command failed: {' '.join(cmd)}", file=sys.stderr)
+        print(f"stdout: {result.stdout}", file=sys.stderr)
+        print(f"stderr: {result.stderr}", file=sys.stderr)
+        raise subprocess.CalledProcessError(result.returncode, cmd)
+    return result
+
+
+def find_ci_runs_on_main(repo, limit=10):
+    """Find recent completed CI workflow runs on main branch."""
+    try:
+        output = run_cmd([
+            "gh", "run", "list",
+            "-R", repo,
+            "--workflow", "ci.yml",
+            "--branch", "main",
+            "--status", "success",
+            "--limit", str(limit),
+            "--json", "databaseId,event,createdAt,headSha",
+        ], check=False)
+        
+        if output and output.strip():
+            return json.loads(output)
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        print(f"  Warning: Failed to list CI runs: {e}", file=sys.stderr)
+    return []
+
+
+def list_artifacts_for_run(repo, run_id):
+    """List all artifacts for a workflow run."""
+    all_artifacts = []
+    page = 1
+    per_page = 100
+    
+    while True:
+        try:
+            output = run_cmd([
+                "gh", "api",
+                f"repos/{repo}/actions/runs/{run_id}/artifacts?per_page={per_page}&page={page}",
+                "--jq", ".artifacts"
+            ], check=False, verbose=False)
+            
+            if not output:
+                break
+                
+            artifacts = json.loads(output)
+            if not artifacts:
+                break
+                
+            all_artifacts.extend(artifacts)
+            
+            # If we got fewer than per_page, we've reached the end
+            if len(artifacts) < per_page:
+                break
+                
+            page += 1
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+            print(f"  Warning: Failed to list artifacts (page {page}): {e}", file=sys.stderr)
+            break
+    
+    return all_artifacts
+
+
+def download_artifact(repo, run_id, artifact_name, dest_dir):
+    """Download an artifact from a workflow run."""
+    try:
+        run_cmd([
+            "gh", "run", "download", str(run_id),
+            "-R", repo,
+            "-n", artifact_name,
+            "-D", dest_dir
+        ])
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"  Warning: Failed to download artifact {artifact_name}: {e}", file=sys.stderr)
+        return False
+
+
+def load_image_json(image_json_path):
+    """Load the .image.json file and extract deps."""
+    with open(image_json_path, 'r') as f:
+        data = json.load(f)
+    return data
+
+
+def docker_load_and_tag(tar_path, source_tag, stage_tag):
+    """Load a Docker image from a tar file and tag it with the stage name."""
+    print(f"  Loading Docker image...", file=sys.stderr)
+    run_cmd(["docker", "load", "-i", tar_path], verbose=False)
+    
+    # Verify the image was loaded with its original tag
+    check_result = run_cmd_quiet(["docker", "images", "-q", source_tag], check=False)
+    if not check_result.stdout.strip():
+        print(f"  Warning: Image {source_tag} not found after load", file=sys.stderr)
+        return False
+    
+    # Tag the image with the stage name expected by Dockerfile
+    print(f"  Tagging as {stage_tag}...", file=sys.stderr)
+    try:
+        run_cmd(["docker", "tag", source_tag, stage_tag], verbose=False)
+    except subprocess.CalledProcessError:
+        print(f"  Warning: Failed to tag image as {stage_tag}", file=sys.stderr)
+        return False
+    
+    print(f"  Loaded: {stage_tag}", file=sys.stderr)
+    return True
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Fetch pre-built dependency images from GitHub Actions artifacts")
+    parser.add_argument("--tag", default="latest", help="Image tag from images.json (default: latest)")
+    parser.add_argument("--image-json", default=".image.json", help="Path to processed .image.json file")
+    parser.add_argument("--repo", default="stellar/quickstart", help="GitHub repository")
+    parser.add_argument("--arch", default="", help="Architecture (auto-detected if not provided)")
+    args = parser.parse_args()
+    
+    # Detect architecture
+    arch = args.arch if args.arch else detect_arch()
+    print(f"Architecture: {arch}", file=sys.stderr)
+    
+    # Load image configuration
+    if not os.path.exists(args.image_json):
+        print(f"Error: {args.image_json} not found. Run 'make .image.json TAG={args.tag}' first.", file=sys.stderr)
+        sys.exit(1)
+    
+    image_data = load_image_json(args.image_json)
+    deps = image_data.get("deps", [])
+    
+    if not deps:
+        print(f"Error: No deps found in {args.image_json}", file=sys.stderr)
+        sys.exit(1)
+    
+    print(f"Found {len(deps)} dependencies to fetch:", file=sys.stderr)
+    for dep in deps:
+        print(f"  - {dep['name']}: {dep['repo']}@{dep.get('sha', dep.get('ref', 'unknown'))[:12]}...", file=sys.stderr)
+    
+    # Find recent CI runs on main branch
+    print(f"\nLooking for CI runs on main branch...", file=sys.stderr)
+    ci_runs = find_ci_runs_on_main(args.repo, limit=10)
+    
+    if ci_runs:
+        print(f"  Found {len(ci_runs)} recent CI runs", file=sys.stderr)
+    else:
+        print(f"  No completed CI runs found on main branch", file=sys.stderr)
+        sys.exit(1)
+    
+    # Build a map of all available artifacts across all recent runs
+    print(f"\nBuilding artifact index from recent CI runs...", file=sys.stderr)
+    artifact_index = {}  # artifact_name -> (run_id, artifact_info)
+    
+    for run in ci_runs:
+        run_id = run['databaseId']
+        artifacts = list_artifacts_for_run(args.repo, run_id)
+        for artifact in artifacts:
+            name = artifact['name']
+            if name.endswith('.tar') and not artifact.get('expired', False):
+                if name not in artifact_index:
+                    artifact_index[name] = (run_id, artifact)
+    
+    print(f"  Found {len(artifact_index)} tar artifacts", file=sys.stderr)
+    
+    # Try to download each dependency
+    success_count = 0
+    failed_deps = []
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+        
+        for dep in deps:
+            dep_name = dep["name"]
+            dep_id = dep.get("id")
+            dep_sha = dep.get("sha")
+            
+            if not dep_id:
+                print(f"Error: dep '{dep_name}' missing 'id' field", file=sys.stderr)
+                failed_deps.append(dep_name)
+                continue
+            
+            if not dep_sha:
+                print(f"Error: dep '{dep_name}' missing 'sha' field", file=sys.stderr)
+                failed_deps.append(dep_name)
+                continue
+            
+            print(f"\nFetching {dep_name}...", file=sys.stderr)
+            
+            # Expected filename and Docker tags
+            tar_artifact_name = f"image-{dep_name}-{dep_id}-{arch}.tar"
+            source_tag = f"stellar-{dep_name}:{dep_sha}-{arch}"
+            stage_tag = f"stellar-{dep_name}-stage"
+            
+            downloaded = False
+            tar_path = tmpdir / tar_artifact_name
+            
+            # Try to download from artifacts
+            if tar_artifact_name in artifact_index:
+                run_id, artifact_info = artifact_index[tar_artifact_name]
+                print(f"  Found artifact in CI run {run_id}", file=sys.stderr)
+                
+                artifact_dir = tmpdir / f"artifact-{dep_name}"
+                artifact_dir.mkdir(exist_ok=True)
+                
+                if download_artifact(args.repo, run_id, tar_artifact_name, str(artifact_dir)):
+                    # Find the downloaded tar file
+                    for f in artifact_dir.iterdir():
+                        if f.suffix == '.tar' or f.name.endswith('.tar') or f.name == 'image':
+                            tar_path = f
+                            downloaded = True
+                            print(f"  Downloaded: {tar_artifact_name}", file=sys.stderr)
+                            break
+            else:
+                print(f"  Artifact not found in recent CI runs", file=sys.stderr)
+            
+            # Load the image if downloaded
+            if downloaded and tar_path.exists():
+                if docker_load_and_tag(str(tar_path), source_tag, stage_tag):
+                    success_count += 1
+                else:
+                    failed_deps.append(dep_name)
+            else:
+                print(f"  Failed to download {dep_name}", file=sys.stderr)
+                failed_deps.append(dep_name)
+    
+    # Summary
+    print(f"\n{'='*60}", file=sys.stderr)
+    print(f"Summary: {success_count}/{len(deps)} dependencies loaded successfully", file=sys.stderr)
+    
+    if failed_deps:
+        print(f"Failed: {', '.join(failed_deps)}", file=sys.stderr)
+        print(f"\nNote: Some images could not be fetched. This typically happens when:", file=sys.stderr)
+        print(f"  - Artifacts have expired (GitHub retains them for 7 days)", file=sys.stderr)
+        print(f"  - The requested tag wasn't recently built in CI", file=sys.stderr)
+        print(f"\nTo get pre-built images, you can:", file=sys.stderr)
+        print(f"  1. Build from source: make build TAG={args.tag}", file=sys.stderr)
+        print(f"  2. Try a different tag that was recently built (e.g., nightly)", file=sys.stderr)
+        sys.exit(1)
+    
+    print(f"\nAll dependencies loaded successfully! You can now run:", file=sys.stderr)
+    print(f"  make build TAG={args.tag}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
