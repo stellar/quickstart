@@ -45,7 +45,7 @@ COPY apt-retry /usr/local/bin/
 RUN apt-retry sh -c 'apt-get update && \
     apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
-                       bison flex sed perl libpq-dev parallel \
+                       bison flex sed perl libpq-dev parallel libgoogle-perftools-dev \
                        clang-20 libc++abi-20-dev libc++-20-dev \
                        postgresql curl jq'
 
