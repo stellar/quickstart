@@ -30,7 +30,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -96,7 +96,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v25.0.0",
+        "ref": "v25.0.1",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
