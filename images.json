@@ -284,7 +284,7 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "main"
+        "ref": "protocol-next"
       },
       {
         "name": "horizon",
