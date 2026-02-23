@@ -1,6 +1,6 @@
 [
   {
-    "tag": "latest",
+    "tag": "xdrifdef",
     "events": [
       "pull_request",
       "push"
@@ -17,9 +17,9 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.1.1",
+        "ref": "2e45f3df2b07f8b53a02178c0fe57f3652199535",
         "options": {
-          "configure_flags": "--disable-tests"
+          "configure_flags": "--disable-tests --xdr-transaction-meta-v5"
         }
       },
       {
