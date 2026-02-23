@@ -38,7 +38,7 @@ console:
 	$(CONTAINER_RUNTIME) exec -it stellar /bin/bash
 
 build: $(IMAGE_JSON)
-	$(CONTAINER_RUNTIME) build -t stellar/quickstart:$(TAG) -f Dockerfile . \
+	$(CONTAINER_RUNTIME) build -t stellar/quickstart:$(TAG) -f Dockerfile --target stellar-core-stage  . \
 		--build-arg REVISION=$(REVISION) \
 		--build-arg XDR_REPO=$(XDR_REPO) --build-arg XDR_REF=$(XDR_SHA) \
 		--build-arg CORE_REPO="$(CORE_REPO)" --build-arg CORE_REF="$(CORE_SHA)" --build-arg CORE_OPTIONS='$(CORE_OPTIONS)' \
