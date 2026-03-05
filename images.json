@@ -12,7 +12,7 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v25.0.1"
       },
       {
         "name": "core",
@@ -78,7 +78,7 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v25.0.1"
       },
       {
         "name": "core",
