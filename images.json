@@ -278,7 +278,7 @@
         "repo": "stellar/stellar-core",
         "ref": "master",
         "options": {
-          "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
+          "configure_flags": "--disable-tests"
         }
       },
       {
