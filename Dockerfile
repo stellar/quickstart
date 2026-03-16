@@ -9,7 +9,7 @@
 # |------------------------|----------------|
 # | ubuntu:24.04           | 13 (trixie)    |
 # | rust:1-trixie          | 13 (trixie)    |
-# | golang:1.24-trixie     | 13 (trixie)    |
+# | golang:1.26-trixie     | 13 (trixie)    |
 # | node:22-trixie         | 13 (trixie)    |
 
 ARG XDR_IMAGE=stellar-xdr-stage
@@ -82,7 +82,7 @@ COPY --from=stellar-core-builder /usr/local/bin/stellar-core /stellar-core
 
 # rpc
 
-FROM golang:1.24-trixie AS stellar-rpc-builder
+FROM golang:1.26-trixie AS stellar-rpc-builder
 
 ARG RPC_REPO
 ARG RPC_REF
@@ -110,7 +110,7 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 
 # horizon
 
-FROM golang:1.24-trixie AS stellar-horizon-builder
+FROM golang:1.26-trixie AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY apt-retry /usr/local/bin/
@@ -135,7 +135,7 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 
 # friendbot
 
-FROM golang:1.24-trixie AS stellar-friendbot-builder
+FROM golang:1.26-trixie AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 COPY apt-retry /usr/local/bin/
@@ -190,7 +190,7 @@ COPY --from=stellar-lab-builder /usr/local/bin/node /node
 
 # galexie
 
-FROM golang:1.24-trixie AS stellar-galexie-builder
+FROM golang:1.26-trixie AS stellar-galexie-builder
 
 ARG GALEXIE_REPO
 ARG GALEXIE_REF
