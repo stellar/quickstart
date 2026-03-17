@@ -310,7 +310,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "main"
+        "ref": "protocol-next"
       }
     ],
     "tests": {
