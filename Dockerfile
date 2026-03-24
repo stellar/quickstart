@@ -265,4 +265,9 @@ ADD futurenet /opt/stellar-default/futurenet
 ADD start /
 RUN ["chmod", "+x", "start"]
 
+RUN ln -s /usr/lib/*/faketime/libfaketime.so.1 /usr/lib/libfaketime.so.1
+RUN echo "+0" > /etc/faketimerc
+RUN echo /usr/lib/libfaketime.so.1 > /etc/ld.so.preload
+ENV FAKETIME_NO_CACHE=1
+
 ENTRYPOINT ["/start"]
