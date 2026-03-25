@@ -268,6 +268,6 @@ RUN ["chmod", "+x", "start"]
 RUN ln -s /usr/lib/*/faketime/libfaketime.so.1 /usr/lib/libfaketime.so.1
 COPY faketimerc /etc/faketimerc
 RUN echo /usr/lib/libfaketime.so.1 > /etc/ld.so.preload
-ENV FAKETIME_NO_CACHE=1
+ENV FAKETIME_CACHE_DURATION=1
 
 ENTRYPOINT ["/start"]

@@ -817,7 +817,7 @@ function exec_supervisor() {
   # started. This is problematic for services that use the same environment
   # variable name for things that the start script does, like NETWORK.
   exec env -i \
-    FAKETIME_NO_CACHE="$FAKETIME_NO_CACHE" \
+    FAKETIME_CACHE_DURATION="$FAKETIME_CACHE_DURATION" \
     supervisord -n -c $SUPHOME/etc/supervisord.conf \
     > >(sed -u 's/^/supervisor: /') \
     2> >(sed -u 's/^/supervisor: /' >&2)
