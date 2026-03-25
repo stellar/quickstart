@@ -409,6 +409,87 @@ image then build that image specifying its tag name:
 make build TAG=mytag
 ```
 
+### Modifying Time
+
+The image includes [libfaketime](https://github.com/wolfcw/libfaketime) which allows modifying the time seen by all processes in the container without affecting the host system. Time modifications are controlled by writing values to the `/etc/faketimerc` file inside the container. Changes take effect immediately for all services. Modifying time can be unpredictable or unstable, for example very large changes in speed may not be handled well by all services, so this feature is intended for development and testing only.
+
+By default the file contains `+0` which means no time modification.
+
+> [!WARNING]
+> Only move time forward. Moving time backwards will cause unexpected behavior in services that depend on monotonically increasing timestamps, such as ledger close times.
+
+#### Modifying time of a running container
+
+Mount a file from the host to `/etc/faketimerc` so that time can be changed by editing the file on the host:
+
+```shell
+$ echo "+0" > faketimerc
+$ docker run -d -p "8000:8000" -v "$(pwd)/faketimerc:/etc/faketimerc" --name stellar stellar/quickstart --local
+```
+
+Then modify time by writing to the file on the host:
+
+```shell
+$ echo "+24h" > faketimerc
+```
+
+#### Example values
+
+| Value | Effect |
+| --- | --- |
+| `+0` | No modification (default) |
+| `+24h` | 24 hours in the future |
+| `+7d` | 7 days in the future |
+| `+1y` | 1 year in the future |
+| `+10m` | 10 minutes in the future |
+| `+120` | 120 seconds in the future |
+| `+0 x2` | No offset, but time passes twice as fast |
+| `+0 x0.5` | No offset, but time passes at half speed |
+| `+0 x10` | No offset, but time passes 10x faster |
+| `+24h x2` | 24 hours in the future, clock running at double speed |
+
+#### Progressive jumps
+
+Write successively larger offsets to move time forward in steps:
+
+```shell
+# Jump 24 hours forward
+$ docker exec stellar bash -c 'echo "+24h" > /etc/faketimerc'
+
+# Jump another 24 hours forward (48 hours total)
+$ docker exec stellar bash -c 'echo "+48h" > /etc/faketimerc'
+
+# Jump another 24 hours forward (72 hours total)
+$ docker exec stellar bash -c 'echo "+72h" > /etc/faketimerc'
+
+# Reset to real time
+$ docker exec stellar bash -c 'echo "+0" > /etc/faketimerc'
+```
+
+Note: offsets are always relative to real time, so to move forward in increments you must increase the total offset each time.
+
+#### Speeding up time
+
+To make time pass faster without jumping:
+
+```shell
+# Time passes 10x faster
+$ docker exec stellar bash -c 'echo "+0 x10" > /etc/faketimerc'
+
+# Time passes 100x faster
+$ docker exec stellar bash -c 'echo "+0 x100" > /etc/faketimerc'
+
+# Back to normal speed
+$ docker exec stellar bash -c 'echo "+0" > /etc/faketimerc'
+```
+
+Combine an offset with a speed multiplier to jump forward and then continue at an accelerated rate:
+
+```shell
+# Jump 24 hours ahead, then continue at 5x speed
+$ docker exec stellar bash -c 'echo "+24h x5" > /etc/faketimerc'
+```
+
 ### Background vs. Interactive containers
 
 Docker containers can be run interactively (using the `-it` flags) or in a detached, background state (using the `-d` flag). Many of the example commands below use the `-it` flags to aid in debugging but in many cases you will simply want to run a node in the background. It's recommended that you use the use [the tutorials at docker](https://docs.docker.com/engine/tutorials/usingdocker/) to familiarize yourself with using docker.
