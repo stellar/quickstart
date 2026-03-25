@@ -411,7 +411,7 @@ make build TAG=mytag
 
 ### Modifying Time
 
-The image includes [libfaketime](https://github.com/wolfcw/libfaketime) which allows modifying the time seen by all processes in the container without affecting the host system. Time modifications are controlled by writing values to the `/etc/faketimerc` file inside the container. Changes take effect immediately for all services.
+The image includes [libfaketime](https://github.com/wolfcw/libfaketime) which allows modifying the time seen by all processes in the container without affecting the host system. Time modifications are controlled by writing values to the `/etc/faketimerc` file inside the container. Changes take effect immediately for all services. Modifying time can be unpredictable or unstable, for example very large changes in speed may not be handled well by all services, so this feature is intended for development and testing only.
 
 By default the file contains `+0` which means no time modification.
 
