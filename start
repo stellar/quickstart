@@ -663,58 +663,150 @@ function kill_supervisor() {
   kill -3 $(cat "/var/run/supervisord.pid")
 }
 
+function fail_soroban_config_upgrade() {
+  echo "!!!!! $1. Stopping all services. !!!!!"
+  kill_supervisor
+  return 1
+}
+
+function get_ledger_transaction_count() {
+  curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'
+}
+
+function wait_for_ledger_transaction_count() {
+  while [ "$(get_ledger_transaction_count)" -lt "$1" ]; do
+    sleep 1
+  done
+}
+
+function submit_soroban_config_tx() {
+  local label="$1"
+  local tx="$2"
+  local txid="$3"
+  local attempt=1
+  local max_attempts=30
+
+  while true; do
+    local response
+    local status
+
+    response="$(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx")"
+    status="$(echo "$response" | jq -r '.status')"
+
+    echo "upgrades: soroban config: $label: $txid .. $status"
+
+    case "$status" in
+      PENDING|DUPLICATE)
+        return 0
+        ;;
+      TRY_AGAIN_LATER)
+        if [ "$attempt" -ge "$max_attempts" ]; then
+          echo "$response"
+          fail_soroban_config_upgrade "Unable to submit Soroban config transaction '$label' after $attempt attempts"
+        fi
+
+        attempt=$((attempt+1))
+        sleep 1
+        ;;
+      ERROR|FILTERED)
+        echo "$response"
+        fail_soroban_config_upgrade "Unable to submit Soroban config transaction '$label'"
+        ;;
+      *)
+        echo "$response"
+        fail_soroban_config_upgrade "Unexpected status '$status' while submitting Soroban config transaction '$label'"
+        ;;
+    esac
+  done
+}
+
+function apply_soroban_config_tx() {
+  submit_soroban_config_tx "$1" "$2" "$3"
+  wait_for_ledger_transaction_count "$4"
+}
+
+function set_soroban_config_upgrade() {
+  local key="$1"
+  local attempt=1
+  local max_attempts=10
+
+  while true; do
+    local output
+
+    output="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
+    echo "$output"
+
+    if [ "$output" != "Error setting configUpgradeSet" ]; then
+      return 0
+    fi
+
+    if [ "$attempt" -ge "$max_attempts" ]; then
+      fail_soroban_config_upgrade "Unable to upgrade Soroban Config Settings"
+    fi
+
+    attempt=$((attempt+1))
+    sleep 1
+  done
+}
+
 function upgrade_soroban_config() {
   local config_file_path="$1"
   local seq_num="$2"
+  local upgrade_output
+  local line_count
   
   # Generate txs for installing, deploying and executing the contract that
   # uploads a new config. Use the network root account to submit the txs.
-  upgrade_output="$(echo $NETWORK_ROOT_SECRET_KEY \
+  upgrade_output="$(echo "$NETWORK_ROOT_SECRET_KEY" \
     | stellar-core get-settings-upgrade-txs \
       "$NETWORK_ROOT_ACCOUNT_ID" \
       "$seq_num" \
       "$NETWORK_PASSPHRASE" \
-      --xdr `stellar-xdr encode --type ConfigUpgradeSet < "$config_file_path"` \
+      --xdr "$(stellar-xdr encode --type ConfigUpgradeSet < "$config_file_path")" \
       --signtxs)"
 
-  let line_count=$(echo "$upgrade_output" | wc -l)
+  line_count="$(echo "$upgrade_output" | wc -l | tr -d ' ')"
 
-  echo "$upgrade_output" | { \
-      TX_COUNT="`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`"
-      TX_COUNT=$((TX_COUNT+1))
-      # If the line count is 9 instead of 7, a version of core is being used where the restore op is being returned
-      if [ $line_count = 9 ] ; then
-        read tx;
-        read txid;
-        echo "upgrades: soroban config: restore contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')";
-        while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
-        TX_COUNT=$((TX_COUNT+1))
-      fi
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: install contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
-      TX_COUNT=$((TX_COUNT+1)); \
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: deploy contract: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
-      TX_COUNT=$((TX_COUNT+1)); \
-      read tx; \
-      read txid; \
-      echo "upgrades: soroban config: upload config: $txid .. $(curl -sG 'http://localhost:11626/tx' --data-urlencode "blob=$tx" | jq -r '.status')"; \
-      while [ "`curl -s http://localhost:11626/metrics | jq -r '.metrics."ledger.transaction.count".count'`" != "$TX_COUNT" ]; do sleep 1; done
-      TX_COUNT=$((TX_COUNT+1)); \
-      read key; \
-      echo "upgrades: soroban config: set config with key: $key";
-      OUTPUT="$(curl -sG 'http://localhost:11626/upgrades?mode=set&upgradetime=1970-01-01T00:00:00Z' --data-urlencode "configupgradesetkey=$key")"
-      echo "$OUTPUT"; \
+  if [ "$line_count" -ne 7 ] && [ "$line_count" -ne 9 ]; then
+    echo "$upgrade_output"
+    fail_soroban_config_upgrade "Unexpected output from stellar-core get-settings-upgrade-txs"
+  fi
 
-      if [ "$OUTPUT" == "Error setting configUpgradeSet" ]; then
-        echo "!!!!! Unable to upgrade Soroban Config Settings. Stopping all services. !!!!!"
-        kill_supervisor
-      fi
-    }
+  echo "$upgrade_output" | {
+    local expected_tx_count
+    local tx
+    local txid
+    local key
+
+    expected_tx_count=$(( $(get_ledger_transaction_count) + 1 ))
+
+    # If 9 lines are returned instead of 7, core included a restore transaction.
+    if [ "$line_count" -eq 9 ]; then
+      read tx
+      read txid
+      apply_soroban_config_tx "restore contract" "$tx" "$txid" "$expected_tx_count"
+      expected_tx_count=$((expected_tx_count+1))
+    fi
+
+    read tx
+    read txid
+    apply_soroban_config_tx "install contract" "$tx" "$txid" "$expected_tx_count"
+    expected_tx_count=$((expected_tx_count+1))
+
+    read tx
+    read txid
+    apply_soroban_config_tx "deploy contract" "$tx" "$txid" "$expected_tx_count"
+    expected_tx_count=$((expected_tx_count+1))
+
+    read tx
+    read txid
+    apply_soroban_config_tx "upload config" "$tx" "$txid" "$expected_tx_count"
+
+    read key
+    echo "upgrades: soroban config: set config with key: $key"
+    set_soroban_config_upgrade "$key"
+  }
+
   echo "upgrades: soroban config done"
 }
 
