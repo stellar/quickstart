@@ -30,7 +30,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v25.1.0",
+        "ref": "v26.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -51,7 +51,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v25.1.0"
+        "ref": "galexie-v26.0.0"
       }
     ],
     "tests": {
@@ -96,7 +96,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v25.1.0",
+        "ref": "v26.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -117,7 +117,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v25.1.0"
+        "ref": "galexie-v26.0.0"
       }
     ],
     "tests": {
@@ -143,19 +143,19 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 25,
+      "protocol_version_default": 26,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v26.0.0"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v26.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -163,12 +163,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "1695c9c53a4cfc52ffb53c10da7fef60076e7bba"
+        "ref": "v26.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "88d8ba74bee93f274559d4cc67172538267ee3f2",
+        "ref": "v26.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -189,7 +189,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v25.1.0"
+        "ref": "galexie-v26.0.0"
       }
     ],
     "tests": {
@@ -204,7 +204,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 25
+      "protocol_version_default": 26
     },
     "deps": [
       {
@@ -264,7 +264,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 26,
+      "protocol_version_default": 27,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
@@ -278,7 +278,7 @@
         "repo": "stellar/stellar-core",
         "ref": "master",
         "options": {
-          "configure_flags": "--disable-tests"
+          "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
       },
       {
