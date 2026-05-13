@@ -22,3 +22,7 @@ This PR formalizes the discussion in issue #932 and the solution we use for Chat
 which cuts local test time ~90%.
 
 Reference: #932
+
+## Usage
+Call the endpoint to fast-forward N ledgers from the current state:
+This will fast-forward 1000 ledgers from the current state, not jump to ledger 1000.
