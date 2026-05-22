@@ -17,7 +17,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v26.0.1",
+        "ref": "v26.1.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -51,7 +51,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v26.0.0"
+        "ref": "galexie-v26.1.0"
       }
     ],
     "tests": {
@@ -83,7 +83,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v26.0.1",
+        "ref": "v26.1.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -117,7 +117,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v26.0.0"
+        "ref": "galexie-v26.1.0"
       }
     ],
     "tests": {
@@ -155,7 +155,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v26.0.0",
+        "ref": "v26.1.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -189,7 +189,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v26.0.0"
+        "ref": "galexie-v26.1.0"
       }
     ],
     "tests": {
