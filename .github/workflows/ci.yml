@@ -34,11 +34,18 @@ jobs:
   complete:
     if: always()
     name: complete
-    needs: [build, test, action-using-artifact, push, action-using-registry]
+    needs: [lint, build, test, action-using-artifact, push, action-using-registry]
     runs-on: ubuntu-latest
     steps:
     - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
       run: exit 1
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: make lint # runs rubocop in a ruby container; docker is preinstalled on runners
 
   setup:
     name: 1 setup

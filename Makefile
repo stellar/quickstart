@@ -1,4 +1,4 @@
-__PHONY__: run logs console build build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test
+__PHONY__: run logs console build build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test lint
 
 CONTAINER_RUNTIME?=docker
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
@@ -59,3 +59,11 @@ test:
 	go run tests/test_friendbot.go
 	go run tests/test_stellar_rpc_up.go
 	go run tests/test_stellar_rpc_healthy.go
+
+# Lint the Ruby scripts in .scripts/ with rubocop.
+lint:
+	$(CONTAINER_RUNTIME) run --rm \
+		-v "$(CURDIR)":/work -w /work \
+		-v quickstart-bundle:/usr/local/bundle \
+		ruby:3.2 \
+		sh -c "bundle install && bundle exec rubocop"

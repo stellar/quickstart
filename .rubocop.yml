@@ -1,0 +1,84 @@
+# RuboCop is configured to keep the scripts in .scripts/ written in plain,
+# predictable Ruby. It disallows the Ruby-isms that people who don't write
+# Ruby every day find surprising: method calls without parentheses, `unless`,
+# and trailing (modifier) `if`/`unless`.
+
+require:
+  - ./.rubocop/no_unless.rb
+  - ./.rubocop/no_modifier_conditional.rb
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
+  Include:
+    - ".scripts/*"
+    - "**/*.rb"
+  Exclude:
+    - ".rubocop/**/*"
+    - "Gemfile"
+
+# --- Rules we explicitly want enforced ---
+
+# Always use parentheses around method-call arguments (no "bracket-less" calls).
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
+  EnforcedStyle: require_parentheses
+
+# Our custom cops (defined in .rubocop/) that ban surprising Ruby-isms.
+Local/NoUnless:
+  Enabled: true
+
+Local/NoModifierConditional:
+  Enabled: true
+
+# --- Cops disabled because they would push code back toward the forms above ---
+
+# Would demand a trailing `if`/`unless` for short statements.
+Style/IfUnlessModifier:
+  Enabled: false
+
+# Would demand a trailing `while`/`until` for short loops.
+Style/WhileUntilModifier:
+  Enabled: false
+
+# Would rewrite `if !x` into `unless x`.
+Style/NegatedIf:
+  Enabled: false
+
+# Guard clauses are written as trailing `if`/`unless`.
+Style/GuardClause:
+  Enabled: false
+
+# `next if ...` is a trailing conditional.
+Style/Next:
+  Enabled: false
+
+# --- Keep things plain rather than "clever" ---
+
+# Allow ["a", "b"] rather than requiring %w[a b].
+Style/WordArray:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+# Allow building an array with a plain `each` + `push` loop rather than
+# requiring `map`/`flat_map`/`each_with_object`.
+Style/MapIntoArray:
+  Enabled: false
+
+# Use double quotes everywhere so quoting is one less thing to think about.
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+# These are top-level scripts; top-level method definitions are expected.
+Style/TopLevelMethodDefinition:
+  Enabled: false
+
+# Don't force these small scripts to be split up by length/complexity limits.
+Metrics:
+  Enabled: false

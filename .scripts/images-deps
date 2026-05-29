@@ -1,11 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-set -e
-set -u
-set -o pipefail
+require "json"
 
 # Accepts as stdin a JSON object in the format of images.json. Outputs an array
 # of all dependencies that need to be built across all the images.
 # Usage: < images.json ./.scripts/images-deps
 
-jq -c '[ .[] | .deps[] ] | unique'
+images = JSON.parse($stdin.read)
+
+deps = []
+images.each do |image|
+  image["deps"].each do |dep|
+    deps.push(dep)
+  end
+end
+
+puts(JSON.generate(deps.uniq))

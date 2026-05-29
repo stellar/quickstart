@@ -1,19 +1,22 @@
-#!/usr/bin/env python3
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-import json
-import sys
+require "json"
 
 # Accepts as stdin a JSON object in the format of images.json. Outputs an array
 # of all the additional test cases defined in the images merged together.
 # Usage: < images.json ./.scripts/images-additional-tests
 
-images = json.load(sys.stdin)
-tests = []
-for image in images:
-    tag = image['tag']
-    for test in image.get('additional-tests', []):
-        tests.append({'image': image, **test})
-    for test in image.get('tests', {}).get('additional-tests', []):
-        tests.append({'image': image, **test})
+images = JSON.parse($stdin.read)
 
-print(json.dumps(tests))
+tests = []
+images.each do |image|
+  image.fetch("additional-tests", []).each do |test|
+    tests.push({ "image" => image }.merge(test))
+  end
+  image.fetch("tests", {}).fetch("additional-tests", []).each do |test|
+    tests.push({ "image" => image }.merge(test))
+  end
+end
+
+puts(JSON.generate(tests))
