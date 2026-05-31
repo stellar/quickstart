@@ -8,12 +8,5 @@ require "json"
 # Usage: < images.json ./.scripts/images-deps
 
 images = JSON.parse($stdin.read)
-
-deps = []
-images.each do |image|
-  image["deps"].each do |dep|
-    deps.push(dep)
-  end
-end
-
-puts(JSON.generate(deps.uniq))
+deps = images.flat_map { |image| image["deps"] }.uniq
+puts(JSON.generate(deps))

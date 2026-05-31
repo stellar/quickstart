@@ -8,15 +8,8 @@ require "json"
 # Usage: < images.json ./.scripts/images-additional-tests
 
 images = JSON.parse($stdin.read)
-
-tests = []
-images.each do |image|
-  image.fetch("additional-tests", []).each do |test|
-    tests.push({ "image" => image }.merge(test))
-  end
-  image.fetch("tests", {}).fetch("additional-tests", []).each do |test|
-    tests.push({ "image" => image }.merge(test))
-  end
+tests = images.flat_map do |image|
+  defined_tests = image.fetch("additional-tests", []) + image.fetch("tests", {}).fetch("additional-tests", [])
+  defined_tests.map { |test| { "image" => image }.merge(test) }
 end
-
 puts(JSON.generate(tests))

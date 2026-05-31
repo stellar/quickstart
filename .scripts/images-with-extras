@@ -16,36 +16,30 @@ require "digest"
 #
 # Usage: < images.json ./.scripts/images-with-extras
 
-images = JSON.parse($stdin.read)
+def main
+  images = JSON.parse($stdin.read)
+  cache = {}
 
-cache = {}
-
-images.each do |image|
-  tag = image["tag"]
-  image["deps"].each do |dep|
-    name = dep["name"]
-    repo = dep["repo"]
-    ref = dep["ref"]
-    warn("#{tag} #{name} #{repo} #{ref} ...")
-
-    key = [name, repo, ref]
-    if cache.key?(key)
-      sha = cache[key]
-    else
-      stdout, stderr, status = Open3.capture3("gh", "api", "repos/#{repo}/commits/#{ref}", "--jq", ".sha")
-      if !status.success?
-        abort("Error: failed to get commit for #{repo}/#{ref}: #{stderr}")
-      end
-      sha = stdout.strip
-      cache[key] = sha
+  images.each do |image|
+    tag = image["tag"]
+    image["deps"].each do |dep|
+      name, repo, ref = dep.values_at("name", "repo", "ref")
+      warn("#{tag} #{name} #{repo} #{ref} ...")
+      dep["sha"] = cache[[repo, ref]] ||= commit_sha(repo, ref)
+      warn(" • revision sha = #{dep["sha"]}")
+      dep["id"] = Digest::SHA256.hexdigest(JSON.generate(dep))
+      warn(" • id = #{dep["id"]}")
     end
-    warn(" • revision sha = #{sha}")
-    dep["sha"] = sha
-
-    dep_id = Digest::SHA256.hexdigest(JSON.generate(dep))
-    dep["id"] = dep_id
-    warn(" • id = #{dep_id}")
   end
+
+  puts(JSON.generate(images))
 end
 
-puts(JSON.generate(images))
+# Resolve a repo ref to its commit sha via the GitHub API.
+def commit_sha(repo, ref)
+  stdout, stderr, status = Open3.capture3("gh", "api", "repos/#{repo}/commits/#{ref}", "--jq", ".sha")
+  abort("Error: failed to get commit for #{repo}/#{ref}: #{stderr}") unless status.success?
+  stdout.strip
+end
+
+main

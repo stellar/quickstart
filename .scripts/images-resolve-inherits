@@ -23,101 +23,52 @@ require "json"
 #   < images.json ./.scripts/images-resolve-inherits
 #   < images.json ./.scripts/images-resolve-inherits parents.json
 
-# Read images from stdin, resolve all inherits, and output to stdout.
 def main
   images = JSON.parse($stdin.read)
-
-  # Load parent images from file if provided.
-  parents = []
-  if ARGV.any?
-    parents = JSON.parse(File.read(ARGV[0]))
-    # Resolve any inherits within the parent images first.
-    while inherits?(parents)
-      parents = resolve_inherits(parents, [])
-    end
-  end
-
-  while inherits?(images)
-    images = resolve_inherits(images, parents)
-  end
-
+  parents = ARGV.any? ? JSON.parse(File.read(ARGV[0])) : []
+  parents = resolve_inherits(parents, []) while inherits?(parents)
+  images = resolve_inherits(images, parents) while inherits?(images)
   puts(JSON.generate(images))
 end
 
-# Return true if any image has an 'inherit' field.
-def inherits?(images)
-  images.any? do |image|
-    image.key?("inherit")
-  end
-end
-
-# Resolve one level of inheritance for all images.
-#
-# For each image with an 'inherit' field:
-# - Copy deps from the parent that aren't already defined in the child
-# - Merge config from the parent (child values override parent values)
-# - If the parent also has an 'inherit' field, copy it (for nested resolution)
-# - Remove the child's 'inherit' field once resolved
-#
-# Parents can be looked up from either the input images or the parents list.
-# Input images take precedence over parents with the same tag.
-#
-# Exits with error if an image inherits from an unknown tag.
+# Resolve one level of inheritance for all images. For each image with an
+# 'inherit' field, copy the parent's deps that aren't already defined in the
+# child, merge config (child overrides parent), and carry over the parent's own
+# 'inherit' for nested resolution. Parents are looked up in the input images
+# first, then in the optional parents list. Exits if a tag is unknown.
 def resolve_inherits(images, parents)
-  lookup = build_lookup(images)
-  parent_lookup = build_lookup(parents)
+  lookup = lookup_by_tag(images)
+  parent_lookup = lookup_by_tag(parents)
 
   images.each do |image|
-    if image.key?("inherit")
-      parent_tag = image["inherit"]
-      # Look up in input images first, then fall back to parents.
-      parent = lookup[parent_tag] || parent_lookup[parent_tag]
-      if parent.nil?
-        abort("Error: image '#{image["tag"]}' inherits from unknown image '#{parent_tag}'")
-      end
+    next unless image.key?("inherit")
 
-      # Get existing dep names in child.
-      child_dep_names = []
-      image.fetch("deps", []).each do |dep|
-        child_dep_names.push(dep["name"])
-      end
+    parent_tag = image["inherit"]
+    parent = lookup[parent_tag] || parent_lookup[parent_tag]
+    abort("Error: image '#{image["tag"]}' inherits from unknown image '#{parent_tag}'") unless parent
 
-      # Copy deps from parent that aren't in child.
-      inherited_deps = []
-      parent.fetch("deps", []).each do |dep|
-        if !child_dep_names.include?(dep["name"])
-          inherited_deps.push(dep)
-        end
-      end
-      image["deps"] = inherited_deps + image.fetch("deps", [])
+    child_dep_names = image.fetch("deps", []).map { |dep| dep["name"] }
+    inherited_deps = parent.fetch("deps", []).reject { |dep| child_dep_names.include?(dep["name"]) }
+    image["deps"] = inherited_deps + image.fetch("deps", [])
 
-      # Merge config from parent (child values override parent).
-      parent_config = parent.fetch("config", {})
-      child_config = image.fetch("config", {})
-      if !parent_config.empty? || !child_config.empty?
-        image["config"] = parent_config.merge(child_config)
-      end
+    merged_config = parent.fetch("config", {}).merge(image.fetch("config", {}))
+    image["config"] = merged_config unless merged_config.empty?
 
-      # Remove child's inherit since it has been resolved.
-      image.delete("inherit")
-
-      # Copy parent's inherit if present (for nested resolution).
-      if parent.key?("inherit")
-        image["inherit"] = parent["inherit"]
-      end
-    end
+    image.delete("inherit")
+    image["inherit"] = parent["inherit"] if parent.key?("inherit")
   end
 
   images
 end
 
+# Return true if any image has an 'inherit' field.
+def inherits?(images)
+  images.any? { |image| image.key?("inherit") }
+end
+
 # Return a hash mapping image tags to their image objects.
-def build_lookup(images)
-  lookup = {}
-  images.each do |image|
-    lookup[image["tag"]] = image
-  end
-  lookup
+def lookup_by_tag(images)
+  images.to_h { |image| [image["tag"], image] }
 end
 
 main

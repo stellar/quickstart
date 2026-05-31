@@ -12,40 +12,28 @@ require "open3"
 # For 'rc': uses the newest release (prerelease or stable)
 
 def main
-  if ARGV.length != 2 || !["stable", "rc"].include?(ARGV[1])
-    abort("Usage: auto-update <image-tag> <stable|rc>")
-  end
-
-  image_tag = ARGV[0]
-  mode = ARGV[1]
+  abort("Usage: auto-update <image-tag> <stable|rc>") unless ARGV.length == 2 && %w[stable rc].include?(ARGV[1])
+  image_tag, mode = ARGV
 
   images = JSON.parse(File.read("images.json"))
-
-  # Find target image.
-  target = images.find do |image|
-    image["tag"] == image_tag
-  end
-  if target.nil?
-    abort("Error: image '#{image_tag}' not found")
-  end
+  target = images.find { |image| image["tag"] == image_tag }
+  abort("Error: image '#{image_tag}' not found") unless target
 
   updated = false
   target["deps"].each do |dep|
-    name = dep["name"]
-    repo = dep["repo"]
-    current = dep["ref"]
+    name, repo, ref = dep.values_at("name", "repo", "ref")
 
     # Skip non-release refs (branches, SHAs).
-    if !current.start_with?("v")
+    unless ref.start_with?("v")
       puts("#{name}: skipping, ref is not a version")
       next
     end
 
-    latest = get_latest_release(repo, mode == "rc")
+    latest = latest_release(repo, mode == "rc")
     if latest.nil?
       puts("#{name}: skipping, no release found")
-    elsif latest != current
-      puts("#{name}: #{current} -> #{latest}")
+    elsif latest != ref
+      puts("#{name}: #{ref} -> #{latest}")
       dep["ref"] = latest
       updated = true
     else
@@ -53,33 +41,24 @@ def main
     end
   end
 
-  if updated
-    File.write("images.json", "#{JSON.pretty_generate(images)}\n")
-  end
+  File.write("images.json", "#{JSON.pretty_generate(images)}\n") if updated
 end
 
-# Get the latest release. If include_prerelease is false, skip prereleases.
-def get_latest_release(repo, include_prerelease)
-  get_releases(repo).each do |rel|
-    if include_prerelease && rel["tag"].include?("rc")
-      return rel["tag"]
-    end
-    if !rel["prerelease"]
-      return rel["tag"]
-    end
+# Get the latest release tag, or nil if there is none. When include_prerelease
+# is false, prereleases are skipped.
+def latest_release(repo, include_prerelease)
+  release = releases(repo).find do |rel|
+    (include_prerelease && rel["tag"].include?("rc")) || !rel["prerelease"]
   end
-  nil
+  release&.fetch("tag")
 end
 
-# Get all releases from a repo.
-def get_releases(repo)
+# Get all releases from a repo, newest first.
+def releases(repo)
   stdout, stderr, status = Open3.capture3(
-    "gh", "api", "repos/#{repo}/releases",
-    "--jq", "[.[] | {tag: .tag_name, prerelease: .prerelease}]"
+    "gh", "api", "repos/#{repo}/releases", "--jq", "[.[] | {tag: .tag_name, prerelease: .prerelease}]"
   )
-  if !status.success?
-    abort("Error: failed to get releases for #{repo}: #{stderr}")
-  end
+  abort("Error: failed to get releases for #{repo}: #{stderr}") unless status.success?
   JSON.parse(stdout)
 end
 
