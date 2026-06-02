@@ -262,7 +262,7 @@ ADD pubnet /opt/stellar-default/pubnet
 ADD testnet /opt/stellar-default/testnet
 ADD futurenet /opt/stellar-default/futurenet
 
-ADD start /
-RUN ["chmod", "+x", "start"]
+ADD start.py /
+RUN ["chmod", "+x", "start.py"]
 
-ENTRYPOINT ["/start"]
+ENTRYPOINT ["/start.py"]
