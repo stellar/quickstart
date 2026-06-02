@@ -107,6 +107,7 @@ class Quickstart:
 
         self.PGPASS = os.environ.get("PGPASS", "")
         self.CURRENT_POSTGRES_PID = None
+        self._postgres_proc = None
 
         # When --logs is set, all of our own output and supervisord's output is
         # wrapped with a cyan "quickstart   | " prefix (matching the bash sed
@@ -1095,6 +1096,7 @@ class Quickstart:
              "-c", f"config_file={self.PGHOME}/etc/postgresql.conf"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
+        self._postgres_proc = proc
         self.CURRENT_POSTGRES_PID = proc.pid
 
         while subprocess.run(["sudo", "-u", "postgres", "psql", "-c", "select 1"],
@@ -1109,17 +1111,11 @@ class Quickstart:
             return
 
         subprocess.run(["killall", "postgres"])
-        # wait for postgres to die
-        while self._pid_alive(self.CURRENT_POSTGRES_PID):
+        # wait for postgres to die (poll() also reaps the child so it does not
+        # linger as a zombie)
+        while self._postgres_proc.poll() is None:
             time.sleep(0.5)
         self.log("postgres: down")
-
-    def _pid_alive(self, pid):
-        try:
-            os.kill(pid, 0)
-            return True
-        except OSError:
-            return False
 
     # ------------------------------------------------------------------
     # service status watchers
