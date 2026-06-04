@@ -84,7 +84,6 @@
         "name": "core",
         "repo": "stellar/stellar-core",
         "ref": "7696c069d720fb450caeae940769b0a78a157363",
-        "comment": "v27.0.0 release candidate",
         "options": {
           "configure_flags": "--disable-tests"
         }
