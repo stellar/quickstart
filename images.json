@@ -17,7 +17,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v26.1.0",
+        "ref": "v27.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -25,7 +25,7 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v26.0.0"
+        "ref": "v26.0.1"
       },
       {
         "name": "horizon",
@@ -83,7 +83,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v26.1.0",
+        "ref": "v27.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -91,7 +91,7 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v26.0.0"
+        "ref": "v26.0.1"
       },
       {
         "name": "horizon",
