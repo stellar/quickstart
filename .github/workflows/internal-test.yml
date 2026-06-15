@@ -27,7 +27,7 @@ on:
 
 env:
   artifact_retention_days_for_logs: 60
-  timeout_multiplier: 4
+  timeout_multiplier: 6
 
 jobs:
 
