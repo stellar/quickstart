@@ -179,6 +179,11 @@ jobs:
         docker logs stellar -f &
         echo "supervisorctl tail -f galexie" | docker exec -i stellar sh &
         go run tests/test_galexie.go
+    - name: Run faketime test
+      timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
+      run: |
+        docker logs stellar -f &
+        go run tests/test_faketime.go
     - name: Prepare Test Logs
       if: always()
       run: |
