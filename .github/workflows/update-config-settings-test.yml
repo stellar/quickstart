@@ -13,13 +13,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install stellar-cli
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        tag="$(gh api repos/stellar/stellar-cli/releases/latest --jq .tag_name)"
-        ver="${tag#v}"
-        curl -sSfL "https://github.com/stellar/stellar-cli/releases/download/${tag}/stellar-cli-${ver}-x86_64-unknown-linux-gnu.tar.gz" | tar xz stellar
-        sudo mv stellar /usr/local/bin/
+      uses: stellar/stellar-cli@v26.1.0
 
     - name: Run update-config-settings
       id: update
