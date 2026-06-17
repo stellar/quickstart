@@ -1,0 +1,29 @@
+name: Update Config Settings Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install stellar-cli
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tag="$(gh api repos/stellar/stellar-cli/releases/latest --jq .tag_name)"
+        ver="${tag#v}"
+        curl -sSfL "https://github.com/stellar/stellar-cli/releases/download/${tag}/stellar-cli-${ver}-x86_64-unknown-linux-gnu.tar.gz" | tar xz stellar
+        sudo mv stellar /usr/local/bin/
+
+    - name: Run update-config-settings
+      id: update
+      run: echo "file=$(./.scripts/update-config-settings)" >> $GITHUB_OUTPUT
+
+    - name: Validate ConfigUpgradeSet
+      run: stellar xdr encode --type ConfigUpgradeSet < "${{ steps.update.outputs.file }}" > /dev/null

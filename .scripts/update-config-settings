@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Regenerates the latest-protocol testnet config settings from live testnet.
+#
+# For each config setting already present in the target testnet.json (in file
+# order), this queries testnet RPC for the live LedgerEntry and rewrites its
+# value. The set and order of entries is preserved from the existing file,
+# which intentionally excludes non-upgradeable settings (e.g.
+# live_soroban_state_size_window, eviction_iterator, frozen_*).
+#
+# Usage: ./.scripts/update-config-settings [target-testnet.json]
+# Env:   RPC_URL  (default: https://soroban-testnet.stellar.org)
+set -euo pipefail
+
+RPC_URL="${RPC_URL:-https://soroban-testnet.stellar.org}"
+config_settings_dir="local/core/etc/config-settings"
+
+if [ $# -ge 1 ]; then
+  file="$1"
+else
+  latest="$(ls "$config_settings_dir" | grep -E '^p[0-9]+$' | sort -V | tail -1)"
+  file="$config_settings_dir/$latest/testnet.json"
+fi
+
+get_entry() {
+  local name="$1" key resp xdr
+  key="$(printf '{"config_setting":{"config_setting_id":"%s"}}' "$name" \
+    | stellar xdr encode --type LedgerKey)"
+  resp="$(curl -fsS --max-time 30 -X POST "$RPC_URL" \
+    -H 'Content-Type: application/json' \
+    -d "$(jq -cn --arg k "$key" \
+        '{jsonrpc:"2.0",id:1,method:"getLedgerEntries",params:{keys:[$k]}}')")"
+  xdr="$(printf '%s' "$resp" | jq -r '.result.entries[0].xdr')"
+  if [ -z "$xdr" ] || [ "$xdr" = "null" ]; then
+    echo "error: no ledger entry returned for config setting '$name'" >&2
+    printf '%s\n' "$resp" >&2
+    exit 1
+  fi
+  printf '%s' "$xdr" | stellar xdr decode --type LedgerEntryData --output json \
+    | jq -c '.config_setting'
+}
+
+updated="[]"
+while IFS= read -r name; do
+  entry="$(get_entry "$name")"
+  updated="$(printf '%s' "$updated" | jq -c --argjson e "$entry" '. + [$e]')"
+done < <(jq -r '.updated_entry[] | keys[0]' "$file")
+
+jq -n --argjson u "$updated" '{updated_entry: $u}' > "$file"
+echo "$file"
