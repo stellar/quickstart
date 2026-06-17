@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Regenerates the testnet config settings for the protocol version that testnet
+# is currently running.
+#
+# Fetches testnet's upgradeable Soroban config settings as a ConfigUpgradeSet
+# (the format consumed by `stellar-xdr encode --type ConfigUpgradeSet` in the
+# start script) and writes them, sorted for stable output, to testnet.json for
+# the protocol version in effect when retrieved. Internally-maintained,
+# non-upgradeable settings are excluded (no --internal).
+#
+# unlimited.json is regenerated alongside it: it is testnet.json with a set of
+# "unlimited" scalar overrides applied (cost-param arrays carry through from
+# testnet unchanged). The overrides are taken from this protocol's own committed
+# unlimited.json, preserving its hand-tuning; for a protocol the repo has no
+# directory for yet, they are taken from the most recent prior protocol, and
+# settings introduced by the new protocol keep their testnet values until tuned
+# by hand in the resulting PR.
+#
+# Usage: ./.scripts/update-config-settings
+set -euo pipefail
+
+config_settings_dir="local/core/etc/config-settings"
+
+protocol="$(stellar ledger latest --network testnet --output json | jq -r '.protocolVersion')"
+if ! [[ "$protocol" =~ ^[0-9]+$ ]]; then
+  echo "error: could not determine testnet protocol version (got '$protocol')" >&2
+  exit 1
+fi
+
+# stellar-cli's major version tracks the protocol it supports. If testnet has
+# advanced beyond it, `stellar network settings` silently omits settings the
+# older XDR doesn't know about, so fail loudly to prompt bumping the pinned CLI.
+cli_protocol="$(stellar version | head -n1 | sed -E 's/^stellar ([0-9]+).*/\1/')"
+if [ "$protocol" -gt "$cli_protocol" ]; then
+  echo "error: testnet is on protocol $protocol but stellar-cli supports protocol $cli_protocol; bump the pinned stellar-cli version" >&2
+  exit 1
+fi
+
+dir="$config_settings_dir/p$protocol"
+mkdir -p "$dir"
+
+# Pick the source of the unlimited overrides before overwriting anything: this
+# protocol's own committed pair if present, else the most recent prior protocol.
+override_t=""
+override_u=""
+if [ -f "$dir/testnet.json" ] && [ -f "$dir/unlimited.json" ]; then
+  override_t="$dir/testnet.json"
+  override_u="$dir/unlimited.json"
+else
+  for ((v = protocol - 1; v >= 20; v--)); do
+    if [ -f "$config_settings_dir/p$v/testnet.json" ] && [ -f "$config_settings_dir/p$v/unlimited.json" ]; then
+      override_t="$config_settings_dir/p$v/testnet.json"
+      override_u="$config_settings_dir/p$v/unlimited.json"
+      break
+    fi
+  done
+fi
+if [ -z "$override_u" ]; then
+  echo "error: no protocol with testnet.json and unlimited.json to derive unlimited overrides from" >&2
+  exit 1
+fi
+
+# Fetch testnet's settings, sorted for stable output.
+testnet="$(stellar network settings --network testnet --output json | jq -S .)"
+
+# unlimited.json = testnet.json with the unlimited overrides (the leaf fields
+# where the override source's unlimited.json differs from its testnet.json).
+unlimited="$(printf '%s' "$testnet" | jq -S --slurpfile t "$override_t" --slurpfile u "$override_u" '
+  ( $t[0].updated_entry | map({(keys[0]): .[keys[0]]}) | add ) as $T
+  | ( $u[0].updated_entry | map({(keys[0]): .[keys[0]]}) | add ) as $U
+  | { updated_entry: ( .updated_entry | map(
+      (keys[0]) as $n | .[$n] as $v
+      | { ($n):
+          ( if ($U[$n] == null) or ($T[$n] == null) then $v
+            elif ($U[$n] | type) == "object"
+            then reduce ($U[$n] | paths(scalars)) as $p
+                   ($v;
+                    if ($U[$n] | getpath($p)) != ($T[$n] | getpath($p)?)
+                    then setpath($p; ($U[$n] | getpath($p))) else . end)
+            else (if $U[$n] != $T[$n] then $U[$n] else $v end)
+            end ) } ) ) }
+')"
+
+printf '%s\n' "$testnet" > "$dir/testnet.json"
+printf '%s\n' "$unlimited" > "$dir/unlimited.json"
+echo "$dir"
