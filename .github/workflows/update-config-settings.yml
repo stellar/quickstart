@@ -26,7 +26,9 @@ jobs:
 
     - name: Update config settings
       id: update
-      run: echo "file=$(./.scripts/update-config-settings)" >> $GITHUB_OUTPUT
+      run: |
+        file="$(./.scripts/update-config-settings)"
+        echo "file=$file" >> "$GITHUB_OUTPUT"
 
     - name: Create Pull Request
       env:

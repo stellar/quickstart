@@ -23,7 +23,9 @@ jobs:
 
     - name: Run update-config-settings
       id: update
-      run: echo "file=$(./.scripts/update-config-settings)" >> $GITHUB_OUTPUT
+      run: |
+        file="$(./.scripts/update-config-settings)"
+        echo "file=$file" >> "$GITHUB_OUTPUT"
 
     - name: Validate ConfigUpgradeSet
       run: stellar xdr encode --type ConfigUpgradeSet < "${{ steps.update.outputs.file }}" > /dev/null
