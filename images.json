@@ -272,12 +272,12 @@
       {
         "name": "xdr",
         "repo": "sisuresh/rs-stellar-xdr",
-        "ref": "7b46a60d914c1e5befd6a2d2c50d2fdf7e5eb1f0"
+        "ref": "8f826caa99f3b4c55e4d958eb5b6a9a1dbbf9873"
       },
       {
         "name": "core",
         "repo": "sisuresh/stellar-core",
-        "ref": "e32fa4234e767b1dea40a2b06f1250b23999bf73",
+        "ref": "ec7022dfa691a51c6c7d5d4e7ae1321709559fce",
         "options": {
           "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
@@ -285,12 +285,12 @@
       {
         "name": "rpc",
         "repo": "sisuresh/stellar-rpc",
-        "ref": "cd4e29cd0aa1d81feb2b74f5a116da2eff873b3c"
+        "ref": "a240dc47c28a2c42353def635902eb14e9e69faa"
       },
       {
         "name": "horizon",
         "repo": "sisuresh/stellar-horizon",
-        "ref": "51fd10ebcf4021ffc205457c5d644391ea37592d",
+        "ref": "7ebefc4c0254bce5180da02f379bd52f9fe54106",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
