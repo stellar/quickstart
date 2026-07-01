@@ -277,7 +277,7 @@
       {
         "name": "core",
         "repo": "sisuresh/stellar-core",
-        "ref": "ec7022dfa691a51c6c7d5d4e7ae1321709559fce",
+        "ref": "b2b06a8e6e8f6de0edecdb1666a79ba0d8eb4673",
         "options": {
           "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
