@@ -72,7 +72,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 25
+      "protocol_version_default": 27
     },
     "deps": [
       {
