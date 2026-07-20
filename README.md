@@ -159,7 +159,7 @@ For the closely-related need of testing against real network state, the [Stellar
 
 A turnkey fork mode in quickstart depends on stellar-core capabilities that do not exist today:
 
-- **Starting core at an arbitrary ledger.** Seeding a fork requires stopping and starting core at a chosen, non-checkpoint ledger. This is tracked in [stellar/stellar-core#4427](https://github.com/stellar/stellar-core/issues/4427).
+- **Pinning the fork to a chosen ledger.** Seeding a fork requires catching up to a specific, non-checkpoint ledger and then stopping core there cleanly so the state can be pinned. Support for stopping core at a chosen ledger is tracked in [stellar/stellar-core#4427](https://github.com/stellar/stellar-core/issues/4427).
 - **Overriding ledger entries.** There is no mechanism to reset or overwrite arbitrary ledger entries, for example to reset and fund the network root account so that Friendbot can issue test accounts on the fork.
 - **Submitting transactions without the real signers.** A fork keeps the same network passphrase as the forked network so that contract IDs (including Stellar Asset Contracts) remain valid, which means transactions would otherwise require the real accounts' signers. A way to accept signature-less transactions (or an equivalent) is needed so that developers can transact against the fork.
 
