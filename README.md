@@ -144,6 +144,27 @@ In public network mode, the node will join the public, production Stellar networ
 
 _Note: In pubnet mode the node will consume more disk, memory, and CPU resources because of the size of the ledger and frequency of transactions. If disk space warnings occur and the image is being used on a Docker runtime that uses a VM, like that of macOS and Windows, the VM may need to have its disk space allocation increased._
 
+### Forking a network
+
+"Forking" a network, in the sense popularized by Ethereum tooling such as Foundry's Anvil and Hardhat, means starting a local node seeded with the current state of a live network (for example mainnet) and then submitting your own transactions against that state without affecting the real network. It is a convenient way to test contracts and applications against real, deployed on-chain state.
+
+> [!NOTE]
+> Quickstart does not yet provide a turnkey fork mode. There is no `--fork` option, and this section does not describe one. A Foundry/Anvil-style fork workflow for Stellar is an actively-designed capability that is being tracked in [stellar/quickstart#625](https://github.com/stellar/quickstart/issues/625). Follow or weigh in on that issue for progress.
+
+#### What you can do today
+
+For the closely-related need of testing against real network state, the [Stellar CLI](https://github.com/stellar/stellar-cli) and the Soroban Rust SDK support a snapshot-based workflow: capture a snapshot of selected ledger entries from a live network with `stellar snapshot create`, then load that snapshot in a test to run against the captured state. This is a point-in-time snapshot used from your tests, not a running forked network. Improvements to SDK-side fork testing are tracked in [stellar/rs-soroban-sdk#1448](https://github.com/stellar/rs-soroban-sdk/issues/1448).
+
+#### What is not yet possible, and why
+
+A turnkey fork mode in quickstart depends on stellar-core capabilities that do not exist today:
+
+- **Starting core at an arbitrary ledger.** Seeding a fork requires stopping and starting core at a chosen, non-checkpoint ledger. This is tracked in [stellar/stellar-core#4427](https://github.com/stellar/stellar-core/issues/4427).
+- **Overriding ledger entries.** There is no mechanism to reset or overwrite arbitrary ledger entries, for example to reset and fund the network root account so that Friendbot can issue test accounts on the fork.
+- **Submitting transactions without the real signers.** A fork keeps the same network passphrase as the forked network so that contract IDs (including Stellar Asset Contracts) remain valid, which means transactions would otherwise require the real accounts' signers. A way to accept signature-less transactions (or an equivalent) is needed so that developers can transact against the fork.
+
+Keeping the same network passphrase also creates a footgun: a transaction built against the fork could be valid on the real network too. See also the discussion of network passphrases and the root account in [Security Considerations](#security-considerations).
+
 ### Service Options
 
 The image runs all services available by default, but can be configured to run only certain services as needed. The option for configuring which services run is the `--enable` option.
