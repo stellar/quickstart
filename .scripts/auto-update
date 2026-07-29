@@ -59,7 +59,8 @@ def main():
 def get_latest_release(repo, prefix='', include_prerelease=False):
     """Get the latest release tagged with prefix. If include_prerelease is False, skip prereleases."""
     for rel in get_releases(repo):
-        if not rel['tag'].startswith(prefix):
+        version = VERSION_REF.fullmatch(rel['tag'])
+        if not version or version['prefix'] != prefix:
             continue
         if include_prerelease and 'rc' in rel['tag']:
             return rel['tag']
