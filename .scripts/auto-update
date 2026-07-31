@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import subprocess
 import sys
 
@@ -10,6 +11,9 @@ import sys
 #
 # For 'stable': uses GitHub's latest stable release
 # For 'rc': uses the newest release (prerelease or stable)
+
+# A version ref, with an optional repo specific prefix, e.g. 'v1.2.3', 'galexie-v1.2.3-rc1'
+VERSION_REF = re.compile(r'(?P<prefix>.*?)v\d+\.\d+\.\d+(-.+)?$')
 
 def main():
     if len(sys.argv) != 3 or sys.argv[2] not in ('stable', 'rc'):
@@ -32,11 +36,12 @@ def main():
         name, repo, current = dep['name'], dep['repo'], dep['ref']
 
         # Skip non-release refs (branches, SHAs)
-        if not current.startswith('v'):
+        version = VERSION_REF.fullmatch(current)
+        if not version:
             print(f"{name}: skipping, ref is not a version")
             continue
 
-        latest = get_latest_release(repo, include_prerelease=(mode == 'rc'))
+        latest = get_latest_release(repo, version['prefix'], include_prerelease=(mode == 'rc'))
         if not latest:
             print(f"{name}: skipping, no release found")
         elif latest != current:
@@ -51,9 +56,12 @@ def main():
             json.dump(images, f, indent=2)
             f.write('\n')
 
-def get_latest_release(repo, include_prerelease=False):
-    """Get the latest release. If include_prerelease is False, skip prereleases."""
+def get_latest_release(repo, prefix='', include_prerelease=False):
+    """Get the latest release tagged with prefix. If include_prerelease is False, skip prereleases."""
     for rel in get_releases(repo):
+        version = VERSION_REF.fullmatch(rel['tag'])
+        if not version or version['prefix'] != prefix:
+            continue
         if include_prerelease and 'rc' in rel['tag']:
             return rel['tag']
         if not rel['prerelease']:
