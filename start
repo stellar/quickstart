@@ -472,10 +472,10 @@ function init_db() {
   if [ "$ENABLE_CORE" = "true" ] && [ "$CORE_USE_POSTGRES" = "true" ]; then
     run_silent "create-core-db" sudo -u postgres createdb core
   fi
-  run_silent "stellar-postgres-user" sudo -u postgres psql <<-SQL
-    CREATE USER $PGUSER WITH PASSWORD '$PGPASS';
-    $([ "$ENABLE_HORIZON" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE horizon to $PGUSER;")
-    $([ "$ENABLE_CORE" = "true" ] && [ "$CORE_USE_POSTGRES" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE core to $PGUSER;")
+  run_silent "stellar-postgres-user" sudo -u postgres psql -v pguser="$PGUSER" -v pgpass="$PGPASS" <<-SQL
+    CREATE USER :"pguser" WITH PASSWORD :'pgpass';
+    $([ "$ENABLE_HORIZON" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE horizon to :\"pguser\";")
+    $([ "$ENABLE_CORE" = "true" ] && [ "$CORE_USE_POSTGRES" = "true" ] && echo "GRANT ALL PRIVILEGES ON DATABASE core to :\"pguser\";")
 SQL
 
   touch .quickstart-initialized
