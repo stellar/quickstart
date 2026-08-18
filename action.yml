@@ -113,6 +113,11 @@ runs:
           if [ "$status" == "healthy" ]; then
             break
           fi
+          if [ "$status" == "unhealthy" ]; then
+            echo "::error::stellar container reported unhealthy, printing logs:"
+            docker logs stellar
+            exit 1
+          fi
           sleep 1;
           i=$((i + 1))
           if (( $i > 300 )); then
