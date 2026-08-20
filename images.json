@@ -260,6 +260,7 @@
   {
     "tag": "nightly-next",
     "events": [
+      "pull_request",
       "push",
       "schedule"
     ],
@@ -270,26 +271,26 @@
     "deps": [
       {
         "name": "xdr",
-        "repo": "stellar/rs-stellar-xdr",
-        "ref": "main"
+        "repo": "sisuresh/rs-stellar-xdr",
+        "ref": "p28-cap-0085"
       },
       {
         "name": "core",
-        "repo": "stellar/stellar-core",
-        "ref": "master",
+        "repo": "sisuresh/stellar-core",
+        "ref": "p28-cap-0085",
         "options": {
           "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
       },
       {
         "name": "rpc",
-        "repo": "stellar/stellar-rpc",
-        "ref": "protocol-next"
+        "repo": "sisuresh/stellar-rpc",
+        "ref": "p28-cap-0085"
       },
       {
         "name": "horizon",
-        "repo": "stellar/stellar-horizon",
-        "ref": "protocol-next",
+        "repo": "sisuresh/stellar-horizon",
+        "ref": "p28-cap-0085",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -304,8 +305,8 @@
       },
       {
         "name": "lab",
-        "repo": "stellar/laboratory",
-        "ref": "main"
+        "repo": "sisuresh/laboratory",
+        "ref": "p28-cap-0085"
       },
       {
         "name": "galexie",
