@@ -74,19 +74,6 @@ def update_image(image):
     image['config']['protocol_version_default'] = version
     return True
 
-def read_source(dep, path):
-    """Read a file from the dep's repo at its ref via the GitHub API, or None."""
-    result = subprocess.run(
-        ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
-         f"repos/{dep['repo']}/contents/{path}?ref={dep['ref']}"],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        print(f"Error: failed to read {path} from {dep['repo']}@{dep['ref']}: {result.stderr}",
-              file=sys.stderr)
-        return None
-    return result.stdout
-
 def xdr_version(dep):
     """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
     text = read_source(dep, 'Cargo.toml')
@@ -137,6 +124,19 @@ PROTOCOL_SOURCES = {
         'internal/ingest/main.go',
         r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)'),
 }
+
+def read_source(dep, path):
+    """Read a file from the dep's repo at its ref via the GitHub API, or None."""
+    result = subprocess.run(
+        ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
+         f"repos/{dep['repo']}/contents/{path}?ref={dep['ref']}"],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to read {path} from {dep['repo']}@{dep['ref']}: {result.stderr}",
+              file=sys.stderr)
+        return None
+    return result.stdout
 
 if __name__ == '__main__':
     main()
