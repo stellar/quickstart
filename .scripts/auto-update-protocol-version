@@ -20,7 +20,7 @@ import sys
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
-#   rpc      stellar-rpc      .../integrationtest/infrastructure/test.go MaxSupportedProtocolVersion
+#   rpc      stellar-rpc      .github/workflows/stellar-rpc.yml core_deb_version's major
 #   horizon  stellar-horizon  internal/ingest/main.go MaxSupportedProtocolVersion
 #
 # stellar-core built with --enable-next-protocol-version-unsafe-for-production
@@ -78,12 +78,8 @@ def update_image(image):
 PROTOCOL_SOURCES = {
     'xdr': lambda dep: xdr_version(dep),
     'core': lambda dep: core_version(dep),
-    'rpc': lambda dep: regex_version(dep,
-        'cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go',
-        r'MaxSupportedProtocolVersion\s*=\s*(\d+)'),
-    'horizon': lambda dep: regex_version(dep,
-        'internal/ingest/main.go',
-        r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)'),
+    'rpc': lambda dep: rpc_version(dep),
+    'horizon': lambda dep: horizon_version(dep),
 }
 
 def xdr_version(dep):
@@ -114,6 +110,23 @@ def core_version(dep):
     if NEXT_PROTOCOL_FLAG in dep.get('options', {}).get('configure_flags', ''):
         version += 1
     return version
+
+def rpc_version(dep):
+    """Major of the stellar-core deb the RPC bundles, from its CI workflow.
+
+    stellar-rpc pins the captive-core build it runs against via core_deb_version
+    in .github/workflows/stellar-rpc.yml (one entry per tested protocol); the
+    highest of those cores' major versions is the top protocol the RPC supports."""
+    text = read_source(dep, '.github/workflows/stellar-rpc.yml')
+    if text is None:
+        return None
+    majors = [int(m) for m in re.findall(r"core_deb_version:\s*['\"]?(\d+)", text)]
+    return max(majors, default=None)
+
+def horizon_version(dep):
+    """MaxSupportedProtocolVersion from stellar-horizon's ingest package."""
+    return regex_version(dep, 'internal/ingest/main.go',
+                         r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)')
 
 def regex_version(dep, path, pattern):
     """Read `path` from the dep and pull an int out of the first `pattern` match."""
