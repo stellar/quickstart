@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+
+import json
+import re
+import subprocess
+import sys
+
+# Auto-update script for the protocol_version_default field in images.json
+#
+# Usage: ./.scripts/auto-update-protocol-version [image-tag ...]
+#
+# For each image (all images by default, or only those named as arguments),
+# sets config.protocol_version_default to the max ledger protocol version
+# supported by the stellar-core the image builds.
+#
+# The supported version is read from stellar-core's source at the image's
+# 'core' dep ref, so it works for every ref kind: release tags, branches
+# (e.g. 'master') and commit SHAs. stellar-core defines it in
+# src/main/Config.cpp as:
+#
+#   uint32 const Config::CURRENT_LEDGER_PROTOCOL_VERSION = N
+#   #ifdef ENABLE_NEXT_PROTOCOL_VERSION_UNSAFE_FOR_PRODUCTION
+#                                                          + 1
+#   #endif
+#       ;
+#
+# Images whose core is built with --enable-next-protocol-version-unsafe-for-production
+# support N + 1, matching that conditional.
+
+CONFIG_PATH = 'src/main/Config.cpp'
+NEXT_PROTOCOL_FLAG = '--enable-next-protocol-version-unsafe-for-production'
+
+CURRENT_LEDGER_PROTOCOL_VERSION = re.compile(
+    r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(?P<version>\d+)'
+)
+
+def main():
+    with open('images.json', 'r') as f:
+        images = json.load(f)
+
+    tags = sys.argv[1:]
+
+    updated = False
+    for image in images:
+        if tags and image['tag'] not in tags:
+            continue
+        if update_image(image):
+            updated = True
+
+    if updated:
+        with open('images.json', 'w') as f:
+            json.dump(images, f, indent=2)
+            f.write('\n')
+
+def update_image(image):
+    """Update image's protocol_version_default from stellar-core. Returns True if changed."""
+    tag = image['tag']
+
+    core = next((dep for dep in image['deps'] if dep['name'] == 'core'), None)
+    if not core:
+        print(f"{tag}: skipping, no 'core' dep")
+        return False
+
+    version = supported_protocol_version(core['repo'], core['ref'])
+    if version is None:
+        print(f"{tag}: skipping, could not read protocol version from {core['repo']}@{core['ref']}")
+        return False
+
+    # Core built with the next-protocol flag supports one version beyond the
+    # source constant, matching the #ifdef in Config.cpp.
+    flags = core.get('options', {}).get('configure_flags', '')
+    if NEXT_PROTOCOL_FLAG in flags:
+        version += 1
+
+    current = image['config'].get('protocol_version_default')
+    if current == version:
+        print(f"{tag}: protocol_version_default matches core ({version})")
+        return False
+
+    print(f"{tag}: protocol_version_default {current} -> {version}")
+    image['config']['protocol_version_default'] = version
+    return True
+
+def supported_protocol_version(repo, ref):
+    """Read CURRENT_LEDGER_PROTOCOL_VERSION from repo's Config.cpp at ref, or None."""
+    result = subprocess.run(
+        ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
+         f'repos/{repo}/contents/{CONFIG_PATH}?ref={ref}'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to read {CONFIG_PATH} from {repo}@{ref}: {result.stderr}",
+              file=sys.stderr)
+        return None
+
+    match = CURRENT_LEDGER_PROTOCOL_VERSION.search(result.stdout)
+    if not match:
+        return None
+    return int(match['version'])
+
+if __name__ == '__main__':
+    main()
