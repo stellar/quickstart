@@ -74,6 +74,18 @@ def update_image(image):
     image['config']['protocol_version_default'] = version
     return True
 
+# Component name -> function(dep) -> max supported protocol version (or None).
+PROTOCOL_SOURCES = {
+    'xdr': lambda dep: xdr_version(dep),
+    'core': lambda dep: core_version(dep),
+    'rpc': lambda dep: regex_version(dep,
+        'cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go',
+        r'MaxSupportedProtocolVersion\s*=\s*(\d+)'),
+    'horizon': lambda dep: regex_version(dep,
+        'internal/ingest/main.go',
+        r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)'),
+}
+
 def xdr_version(dep):
     """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
     text = read_source(dep, 'Cargo.toml')
@@ -103,27 +115,13 @@ def core_version(dep):
         version += 1
     return version
 
-def regex_version(path, pattern):
-    """An extractor that reads `path` and pulls an int out of the first `pattern` match."""
-    def extract(dep):
-        text = read_source(dep, path)
-        if text is None:
-            return None
-        match = re.search(pattern, text)
-        return int(match.group(1)) if match else None
-    return extract
-
-# Component name -> function(dep) -> max supported protocol version (or None).
-PROTOCOL_SOURCES = {
-    'xdr': xdr_version,
-    'core': core_version,
-    'rpc': regex_version(
-        'cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go',
-        r'MaxSupportedProtocolVersion\s*=\s*(\d+)'),
-    'horizon': regex_version(
-        'internal/ingest/main.go',
-        r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)'),
-}
+def regex_version(dep, path, pattern):
+    """Read `path` from the dep and pull an int out of the first `pattern` match."""
+    text = read_source(dep, path)
+    if text is None:
+        return None
+    match = re.search(pattern, text)
+    return int(match.group(1)) if match else None
 
 def read_source(dep, path):
     """Read a file from the dep's repo at its ref via the GitHub API, or None."""
