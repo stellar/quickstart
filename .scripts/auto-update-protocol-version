@@ -10,29 +10,24 @@ import sys
 # Usage: ./.scripts/auto-update-protocol-version [image-tag ...]
 #
 # For each image (all images by default, or only those named as arguments),
-# sets config.protocol_version_default to the max ledger protocol version
-# supported by the stellar-core the image builds.
+# sets config.protocol_version_default to the highest ledger protocol version
+# supported by ALL of its xdr, core, rpc and horizon components, i.e. the
+# minimum of each component's own max supported version.
 #
-# The supported version is read from stellar-core's source at the image's
-# 'core' dep ref, so it works for every ref kind: release tags, branches
-# (e.g. 'master') and commit SHAs. stellar-core defines it in
-# src/main/Config.cpp as:
+# Each component's max supported version is read from its source at the pinned
+# dep ref, so it works for every ref kind: release tags, branches (e.g. 'main',
+# 'master') and commit SHAs.
 #
-#   uint32 const Config::CURRENT_LEDGER_PROTOCOL_VERSION = N
-#   #ifdef ENABLE_NEXT_PROTOCOL_VERSION_UNSAFE_FOR_PRODUCTION
-#                                                          + 1
-#   #endif
-#       ;
+#   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
+#   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
+#   rpc      stellar-rpc      .../integrationtest/infrastructure/test.go MaxSupportedProtocolVersion
+#   horizon  stellar-horizon  internal/ingest/main.go MaxSupportedProtocolVersion
 #
-# Images whose core is built with --enable-next-protocol-version-unsafe-for-production
-# support N + 1, matching that conditional.
+# stellar-core built with --enable-next-protocol-version-unsafe-for-production
+# supports one version beyond its source constant, matching the #ifdef in
+# Config.cpp; that flag is read from the image's core dep options.
 
-CONFIG_PATH = 'src/main/Config.cpp'
 NEXT_PROTOCOL_FLAG = '--enable-next-protocol-version-unsafe-for-production'
-
-CURRENT_LEDGER_PROTOCOL_VERSION = re.compile(
-    r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(?P<version>\d+)'
-)
 
 def main():
     with open('images.json', 'r') as f:
@@ -53,50 +48,95 @@ def main():
             f.write('\n')
 
 def update_image(image):
-    """Update image's protocol_version_default from stellar-core. Returns True if changed."""
+    """Set image's protocol_version_default to min over its components. Returns True if changed."""
     tag = image['tag']
+    deps = {dep['name']: dep for dep in image['deps']}
 
-    core = next((dep for dep in image['deps'] if dep['name'] == 'core'), None)
-    if not core:
-        print(f"{tag}: skipping, no 'core' dep")
-        return False
+    supported = {}
+    for name, extract in PROTOCOL_SOURCES.items():
+        dep = deps.get(name)
+        if not dep:
+            print(f"{tag}: skipping, no '{name}' dep")
+            return False
+        version = extract(dep)
+        if version is None:
+            print(f"{tag}: skipping, could not read protocol version from {name} ({dep['repo']}@{dep['ref']})")
+            return False
+        supported[name] = version
 
-    version = supported_protocol_version(core['repo'], core['ref'])
-    if version is None:
-        print(f"{tag}: skipping, could not read protocol version from {core['repo']}@{core['ref']}")
-        return False
-
-    # Core built with the next-protocol flag supports one version beyond the
-    # source constant, matching the #ifdef in Config.cpp.
-    flags = core.get('options', {}).get('configure_flags', '')
-    if NEXT_PROTOCOL_FLAG in flags:
-        version += 1
-
+    version = min(supported.values())
     current = image['config'].get('protocol_version_default')
     if current == version:
-        print(f"{tag}: protocol_version_default matches core ({version})")
+        print(f"{tag}: protocol_version_default matches components ({version}) {supported}")
         return False
 
-    print(f"{tag}: protocol_version_default {current} -> {version}")
+    print(f"{tag}: protocol_version_default {current} -> {version} {supported}")
     image['config']['protocol_version_default'] = version
     return True
 
-def supported_protocol_version(repo, ref):
-    """Read CURRENT_LEDGER_PROTOCOL_VERSION from repo's Config.cpp at ref, or None."""
+def read_source(dep, path):
+    """Read a file from the dep's repo at its ref via the GitHub API, or None."""
     result = subprocess.run(
         ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
-         f'repos/{repo}/contents/{CONFIG_PATH}?ref={ref}'],
+         f"repos/{dep['repo']}/contents/{path}?ref={dep['ref']}"],
         capture_output=True, text=True
     )
     if result.returncode != 0:
-        print(f"Error: failed to read {CONFIG_PATH} from {repo}@{ref}: {result.stderr}",
+        print(f"Error: failed to read {path} from {dep['repo']}@{dep['ref']}: {result.stderr}",
               file=sys.stderr)
         return None
+    return result.stdout
 
-    match = CURRENT_LEDGER_PROTOCOL_VERSION.search(result.stdout)
+def xdr_version(dep):
+    """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
+    text = read_source(dep, 'Cargo.toml')
+    if text is None:
+        return None
+    section = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('[') and stripped.endswith(']'):
+            section = stripped[1:-1]
+        elif section == 'package':
+            match = re.match(r'version\s*=\s*"(\d+)', stripped)
+            if match:
+                return int(match.group(1))
+    return None
+
+def core_version(dep):
+    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core, plus the next-protocol flag."""
+    text = read_source(dep, 'src/main/Config.cpp')
+    if text is None:
+        return None
+    match = re.search(r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(\d+)', text)
     if not match:
         return None
-    return int(match['version'])
+    version = int(match.group(1))
+    if NEXT_PROTOCOL_FLAG in dep.get('options', {}).get('configure_flags', ''):
+        version += 1
+    return version
+
+def regex_version(path, pattern):
+    """An extractor that reads `path` and pulls an int out of the first `pattern` match."""
+    def extract(dep):
+        text = read_source(dep, path)
+        if text is None:
+            return None
+        match = re.search(pattern, text)
+        return int(match.group(1)) if match else None
+    return extract
+
+# Component name -> function(dep) -> max supported protocol version (or None).
+PROTOCOL_SOURCES = {
+    'xdr': xdr_version,
+    'core': core_version,
+    'rpc': regex_version(
+        'cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go',
+        r'MaxSupportedProtocolVersion\s*=\s*(\d+)'),
+    'horizon': regex_version(
+        'internal/ingest/main.go',
+        r'MaxSupportedProtocolVersion\s+uint32\s*=\s*(\d+)'),
+}
 
 if __name__ == '__main__':
     main()
