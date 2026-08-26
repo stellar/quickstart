@@ -59,6 +59,8 @@ jobs:
       fail-fast: false
     name: 1 push (${{ matrix.tag }}, ${{ matrix.arch }})
     permissions:
+      attestations: write
+      id-token: write
       packages: write
       statuses: write
     runs-on: ubuntu-latest
@@ -87,6 +89,20 @@ jobs:
       run: >
         docker push
         ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - name: Image Digest
+      id: digest
+      run: |
+        digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }} | jq -r '.digest')"
+        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+          echo "could not determine digest of pushed image" >&2
+          exit 1
+        fi
+        echo "digest=$digest" | tee -a $GITHUB_OUTPUT
+    - name: Attest Image
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-name: ${{ secrets.registry }}/${{ inputs.registry_repo }}
+        subject-digest: ${{ steps.digest.outputs.digest }}
     - name: Post Status with Image Name
       uses: actions/github-script@v5
       with:
@@ -108,6 +124,8 @@ jobs:
       fail-fast: false
     name: 2 push manifest (${{ matrix.tag }})
     permissions:
+      attestations: write
+      id-token: write
       packages: write
       statuses: write
     runs-on: ubuntu-latest
@@ -137,6 +155,20 @@ jobs:
       run: >
         docker manifest push
         ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - name: Image Digest
+      id: digest
+      run: |
+        digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }} | jq -r '.digest')"
+        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+          echo "could not determine digest of pushed image" >&2
+          exit 1
+        fi
+        echo "digest=$digest" | tee -a $GITHUB_OUTPUT
+    - name: Attest Image
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-name: ${{ secrets.registry }}/${{ inputs.registry_repo }}
+        subject-digest: ${{ steps.digest.outputs.digest }}
     - uses: actions/github-script@v5
       with:
         script: |
@@ -157,6 +189,8 @@ jobs:
       fail-fast: false
     name: 3 push alias (${{ matrix.tag }})
     permissions:
+      attestations: write
+      id-token: write
       packages: write
       statuses: write
     runs-on: ubuntu-latest
@@ -176,6 +210,20 @@ jobs:
         docker buildx imagetools create -t
         ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }}
         ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }}
+    - name: Image Digest
+      id: digest
+      run: |
+        digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }} | jq -r '.digest')"
+        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+          echo "could not determine digest of pushed image" >&2
+          exit 1
+        fi
+        echo "digest=$digest" | tee -a $GITHUB_OUTPUT
+    - name: Attest Image
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-name: ${{ secrets.registry }}/${{ inputs.registry_repo }}
+        subject-digest: ${{ steps.digest.outputs.digest }}
     - uses: actions/github-script@v5
       with:
         script: |
