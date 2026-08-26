@@ -14,14 +14,12 @@ import sys
 # supported by ALL of its xdr, core, rpc and horizon components, i.e. the
 # minimum of each component's own max supported version.
 #
-# Component sources are read at the commit SHAs in <resolved-images.json>
-# (produced by resolve-image-refs), never at the branch refs in images.json, so
-# the protocol values match the exact commits a PR will record. images.json is
-# updated in place with the resulting protocol_version_default (refs untouched),
-# and <resolved-images.json>'s protocol_version_default is synced to match.
-#
-# resolve-image-refs handles every ref kind: release tags, branches (e.g. 'main',
-# 'master') and commit SHAs all resolve to a commit SHA.
+# Component sources are read at each dep's resolved 'sha' in <resolved-images.json>
+# (produced by piping images.json through images-resolve-inherits and
+# images-with-extras), never at the branch refs in images.json, so the protocol
+# values match the exact commits a PR will record. images.json is updated in
+# place with the resulting protocol_version_default (its refs untouched), and
+# <resolved-images.json>'s protocol_version_default is synced to match.
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
@@ -156,10 +154,10 @@ def regex_version(dep, path, pattern):
     return int(match.group(1)) if match else None
 
 def read_source(dep, path):
-    """Read a file from the dep's repo at its ref via the GitHub API, or None."""
+    """Read a file from the dep's repo at its resolved sha via the GitHub API, or None."""
     result = subprocess.run(
         ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
-         f"repos/{dep['repo']}/contents/{path}?ref={dep['ref']}"],
+         f"repos/{dep['repo']}/contents/{path}?ref={dep['sha']}"],
         capture_output=True, text=True
     )
     if result.returncode != 0:

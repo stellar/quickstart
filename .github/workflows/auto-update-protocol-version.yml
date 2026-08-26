@@ -16,13 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Resolve every dep ref to a commit SHA once, up front, so the protocol
-    # values and the SHAs the PR records are computed from the same commits
-    # (a tracked branch could otherwise move between steps).
-    - name: Resolve component refs
+    # Resolve inherits and every dep ref to a commit SHA once, up front, so the
+    # protocol values and the SHAs the PR records are computed from the same
+    # commits (a tracked branch could otherwise move between steps).
+    - name: Resolve images
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./.scripts/resolve-image-refs > images.resolved.json
+      run: |
+        set -o pipefail
+        ./.scripts/images-resolve-inherits < images.json \
+          | ./.scripts/images-with-extras > images.resolved.json
 
     - name: Update protocol_version_default
       env:
