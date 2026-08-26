@@ -92,11 +92,8 @@ jobs:
     - name: Image Digest
       id: digest
       run: |
+        set -o pipefail
         digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }} | jq -r '.digest')"
-        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
-          echo "could not determine digest of pushed image" >&2
-          exit 1
-        fi
         echo "digest=$digest" | tee -a $GITHUB_OUTPUT
     - name: Attest Image
       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -158,11 +155,8 @@ jobs:
     - name: Image Digest
       id: digest
       run: |
+        set -o pipefail
         digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag }} | jq -r '.digest')"
-        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
-          echo "could not determine digest of pushed image" >&2
-          exit 1
-        fi
         echo "digest=$digest" | tee -a $GITHUB_OUTPUT
     - name: Attest Image
       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -213,11 +207,8 @@ jobs:
     - name: Image Digest
       id: digest
       run: |
+        set -o pipefail
         digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' ${{ secrets.registry }}/${{ inputs.registry_repo }}:${{ steps.tag.outputs.tag-alias }} | jq -r '.digest')"
-        if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
-          echo "could not determine digest of pushed image" >&2
-          exit 1
-        fi
         echo "digest=$digest" | tee -a $GITHUB_OUTPUT
     # Redundant while the alias is a 1:1 copy of a manifest list, because
     # imagetools create passes the original bytes and descriptor through and so
