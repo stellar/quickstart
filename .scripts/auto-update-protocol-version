@@ -22,12 +22,6 @@ import sys
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
 #   rpc      stellar-rpc      .github/workflows/stellar-rpc.yml core_deb_version's major
 #   horizon  stellar-horizon  internal/ingest/main.go MaxSupportedProtocolVersion
-#
-# stellar-core built with --enable-next-protocol-version-unsafe-for-production
-# supports one version beyond its source constant, matching the #ifdef in
-# Config.cpp; that flag is read from the image's core dep options.
-
-NEXT_PROTOCOL_FLAG = '--enable-next-protocol-version-unsafe-for-production'
 
 def main():
     with open('images.json', 'r') as f:
@@ -49,11 +43,18 @@ def main():
 
 def update_image(image):
     """Set image's protocol_version_default to min over its components. Returns True if changed."""
+    # Component name -> function(dep) -> max supported protocol version (or None).
+    sources = {
+        'xdr': xdr_version,
+        'core': core_version,
+        'rpc': rpc_version,
+        'horizon': horizon_version,
+    }
     tag = image['tag']
     deps = {dep['name']: dep for dep in image['deps']}
 
     supported = {}
-    for name, extract in PROTOCOL_SOURCES.items():
+    for name, extract in sources.items():
         dep = deps.get(name)
         if not dep:
             print(f"{tag}: skipping, no '{name}' dep")
@@ -73,14 +74,6 @@ def update_image(image):
     print(f"{tag}: protocol_version_default {current} -> {version} {supported}")
     image['config']['protocol_version_default'] = version
     return True
-
-# Component name -> function(dep) -> max supported protocol version (or None).
-PROTOCOL_SOURCES = {
-    'xdr': lambda dep: xdr_version(dep),
-    'core': lambda dep: core_version(dep),
-    'rpc': lambda dep: rpc_version(dep),
-    'horizon': lambda dep: horizon_version(dep),
-}
 
 def xdr_version(dep):
     """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
@@ -107,7 +100,10 @@ def core_version(dep):
     if not match:
         return None
     version = int(match.group(1))
-    if NEXT_PROTOCOL_FLAG in dep.get('options', {}).get('configure_flags', ''):
+    # stellar-core built with this flag supports one version beyond its source
+    # constant, matching the #ifdef in Config.cpp; read it from the core dep options.
+    next_flag = '--enable-next-protocol-version-unsafe-for-production'
+    if next_flag in dep.get('options', {}).get('configure_flags', ''):
         version += 1
     return version
 
