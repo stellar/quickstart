@@ -2,7 +2,6 @@ name: Auto Update Protocol Version
 
 on:
   schedule:
-  - cron: '30 20 * * *'  # 12:30 PM Pacific
   - cron: '30 1 * * *'   # 5:30 PM Pacific
   workflow_dispatch:
 
