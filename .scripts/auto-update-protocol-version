@@ -7,22 +7,21 @@ import sys
 
 # Auto-update script for the protocol_version_default field in images.json
 #
-# Usage: ./.scripts/auto-update-protocol-version [--refs resolved.json] [image-tag ...]
+# Usage: ./.scripts/auto-update-protocol-version <resolved-images.json> [image-tag ...]
 #
 # For each image (all images by default, or only those named as arguments),
 # sets config.protocol_version_default to the highest ledger protocol version
 # supported by ALL of its xdr, core, rpc and horizon components, i.e. the
 # minimum of each component's own max supported version.
 #
-# Each component's max supported version is read from its source at the pinned
-# dep ref, so it works for every ref kind: release tags, branches (e.g. 'main',
-# 'master') and commit SHAs.
+# Component sources are read at the commit SHAs in <resolved-images.json>
+# (produced by resolve-image-refs), never at the branch refs in images.json, so
+# the protocol values match the exact commits a PR will record. images.json is
+# updated in place with the resulting protocol_version_default (refs untouched),
+# and <resolved-images.json>'s protocol_version_default is synced to match.
 #
-# With --refs, component sources are read at the refs in the given resolved
-# images.json (produced by resolve-image-refs) rather than the refs in
-# images.json, and that file's protocol_version_default is updated in place too.
-# This keeps the protocol values and the exact commits a PR records consistent,
-# even if a tracked branch moves between steps.
+# resolve-image-refs handles every ref kind: release tags, branches (e.g. 'main',
+# 'master') and commit SHAs all resolve to a commit SHA.
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
@@ -31,26 +30,22 @@ import sys
 
 def main():
     args = sys.argv[1:]
-    refs_path = None
-    if args and args[0] == '--refs':
-        refs_path, args = args[1], args[2:]
-    tags = args
+    if not args:
+        print("Usage: auto-update-protocol-version <resolved-images.json> [image-tag ...]",
+              file=sys.stderr)
+        sys.exit(1)
+    resolved_path, tags = args[0], args[1:]
 
     with open('images.json', 'r') as f:
         images = json.load(f)
-
-    # Compute against the refs in refs_path (commit SHAs resolved up front) when
-    # given, otherwise against images.json's own refs. Either way the computed
-    # protocol_version_default is written back into images.json (refs untouched).
-    if refs_path:
-        with open(refs_path, 'r') as f:
-            source = json.load(f)
-    else:
-        source = images
+    with open(resolved_path, 'r') as f:
+        resolved = json.load(f)
     by_tag = {image['tag']: image for image in images}
 
+    # Compute against the resolved commit SHAs, then write the resulting
+    # protocol_version_default into images.json (refs untouched).
     updated = False
-    for src in source:
+    for src in resolved:
         if tags and src['tag'] not in tags:
             continue
         if update_image(src):
@@ -65,10 +60,9 @@ def main():
 
     # Sync the resolved snapshot so it records the exact state the PR proposes:
     # the resolved commit SHAs plus the resulting protocol_version_default.
-    if refs_path:
-        with open(refs_path, 'w') as f:
-            json.dump(source, f, indent=2)
-            f.write('\n')
+    with open(resolved_path, 'w') as f:
+        json.dump(resolved, f, indent=2)
+        f.write('\n')
 
 def update_image(image):
     """Set image's protocol_version_default to min over its components. Returns True if changed."""

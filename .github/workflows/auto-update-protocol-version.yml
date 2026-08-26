@@ -27,7 +27,7 @@ jobs:
     - name: Update protocol_version_default
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./.scripts/auto-update-protocol-version --refs images.resolved.json
+      run: ./.scripts/auto-update-protocol-version images.resolved.json
 
     - name: Check for changes
       id: changes
