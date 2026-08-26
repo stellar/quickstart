@@ -219,6 +219,10 @@ jobs:
           exit 1
         fi
         echo "digest=$digest" | tee -a $GITHUB_OUTPUT
+    # Redundant while the alias is a 1:1 copy of a manifest list, because
+    # imagetools create passes the original bytes and descriptor through and so
+    # the alias has the same digest as the manifest attested above. Kept so the
+    # alias tag stays attested if that ever stops holding.
     - name: Attest Image
       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
       with:

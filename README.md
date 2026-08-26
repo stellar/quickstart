@@ -103,6 +103,9 @@ the [`gh` CLI]:
 gh attestation verify oci://docker.io/stellar/quickstart:latest --repo stellar/quickstart
 ```
 
+The `gh` CLI must be authenticated, because the attestation is fetched from
+GitHub rather than from the registry.
+
 Attestations are only available for images built after attestation support was
 added to the build, and are not available for older images.
 
