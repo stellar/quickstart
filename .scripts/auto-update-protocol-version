@@ -10,9 +10,15 @@ import sys
 # Usage: ./.scripts/auto-update-protocol-version <resolved-images.json> [image-tag ...]
 #
 # For each image (all images by default, or only those named as arguments),
-# sets config.protocol_version_default to the highest ledger protocol version
-# supported by ALL of its xdr, core, rpc and horizon components, i.e. the
-# minimum of each component's own max supported version.
+# sets config.protocol_version_default to the highest ledger protocol version it
+# supports:
+#
+#   - Released images: the minimum over the max supported version of each of its
+#     xdr, core, rpc and horizon components.
+#   - "Next" images (core built with the unsafe next-protocol flag, e.g.
+#     'future' and 'nightly-next'): one beyond the highest released image. Their
+#     pre-release component pins report lagging release versions that would
+#     otherwise understate the protocol they exist to exercise.
 #
 # Component sources are read at each dep's resolved 'sha' in <resolved-images.json>
 # (produced by piping images.json through images-resolve-inherits and
@@ -25,6 +31,8 @@ import sys
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
 #   rpc      stellar-rpc      .github/workflows/stellar-rpc.yml core_deb_version's major
 #   horizon  stellar-horizon  internal/ingest/main.go MaxSupportedProtocolVersion
+
+NEXT_PROTOCOL_FLAG = '--enable-next-protocol-version-unsafe-for-production'
 
 def main():
     args = sys.argv[1:]
@@ -40,16 +48,38 @@ def main():
         resolved = json.load(f)
     by_tag = {image['tag']: image for image in images}
 
-    # Compute against the resolved commit SHAs, then write the resulting
-    # protocol_version_default into images.json (refs untouched).
+    # Max supported protocol per released (non-next) image, then the highest of
+    # those: the protocol the released set is on. Next images target one beyond.
+    supported = {image['tag']: supported_versions(image)
+                 for image in resolved if not is_next(image)}
+    released = max((min(s.values()) for s in supported.values() if s is not None),
+                   default=None)
+
     updated = False
     for src in resolved:
-        if tags and src['tag'] not in tags:
+        tag = src['tag']
+        if tags and tag not in tags:
             continue
-        if update_image(src):
-            by_tag[src['tag']]['config']['protocol_version_default'] = \
-                src['config']['protocol_version_default']
-            updated = True
+
+        if is_next(src):
+            if released is None:
+                print(f"{tag}: skipping, no released image to derive the next protocol from")
+                continue
+            version, detail = released + 1, f"[next: released {released} + 1]"
+        else:
+            if supported[tag] is None:
+                continue  # supported_versions already reported why
+            version, detail = min(supported[tag].values()), supported[tag]
+
+        target = by_tag[tag]
+        current = target['config'].get('protocol_version_default')
+        if current == version:
+            print(f"{tag}: protocol_version_default matches ({version}) {detail}")
+            continue
+        print(f"{tag}: protocol_version_default {current} -> {version} {detail}")
+        target['config']['protocol_version_default'] = version
+        src['config']['protocol_version_default'] = version
+        updated = True
 
     if updated:
         with open('images.json', 'w') as f:
@@ -62,8 +92,14 @@ def main():
         json.dump(resolved, f, indent=2)
         f.write('\n')
 
-def update_image(image):
-    """Set image's protocol_version_default to min over its components. Returns True if changed."""
+def is_next(image):
+    """True if the image's core is built with the unsafe next-protocol flag."""
+    core = next((dep for dep in image['deps'] if dep['name'] == 'core'), None)
+    return core is not None and \
+        NEXT_PROTOCOL_FLAG in core.get('options', {}).get('configure_flags', '')
+
+def supported_versions(image):
+    """{component: max supported protocol} for the image, or None if any can't be read."""
     # Component name -> function(dep) -> max supported protocol version (or None).
     sources = {
         'xdr': xdr_version,
@@ -79,22 +115,13 @@ def update_image(image):
         dep = deps.get(name)
         if not dep:
             print(f"{tag}: skipping, no '{name}' dep")
-            return False
+            return None
         version = extract(dep)
         if version is None:
             print(f"{tag}: skipping, could not read protocol version from {name} ({dep['repo']}@{dep['ref']})")
-            return False
+            return None
         supported[name] = version
-
-    version = min(supported.values())
-    current = image['config'].get('protocol_version_default')
-    if current == version:
-        print(f"{tag}: protocol_version_default matches components ({version}) {supported}")
-        return False
-
-    print(f"{tag}: protocol_version_default {current} -> {version} {supported}")
-    image['config']['protocol_version_default'] = version
-    return True
+    return supported
 
 def xdr_version(dep):
     """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
@@ -113,20 +140,12 @@ def xdr_version(dep):
     return None
 
 def core_version(dep):
-    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core, plus the next-protocol flag."""
+    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core."""
     text = read_source(dep, 'src/main/Config.cpp')
     if text is None:
         return None
     match = re.search(r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(\d+)', text)
-    if not match:
-        return None
-    version = int(match.group(1))
-    # stellar-core built with this flag supports one version beyond its source
-    # constant, matching the #ifdef in Config.cpp; read it from the core dep options.
-    next_flag = '--enable-next-protocol-version-unsafe-for-production'
-    if next_flag in dep.get('options', {}).get('configure_flags', ''):
-        version += 1
-    return version
+    return int(match.group(1)) if match else None
 
 def rpc_version(dep):
     """Major of the stellar-core deb the RPC bundles, from its CI workflow.
