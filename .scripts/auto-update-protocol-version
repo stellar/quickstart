@@ -82,8 +82,11 @@ def update_image(image):
             return False
         version = extract(dep)
         if version is None:
-            print(f"{tag}: skipping, could not read protocol version from {name} ({dep['repo']}@{dep['ref']})")
-            return False
+            # A read/parse failure would leave this image stale while others
+            # still update; fail the whole run rather than open a partial PR.
+            print(f"{tag}: failed to read protocol version from {name} ({dep['repo']}@{dep['ref']})",
+                  file=sys.stderr)
+            sys.exit(1)
         supported[name] = version
 
     version = min(supported.values())
