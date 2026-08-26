@@ -16,10 +16,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Resolve every dep ref to a commit SHA once, up front, so the protocol
+    # values and the SHAs the PR records are computed from the same commits
+    # (a tracked branch could otherwise move between steps).
+    - name: Resolve component refs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: ./.scripts/resolve-image-refs > images.resolved.json
+
     - name: Update protocol_version_default
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./.scripts/auto-update-protocol-version
+      run: ./.scripts/auto-update-protocol-version --refs images.resolved.json
 
     - name: Check for changes
       id: changes
@@ -35,7 +43,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: images
-        path: images.json
+        path: |
+          images.json
+          images.resolved.json
 
   create-pr:
     runs-on: ubuntu-latest
@@ -56,13 +66,10 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-
-        # Resolve every dep ref to the commit SHA it currently points to, and
-        # key the branch on that. A downstream component change yields a new
-        # hash -> a new PR, instead of deduping onto the existing one.
-        resolved=$(./.scripts/resolve-image-refs)
+        # Key the branch on the resolved snapshot (commit SHAs) computed in the
+        # check job. A downstream component change yields a new hash -> a new
+        # PR, instead of deduping onto the existing one.
+        resolved=$(cat images.resolved.json)
         hash=$(printf '%s' "$resolved" | sha256sum | cut -c1-16)
         branch="auto-update-protocol-version/${hash}"
 
@@ -72,6 +79,8 @@ jobs:
           exit 0
         fi
 
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
         git checkout -b "$branch"
         git add images.json
         git commit -m "Update protocol_version_default (${hash})"

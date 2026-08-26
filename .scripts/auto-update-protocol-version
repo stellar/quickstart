@@ -7,7 +7,7 @@ import sys
 
 # Auto-update script for the protocol_version_default field in images.json
 #
-# Usage: ./.scripts/auto-update-protocol-version [image-tag ...]
+# Usage: ./.scripts/auto-update-protocol-version [--refs resolved.json] [image-tag ...]
 #
 # For each image (all images by default, or only those named as arguments),
 # sets config.protocol_version_default to the highest ledger protocol version
@@ -18,27 +18,56 @@ import sys
 # dep ref, so it works for every ref kind: release tags, branches (e.g. 'main',
 # 'master') and commit SHAs.
 #
+# With --refs, component sources are read at the refs in the given resolved
+# images.json (produced by resolve-image-refs) rather than the refs in
+# images.json, and that file's protocol_version_default is updated in place too.
+# This keeps the protocol values and the exact commits a PR records consistent,
+# even if a tracked branch moves between steps.
+#
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
 #   rpc      stellar-rpc      .github/workflows/stellar-rpc.yml core_deb_version's major
 #   horizon  stellar-horizon  internal/ingest/main.go MaxSupportedProtocolVersion
 
 def main():
+    args = sys.argv[1:]
+    refs_path = None
+    if args and args[0] == '--refs':
+        refs_path, args = args[1], args[2:]
+    tags = args
+
     with open('images.json', 'r') as f:
         images = json.load(f)
 
-    tags = sys.argv[1:]
+    # Compute against the refs in refs_path (commit SHAs resolved up front) when
+    # given, otherwise against images.json's own refs. Either way the computed
+    # protocol_version_default is written back into images.json (refs untouched).
+    if refs_path:
+        with open(refs_path, 'r') as f:
+            source = json.load(f)
+    else:
+        source = images
+    by_tag = {image['tag']: image for image in images}
 
     updated = False
-    for image in images:
-        if tags and image['tag'] not in tags:
+    for src in source:
+        if tags and src['tag'] not in tags:
             continue
-        if update_image(image):
+        if update_image(src):
+            by_tag[src['tag']]['config']['protocol_version_default'] = \
+                src['config']['protocol_version_default']
             updated = True
 
     if updated:
         with open('images.json', 'w') as f:
             json.dump(images, f, indent=2)
+            f.write('\n')
+
+    # Sync the resolved snapshot so it records the exact state the PR proposes:
+    # the resolved commit SHAs plus the resulting protocol_version_default.
+    if refs_path:
+        with open(refs_path, 'w') as f:
+            json.dump(source, f, indent=2)
             f.write('\n')
 
 def update_image(image):
