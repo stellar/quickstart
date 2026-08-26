@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+# Prints images.json with every dep 'ref' resolved to the commit SHA it points
+# to right now, so a protocol-update PR can record the exact component commits
+# that protocol_version_default was derived from.
+#
+# Usage: ./.scripts/resolve-image-refs
+
+import json
+import subprocess
+import sys
+
+def resolve_ref(repo, ref):
+    """Commit SHA that repo's ref points to, or the original ref if it can't be read."""
+    result = subprocess.run(
+        ['gh', 'api', f'repos/{repo}/commits/{ref}', '--jq', '.sha'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to resolve {repo}@{ref}: {result.stderr}", file=sys.stderr)
+        return ref
+    return result.stdout.strip()
+
+def main():
+    with open('images.json', 'r') as f:
+        images = json.load(f)
+
+    for image in images:
+        for dep in image['deps']:
+            dep['ref'] = resolve_ref(dep['repo'], dep['ref'])
+
+    json.dump(images, sys.stdout, indent=2)
+    sys.stdout.write('\n')
+
+if __name__ == '__main__':
+    main()
