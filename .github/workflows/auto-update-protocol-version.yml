@@ -48,10 +48,11 @@ jobs:
         <<< "$images" jq -C
         echo "$images" > images.resolved.json
 
+    # 'future' is left out and updated by hand; the rest track automatically.
     - name: Update protocol_version_default
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./.scripts/auto-update-protocol-version images.resolved.json
+      run: ./.scripts/auto-update-protocol-version images.resolved.json latest testing nightly nightly-next
 
     - name: Check for changes
       id: changes
