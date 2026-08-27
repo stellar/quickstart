@@ -93,6 +93,25 @@ All tags are published as multiplatform images supporting architectures:
 - `linux/amd46`
 - `linux/arm64`
 
+## Verifying Images
+
+Images are published with [build provenance attestations] signed by GitHub
+Actions, recording the workflow and commit that built them. Verify an image with
+the [`gh` CLI]:
+
+```
+gh attestation verify oci://docker.io/stellar/quickstart:latest --repo stellar/quickstart
+```
+
+The `gh` CLI must be authenticated, because the attestation is fetched from
+GitHub rather than from the registry.
+
+Attestations are only available for images built after attestation support was
+added to the build, and are not available for older images.
+
+[build provenance attestations]: https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds
+[`gh` CLI]: https://cli.github.com
+
 ## Usage
 
 To use this project successfully, you should first decide a few things:
