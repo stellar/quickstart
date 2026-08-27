@@ -120,6 +120,12 @@ jobs:
     if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     name: 5 push
     needs: [setup, build]
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+      statuses: write
     uses: ./.github/workflows/internal-push.yml
     with:
       sha: ${{ needs.setup.outputs.sha }}
