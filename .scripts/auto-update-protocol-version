@@ -14,13 +14,6 @@ import sys
 # supported by ALL of its xdr, core, rpc and horizon components, i.e. the
 # minimum of each component's own max supported version.
 #
-# Component sources are read at each dep's resolved 'sha' in <resolved-images.json>
-# (produced by piping images.json through images-resolve-inherits and
-# images-with-extras), never at the branch refs in images.json, so the protocol
-# values match the exact commits a PR will record. images.json is updated in
-# place with the resulting protocol_version_default (its refs untouched), and
-# <resolved-images.json>'s protocol_version_default is synced to match.
-#
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
 #   rpc      stellar-rpc      .github/workflows/stellar-rpc.yml core_deb_version's major
