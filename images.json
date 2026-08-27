@@ -1,12 +1,9 @@
 [
   {
     "tag": "latest",
-    "events": [
-      "pull_request",
-      "push"
-    ],
+    "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 27
+      "protocol_version_default": 28
     },
     "deps": [
       {
@@ -67,12 +64,9 @@
   },
   {
     "tag": "testing",
-    "events": [
-      "pull_request",
-      "push"
-    ],
+    "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 27
+      "protocol_version_default": 28
     },
     "deps": [
       {
@@ -138,10 +132,7 @@
   },
   {
     "tag": "future",
-    "events": [
-      "pull_request",
-      "push"
-    ],
+    "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 28,
       "horizon_skip_protocol_version_check": true
@@ -189,7 +180,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v27.0.0"
+        "ref": "galexie-v28.0.0"
       }
     ],
     "tests": {
@@ -199,12 +190,9 @@
   },
   {
     "tag": "nightly",
-    "events": [
-      "push",
-      "schedule"
-    ],
+    "events": ["push", "schedule"],
     "config": {
-      "protocol_version_default": 26
+      "protocol_version_default": 28
     },
     "deps": [
       {
@@ -259,10 +247,7 @@
   },
   {
     "tag": "nightly-next",
-    "events": [
-      "push",
-      "schedule"
-    ],
+    "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 28,
       "horizon_skip_protocol_version_check": true
