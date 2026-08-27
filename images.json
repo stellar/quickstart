@@ -1,6 +1,7 @@
 [
   {
     "tag": "latest",
+    "autoupdate": true,
     "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 28
@@ -64,6 +65,7 @@
   },
   {
     "tag": "testing",
+    "autoupdate": true,
     "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 28
@@ -132,6 +134,7 @@
   },
   {
     "tag": "future",
+    "autoupdate": false,
     "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 28,
@@ -190,6 +193,7 @@
   },
   {
     "tag": "nightly",
+    "autoupdate": true,
     "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 28
@@ -247,6 +251,7 @@
   },
   {
     "tag": "nightly-next",
+    "autoupdate": true,
     "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 28,
