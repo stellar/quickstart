@@ -1,10 +1,10 @@
 [
   {
     "tag": "latest",
-    "autoupdate": true,
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 28
+      "protocol_version_default": 28,
+      "autoupdate_protocol_version_default": true
     },
     "deps": [
       {
@@ -65,10 +65,10 @@
   },
   {
     "tag": "testing",
-    "autoupdate": true,
     "events": ["pull_request", "push"],
     "config": {
-      "protocol_version_default": 28
+      "protocol_version_default": 28,
+      "autoupdate_protocol_version_default": true
     },
     "deps": [
       {
@@ -134,10 +134,10 @@
   },
   {
     "tag": "future",
-    "autoupdate": false,
     "events": ["pull_request", "push"],
     "config": {
       "protocol_version_default": 28,
+      "autoupdate_protocol_version_default": false,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
@@ -193,10 +193,10 @@
   },
   {
     "tag": "nightly",
-    "autoupdate": true,
     "events": ["push", "schedule"],
     "config": {
-      "protocol_version_default": 28
+      "protocol_version_default": 28,
+      "autoupdate_protocol_version_default": true
     },
     "deps": [
       {
@@ -251,10 +251,10 @@
   },
   {
     "tag": "nightly-next",
-    "autoupdate": true,
     "events": ["push", "schedule"],
     "config": {
       "protocol_version_default": 28,
+      "autoupdate_protocol_version_default": true,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [

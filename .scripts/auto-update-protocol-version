@@ -9,11 +9,11 @@ import sys
 #
 # Usage: ./.scripts/auto-update-protocol-version <resolved-images.json> [image-tag ...]
 #
-# For each image with "autoupdate": true (all such by default, or only those
-# named as arguments), sets config.protocol_version_default to the highest ledger
-# protocol version supported by ALL of its xdr, core, rpc and horizon components,
-# i.e. the minimum of each component's own max supported version. Images with
-# "autoupdate": false (e.g. 'future') are left for manual updates.
+# For each image with config.autoupdate_protocol_version_default true (all such by
+# default, or only those named as arguments), sets config.protocol_version_default
+# to the highest ledger protocol version supported by ALL of its xdr, core, rpc and
+# horizon components, i.e. the minimum of each component's own max supported
+# version. Images with it false (e.g. 'future') are left for manual updates.
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
 #   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
@@ -41,8 +41,8 @@ def main():
         tag = src['tag']
         if tags and tag not in tags:
             continue
-        if not src.get('autoupdate', True):
-            print(f"{tag}: skipping, autoupdate disabled")
+        if not src['config'].get('autoupdate_protocol_version_default', True):
+            print(f"{tag}: skipping, autoupdate_protocol_version_default is false")
             continue
         if update_image(src):
             by_tag[tag]['config']['protocol_version_default'] = \

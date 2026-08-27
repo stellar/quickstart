@@ -48,7 +48,7 @@ jobs:
         <<< "$images" jq -C
         echo "$images" > images.resolved.json
 
-    # Only images with "autoupdate": true in images.json are updated.
+    # Only images with config.autoupdate_protocol_version_default are updated.
     - name: Update protocol_version_default
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
