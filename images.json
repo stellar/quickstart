@@ -1,7 +1,10 @@
 [
   {
     "tag": "latest",
-    "events": ["pull_request", "push"],
+    "events": [
+      "pull_request",
+      "push"
+    ],
     "config": {
       "protocol_version_default": 28,
       "autoupdate_protocol_version_default": true
@@ -23,12 +26,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v28.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v28.0.0",
+        "ref": "v28.0.1",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -49,7 +52,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v28.0.0"
+        "ref": "galexie-v28.0.1"
       }
     ],
     "tests": {
@@ -65,7 +68,10 @@
   },
   {
     "tag": "testing",
-    "events": ["pull_request", "push"],
+    "events": [
+      "pull_request",
+      "push"
+    ],
     "config": {
       "protocol_version_default": 28,
       "autoupdate_protocol_version_default": true
@@ -87,12 +93,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v28.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v28.0.0",
+        "ref": "v28.0.1",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -113,7 +119,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v28.0.0"
+        "ref": "galexie-v28.0.1"
       }
     ],
     "tests": {
@@ -134,7 +140,10 @@
   },
   {
     "tag": "future",
-    "events": ["pull_request", "push"],
+    "events": [
+      "pull_request",
+      "push"
+    ],
     "config": {
       "protocol_version_default": 28,
       "autoupdate_protocol_version_default": false,
@@ -193,7 +202,10 @@
   },
   {
     "tag": "nightly",
-    "events": ["push", "schedule"],
+    "events": [
+      "push",
+      "schedule"
+    ],
     "config": {
       "protocol_version_default": 28,
       "autoupdate_protocol_version_default": true
@@ -251,7 +263,10 @@
   },
   {
     "tag": "nightly-next",
-    "events": ["push", "schedule"],
+    "events": [
+      "push",
+      "schedule"
+    ],
     "config": {
       "protocol_version_default": 28,
       "autoupdate_protocol_version_default": true,
