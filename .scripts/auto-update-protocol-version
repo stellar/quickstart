@@ -9,7 +9,7 @@ import sys
 #
 # Usage: ./.scripts/auto-update-protocol-version <resolved-images.json> [image-tag ...]
 #
-# For each image with config.autoupdate_protocol_version_default true (all such by
+# For each image with config.protocol_version_default_autoupdate true (all such by
 # default, or only those named as arguments), sets config.protocol_version_default
 # to the highest ledger protocol version supported by ALL of its xdr, core, rpc and
 # horizon components. Images with it false (e.g. 'future') are left for manual
@@ -47,8 +47,8 @@ def main():
         tag = src['tag']
         if tags and tag not in tags:
             continue
-        if not src['config'].get('autoupdate_protocol_version_default', False):
-            print(f"{tag}: skipping, autoupdate_protocol_version_default is false")
+        if not src['config'].get('protocol_version_default_autoupdate', False):
+            print(f"{tag}: skipping, protocol_version_default_autoupdate is false")
             continue
         if update_image(src):
             by_tag[tag]['config']['protocol_version_default'] = \
