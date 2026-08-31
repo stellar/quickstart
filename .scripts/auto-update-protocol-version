@@ -75,8 +75,9 @@ def update_image(image):
             print(f"{tag}: skipping, no '{name}' dep")
             return False
 
+    xdr = require(tag, 'xdr', deps['xdr'], xdr_version)
     core = require(tag, 'core', deps['core'], core_version)
-    supported = {'xdr': require(tag, 'xdr', deps['xdr'], xdr_version), 'core': core}
+    supported = {'xdr': xdr, 'core': core}
 
     # rpc and horizon are at core's protocol as long as the XDR they build against
     # is not older than the XDR core pins.
