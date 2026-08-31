@@ -47,7 +47,7 @@ def main():
         tag = src['tag']
         if tags and tag not in tags:
             continue
-        if not src['config'].get('autoupdate_protocol_version_default', True):
+        if not src['config'].get('autoupdate_protocol_version_default', False):
             print(f"{tag}: skipping, autoupdate_protocol_version_default is false")
             continue
         if update_image(src):
