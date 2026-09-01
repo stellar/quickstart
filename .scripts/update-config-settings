@@ -21,7 +21,8 @@ set -euo pipefail
 
 config_settings_dir="local/core/etc/config-settings"
 
-protocol="$(stellar ledger latest --network testnet --output json | jq -r '.protocolVersion')"
+ledger_latest="$(stellar ledger latest --network testnet --output json)"
+protocol="$(printf '%s' "$ledger_latest" | jq -r '.protocolVersion')"
 if ! [[ "$protocol" =~ ^[0-9]+$ ]]; then
   echo "error: could not determine testnet protocol version (got '$protocol')" >&2
   exit 1
@@ -61,7 +62,8 @@ if [ -z "$override_u" ]; then
 fi
 
 # Fetch testnet's settings, sorted for stable output.
-testnet="$(stellar network settings --network testnet --output json | jq -S .)"
+network_settings="$(stellar network settings --network testnet --output json)"
+testnet="$(printf '%s' "$network_settings" | jq -S .)"
 
 # unlimited.json = testnet.json with the unlimited overrides (the leaf fields
 # where the override source's unlimited.json differs from its testnet.json).
