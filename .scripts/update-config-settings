@@ -30,13 +30,7 @@ fi
 # stellar-cli's major version tracks the protocol it supports. If testnet has
 # advanced beyond it, `stellar network settings` silently omits settings the
 # older XDR doesn't know about, so fail loudly to prompt bumping the pinned CLI.
-#
-# `stellar version` output is captured in full before piping to head/sed: piping
-# it directly to `head -n1` lets head close its end of the pipe as soon as it
-# has its line, which can race with `stellar` still writing its later lines and
-# make it panic on the resulting broken pipe.
-cli_version_output="$(stellar version)"
-cli_protocol="$(printf '%s\n' "$cli_version_output" | head -n1 | sed -E 's/^stellar ([0-9]+).*/\1/')"
+cli_protocol="$(stellar version --only-version-major)"
 if [ "$protocol" -gt "$cli_protocol" ]; then
   echo "error: testnet is on protocol $protocol but stellar-cli supports protocol $cli_protocol; bump the pinned stellar-cli version" >&2
   exit 1
