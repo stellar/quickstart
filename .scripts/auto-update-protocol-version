@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+
+import json
+import re
+import subprocess
+import sys
+
+# Auto-update script for the protocol_version_default field in images.json
+#
+# Usage: ./.scripts/auto-update-protocol-version <resolved-images.json> [image-tag ...]
+#
+# For each image with config.protocol_version_default_autoupdate true (all such by
+# default, or only those named as arguments), sets config.protocol_version_default
+# to the highest ledger protocol version supported by ALL of its xdr, core, rpc and
+# horizon components. Images with it false (e.g. 'future') are left for manual
+# updates.
+#
+#   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
+#   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
+#   rpc      stellar-rpc      go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
+#   horizon  stellar-horizon  go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
+#
+# rpc and horizon don't state a protocol version of their own, so theirs is derived
+# from the XDR they build against: the stellar-xdr commit their go-stellar-sdk
+# generates from, compared with the stellar-xdr commit core pins at
+# src/protocol-curr/xdr. Matching or newer means they handle core's protocol and so
+# carry core's version; older means they can't and the image is left alone.
+
+def main():
+    args = sys.argv[1:]
+    if not args:
+        print("Usage: auto-update-protocol-version <resolved-images.json> [image-tag ...]",
+              file=sys.stderr)
+        sys.exit(1)
+    resolved_path, tags = args[0], args[1:]
+
+    with open('images.json', 'r') as f:
+        images = json.load(f)
+    with open(resolved_path, 'r') as f:
+        resolved = json.load(f)
+    by_tag = {image['tag']: image for image in images}
+
+    # Compute against the resolved commit SHAs, then write the resulting
+    # protocol_version_default into images.json (refs untouched).
+    updated = False
+    for src in resolved:
+        tag = src['tag']
+        if tags and tag not in tags:
+            continue
+        if not src['config'].get('protocol_version_default_autoupdate', False):
+            print(f"{tag}: skipping, protocol_version_default_autoupdate is false")
+            continue
+        if update_image(src):
+            by_tag[tag]['config']['protocol_version_default'] = \
+                src['config']['protocol_version_default']
+            updated = True
+
+    if updated:
+        with open('images.json', 'w') as f:
+            json.dump(images, f, indent=2)
+            f.write('\n')
+
+    # Sync the resolved snapshot so it records the exact state the PR proposes:
+    # the resolved commit SHAs plus the resulting protocol_version_default.
+    with open(resolved_path, 'w') as f:
+        json.dump(resolved, f, indent=2)
+        f.write('\n')
+
+def update_image(image):
+    """Set image's protocol_version_default to min over its components. Returns True if changed."""
+    tag = image['tag']
+    deps = {dep['name']: dep for dep in image['deps']}
+    for name in ('xdr', 'core', 'rpc', 'horizon'):
+        if name not in deps:
+            print(f"{tag}: skipping, no '{name}' dep")
+            return False
+
+    xdr = require(tag, 'xdr', deps['xdr'], xdr_version)
+    core = require(tag, 'core', deps['core'], core_version)
+    supported = {'xdr': xdr, 'core': core}
+
+    # rpc and horizon are at core's protocol as long as the XDR they build against
+    # is not older than the XDR core pins.
+    core_xdr = require(tag, 'core', deps['core'], core_xdr_commit)
+    for name in ('rpc', 'horizon'):
+        dep = deps[name]
+        commit = require(tag, name, dep, sdk_xdr_commit)
+        status = xdr_compare(core_xdr, commit)
+        if status is None:
+            print(f"{tag}: failed to compare {name}'s xdr with core's", file=sys.stderr)
+            sys.exit(1)
+        if status not in ('identical', 'ahead'):
+            print(f"{tag}: skipping, {name}'s xdr {commit[:12]} is {status} "
+                  f"vs core's {core_xdr[:12]}")
+            return False
+        supported[name] = core
+
+    version = min(supported.values())
+    current = image['config'].get('protocol_version_default')
+    if current == version:
+        print(f"{tag}: protocol_version_default matches components ({version}) {supported}")
+        return False
+
+    print(f"{tag}: protocol_version_default {current} -> {version} {supported}")
+    image['config']['protocol_version_default'] = version
+    return True
+
+def require(tag, name, dep, extract):
+    """extract(dep), or exit: a read/parse failure must not leave the image stale."""
+    value = extract(dep)
+    if value is None:
+        print(f"{tag}: failed to read protocol version from {name} ({dep['repo']}@{dep['ref']})",
+              file=sys.stderr)
+        sys.exit(1)
+    return value
+
+def xdr_version(dep):
+    """Major of the [package] version in rs-stellar-xdr's Cargo.toml."""
+    text = read_source(dep, 'Cargo.toml')
+    if text is None:
+        return None
+    section = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith('[') and stripped.endswith(']'):
+            section = stripped[1:-1]
+        elif section == 'package':
+            match = re.match(r'version\s*=\s*"(\d+)', stripped)
+            if match:
+                return int(match.group(1))
+    return None
+
+def core_version(dep):
+    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core."""
+    text = read_source(dep, 'src/main/Config.cpp')
+    if text is None:
+        return None
+    match = re.search(r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(\d+)', text)
+    if not match:
+        return None
+    version = int(match.group(1))
+    # stellar-core built with this flag supports one version beyond its source
+    # constant, matching the #ifdef in Config.cpp; read it from the core dep options.
+    next_flag = '--enable-next-protocol-version-unsafe-for-production'
+    if next_flag in dep.get('options', {}).get('configure_flags', ''):
+        version += 1
+    return version
+
+def core_xdr_commit(dep):
+    """stellar-xdr commit that stellar-core pins as its protocol XDR."""
+    return read_submodule(dep, 'src/protocol-curr/xdr')
+
+def sdk_xdr_commit(dep):
+    """stellar-xdr commit the dep's go-stellar-sdk generates its XDR from."""
+    text = read_source(dep, 'go.mod')
+    if text is None:
+        return None
+    match = re.search(r'github\.com/stellar/go-stellar-sdk\s+(\S+)', text)
+    if not match:
+        return None
+    text = read_file('stellar/go-stellar-sdk', module_ref(match.group(1)), 'Makefile')
+    if text is None:
+        return None
+    match = re.search(r'^XDR_COMMIT\s*=\s*(\w+)', text, re.MULTILINE)
+    return match.group(1) if match else None
+
+def module_ref(version):
+    """Git ref for a go module version: a pseudo-version's commit, else the tag."""
+    match = re.search(r'-([0-9a-f]{12})$', version)
+    return match.group(1) if match else version
+
+def xdr_compare(base, head):
+    """How head compares with base in stellar-xdr: identical, ahead, behind, diverged."""
+    result = subprocess.run(
+        ['gh', 'api', f'repos/stellar/stellar-xdr/compare/{base}...{head}', '--jq', '.status'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to compare stellar-xdr {base}...{head}: {result.stderr}",
+              file=sys.stderr)
+        return None
+    return result.stdout.strip() or None
+
+def read_source(dep, path):
+    """Read a file from the dep's repo at its resolved sha, or None."""
+    return read_file(dep['repo'], dep['sha'], path)
+
+def read_file(repo, ref, path):
+    """Read a file from a repo at a ref via the GitHub API, or None."""
+    result = subprocess.run(
+        ['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
+         f"repos/{repo}/contents/{path}?ref={ref}"],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to read {path} from {repo}@{ref}: {result.stderr}",
+              file=sys.stderr)
+        return None
+    return result.stdout
+
+def read_submodule(dep, path):
+    """Commit a submodule is pinned at in the dep's repo, or None."""
+    result = subprocess.run(
+        ['gh', 'api', f"repos/{dep['repo']}/contents/{path}?ref={dep['sha']}", '--jq', '.sha'],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"Error: failed to read submodule {path} from {dep['repo']}@{dep['ref']}: {result.stderr}",
+              file=sys.stderr)
+        return None
+    return result.stdout.strip() or None
+
+if __name__ == '__main__':
+    main()

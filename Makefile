@@ -1,4 +1,4 @@
-__PHONY__: run logs console build build-deps build-deps-xdr build-deps-core build-deps-horizon build-deps-friendbot build-deps-rpc build-deps-lab test
+.PHONY: run logs console build test
 
 CONTAINER_RUNTIME?=docker
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
