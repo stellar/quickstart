@@ -49,7 +49,6 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${CORE_USE_POSTGRES:=}"
 : "${LIMITS:=testnet}"
 
-QUICKSTART_INITIALIZED=false
 CURRENT_POSTGRES_PID=""
 
 function main() {
