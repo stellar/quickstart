@@ -70,6 +70,7 @@ The following image tags are available on DockerHub:
 - [`futurenet`](https://hub.docker.com/layers/stellar/quickstart/futurenet) - unstable software, generally compatible with [futurenet][networks]
 - [`nightly`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches, do not use
 - [`nightly-next`](https://hub.docker.com/layers/stellar/quickstart/nightly) - unstable software, tracking main development branches for the next protocol, do not use
+- `protocol-change-vote` - experiment in which validators vote on protocol changes by name instead of by protocol version number, do not use ([walkthrough](docs/protocol-change-voting.md))
 
 In addition, each commit to the Quickstart repository builds a unique tag that is not updated, that the above tags point to, in the format:
 

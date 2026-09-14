@@ -322,5 +322,67 @@
       "continue-on-error": true,
       "additional-tests": []
     }
+  },
+  {
+    "tag": "protocol-change-vote",
+    "events": [
+      "pull_request",
+      "push"
+    ],
+    "config": {
+      "protocol_version_default": 28,
+      "protocol_version_default_autoupdate": false,
+      "horizon_skip_protocol_version_check": true
+    },
+    "deps": [
+      {
+        "name": "xdr",
+        "repo": "stellar/rs-stellar-xdr",
+        "ref": "v28.0.0"
+      },
+      {
+        "name": "core",
+        "repo": "leighmcculloch/stellar-core",
+        "ref": "vote-upgrades-by-name",
+        "options": {
+          "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
+        }
+      },
+      {
+        "name": "rpc",
+        "repo": "stellar/stellar-rpc",
+        "ref": "v28.0.1"
+      },
+      {
+        "name": "horizon",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v28.0.1",
+        "options": {
+          "pkg": "github.com/stellar/stellar-horizon"
+        }
+      },
+      {
+        "name": "friendbot",
+        "repo": "stellar/friendbot",
+        "ref": "4a6a1715d5b81c640dd9f887dd37b26499e95e72",
+        "options": {
+          "pkg": "github.com/stellar/friendbot"
+        }
+      },
+      {
+        "name": "lab",
+        "repo": "stellar/laboratory",
+        "ref": "main"
+      },
+      {
+        "name": "galexie",
+        "repo": "stellar/stellar-galexie",
+        "ref": "galexie-v28.0.1"
+      }
+    ],
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
   }
 ]
