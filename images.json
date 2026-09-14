@@ -343,7 +343,7 @@
       {
         "name": "core",
         "repo": "leighmcculloch/stellar-core",
-        "ref": "vote-upgrades-by-name",
+        "ref": "95a897b324af39f89756bd3ab3c35248a767d7fe",
         "options": {
           "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
