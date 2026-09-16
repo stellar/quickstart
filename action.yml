@@ -83,15 +83,18 @@ runs:
       shell: bash
 
     - name: "Resolve image"
+      id: resolve
       env:
         IMAGE: ${{ inputs.image || (inputs.artifact && 'quickstart' || 'docker.io/stellar/quickstart') }}:${{ inputs.tag }}
-      run: echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      run: echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: "Pull image"
       # docker run pulls the image itself, but gives up after a single attempt,
       # so a transient registry error fails the whole job. Pull it here with
       # retries instead, leaving docker run to find the image already present.
+      env:
+        IMAGE: ${{ steps.resolve.outputs.image }}
       run: |
         if docker image inspect "$IMAGE" > /dev/null 2>&1; then
           echo "$IMAGE is already present"
@@ -124,7 +127,7 @@ runs:
         --health-interval ${{ inputs.health_interval }}s 
         --health-timeout ${{ inputs.health_timeout }}s 
         --health-retries ${{ inputs.health_retries }} 
-        "$IMAGE"
+        ${{ steps.resolve.outputs.image }}
       shell: bash
 
     - name: "Wait for container to be healthy"
