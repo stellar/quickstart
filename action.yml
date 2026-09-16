@@ -82,6 +82,33 @@ runs:
       run: docker load -i /tmp/image
       shell: bash
 
+    - name: "Pull image"
+      # docker run pulls the image itself, but gives up after a single attempt,
+      # so a transient registry error fails the whole job. Pull it here with
+      # retries instead, leaving docker run to find the image already present.
+      env:
+        IMAGE: ${{ inputs.image || (inputs.artifact && 'quickstart' || 'docker.io/stellar/quickstart') }}:${{ inputs.tag }}
+      run: |
+        if docker image inspect "$IMAGE" > /dev/null 2>&1; then
+          echo "$IMAGE is already present"
+          exit 0
+        fi
+        delay=2
+        for attempt in 1 2 3 4 5; do
+          if docker pull "$IMAGE"; then
+            exit 0
+          fi
+          if [ "$attempt" -eq 5 ]; then
+            break
+          fi
+          echo "docker pull failed (attempt $attempt of 5), retrying in ${delay}s"
+          sleep "$delay"
+          delay=$(( delay * 2 ))
+        done
+        echo "::error::docker pull of $IMAGE failed after 5 attempts"
+        exit 1
+      shell: bash
+
     - run: >
         docker run -d --name stellar 
         -p 8000:8000 
