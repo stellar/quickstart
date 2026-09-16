@@ -108,7 +108,9 @@ runs:
         docker pull "$IMAGE"
       shell: bash
 
-    - run: >
+    - env:
+        IMAGE: ${{ steps.resolve.outputs.image }}
+      run: >
         docker run -d --name stellar 
         -p 8000:8000 
         -p 11626:11626 
@@ -127,7 +129,7 @@ runs:
         --health-interval ${{ inputs.health_interval }}s 
         --health-timeout ${{ inputs.health_timeout }}s 
         --health-retries ${{ inputs.health_retries }} 
-        ${{ steps.resolve.outputs.image }}
+        "$IMAGE"
       shell: bash
 
     - name: "Wait for container to be healthy"
