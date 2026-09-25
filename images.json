@@ -315,7 +315,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "protocol-next"
+        "ref": ["protocol-next", "main"]
       }
     ],
     "tests": {
