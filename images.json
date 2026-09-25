@@ -294,7 +294,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "protocol-next",
+        "ref": "main",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
