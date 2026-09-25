@@ -393,6 +393,8 @@ jobs:
         tag: custom-amd64
 ```
 
+A dep's `ref` can also be an array of refs, in which case the first ref that exists in the repo is used. For example, `"ref": ["my-feature", "main"]` builds `my-feature` if it exists and falls back to `main` if it doesn't.
+
 For an example of a full image definition without inheritance, see the [images.json](./images.json) file in this repository.
 
 
