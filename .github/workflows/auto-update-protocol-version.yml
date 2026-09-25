@@ -41,7 +41,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         images_before="$images"
-        images="$(<<< "$images" ./.scripts/images-with-extras)"
+        images="$(<<< "$images" ./.scripts/images-with-extras --no-fallback)"
         echo "Diff:"
         diff -u --color=always <(<<< "$images_before" jq) <(<<< "$images" jq) || true
         echo "Output:"
