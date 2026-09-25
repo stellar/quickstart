@@ -10,16 +10,13 @@ import hashlib
 #
 # 1. Resolves any 'ref' values in the JSON to a revision sha. A 'ref' may be a
 #    single ref or an array of refs, in which case the first ref that exists in
-#    the repo is used, and 'ref' is replaced with it. With --no-fallback only
-#    the first ref of an array is tried.
+#    the repo is used, and 'ref' is replaced with it.
 # 2. Hashes the entire dep details and injects the hash as an id into the deps
 #    details. The id can be used to uniquely identify a dep configuration.
 #
 # Outputs the original JSON modified.
 #
-# Usage: < images.json ./.scripts/images-with-extras [--no-fallback]
-
-no_fallback = "--no-fallback" in sys.argv[1:]
+# Usage: < images.json ./.scripts/images-with-extras
 
 images = json.load(sys.stdin)
 
@@ -46,8 +43,6 @@ for image in images:
         name = dep["name"]
         repo = dep["repo"]
         refs = dep["ref"] if isinstance(dep["ref"], list) else [dep["ref"]]
-        if no_fallback:
-            refs = refs[:1]
         print(f"{tag} {name} {repo} {refs} ...", file=sys.stderr)
         for ref in refs:
             key = (name, repo, ref)
