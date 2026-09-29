@@ -9,6 +9,11 @@ IMAGE_JSON=.image.json
 .image.json: images.json .scripts/images-with-extras
 	< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
 
+# Force .image.json to regenerate when it was generated for a different TAG
+ifneq ($(shell jq -r '.tag' $(IMAGE_JSON) 2>/dev/null),$(TAG))
+.PHONY: $(IMAGE_JSON)
+endif
+
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
 XDR_SHA =           $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .sha')
