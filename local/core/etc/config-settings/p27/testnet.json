@@ -960,16 +960,6 @@
         "nomination_timeout_increment_milliseconds": 1000,
         "nomination_timeout_initial_milliseconds": 1000
       }
-    },
-    {
-      "frozen_ledger_keys": {
-        "keys": []
-      }
-    },
-    {
-      "freeze_bypass_txs": {
-        "tx_hashes": []
-      }
     }
   ]
 }
