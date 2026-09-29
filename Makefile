@@ -1,13 +1,18 @@
 .PHONY: run logs console build test
+.DELETE_ON_ERROR:
 
 CONTAINER_RUNTIME?=docker
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=latest
 
-# Process images.json through the images-with-extras script
+# Process images.json through the images-with-extras script. Steps hand their
+# output on through a variable rather than a pipe, so that a failure in any of
+# them fails the recipe (/bin/sh may not support pipefail).
 IMAGE_JSON=.image.json
 .image.json: images.json .scripts/images-with-extras
-	< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
+	image="$$(< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]')" \
+		&& image="$$(printf '%s\n' "$$image" | .scripts/images-with-extras)" \
+		&& printf '%s\n' "$$image" | jq '.[]' > $@
 
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
