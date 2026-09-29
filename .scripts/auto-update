@@ -35,8 +35,8 @@ def main():
     for dep in target['deps']:
         name, repo, current = dep['name'], dep['repo'], dep['ref']
 
-        # Skip non-release refs (branches, SHAs)
-        version = VERSION_REF.fullmatch(current)
+        # Skip non-release refs (branches, SHAs, lists of fallback branches)
+        version = isinstance(current, str) and VERSION_REF.fullmatch(current)
         if not version:
             print(f"{name}: skipping, ref is not a version")
             continue
