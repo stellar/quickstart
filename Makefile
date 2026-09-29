@@ -6,13 +6,13 @@ TAG?=latest
 
 # Process images.json through the images-with-extras script
 IMAGE_JSON=.image.json
-.image.json: images.json .scripts/images-with-extras
+.image.json: images.json .scripts/images-with-extras .image.tag
 	< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
 
-# Force .image.json to regenerate when it was generated for a different TAG
-ifneq ($(shell jq -r '.tag' $(IMAGE_JSON) 2>/dev/null),$(TAG))
-.PHONY: $(IMAGE_JSON)
-endif
+# Track TAG as a file so that .image.json regenerates when TAG changes
+.image.tag: FORCE
+	@echo '$(TAG)' | cmp -s - $@ || echo '$(TAG)' > $@
+FORCE:
 
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
