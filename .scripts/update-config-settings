@@ -6,7 +6,9 @@
 # (the format consumed by `stellar-xdr encode --type ConfigUpgradeSet` in the
 # start script) and writes them, sorted for stable output, to testnet.json for
 # the protocol version in effect when retrieved. Internally-maintained,
-# non-upgradeable settings are excluded (no --internal).
+# non-upgradeable settings are excluded (no --internal), as are the frozen
+# ledger keys and freeze bypass txs settings, which stellar-core only changes
+# through their delta settings.
 #
 # unlimited.json is regenerated alongside it: it is testnet.json with a set of
 # "unlimited" scalar overrides applied (cost-param arrays carry through from
@@ -60,8 +62,11 @@ if [ -z "$override_u" ]; then
   exit 1
 fi
 
-# Fetch testnet's settings, sorted for stable output.
-testnet="$(stellar network settings --network testnet --output json | jq -S .)"
+# Fetch testnet's settings, sorted for stable output. The CLI includes
+# frozen_ledger_keys and freeze_bypass_txs without --internal, but stellar-core
+# rejects a ConfigUpgradeSet containing them, so drop them.
+testnet="$(stellar network settings --network testnet --output json \
+  | jq -S '.updated_entry |= map(select(has("frozen_ledger_keys") or has("freeze_bypass_txs") | not))')"
 
 # unlimited.json = testnet.json with the unlimited overrides (the leaf fields
 # where the override source's unlimited.json differs from its testnet.json).
