@@ -33,9 +33,6 @@ on:
         type: "boolean"
         default: true
 
-env:
-  artifact_retention_days_for_image: 7
-
 jobs:
 
   complete:
@@ -52,7 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.sha.outputs.sha }}
-      tag-prefix: ${{ steps.tag-prefix.outputs.tag-prefix }}
       images: ${{ steps.images.outputs.images }}
     steps:
     - uses: actions/checkout@v4
