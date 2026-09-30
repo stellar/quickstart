@@ -4,10 +4,10 @@ CONTAINER_RUNTIME?=docker
 REVISION=$(shell git -c core.abbrev=no describe --always --exclude='*' --long --dirty)
 TAG?=latest
 
-# Process images.json through the images-with-extras script
+# Process images.json through the images-resolve-inherits and images-with-extras scripts
 IMAGE_JSON=.image.json
-.image.json: images.json .scripts/images-with-extras
-	< images.json jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
+.image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras
+	< images.json .scripts/images-resolve-inherits | jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
 
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
