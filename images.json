@@ -13,12 +13,12 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v28.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v28.0.1",
+        "ref": "v29.0.0-internal",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -26,12 +26,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v28.0.1"
+        "ref": "v29.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v28.0.1",
+        "ref": "v29.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -52,7 +52,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v28.0.1"
+        "ref": "galexie-v29.0.0"
       }
     ],
     "tests": {
@@ -80,12 +80,12 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v28.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v28.0.1",
+        "ref": "v29.0.0-internal",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -93,12 +93,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v28.0.1"
+        "ref": "v29.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v28.0.1",
+        "ref": "v29.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -119,7 +119,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v28.0.1"
+        "ref": "galexie-v29.0.0"
       }
     ],
     "tests": {
@@ -289,12 +289,18 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": ["protocol-next", "main"]
+        "ref": [
+          "protocol-next",
+          "main"
+        ]
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": ["protocol-next", "main"],
+        "ref": [
+          "protocol-next",
+          "main"
+        ],
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -315,7 +321,10 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": ["protocol-next", "main"]
+        "ref": [
+          "protocol-next",
+          "main"
+        ]
       }
     ],
     "tests": {
