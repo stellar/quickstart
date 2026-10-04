@@ -13,7 +13,6 @@ export SUPHOME="$STELLAR_HOME/supervisor"
 export COREHOME="$STELLAR_HOME/core"
 export HZHOME="$STELLAR_HOME/horizon"
 export FBHOME="$STELLAR_HOME/friendbot"
-export LABHOME="$STELLAR_HOME/lab"
 export NXHOME="$STELLAR_HOME/nginx"
 export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 export GALEXIEHOME="$STELLAR_HOME/galexie"
@@ -339,7 +338,6 @@ function copy_defaults() {
     echo "supervisor: config directory exists, skipping copy"
   else
     $CP /opt/stellar-default/common/supervisor/ $SUPHOME
-    cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/stellar-rpc.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/galexie.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/ledger-meta-store.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
