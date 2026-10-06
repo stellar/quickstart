@@ -6,6 +6,9 @@ TAG?=latest
 
 # Process images.json through the images-resolve-inherits and images-with-extras scripts
 IMAGE_JSON=.image.json
+.DELETE_ON_ERROR:
+.image.json: SHELL=/bin/bash
+.image.json: .SHELLFLAGS=-o pipefail -c
 .image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras .image.tag
 	< images.json .scripts/images-resolve-inherits | jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
 
