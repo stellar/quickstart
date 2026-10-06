@@ -9,8 +9,13 @@ IMAGE_JSON=.image.json
 .DELETE_ON_ERROR:
 .image.json: SHELL=/bin/bash
 .image.json: .SHELLFLAGS=-o pipefail -c
-.image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras
+.image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras .image.tag
 	< images.json .scripts/images-resolve-inherits | jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
+
+# Track TAG as a file so that .image.json regenerates when TAG changes
+.image.tag: FORCE
+	@echo '$(TAG)' | cmp -s - $@ || echo '$(TAG)' > $@
+FORCE:
 
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
