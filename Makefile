@@ -6,8 +6,13 @@ TAG?=latest
 
 # Process images.json through the images-resolve-inherits and images-with-extras scripts
 IMAGE_JSON=.image.json
-.image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras
+.image.json: images.json .scripts/images-resolve-inherits .scripts/images-with-extras .image.tag
 	< images.json .scripts/images-resolve-inherits | jq '.[] | select(.tag == "$(TAG)") | [ . ]' | .scripts/images-with-extras | jq '.[]' > $@
+
+# Track TAG as a file so that .image.json regenerates when TAG changes
+.image.tag: FORCE
+	@echo '$(TAG)' | cmp -s - $@ || echo '$(TAG)' > $@
+FORCE:
 
 # Extract configuration from selected image
 XDR_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "xdr") | .repo')
