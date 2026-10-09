@@ -120,10 +120,23 @@ jobs:
     - name: Run core test
       if: ${{ contains(matrix.enable, 'core') }}
       timeout-minutes: ${{ fromJSON(steps.timeout.outputs.minutes) }}
+      env:
+        TEST_NETWORK: ${{ matrix.network }}
+        TEST_PROTOCOL: ${{ matrix.image.config.protocol_version_default }}
+        TEST_OPTIONS: ${{ matrix.options }}
       run: |
         docker logs stellar -f &
         echo "supervisorctl tail -f stellar-core" | docker exec -i stellar sh &
-        go run tests/test_core.go
+        args=()
+        if [[ "$TEST_NETWORK" == 'local' && "$TEST_PROTOCOL" -ge 26 ]]; then
+          preset=testnet
+          case "$TEST_OPTIONS" in
+            '--limits mainnet') preset=mainnet ;;
+            '--limits unlimited') preset=unlimited ;;
+          esac
+          args=(--soroban-settings "local/core/etc/config-settings/$preset.json")
+        fi
+        go run tests/test_core.go "${args[@]}"
         curl http://localhost:11626/info
     - name: Run horizon up test
       if: ${{ contains(matrix.enable, 'horizon') }}

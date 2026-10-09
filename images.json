@@ -6,18 +6,18 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 29
     },
     "deps": [
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v29.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -25,14 +25,14 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v25.0.0"
+        "ref": "v29.0.0"
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v29.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
@@ -56,6 +56,18 @@
           "arch": "amd64",
           "network": "pubnet",
           "enable": "core,rpc,horizon"
+        },
+        {
+          "arch": "amd64",
+          "network": "local",
+          "enable": "core",
+          "options": "--limits mainnet"
+        },
+        {
+          "arch": "amd64",
+          "network": "local",
+          "enable": "core",
+          "options": "--limits unlimited"
         }
       ]
     }
@@ -67,18 +79,18 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 29
     },
     "deps": [
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v29.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -86,14 +98,14 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v25.0.0"
+        "ref": "v29.0.0"
       },
       {
         "name": "horizon",
-        "repo": "stellar/go",
-        "ref": "horizon-v24.0.0",
+        "repo": "stellar/stellar-horizon",
+        "ref": "v29.0.0",
         "options": {
-          "pkg": "github.com/stellar/go/services/horizon"
+          "pkg": "github.com/stellar/stellar-horizon"
         }
       },
       {
@@ -122,6 +134,18 @@
           "arch": "amd64",
           "network": "pubnet",
           "enable": "core,rpc,horizon"
+        },
+        {
+          "arch": "amd64",
+          "network": "local",
+          "enable": "core",
+          "options": "--limits mainnet"
+        },
+        {
+          "arch": "amd64",
+          "network": "local",
+          "enable": "core",
+          "options": "--limits unlimited"
         }
       ]
     }
@@ -133,19 +157,19 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 25,
+      "protocol_version_default": 29,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "v25.0.0"
+        "ref": "v28.0.1"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v25.0.0",
+        "ref": "v29.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -153,12 +177,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "1695c9c53a4cfc52ffb53c10da7fef60076e7bba"
+        "ref": "v29.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "88d8ba74bee93f274559d4cc67172538267ee3f2",
+        "ref": "v29.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -189,7 +213,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 24
+      "protocol_version_default": 29
     },
     "deps": [
       {
@@ -244,7 +268,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 25,
+      "protocol_version_default": 29,
       "horizon_skip_protocol_version_check": true
     },
     "deps": [

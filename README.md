@@ -115,6 +115,7 @@ In local network mode, you can optionally pass:
 - `--limits {limits}` to configure specific Stellar's contract resource limits to one of:
   - `default` leaves limits set extremely low which is stellar-core's default configuration
   - `testnet` sets limits to match those used on testnet (the default quickstart configuration)
+  - `mainnet` applies the checked-in mainnet Soroban settings
   - `unlimited` sets limits to the maximum resources that can be configured
 
 The network passphrase of the network defaults to:

@@ -68,12 +68,24 @@ function validate_before_start() {
 
 function validate_after_copy_defaults() {
   if [ "$NETWORK" = "local" ] && [ "$LIMITS" != "default" ]; then
-    local config_dir="$COREHOME/etc/config-settings/p$PROTOCOL_VERSION"
-    local config_path="$config_dir/$LIMITS.json"
+    local config_path="$(limits_config_path)"
+    local config_dir="${config_path%/*}"
     if [ ! -f "$config_path" ]; then
-      echo "--limits '$LIMITS' unknown: must be one of: default "$(ls $config_dir | sed 's/\.json//g')
+      local available_limits="default $(find "$config_dir" -maxdepth 1 -type f -name '*.json' -exec basename {} .json \;)"
+      if [ "$config_dir" != "$COREHOME/etc/config-settings" ] && [ -f "$COREHOME/etc/config-settings/mainnet.json" ]; then
+        available_limits="$available_limits mainnet"
+      fi
+      echo "--limits '$LIMITS' unknown: must be one of: $available_limits"
       exit 1
     fi
+  fi
+}
+
+function limits_config_path() {
+  if [ "$LIMITS" = "mainnet" ] || [[ "$PROTOCOL_VERSION" =~ ^[0-9]+$ && "$PROTOCOL_VERSION" -ge 26 ]]; then
+    echo "$COREHOME/etc/config-settings/$LIMITS.json"
+  else
+    echo "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json"
   fi
 }
 
@@ -331,7 +343,7 @@ function copy_defaults() {
   else
     $CP /opt/stellar-default/common/core/ $COREHOME
     $CP /opt/stellar-default/$NETWORK/core/ $COREHOME
-    if [ "$NETWORK" = "local" ]; then
+    if [ "$NETWORK" = "local" ] && [[ "$PROTOCOL_VERSION" =~ ^[0-9]+$ && "$PROTOCOL_VERSION" -lt 26 ]]; then
       # If there are no config settings for the current network, use the config
       # settings from the most recent protocol.
       local config_dir_base="$COREHOME/etc/config-settings"
@@ -667,9 +679,9 @@ function upgrade_local() {
     
     echo "upgrades: soroban config '$LIMITS' limits"
 
-    # Then upgrade with the existing protocol version specific file
+    # Then upgrade with the selected limits file
     # Pass the expected sequence number of the root account after the first call to upgrade_soroban_config
-    upgrade_soroban_config "$COREHOME/etc/config-settings/p$PROTOCOL_VERSION/$LIMITS.json" 4
+    upgrade_soroban_config "$(limits_config_path)" 4
   fi
 
   # Start friendbot once network upgrades are complete and network is ready.
