@@ -203,6 +203,7 @@
   {
     "tag": "nightly",
     "events": [
+      "pull_request",
       "push",
       "schedule"
     ],
