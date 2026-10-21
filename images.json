@@ -26,12 +26,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v29.0.1"
+        "ref": "v30.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -93,12 +93,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v29.0.1"
+        "ref": "v30.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
