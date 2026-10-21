@@ -52,7 +52,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v29.0.0"
+        "ref": "galexie-v30.0.0"
       }
     ],
     "tests": {
@@ -119,7 +119,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v29.0.0"
+        "ref": "galexie-v30.0.0"
       }
     ],
     "tests": {
