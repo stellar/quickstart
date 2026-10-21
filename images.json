@@ -18,7 +18,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -26,12 +26,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v29.0.1"
+        "ref": "v30.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -52,7 +52,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v29.0.0"
+        "ref": "galexie-v30.0.0"
       }
     ],
     "tests": {
@@ -85,7 +85,7 @@
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "configure_flags": "--disable-tests"
         }
@@ -93,12 +93,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "v29.0.1"
+        "ref": "v30.0.0"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "v29.0.0",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -119,7 +119,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v29.0.0"
+        "ref": "galexie-v30.0.0"
       }
     ],
     "tests": {
