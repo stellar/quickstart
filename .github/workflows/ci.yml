@@ -92,11 +92,7 @@ jobs:
     # from forks or opened by dependabot, are not able to push images.
     - name: Secrets
       id: secrets
-      env:
-        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      run: |
-        if [ -n "$DOCKERHUB_TOKEN" ]; then has_secrets=true; else has_secrets=false; fi
-        echo "has-secrets=$has_secrets" | tee -a $GITHUB_OUTPUT
+      run: echo "has-secrets=${{ secrets.DOCKERHUB_TOKEN != '' }}" | tee -a $GITHUB_OUTPUT
 
   build:
     name: 2 build
