@@ -50,6 +50,7 @@ jobs:
       images: ${{ steps.images.outputs.images }}
       tags: ${{ steps.tags.outputs.tags }}
       archs: ${{ steps.archs.outputs.archs }}
+      has-secrets: ${{ steps.secrets.outputs.has-secrets }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -87,6 +88,15 @@ jobs:
         archs='["amd64","arm64"]'
         <<< $archs jq
         echo "archs=$archs" >> $GITHUB_OUTPUT
+    # Builds that don't have access to secrets, such as builds for pull requests
+    # from forks or opened by dependabot, are not able to push images.
+    - name: Secrets
+      id: secrets
+      env:
+        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: |
+        if [ -n "$DOCKERHUB_TOKEN" ]; then has_secrets=true; else has_secrets=false; fi
+        echo "has-secrets=$has_secrets" | tee -a $GITHUB_OUTPUT
 
   build:
     name: 2 build
@@ -117,7 +127,7 @@ jobs:
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
   push:
-    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.setup.outputs.has-secrets == 'true')
     name: 5 push
     needs: [setup, build]
     permissions:
@@ -140,7 +150,7 @@ jobs:
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   action-using-registry:
-    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.setup.outputs.has-secrets == 'true')
     needs: [setup, push]
     name: 6 test action registry
     uses: ./.github/workflows/internal-action-test.yml
