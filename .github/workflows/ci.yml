@@ -116,8 +116,6 @@ jobs:
       artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
-  # Pull requests from forks, and builds triggered by dependabot, don't have
-  # access to secrets and so are not able to push images.
   push:
     if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     name: 5 push
