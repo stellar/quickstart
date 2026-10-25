@@ -50,7 +50,6 @@ jobs:
       images: ${{ steps.images.outputs.images }}
       tags: ${{ steps.tags.outputs.tags }}
       archs: ${{ steps.archs.outputs.archs }}
-      has-secrets: ${{ steps.secrets.outputs.has-secrets }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -88,11 +87,6 @@ jobs:
         archs='["amd64","arm64"]'
         <<< $archs jq
         echo "archs=$archs" >> $GITHUB_OUTPUT
-    # Builds that don't have access to secrets, such as builds for pull requests
-    # from forks or opened by dependabot, are not able to push images.
-    - name: Secrets
-      id: secrets
-      run: echo "has-secrets=${{ secrets.DOCKERHUB_TOKEN != '' }}" | tee -a $GITHUB_OUTPUT
 
   build:
     name: 2 build
@@ -122,8 +116,10 @@ jobs:
       artifact: image-quickstart-${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}.tar
       tag: ${{ fromJSON(needs.setup.outputs.tags)[0] }}-${{ fromJSON(needs.setup.outputs.archs)[0] }}
 
+  # Pull requests from forks, and builds triggered by dependabot, don't have
+  # access to secrets and so are not able to push images.
   push:
-    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.setup.outputs.has-secrets == 'true')
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     name: 5 push
     needs: [setup, build]
     permissions:
@@ -146,7 +142,7 @@ jobs:
       registry_password: ${{ secrets.DOCKERHUB_TOKEN || github.token }}
 
   action-using-registry:
-    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.setup.outputs.has-secrets == 'true')
+    if: ((github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     needs: [setup, push]
     name: 6 test action registry
     uses: ./.github/workflows/internal-action-test.yml
