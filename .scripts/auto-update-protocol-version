@@ -16,7 +16,8 @@ import sys
 # updates.
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
-#   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
+#   core     stellar-core     src/util/ProtocolVersion.h MAX_SUPPORTED_PROTOCOL_VERSION
+#                             (older: src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION)
 #   rpc      stellar-rpc      go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
 #   horizon  stellar-horizon  go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
 #
