@@ -49,6 +49,7 @@ jobs:
       tag-alias-prefix: ${{ steps.tag-prefix.outputs.tag-alias-prefix }}
       images: ${{ steps.images.outputs.images }}
       tags: ${{ steps.tags.outputs.tags }}
+      protocol-versions: ${{ steps.tags.outputs.protocol-versions }}
       archs: ${{ steps.archs.outputs.archs }}
     steps:
     - uses: actions/checkout@v2
@@ -81,6 +82,9 @@ jobs:
         tags="$(<<< $images jq -c '[.[].tag]')"
         <<< $tags jq
         echo "tags=$tags" >> $GITHUB_OUTPUT
+        protocol_versions="$(<<< $images jq -c 'map({(.tag): .config.protocol_version_default}) | add')"
+        <<< $protocol_versions jq
+        echo "protocol-versions=$protocol_versions" >> $GITHUB_OUTPUT
     - name: Architectures
       id: archs
       run: |
@@ -132,6 +136,7 @@ jobs:
       tags: ${{ needs.setup.outputs.tags }}
       archs: ${{ needs.setup.outputs.archs }}
       tag-prefix: ${{ needs.setup.outputs.tag-prefix }}
+      protocol-versions: ${{ needs.setup.outputs.protocol-versions }}
       tag-alias-prefix: ${{ needs.setup.outputs.tag-alias-prefix }}
       registry_repo: ${{ github.repository }}
     secrets:
@@ -145,7 +150,7 @@ jobs:
     name: 6 test action registry
     uses: ./.github/workflows/internal-action-test.yml
     with:
-      tag: ${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
+      tag: p${{ fromJSON(needs.setup.outputs.protocol-versions)[fromJSON(needs.setup.outputs.tags)[0]] }}-${{ needs.setup.outputs.tag-prefix }}${{ fromJSON(needs.setup.outputs.tags)[0] }}
 
   notify:
     name: 7 slack notify on failure

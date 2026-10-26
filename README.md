@@ -74,11 +74,12 @@ The following image tags are available on DockerHub:
 In addition, each commit to the Quickstart repository builds a unique tag that is not updated, that the above tags point to, in the format:
 
 ```
-v<version>-b<build>.<attempt>-<tag>
+p<protocol>-v<version>-b<build>.<attempt>-<tag>
 ```
 
 Where:
 
+- `protocol` = the default protocol version of the image
 - `version` = a version number, incremented with each commit
 - `build` = a build number, additionally incremented for repeat builds of an existing commit
 - `attempt` = an attempt number, additionally incremented for retried repeat builds of an existing commit

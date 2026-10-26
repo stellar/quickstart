@@ -24,6 +24,10 @@ on:
         description: "Tag prefix for the image when pushed (e.g. pr877-v21-)"
         type: "string"
         required: true
+      protocol-versions:
+        description: 'Default protocol version of each tag, prefixed to the immutable tag (e.g. {"latest": 28, ...})'
+        type: "string"
+        required: true
       tag-alias-prefix:
         description: "A second tag prefix for the image when pushed that'll be pushed in addition as an alias (e.g. pr877-)"
         type: "string"
@@ -67,7 +71,7 @@ jobs:
     steps:
     - name: Create Tag
       id: tag
-      run: echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
+      run: echo "tag=p${{ fromJSON(inputs.protocol-versions)[matrix.tag] }}-${{ inputs.tag-prefix }}${{ matrix.tag }}-${{ matrix.arch }}" | tee -a $GITHUB_OUTPUT
     - name: Download Image from Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -132,7 +136,7 @@ jobs:
     - name: Create Tag
       id: tag
       run: |
-        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag=p${{ fromJSON(inputs.protocol-versions)[matrix.tag] }}-${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
     - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ secrets.registry }}
@@ -194,7 +198,7 @@ jobs:
     - name: Create Tag
       id: tag
       run: |
-        echo "tag=${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
+        echo "tag=p${{ fromJSON(inputs.protocol-versions)[matrix.tag] }}-${{ inputs.tag-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
         echo "tag-alias=${{ inputs.tag-alias-prefix }}${{ matrix.tag }}" | tee -a $GITHUB_OUTPUT
     - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
