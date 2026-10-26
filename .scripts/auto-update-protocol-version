@@ -131,16 +131,22 @@ def xdr_version(dep):
     return None
 
 def core_version(dep):
-    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core."""
-    text = read_source(dep, 'src/main/Config.cpp')
-    if text is None:
+    """Ledger protocol version stellar-core supports."""
+    # Newer stellar-core defines MAX_SUPPORTED_PROTOCOL_VERSION in ProtocolVersion.h
+    # and derives CURRENT_LEDGER_PROTOCOL_VERSION from it; older stellar-core sets
+    # CURRENT_LEDGER_PROTOCOL_VERSION to a literal in Config.cpp.
+    version = None
+    for path, name in (('src/util/ProtocolVersion.h', 'MAX_SUPPORTED_PROTOCOL_VERSION'),
+                       ('src/main/Config.cpp', 'CURRENT_LEDGER_PROTOCOL_VERSION')):
+        text = read_source(dep, path)
+        match = text and re.search(rf'{name}\s*=\s*(\d+)', text)
+        if match:
+            version = int(match.group(1))
+            break
+    if version is None:
         return None
-    match = re.search(r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(\d+)', text)
-    if not match:
-        return None
-    version = int(match.group(1))
     # stellar-core built with this flag supports one version beyond its source
-    # constant, matching the #ifdef in Config.cpp; read it from the core dep options.
+    # constant, matching the #ifdef beside it; read it from the core dep options.
     next_flag = '--enable-next-protocol-version-unsafe-for-production'
     if next_flag in dep.get('options', {}).get('configure_flags', ''):
         version += 1
