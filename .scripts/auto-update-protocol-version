@@ -133,12 +133,13 @@ def xdr_version(dep):
 
 def core_version(dep):
     """Ledger protocol version stellar-core supports."""
-    # Newer stellar-core defines MAX_SUPPORTED_PROTOCOL_VERSION in ProtocolVersion.h
-    # and derives CURRENT_LEDGER_PROTOCOL_VERSION from it; older stellar-core sets
-    # CURRENT_LEDGER_PROTOCOL_VERSION to a literal in Config.cpp.
+    # Older stellar-core sets CURRENT_LEDGER_PROTOCOL_VERSION to a literal in
+    # Config.cpp; newer stellar-core derives it from MAX_SUPPORTED_PROTOCOL_VERSION in
+    # ProtocolVersion.h. Config.cpp is tried first as it exists in both, so older
+    # stellar-core never logs a failed read of ProtocolVersion.h.
     version = None
-    for path, name in (('src/util/ProtocolVersion.h', 'MAX_SUPPORTED_PROTOCOL_VERSION'),
-                       ('src/main/Config.cpp', 'CURRENT_LEDGER_PROTOCOL_VERSION')):
+    for path, name in (('src/main/Config.cpp', 'CURRENT_LEDGER_PROTOCOL_VERSION'),
+                       ('src/util/ProtocolVersion.h', 'MAX_SUPPORTED_PROTOCOL_VERSION')):
         text = read_source(dep, path)
         match = text and re.search(rf'{name}\s*=\s*(\d+)', text)
         if match:
