@@ -129,5 +129,3 @@ jobs:
           --body-file pr-body.md \
           --base main \
           --head "$branch"
-
-        gh pr merge --auto --squash "$branch"
