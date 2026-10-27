@@ -6,7 +6,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 28,
+      "protocol_version_default": 30,
       "protocol_version_default_autoupdate": true
     },
     "deps": [
@@ -73,7 +73,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 28,
+      "protocol_version_default": 30,
       "protocol_version_default_autoupdate": true
     },
     "deps": [
@@ -207,7 +207,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 28,
+      "protocol_version_default": 30,
       "protocol_version_default_autoupdate": true
     },
     "deps": [
@@ -268,7 +268,7 @@
       "schedule"
     ],
     "config": {
-      "protocol_version_default": 28,
+      "protocol_version_default": 30,
       "protocol_version_default_autoupdate": true,
       "horizon_skip_protocol_version_check": true
     },
