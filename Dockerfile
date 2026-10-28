@@ -19,6 +19,7 @@ ARG FRIENDBOT_IMAGE=stellar-friendbot-stage
 ARG RPC_IMAGE=stellar-rpc-stage
 ARG LAB_IMAGE=stellar-lab-stage
 ARG GALEXIE_IMAGE=stellar-galexie-stage
+ARG VARIANT_IMAGE=quickstart
 
 # xdr
 
@@ -206,6 +207,21 @@ FROM scratch AS stellar-galexie-stage
 
 COPY --from=stellar-galexie-builder /galexie /galexie
 
+# thruput
+
+# The Thruput CLI is built from its crates.io release on the same base as the
+# final image, because Rust images ship a newer glibc. The CLI then installs
+# the published hog-devnode runtime it supervises, verifying its checksum.
+FROM ubuntu:24.04 AS thruput-builder
+ARG THRUPUT_VERSION
+ARG HOG_DEVNODE_VERSION
+RUN apt-get update && apt-get install -y curl ca-certificates build-essential pkg-config libssl-dev
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN cargo install thruput --locked --version "$THRUPUT_VERSION" --root /thruput
+RUN /thruput/bin/thruput toolchain install "$HOG_DEVNODE_VERSION"
+RUN cp -r /root/.cache/thruput/toolchain/hog-devnode/"$HOG_DEVNODE_VERSION"/*-linux-gnu /hog-devnode
+
 # quickstart
 
 FROM $XDR_IMAGE AS xdr
@@ -266,3 +282,15 @@ ADD start /
 RUN ["chmod", "+x", "start"]
 
 ENTRYPOINT ["/start"]
+
+# The thruput image variant adds the Thruput CLI, its hog-devnode runtime and
+# the shared libraries hog-devnode needs, and the Thruput service config.
+FROM quickstart AS thruput
+COPY --from=thruput-builder /thruput/bin/thruput /usr/local/bin/thruput
+COPY --from=thruput-builder /hog-devnode /usr/local/lib/hog-devnode
+RUN apt-retry sh -c 'apt-get update && apt-get install -y libatomic1 libjemalloc2 libsnappy1v5 liblz4-1 libzstd1' && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY thruput /opt/stellar-default/thruput
+
+# The image built is quickstart, or the variant of it named by VARIANT_IMAGE.
+FROM $VARIANT_IMAGE

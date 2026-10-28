@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+
+set -e
+
+# Runs the local Thruput network: hog-devnode, supervised by `thruput node`,
+# which serves its JSON-RPC API, including the local faucet, on
+# 127.0.0.1:9545. nginx serves it at /thruput/rpc.
+#
+# No key is funded at genesis; accounts are funded through the faucet. The RAM
+# database is capped well below its default to suit Docker hosts with less
+# memory.
+
+export HOME=/opt/stellar/thruput/node
+
+echo "starting thruput node..."
+exec thruput node \
+  --offline \
+  --hog-devnode-binary /usr/local/lib/hog-devnode/hog-devnode \
+  --host 127.0.0.1 \
+  --port 9545 \
+  --ramdb-bytes 2G \
+  --data-dir "$HOME/data"

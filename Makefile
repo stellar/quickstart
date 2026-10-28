@@ -36,6 +36,12 @@ FRIENDBOT_OPTIONS = $(shell < $(IMAGE_JSON) jq -c '.deps[] | select(.name == "fr
 LAB_REPO =          $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "lab") | .repo')
 LAB_SHA =           $(shell < $(IMAGE_JSON) jq -r '.deps[] | select(.name == "lab") | .sha')
 
+# Images with a thruput config also install the Thruput CLI and its local node
+# runtime, both published releases.
+THRUPUT_VERSION =     $(shell < $(IMAGE_JSON) jq -r '.config.thruput.cli // empty')
+HOG_DEVNODE_VERSION = $(shell < $(IMAGE_JSON) jq -r '.config.thruput.hog_devnode // empty')
+THRUPUT_BUILD_ARGS =  $(if $(THRUPUT_VERSION),--build-arg VARIANT_IMAGE=thruput --build-arg THRUPUT_VERSION="$(THRUPUT_VERSION)" --build-arg HOG_DEVNODE_VERSION="$(HOG_DEVNODE_VERSION)")
+
 run:
 	$(CONTAINER_RUNTIME) run --rm -i --name stellar -p 8000:8000 -p 11626:11626 stellar/quickstart:$(TAG) --local
 
@@ -54,7 +60,8 @@ build: $(IMAGE_JSON)
 		--build-arg GALEXIE_REPO="$(GALEXIE_REPO)" --build-arg GALEXIE_REF="$(GALEXIE_SHA)" \
 		--build-arg HORIZON_REPO="$(HORIZON_REPO)" --build-arg HORIZON_REF="$(HORIZON_SHA)" --build-arg HORIZON_OPTIONS='$(HORIZON_OPTIONS)' \
 		--build-arg FRIENDBOT_REPO="$(FRIENDBOT_REPO)" --build-arg FRIENDBOT_REF="$(FRIENDBOT_SHA)" --build-arg FRIENDBOT_OPTIONS='$(FRIENDBOT_OPTIONS)' \
-		--build-arg LAB_REPO="$(LAB_REPO)" --build-arg LAB_REF=$(LAB_SHA)
+		--build-arg LAB_REPO="$(LAB_REPO)" --build-arg LAB_REF=$(LAB_SHA) \
+		$(THRUPUT_BUILD_ARGS)
 
 # Run the same tests that CI runs against a running quickstart container.
 # Build and run the container first with: make build run TAG=...

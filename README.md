@@ -61,6 +61,8 @@ HTTP APIs and Tools are available at the following port and paths:
 - Ledger Meta: `http://localhost:8000/ledger-meta` (available with `--local` and `--enable galexie`)
 - History Archive: `http://localhost:8000/archive` (available with `--local` only)
 
+The `thruput` image also runs a local Thruput network, see [Thruput](#thruput).
+
 ## Tags
 
 The following image tags are available on DockerHub:
@@ -298,6 +300,57 @@ http://localhost:8000/ledger-meta
 The ledger meta store includes:
 - `.config.json` - Configuration file describing the data format
 - Partition directories containing compressed XDR files compressed with zstd with one ledger per file (`.xdr.zst`)
+
+### Thruput
+
+The `thruput` image also runs a local [Thruput](https://www.thruput.network) network alongside the local Stellar network. It is built from Thruput's public releases: the [`thruput`](https://crates.io/crates/thruput) CLI from crates.io, and the `hog-devnode` runtime that the CLI installs and verifies. It adds these services:
+
+- `thruput-node` - a local Thruput network, `hog-devnode` supervised by `thruput node`, which serves the Thruput [JSON-RPC API](https://www.thruput.network/docs/reference/json-rpc-api/), including the local faucet.
+- `thruput-accounts` - creates a Thruput account for every account created on the Stellar network, for the same ed25519 key, funded by an airdrop from the faucet. It follows account creations in Horizon, so it runs only when `horizon` is enabled too.
+
+The `thruput` image uses `--local` network mode by default. The services run only in that mode, where they are enabled by default. To run without them, use the `--enable` option to specify the services you wish to run without `thruput`, for example `--enable core,horizon,rpc`.
+
+Build the image with:
+
+```
+make build TAG=thruput
+```
+
+The Thruput versions are set in the `thruput` image's `config` in `images.json`.
+
+Run it with:
+
+```
+docker run --rm -it -p 8000:8000 --name stellar stellar/quickstart:thruput
+```
+
+The Thruput RPC is available at `http://localhost:8000/thruput/rpc`.
+
+To use the network with the [`thruput` CLI](https://www.thruput.network/docs/cli/install/), create a profile for it:
+
+```
+thruput config new quickstart --network local --rpc-url http://localhost:8000/thruput/rpc --use --global
+```
+
+The CLI funds accounts on a local network with the faucet named in the node's runtime manifest, so copy the manifest out of the container, and pass it to `thruput airdrop`. The manifest changes when the container restarts, so copy it again after each restart. Create a funded key with:
+
+```
+docker cp stellar:/opt/stellar/thruput/node/data/runtime/runtime-manifest.json quickstart-manifest.json
+thruput keys generate alice
+thruput airdrop alice --runtime-manifest quickstart-manifest.json
+thruput balance alice
+```
+
+The key of every Stellar account also has a Thruput account. To use a Stellar key with the `thruput` CLI, import its secret. `thruput keys ls` shows the address of its Thruput account, and `thruput balance` its balance:
+
+```
+stellar keys generate carol --network local --fund
+stellar keys secret carol | thruput keys import carol
+thruput keys ls
+thruput balance carol
+```
+
+The hosted Thruput [explorer](https://www.thruput.network/docs/tools/block-explorer/) and [faucet](https://www.thruput.network/docs/tools/faucet/) serve Futurenet, and are not included in the image.
 
 ### Using in GitHub Actions
 

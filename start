@@ -6,6 +6,7 @@ green=$(echo -e "\e[32m")
 blue=$(echo -e "\e[34m")
 purple=$(echo -e "\e[35m")
 cyan=$(echo -e "\e[36m")
+yellow=$(echo -e "\e[33m")
 
 export STELLAR_HOME="/opt/stellar"
 export PGHOME="$STELLAR_HOME/postgresql"
@@ -19,6 +20,7 @@ export STELLAR_RPC_HOME="$STELLAR_HOME/stellar-rpc"
 export GALEXIEHOME="$STELLAR_HOME/galexie"
 export LEDGERMETASTOREHOME="$STELLAR_HOME/ledger-meta-store"
 export HISTORYARCHIVEHOME="$STELLAR_HOME/history-archive"
+export THRUPUTHOME="$STELLAR_HOME/thruput"
 
 export CORELOG="/var/log/stellar-core"
 
@@ -30,12 +32,13 @@ export PGPORT=5432
 export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version_default')"
 
 : "${PROTOCOL_VERSION:=$PROTOCOL_VERSION_DEFAULT}"
-: "${ENABLE:=core,horizon,rpc}"
+: "${ENABLE:=core,horizon,rpc,thruput}"
 : "${ENABLE_LOGS:=false}"
 : "${ENABLE_CORE:=false}"
 : "${ENABLE_HORIZON:=false}"
 : "${ENABLE_LAB:=false}"
 : "${ENABLE_GALEXIE:=false}"
+: "${ENABLE_THRUPUT:=false}"
 # TODO: Remove once the Soroban RPC name is fully deprecated
 : "${ENABLE_SOROBAN_RPC:=false}"
 : "${ENABLE_RPC:=$ENABLE_SOROBAN_RPC}"
@@ -105,6 +108,11 @@ function start() {
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "lab") | "\(.ref) (\(.sha))"')"
   echo "  galexie:"
   echo "    $(< /image.json jq -r '.deps[] | select(.name == "galexie") | "\(.ref) (\(.sha))"')"
+  if thruput_installed; then
+    echo "  thruput:"
+    echo "    cli: $(< /image.json jq -r '.config.thruput.cli')"
+    echo "    hog-devnode: $(< /image.json jq -r '.config.thruput.hog_devnode')"
+  fi
 
   echo "mode: $STELLAR_MODE"
   echo "network: $NETWORK"
@@ -124,6 +132,7 @@ function start() {
   copy_pgpass
   init_stellar_rpc
   init_galexie
+  init_thruput
 
   stop_postgres  # this gets started in init_db
 
@@ -216,7 +225,12 @@ function process_args() {
 
   # TODO: ask for what network to use
   if [ -z "$NETWORK" ]; then
-    NETWORK="testnet"
+    # The thruput image runs the local network by default, where Thruput runs.
+    if thruput_installed; then
+      NETWORK="local"
+    else
+      NETWORK="testnet"
+    fi
   fi
 
   if [[ ",$ENABLE," = *",core,"* ]]; then
@@ -237,6 +251,16 @@ function process_args() {
 
   if [[ ",$ENABLE," = *",galexie,"* ]]; then
     ENABLE_GALEXIE=true
+  fi
+
+  if [[ ",$ENABLE," = *",thruput,"* ]]; then
+    ENABLE_THRUPUT=true
+  fi
+
+  # Thruput runs only in the thruput image's local network, and is ignored
+  # elsewhere.
+  if [ "$NETWORK" != "local" ] || ! thruput_installed; then
+    ENABLE_THRUPUT=false
   fi
 
   case "$NETWORK" in
@@ -344,6 +368,9 @@ function copy_defaults() {
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/ledger-meta-store.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/friendbot.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
     cp /opt/stellar-default/$NETWORK/supervisor/etc/supervisord.conf.d/history-archive.conf $SUPHOME/etc/supervisord.conf.d 2>/dev/null || true
+    if thruput_installed; then
+      cp /opt/stellar-default/thruput/supervisor/etc/supervisord.conf.d/*.conf $SUPHOME/etc/supervisord.conf.d
+    fi
   fi
 
   if [ -d $COREHOME/etc ]; then
@@ -407,6 +434,17 @@ function copy_defaults() {
     $CP /opt/stellar-default/common/nginx/ $NXHOME
     if [ -d /opt/stellar-default/$NETWORK/nginx/ ]; then
       $CP /opt/stellar-default/$NETWORK/nginx/ $NXHOME
+    fi
+    if thruput_installed; then
+      $CP /opt/stellar-default/thruput/nginx/ $NXHOME
+    fi
+  fi
+
+  if thruput_installed; then
+    if [ -d $THRUPUTHOME ]; then
+      echo "thruput: config directory exists, skipping copy"
+    else
+      $CP /opt/stellar-default/thruput/ $THRUPUTHOME
     fi
   fi
 
@@ -658,6 +696,18 @@ function init_galexie() {
   popd
 }
 
+function thruput_installed() {
+  [ -x /usr/local/bin/thruput ]
+}
+
+function init_thruput() {
+  if [ "$ENABLE_THRUPUT" != "true" ]; then
+    return 0
+  fi
+
+  run_silent "chown-thruput" chown -R stellar:stellar $THRUPUTHOME
+}
+
 function kill_supervisor() {
   kill -3 $(cat "/var/run/supervisord.pid")
 }
@@ -896,6 +946,13 @@ function start_optional_services() {
     supervisorctl start ledger-meta-store
     supervisorctl start galexie
   fi
+
+  if [ "$ENABLE_THRUPUT" == "true" ]; then
+    supervisorctl start thruput-node
+    if [ "$ENABLE_HORIZON" == "true" ]; then
+      supervisorctl start thruput-accounts
+    fi
+  fi
 }
 
 function exec_supervisor() {
@@ -927,6 +984,9 @@ function print_service_logs() {
   fi
   if [ "$ENABLE_RPC" = "true" ]; then
     supervisorctl tail -f stellar-rpc  stdout > >(sed "s/^/${blue}stellar-rpc  | $clear/") &
+  fi
+  if [ "$ENABLE_THRUPUT" = "true" ]; then
+    supervisorctl tail -f thruput-node stdout > >(sed "s/^/${yellow}thruput-node | $clear/") &
   fi
 }
 
@@ -1015,6 +1075,9 @@ function service_status() {
     stellar_core_status "rpc" 11826 &
     stellar_rpc_status &
   fi
+  if [ "$ENABLE_THRUPUT" = "true" ]; then
+    thruput_status &
+  fi
 }
 
 function stellar_core_status() {
@@ -1046,6 +1109,19 @@ function stellar_rpc_status() {
     sleep 5
   done
   echo "stellar-rpc: up and ready"
+}
+
+function thruput_status() {
+  echo "thruput: waiting for ready state..."
+  while ! curl --silent --fail --request POST 'http://localhost:8000/thruput/rpc' \
+      --header 'Content-Type: application/json' \
+      --data-raw '{ "jsonrpc": "2.0", "id": 1, "method": "getChainTip" }' |
+      jq --exit-status '.result != null' > /dev/null 2>&1;
+  do
+    sleep 5
+  done
+  echo "thruput: up and ready"
+  echo "thruput: rpc: http://localhost:8000/thruput/rpc"
 }
 
 function horizon_status() {

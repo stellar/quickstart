@@ -305,6 +305,7 @@ jobs:
         args="$(<<< $image_json jq -c -r '[ .deps[] | [
         "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)-${{ matrix.arch }}"
         ] ] | flatten | join(" ")')"
+        args="${args} $(<<< $image_json jq -r '.config.thruput // empty | "--build-arg VARIANT_IMAGE=thruput --build-arg THRUPUT_VERSION=\(.cli) --build-arg HOG_DEVNODE_VERSION=\(.hog_devnode)"')"
         echo "args=${args}" | tee -a $GITHUB_OUTPUT
     - name: Build Image
       run: >

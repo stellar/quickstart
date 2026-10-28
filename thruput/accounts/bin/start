@@ -1,0 +1,99 @@
+#! /usr/bin/env python3
+
+# Creates a Thruput account for every account created on the Stellar network,
+# for the same ed25519 key. It follows the account_created effects in Horizon,
+# and creates each Thruput account by requesting an airdrop for it from the
+# local node's faucet. The last effect handled is kept in the file cursor, so a
+# restart continues where it stopped.
+
+import base64
+import hashlib
+import json
+import time
+import urllib.request
+
+HORIZON = "http://localhost:8001"
+THRUPUT_RPC = "http://127.0.0.1:9545"
+BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def base58(data):
+    n = int.from_bytes(data, "big")
+    out = ""
+    while n:
+        n, r = divmod(n, 58)
+        out = BASE58[r] + out
+    return "1" * (len(data) - len(data.lstrip(b"\0"))) + out
+
+
+def thruput_address(stellar_account):
+    # A Stellar account ID is a G StrKey of an ed25519 public key. The
+    # Thruput account of that key is its pubkey account with nonce 0, whose
+    # address is sha256(cxs(DomainSeparator("PubkeyAccount")) ||
+    # cxs(PubkeyAccountPreimage)), where the preimage names the key by
+    # sha256(cxs(DomainSeparator("PublicKey")) || cxs(PublicKey::Ed25519)).
+    key = base64.b32decode(stellar_account)[1:33]
+    key_hash = hashlib.sha256(b"\x00\x09PublicKey" + b"\x00" + key).digest()
+    address = hashlib.sha256(b"\x00\x0dPubkeyAccount" + key_hash + b"\x00").digest()
+    return base58(address)
+
+
+def post(url, body):
+    request = urllib.request.Request(
+        url, json.dumps(body).encode(), {"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.load(response)
+
+
+def create_thruput_account(stellar_account):
+    address = thruput_address(stellar_account)
+    # The airdrop is keyed by the Stellar key, so requesting it until it
+    # succeeds funds the account only once.
+    nonce = "0x" + base64.b32decode(stellar_account)[1:33].hex()
+    request = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "faucet_requestAirdrop",
+        "params": {"recipient": address, "clientNonce": nonce},
+    }
+    while True:
+        try:
+            result = post(THRUPUT_RPC, request).get("result") or {}
+            if result.get("attemptStatus") == "succeeded":
+                print(f"thruput account {address} for stellar account "
+                      f"{stellar_account}: {result['transactionHash']}", flush=True)
+                return
+        except OSError:
+            pass
+        time.sleep(1)
+
+
+def main():
+    try:
+        with open("cursor") as f:
+            cursor = f.read().strip()
+    except FileNotFoundError:
+        cursor = ""
+    print("creating thruput accounts for new stellar accounts...", flush=True)
+    while True:
+        url = f"{HORIZON}/effects?order=asc&limit=200"
+        if cursor:
+            url += f"&cursor={cursor}"
+        try:
+            with urllib.request.urlopen(url, timeout=30) as response:
+                records = json.load(response)["_embedded"]["records"]
+        except OSError:
+            records = []
+        if not records:
+            time.sleep(5)
+            continue
+        for record in records:
+            if record["type"] == "account_created":
+                create_thruput_account(record["account"])
+            cursor = record["paging_token"]
+            with open("cursor", "w") as f:
+                f.write(cursor)
+
+
+main()

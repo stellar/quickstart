@@ -331,5 +331,20 @@
       "continue-on-error": true,
       "additional-tests": []
     }
+  },
+  {
+    "tag": "thruput",
+    "inherit": "latest",
+    "events": [],
+    "config": {
+      "thruput": {
+        "cli": "0.42.0",
+        "hog_devnode": "0.1.31"
+      }
+    },
+    "tests": {
+      "continue-on-error": false,
+      "additional-tests": []
+    }
   }
 ]
