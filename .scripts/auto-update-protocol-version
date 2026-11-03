@@ -16,7 +16,8 @@ import sys
 # updates.
 #
 #   xdr      rs-stellar-xdr   Cargo.toml [package] version's major
-#   core     stellar-core     src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION
+#   core     stellar-core     src/util/ProtocolVersion.h MAX_SUPPORTED_PROTOCOL_VERSION
+#                             (older: src/main/Config.cpp CURRENT_LEDGER_PROTOCOL_VERSION)
 #   rpc      stellar-rpc      go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
 #   horizon  stellar-horizon  go.mod's go-stellar-sdk -> its Makefile XDR_COMMIT
 #
@@ -131,16 +132,23 @@ def xdr_version(dep):
     return None
 
 def core_version(dep):
-    """CURRENT_LEDGER_PROTOCOL_VERSION from stellar-core."""
-    text = read_source(dep, 'src/main/Config.cpp')
-    if text is None:
+    """Ledger protocol version stellar-core supports."""
+    # Older stellar-core sets CURRENT_LEDGER_PROTOCOL_VERSION to a literal in
+    # Config.cpp; newer stellar-core derives it from MAX_SUPPORTED_PROTOCOL_VERSION in
+    # ProtocolVersion.h. Config.cpp is tried first as it exists in both, so older
+    # stellar-core never logs a failed read of ProtocolVersion.h.
+    version = None
+    for path, name in (('src/main/Config.cpp', 'CURRENT_LEDGER_PROTOCOL_VERSION'),
+                       ('src/util/ProtocolVersion.h', 'MAX_SUPPORTED_PROTOCOL_VERSION')):
+        text = read_source(dep, path)
+        match = text and re.search(rf'{name}\s*=\s*(\d+)', text)
+        if match:
+            version = int(match.group(1))
+            break
+    if version is None:
         return None
-    match = re.search(r'CURRENT_LEDGER_PROTOCOL_VERSION\s*=\s*(\d+)', text)
-    if not match:
-        return None
-    version = int(match.group(1))
     # stellar-core built with this flag supports one version beyond its source
-    # constant, matching the #ifdef in Config.cpp; read it from the core dep options.
+    # constant, matching the #ifdef beside it; read it from the core dep options.
     next_flag = '--enable-next-protocol-version-unsafe-for-production'
     if next_flag in dep.get('options', {}).get('configure_flags', ''):
         version += 1
