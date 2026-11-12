@@ -96,14 +96,14 @@
           "linear_term": "7013"
         },
         {
-          "const_term": "40256",
+          "const_term": "44420",
           "ext": "v0",
           "linear_term": "0"
         },
         {
-          "const_term": "377551",
+          "const_term": "706689",
           "ext": "v0",
-          "linear_term": "4059"
+          "linear_term": "4229"
         },
         {
           "const_term": "417482",
@@ -141,7 +141,7 @@
           "linear_term": "0"
         },
         {
-          "const_term": "4716",
+          "const_term": "5771",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -151,12 +151,12 @@
           "linear_term": "0"
         },
         {
-          "const_term": "4256",
+          "const_term": "10293",
           "ext": "v0",
           "linear_term": "0"
         },
         {
-          "const_term": "884",
+          "const_term": "2100",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -321,7 +321,7 @@
           "linear_term": "0"
         },
         {
-          "const_term": "2458985",
+          "const_term": "3110211",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -346,7 +346,7 @@
           "linear_term": "0"
         },
         {
-          "const_term": "7873219",
+          "const_term": "9836091",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -426,7 +426,7 @@
           "linear_term": "0"
         },
         {
-          "const_term": "61",
+          "const_term": "34237",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -436,7 +436,7 @@
           "linear_term": "0"
         },
         {
-          "const_term": "1150435",
+          "const_term": "1467330",
           "ext": "v0",
           "linear_term": "0"
         },
@@ -1033,12 +1033,12 @@
     },
     {
       "contract_parallel_compute_v0": {
-        "ledger_max_dependent_tx_clusters": 2
+        "ledger_max_dependent_tx_clusters": 3
       }
     },
     {
       "contract_ledger_cost_ext_v0": {
-        "fee_write1_kb": "875",
+        "fee_write1_kb": "437",
         "tx_max_footprint_entries": 4294967295
       }
     },
