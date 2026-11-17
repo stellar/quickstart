@@ -102,7 +102,17 @@ COPY apt-retry /usr/local/bin/
 RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
-RUN make build-stellar-rpc
+# Go 1.26.11+ (CVE-2026-97038) rejects any library holding LLVM bitcode under a
+# #cgo LDFLAGS -L directory. stellar-rpc refs without stellar/stellar-rpc#1190
+# link from cargo's output directory, where Rust leaves .llvmbc sections in
+# every archive and object, so strip them there before the Go build. This is a
+# no-op for refs that have #1190 and can go once every RPC_REF built here does.
+RUN make build-libs
+RUN rustup component add llvm-tools && \
+    objcopy="$(rustc --print sysroot)/lib/rustlib/$(rustc -vV | sed -n 's|host: ||p')/bin/llvm-objcopy" && \
+    find target -type f \( -name '*.a' -o -name '*.o' \) -print0 | \
+    xargs -0 -n1 "$objcopy" --remove-section=.llvmbc --remove-section=.llvmcmd
+RUN make -o build-libs build-stellar-rpc
 
 FROM scratch AS stellar-rpc-stage
 
