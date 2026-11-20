@@ -171,7 +171,7 @@
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "b3ff4119cc99ebcc8048334f5ec64e78c16d1666",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
