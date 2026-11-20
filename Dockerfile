@@ -82,7 +82,10 @@ COPY --from=stellar-core-builder /usr/local/bin/stellar-core /stellar-core
 
 # rpc
 
-FROM golang:1.26-trixie AS stellar-rpc-builder
+# Pinned below Go 1.26.11, whose cgo check rejects the LLVM bitcode in the Rust
+# libraries that stellar-rpc refs without stellar/stellar-rpc#1190 link from.
+# Unpin once every rpc ref in images.json includes #1190.
+FROM golang:1.26.10-trixie AS stellar-rpc-builder
 
 ARG RPC_REPO
 ARG RPC_REF
