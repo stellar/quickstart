@@ -306,10 +306,6 @@ jobs:
         "--build-arg \(.name | ascii_upcase)_IMAGE=stellar-\(.name):\(.sha)-${{ matrix.arch }}"
         ] ] | flatten | join(" ")')"
         echo "args=${args}" | tee -a $GITHUB_OUTPUT
-    # --provenance=false keeps the image a single manifest. Docker 29 (on
-    # ubuntu-latest since it became Ubuntu 26.04) otherwise keeps BuildKit's
-    # provenance attestation, so the per-arch image pushes as an index, which
-    # the push workflow's docker manifest create rejects.
     - name: Build Image
       run: >
         docker build
