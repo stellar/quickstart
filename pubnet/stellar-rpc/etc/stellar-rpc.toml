@@ -1,0 +1,21 @@
+# The start script fills in the __X__ values.
+
+[storage]
+default_data_dir = "/opt/stellar/stellar-rpc/data"
+
+[retention]
+# Backfilling from genesis would take days, so keep history from the
+# 10,000-ledger chunk holding the network tip at first start.
+earliest_ledger = "now"
+
+[service]
+endpoint = "localhost:8003"
+admin_endpoint = "__STELLAR_RPC_ADMIN_ENDPOINT__"
+
+[ingestion]
+# rpcv2 reads the network passphrase from the captive-core config.
+captive_core_config = "/opt/stellar/stellar-rpc/etc/stellar-captive-core.cfg"
+captive_core_storage_path = "/opt/stellar/stellar-rpc/captive-core"
+history_archive_urls = ["__ARCHIVE__"]
+stellar_core_binary_path = "/usr/bin/stellar-core"
+core_http_port = 11826

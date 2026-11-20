@@ -621,9 +621,8 @@ function init_stellar_rpc() {
     ADMIN_ENDPOINT=
   fi
   
-  perl -pi -e "s/__STELLAR_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/stellar-rpc.cfg
-  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-rpc.cfg
-  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.cfg
+  perl -pi -e "s/__STELLAR_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/stellar-rpc.toml
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.toml
 
   run_silent "init-stellar-rpc" chown -R stellar:stellar .
 
