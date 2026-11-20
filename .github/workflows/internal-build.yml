@@ -309,6 +309,7 @@ jobs:
     - name: Build Image
       run: >
         docker build
+        --provenance=false
         --platform linux/${{ matrix.arch }}
         -f Dockerfile
         -t quickstart:${{ matrix.image.tag }}-${{ matrix.arch }}
