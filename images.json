@@ -331,5 +331,23 @@
       "continue-on-error": true,
       "additional-tests": []
     }
+  },
+  {
+    "tag": "rpc-get-ledger-entries-full-history",
+    "inherit": "latest",
+    "events": [
+      "pull_request"
+    ],
+    "deps": [
+      {
+        "name": "rpc",
+        "repo": "stellar/stellar-rpc",
+        "ref": "get-ledger-entries-full-history"
+      }
+    ],
+    "tests": {
+      "continue-on-error": true,
+      "additional-tests": []
+    }
   }
 ]
