@@ -145,7 +145,7 @@
       "push"
     ],
     "config": {
-      "protocol_version_default": 28,
+      "protocol_version_default": 30,
       "protocol_version_default_autoupdate": false,
       "horizon_skip_protocol_version_check": true
     },
@@ -153,12 +153,12 @@
       {
         "name": "xdr",
         "repo": "stellar/rs-stellar-xdr",
-        "ref": "3305b3e31f19fdb4e64e4b7a4354bb120cdf4415"
+        "ref": "v30.0.0"
       },
       {
         "name": "core",
         "repo": "stellar/stellar-core",
-        "ref": "c10756394962b08796b8ed05ec15634608901546",
+        "ref": "f2b91947fb20fc8174cca38bf320eda7baa3edbb",
         "options": {
           "configure_flags": "--disable-tests --enable-next-protocol-version-unsafe-for-production"
         }
@@ -166,12 +166,12 @@
       {
         "name": "rpc",
         "repo": "stellar/stellar-rpc",
-        "ref": "0c06b41042d7d3283b19ade62c768811c36ace46"
+        "ref": "1b9b66e23f434c6baf13eb1ea43b1ea12d1b11cf"
       },
       {
         "name": "horizon",
         "repo": "stellar/stellar-horizon",
-        "ref": "4460e7f939d8110f578944b3b5154ff17a8513cc",
+        "ref": "v30.0.0",
         "options": {
           "pkg": "github.com/stellar/stellar-horizon"
         }
@@ -192,7 +192,7 @@
       {
         "name": "galexie",
         "repo": "stellar/stellar-galexie",
-        "ref": "galexie-v28.0.0"
+        "ref": "galexie-v30.0.1"
       }
     ],
     "tests": {
