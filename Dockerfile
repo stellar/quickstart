@@ -105,7 +105,7 @@ COPY apt-retry /usr/local/bin/
 RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
-RUN make build-stellar-rpc
+RUN make build-stellar-rpc RPCV2=true
 
 FROM scratch AS stellar-rpc-stage
 
