@@ -47,6 +47,8 @@ export PROTOCOL_VERSION_DEFAULT="$(< /image.json jq -r '.config.protocol_version
 : "${ENABLE_CORE_MANUAL_CLOSE:=false}"
 : "${CORE_LOG_LEVEL:=}"
 : "${CORE_USE_POSTGRES:=}"
+# Empty keeps the earliest_ledger set in the network's stellar-rpc.toml.
+: "${RPC_EARLIEST_LEDGER:=}"
 : "${LIMITS:=testnet}"
 
 CURRENT_POSTGRES_PID=""
@@ -206,6 +208,10 @@ function process_args() {
       ;;
     --core-log-level)
       CORE_LOG_LEVEL="$1"
+      shift
+      ;;
+    --rpc-earliest-ledger)
+      RPC_EARLIEST_LEDGER="$1"
       shift
       ;;
     *)
@@ -621,9 +627,26 @@ function init_stellar_rpc() {
     ADMIN_ENDPOINT=
   fi
   
-  perl -pi -e "s/__STELLAR_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/stellar-rpc.cfg
-  perl -pi -e "s/__NETWORK__/$NETWORK_PASSPHRASE/g" etc/stellar-rpc.cfg
-  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.cfg
+  perl -pi -e "s/__STELLAR_RPC_ADMIN_ENDPOINT__/$ADMIN_ENDPOINT/g" etc/stellar-rpc.toml
+  perl -pi -e "s=__ARCHIVE__=$HISTORY_ARCHIVE_URLS=g" etc/stellar-rpc.toml
+  if [ "$NETWORK" = "testnet" ]; then
+    # Testnet's ledger data lake is in a folder per reset, named by the date of
+    # the reset, so the latest is the current network's.
+    local lake_url="https://aws-public-blockchain.s3.us-east-2.amazonaws.com"
+    local lake_path
+    lake_path="$(curl -sf "$lake_url/?list-type=2&prefix=v1.1/stellar/ledgers/testnet/&delimiter=/" \
+      | grep -o 'v1\.1/stellar/ledgers/testnet/[0-9-]*/' | sort | tail -n 1)"
+    if [ -n "$lake_path" ]; then
+      perl -pi -e "s=__TESTNET_DATASTORE_BUCKET_PATH__=aws-public-blockchain/${lake_path%/}=g" etc/stellar-rpc.toml
+    else
+      echo "stellar rpc: could not find testnet's ledger data lake, backfilling from the history archives instead"
+      # Without a datastore, rpcv2 backfills through captive core.
+      perl -0pi -e 's/\n\[backfill\.datastore\].*//s' etc/stellar-rpc.toml
+    fi
+  fi
+  if [ -n "$RPC_EARLIEST_LEDGER" ]; then
+    perl -pi -e "s/^earliest_ledger = .*/earliest_ledger = \"$RPC_EARLIEST_LEDGER\"/" etc/stellar-rpc.toml
+  fi
 
   run_silent "init-stellar-rpc" chown -R stellar:stellar .
 

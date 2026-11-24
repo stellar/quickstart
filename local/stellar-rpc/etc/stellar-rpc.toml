@@ -1,0 +1,23 @@
+# The start script fills in the __X__ values.
+
+[storage]
+default_data_dir = "/opt/stellar/stellar-rpc/data"
+
+[retention]
+# The local network is new, so keep all of its history.
+earliest_ledger = "genesis"
+
+[service]
+endpoint = "localhost:8003"
+admin_endpoint = "__STELLAR_RPC_ADMIN_ENDPOINT__"
+
+[service.methods.getNetwork]
+friendbot_url = "http://localhost:8000/friendbot"
+
+[ingestion]
+# rpcv2 reads the network passphrase from the captive-core config.
+captive_core_config = "/opt/stellar/stellar-rpc/etc/stellar-captive-core.cfg"
+captive_core_storage_path = "/opt/stellar/stellar-rpc/captive-core"
+history_archive_urls = ["__ARCHIVE__"]
+stellar_core_binary_path = "/usr/bin/stellar-core"
+core_http_port = 11826
