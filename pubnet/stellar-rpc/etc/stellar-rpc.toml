@@ -19,3 +19,12 @@ captive_core_storage_path = "/opt/stellar/stellar-rpc/captive-core"
 history_archive_urls = ["__ARCHIVE__"]
 stellar_core_binary_path = "/usr/bin/stellar-core"
 core_http_port = 11826
+
+[backfill.datastore]
+# Backfill from the public ledger data lake on AWS Open Data, rather than
+# replaying the history archives through captive core.
+type = "S3"
+
+[backfill.datastore.params]
+destination_bucket_path = "aws-public-blockchain/v1.1/stellar/ledgers/pubnet"
+region = "us-east-2"

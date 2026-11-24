@@ -187,6 +187,20 @@ To enable [Stellar Lab](https://github.com/stellar/laboratory) which will use th
 
 **Note: In `--local` mode the `core` service always runs no matter what options are passed, the `friendbot` faucet service runs whenever `horizon` is running, and `horizon` is run when `rpc` is requested so that friendbot is available.**
 
+### RPC Options
+
+#### Earliest Ledger
+
+The RPC keeps history from its earliest ledger onwards. Set it with `--rpc-earliest-ledger {ledger}`, where `{ledger}` is one of:
+
+- `genesis` to keep history from the first ledger of the network (the default in `--local` mode).
+- `now` to keep history from the 10,000-ledger chunk holding the network's latest ledger when the RPC first starts (the default in `--testnet`, `--futurenet` and `--pubnet` modes).
+- A ledger sequence that is a multiple of 10,000.
+
+The earliest ledger is fixed when the RPC first starts and can't be changed afterwards in a persistent container.
+
+The RPC backfills the ledgers from its earliest ledger to the network's latest when it first starts. In `--pubnet` and `--testnet` modes it downloads them from the public ledger data lake on AWS Open Data (`s3://aws-public-blockchain/v1.1/stellar/ledgers`), and in other modes it replays them from the history archives. Backfilling from `genesis` on `--pubnet` downloads the network's whole history and needs several terabytes of disk.
+
 ### Core Options
 
 #### Log Level
