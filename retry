@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-# Retry wrapper for apt commands to handle transient mirror failures.
+# Retry wrapper for commands that can fail transiently (e.g. apt mirrors, Go module proxy).
 # Uses decorrelated jitter: delay = rand(base, 3 * prev_delay), capped at max_delay
-# Usage: apt-retry apt-get update && apt-retry apt-get install -y <packages>
+# Usage: retry <command> [args...]
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
@@ -31,12 +31,12 @@ while [ $attempt -le $max_attempts ]; do
         exit 0
     fi
     if [ $attempt -lt $max_attempts ]; then
-        echo -e "${RED}apt command failed (attempt $attempt/$max_attempts), retrying in ${delay}s...${NC}"
+        echo -e "${RED}command failed (attempt $attempt/$max_attempts), retrying in ${delay}s...${NC}"
         sleep $delay
     fi
     attempt=$((attempt + 1))
     delay=$(next_delay $delay)
 done
 
-echo -e "${RED}apt command failed after $max_attempts attempts${NC}"
+echo -e "${RED}command failed after $max_attempts attempts${NC}"
 exit 1

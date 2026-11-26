@@ -41,8 +41,8 @@ COPY --from=stellar-xdr-builder /usr/local/cargo/bin/stellar-xdr /stellar-xdr
 FROM ubuntu:24.04 AS stellar-core-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-COPY apt-retry /usr/local/bin/
-RUN apt-retry sh -c 'apt-get update && \
+COPY retry /usr/local/bin/
+RUN retry sh -c 'apt-get update && \
     apt-get -y install iproute2 procps lsb-release \
                        git build-essential pkg-config autoconf automake libtool \
                        bison flex sed perl libpq-dev parallel libgoogle-perftools-dev \
@@ -101,11 +101,11 @@ ENV RUSTUP_HOME=/rust/.rust
 ENV PATH="/usr/local/go/bin:$CARGO_HOME/bin:${PATH}"
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY apt-retry /usr/local/bin/
-RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
+COPY retry /usr/local/bin/
+RUN retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
-RUN apt-retry go mod download
+RUN retry go mod download
 RUN make build-stellar-rpc
 
 FROM scratch AS stellar-rpc-stage
@@ -117,8 +117,8 @@ COPY --from=stellar-rpc-builder /go/src/github.com/stellar/stellar-rpc/stellar-r
 FROM golang:1.26-trixie AS stellar-horizon-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-COPY apt-retry /usr/local/bin/
-RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
+COPY retry /usr/local/bin/
+RUN retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG HORIZON_REPO
 ARG HORIZON_REF
@@ -131,7 +131,7 @@ RUN git fetch origin ${HORIZON_REF}
 RUN git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
-RUN apt-retry go mod download
+RUN retry go mod download
 RUN go build -o /stellar-horizon $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-horizon-stage
@@ -143,8 +143,8 @@ COPY --from=stellar-horizon-builder /stellar-horizon /stellar-horizon
 FROM golang:1.26-trixie AS stellar-friendbot-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-COPY apt-retry /usr/local/bin/
-RUN apt-retry sh -c 'apt-get update && apt-get -y install jq'
+COPY retry /usr/local/bin/
+RUN retry sh -c 'apt-get update && apt-get -y install jq'
 
 ARG FRIENDBOT_REPO
 ARG FRIENDBOT_REF
@@ -157,7 +157,7 @@ RUN git fetch origin ${FRIENDBOT_REF}
 RUN git checkout ${FRIENDBOT_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
-RUN apt-retry go mod download
+RUN retry go mod download
 RUN go build -o /friendbot $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-friendbot-stage
@@ -206,8 +206,8 @@ RUN git clone https://github.com/${GALEXIE_REPO} /src
 RUN git fetch origin ${GALEXIE_REF}
 RUN git checkout ${GALEXIE_REF}
 ENV CGO_ENABLED=0
-COPY apt-retry /usr/local/bin/
-RUN apt-retry go mod download
+COPY retry /usr/local/bin/
+RUN retry go mod download
 RUN go build -o /galexie .
 
 FROM scratch AS stellar-galexie-stage
@@ -238,7 +238,7 @@ EXPOSE 8100
 EXPOSE 11625
 EXPOSE 11626
 
-COPY apt-retry /usr/local/bin/
+COPY retry /usr/local/bin/
 ADD dependencies /
 RUN /dependencies
 
