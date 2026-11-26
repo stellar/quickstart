@@ -105,6 +105,7 @@ COPY apt-retry /usr/local/bin/
 RUN apt-retry sh -c 'apt-get update && apt-get install -y build-essential jq' && apt-get clean
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $RUST_TOOLCHAIN_VERSION
 
+RUN apt-retry go mod download
 RUN make build-stellar-rpc
 
 FROM scratch AS stellar-rpc-stage
@@ -130,6 +131,7 @@ RUN git fetch origin ${HORIZON_REF}
 RUN git checkout ${HORIZON_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${HORIZON_REF}-(built-from-source)"
+RUN apt-retry go mod download
 RUN go build -o /stellar-horizon $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-horizon-stage
@@ -155,6 +157,7 @@ RUN git fetch origin ${FRIENDBOT_REF}
 RUN git checkout ${FRIENDBOT_REF}
 ENV CGO_ENABLED=0
 ENV GOFLAGS="-ldflags=-X=github.com/stellar/go/support/app.version=${FRIENDBOT_REF}-(built-from-source)"
+RUN apt-retry go mod download
 RUN go build -o /friendbot $(cat /tmp/arg_pkg)
 
 FROM scratch AS stellar-friendbot-stage
@@ -203,6 +206,8 @@ RUN git clone https://github.com/${GALEXIE_REPO} /src
 RUN git fetch origin ${GALEXIE_REF}
 RUN git checkout ${GALEXIE_REF}
 ENV CGO_ENABLED=0
+COPY apt-retry /usr/local/bin/
+RUN apt-retry go mod download
 RUN go build -o /galexie .
 
 FROM scratch AS stellar-galexie-stage
